@@ -14,6 +14,7 @@ for n,c in pairs(files) do
   io.write(c)
   io.write("NAME = '"..n.."'\n")
   io.write("REQUIRED = _REQUIREDNAME\n")
+  io.write("return AA")
   io.close(io.output())
 end
 
@@ -21,23 +22,30 @@ local oldpath = LUA_PATH
 
 LUA_PATH = string.gsub("D/?.lua;D/?.lc;D/?;D/L", "D/", DIR)
 
-local try = function (p, n)
+local try = function (p, n, r)
   NAME = nil
-  require(p)
+  local rr = require(p)
   assert(NAME == n)
   assert(REQUIRED == p)
+  assert(rr == r)
 end
 
-try('B', 'B.lua')
+AA = nil
+try('B', 'B.lua', true)
 assert(_LOADED.B)
+assert(require"B" == true)
 assert(_LOADED.A)
 _LOADED.A = nil
-try('B', nil)   -- should not reload package
-try('A', 'A.lua')
+try('B', nil, true)   -- should not reload package
+try('A', 'A.lua', true)
 _LOADED.A = nil
 os.remove(DIR..'A.lua')
-try('A', 'A.lc')  -- now must find second option
-try('K', 'L')     -- default option
+AA = {}
+try('A', 'A.lc', AA)  -- now must find second option
+assert(require("A") == AA)
+AA = false
+try('K', 'L', false)     -- default option
+try('K', 'L', false)     -- default option (should reload it)
 assert(_REQUIREDNAME == nil)
 
 

@@ -31,6 +31,18 @@ local showmem = function ()
   end
 end
 
+
+--
+-- redefine dofile to run files through dump/undump
+--
+dofile = function (n)
+  showmem()
+  local f = assert(loadfile(n))
+  local b = stringdump(f)
+  f = assert(loadstring(b))
+  return f()
+end
+
 dofile(_WD..'main.lua')
 
 do
@@ -52,9 +64,7 @@ showmem()
 dofile(_WD..'strings.lua')
 showmem()
 dofile(_WD..'literals.lua')
-showmem()
 assert(dofile(_WD..'attrib.lua') == 27)
-showmem()
 assert(dofile(_WD..'locals.lua') == 5)
 dofile(_WD..'constructs.lua')
 dofile(_WD..'code.lua')
@@ -63,30 +73,18 @@ do
   assert(f() == 'b')
   assert(f() == 'a')
 end
-showmem()
 dofile(_WD..'nextvar.lua')
-showmem()
 dofile(_WD..'pm.lua')
-showmem()
 dofile(_WD..'api.lua')
-showmem()
 assert(dofile(_WD..'events.lua') == 12)
-showmem()
 dofile(_WD..'vararg.lua')
-showmem()
 dofile(_WD..'closure.lua')
-showmem()
 dofile(_WD..'errors.lua')
-showmem()
 dofile(_WD..'math.lua')
-showmem()
 dofile(_WD..'sort.lua')
-showmem()
 assert(dofile(_WD..'verybig.lua') == 10); collectgarbage()
-showmem()
 dofile(_WD..'files.lua')
 print("final OK !!!")
-showmem()
 
 
 print('limpando tudo!!!!')

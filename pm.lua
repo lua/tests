@@ -160,4 +160,12 @@ assert(strfind(a, '^a*(.?)$'))
 assert(not strfind(a, '^a*(.?)b$'))
 assert(strfind(a, '^a-(.?)$'))
 
+-- deep nest of gsubs
+function rev (s)
+  return gsub(s, "(.)(.+)", function (c,s1) return rev(s1)..c end)
+end
+
+local x = strrep('0123456789', 40)
+assert(rev(rev(x)) == x)
+
 print('OK')

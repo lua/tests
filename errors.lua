@@ -16,7 +16,7 @@ end
 
 
 -- testa erros comuns e/ou que voavam no passado
-assert(doit("unpack{n=2^32}"))
+assert(doit("unpack{n=2^30}"))
 assert(doit("a=sin()"))
 assert(not doit("tostring(1)") and doit("tostring()"))
 assert(doit"tonumber()")

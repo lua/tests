@@ -219,7 +219,7 @@ tcheck(t, {n=1;a})
 
 function X (s)
   local REGISTRYINDEX = -10000
-  return (gsub(s, '$(%d+)', function (d) return REGISTRYINDEX-d end))
+  return (gsub(s, '$(%d+)', function (d) return REGISTRYINDEX-1-d end))
 end
 
 a = T.testC[[ pushnum 10; pushnum 20; pushcclosure 2; return 1]]
@@ -262,7 +262,6 @@ assert(type(T.getref(Arr[2])) == 'table')
 
 
 assert(T.getref(-1) == nil)
-assert(T.ref(nil) == -1)      -- (-1 == LUA_REFNIL)
 
 
 a = T.ref({})

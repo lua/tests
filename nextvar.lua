@@ -28,12 +28,11 @@ for i=1,lim do
     s = format('%sa%d=%d,', s, k, k)
   end
 end
-check({}, 0, 1)
 
 print'+'
 
 -- teste de tamanho com construcao dinamica
-local lim = 100
+local lim = 130
 local a = {}; a[2] = 1; check(a, 2, 1)
 a = {}; a[0] = 1; check(a, 0, 2); a[2] = 1; check(a, 2, 2)
 a = {}; a[0] = 1; a[1] = 1; check(a, 1, 2)
@@ -44,20 +43,27 @@ for i = 1,lim do
   check(a, p, 1)
 end
 
+for i = 0,lim do
+  local a = {}
+  local p = mp2(i+1)
+  for j=1,i do a['a'..j] = 1 end
+  check(a, 0, p)
+end
+
 a = {}
 for i=1,16 do a[i] = i end
 check(a, 16, 1)
-for i=1,10 do a[i] = nil end
+for i=1,11 do a[i] = nil end
 for i=30,40 do a[i] = nil end   -- force a rehash
 check(a, 0, 8)
 a[10] = 1
 for i=30,40 do a[i] = nil end   -- force a rehash
 check(a, 0, 8)
-for i=1,13 do a[i] = nil end
+for i=1,14 do a[i] = nil end
 for i=30,50 do a[i] = nil end   -- force a rehash
 check(a, 0, 4)
 for i=1,20 do a[i] = nil end   -- force a rehash
-check(a, 0, 1)
+check(a, 0, 2)
 for i=1,2 do a[i] = 1 end
 check(a, 2, 1)
 

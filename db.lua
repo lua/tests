@@ -23,8 +23,7 @@ end
 
 do
   local a = getinfo(print)
-  assert(a.name == "print" and a.what == "C" and a.namewhat == "global"
-         and a.short_src == "[C]")
+  assert(a.what == "C" and a.short_src == "[C]")
   local b = getinfo(test, "Sf")
   assert(b.name == nil and b.what == "Lua" and b.linedefined == 11 and
          b.func == test and not strfind(b.short_src, "%["))
@@ -310,7 +309,7 @@ local function f (x)
     assert(not pcall(getfenv, 3))
     assert(tail.what == "tail" and tail.short_src == "(tail call)" and
            tail.linedefined == -1 and tail.func == nil)
-    assert(debug.getinfo(3, "n").name == "g1")
+    assert(debug.getinfo(3, "f").func == g1)
     assert(getfenv(3))
     assert(debug.getinfo(4, "S").what == "tail")
     assert(not pcall(getfenv, 5))

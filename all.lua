@@ -8,6 +8,9 @@ LUA_PATH = (LUA_PATH or getenv("LUA_PATH") or "./") .. ";" .. _WD
 
 assert(setlocale"C")
 
+local T,print,gcinfo,format,write,assert,type =
+      T,print,gcinfo,format,write,assert,type
+
 local showmem = function ()
   if not %T then
     %print(%format("    ---- memoria total: %dK ----\n", %gcinfo()))
@@ -33,7 +36,7 @@ f()
 showmem()
 assert(dofile(_WD..'db.lua'))
 showmem()
-assert(dofile(_WD..'calls.lua') == deep)
+assert(dofile(_WD..'calls.lua') == deep and deep)
 showmem()
 assert(dofile(_WD..'strings.lua'))
 showmem()
@@ -57,6 +60,8 @@ showmem()
 assert(dofile(_WD..'tag.lua') == 12)
 showmem()
 assert(dofile(_WD..'vararg.lua'))
+showmem()
+assert(dofile(_WD..'closure.lua'))
 showmem()
 assert(dofile(_WD..'errors.lua'))
 showmem()

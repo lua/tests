@@ -71,6 +71,15 @@ prepfile[[
 RUN("lua a=nil - < %s > %s", prog, out)
 checkout("1\tnil\n")
 
+prepfile[[
+= (6*2-6) -- ===
+a \
+= 10\
+print(a)
+= a]]
+RUN("lua -q < %s > %s", prog, out)
+checkout("6\n10\n10\n\n")
+
 prompt = "alo"
 prepfile[[ --
 a = 2

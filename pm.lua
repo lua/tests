@@ -168,11 +168,11 @@ assert(isbalanced("(9 ((8) 7) a b (\0 c) a") == nil)
 assert(gsub("alo 'oi' alo", "%b''", '"') == 'alo " alo')
 
 
-t = {"apple", "orange", "lime"; n=0}
+local t = {"apple", "orange", "lime"; n=0}
 assert(gsub("x and x and x", "x", function () %t.n=%t.n+1; return %t[%t.n] end)
         == "apple and orange and lime")
 
-local t = {n=0}
+t = {n=0}
 gsub("first second word", "(%w%w*)", function (w) %t.n=%t.n+1; %t[%t.n] = w end)
 assert(t[1] == "first" and t[2] == "second" and t[3] == "word" and t.n == 3)
 

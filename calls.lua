@@ -27,11 +27,14 @@ function err_on_n (n)
   end
 end
 
-function dummy (n)
-  if n > 0 then
-    %assert(%dostring("err_on_n(" .. n .. ")") == nil)
-    dummy(n-1)
-  end
+do
+  local assert, dostring = assert, dostring
+  function dummy (n)
+    if n > 0 then
+      assert(dostring("err_on_n(" .. n .. ")") == nil)
+      dummy(n-1)
+    end
+end
 end
 
 dummy(10)
@@ -87,8 +90,7 @@ assert(fat(0) == 1 and fat(4) == 24 and Y(F)(5)==5*Y(F)(4))
 
 local g = function (z)
   local f = function (a,b,c,d)
-    local z = %z
-    return function (x,y) return %a+%b+%c+%d+%a+x+y+%z end
+    return function (x,y) return a+b+c+d+a+x+y+z end
   end
   return f(z,z+1,z+2,z+3)
 end

@@ -355,7 +355,7 @@ print'+'
 
 -- cria udata para ser coletado quando fechar o estado
 do
-
+  local assert,type,print = assert,type,print
   local tt = T.newtag("Final", 0)
   local u = T.newuserdata(10)
   T.settag(u, tt)

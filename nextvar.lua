@@ -63,7 +63,7 @@ assert(foreach(a, function(i,v) if i=='a' then return v end end) == nil)
 foreach({}, error)
 
 foreachi({x=10, y=20}, error)
-a = {n = 1}
+local a = {n = 1}
 foreachi({n=3}, function (i, v) assert(%a.n == i and not v); %a.n=%a.n+1 end)
 a = {10,20,30,nil,50}
 foreachi(a, function (i,v) assert(a[i] == v) end)

@@ -27,8 +27,6 @@ end
 local b=10
 local a; repeat local b; a,b=1,2; assert(a+1==b); until a+b==11
 
--- shadowing
-assert(not call(dostring, {[[local a; function a() x=a end]]}, '', nil))
 
 assert(x == 1)
 

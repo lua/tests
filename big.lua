@@ -333,7 +333,7 @@ function a:findfield (f)
   return v
 end
 
-ii = 0
+local ii = 0
 i = 1
 while b[i] do
   local r = a:findfield(b[i]);
@@ -344,7 +344,7 @@ end
 
 assert(ii == 299)
 
-function xxxx (x) return %ii+x end
+function xxxx (x) return ii+x end
 
 assert(xxxx(10) == 309)
 
@@ -359,8 +359,8 @@ stat(a)
 a = nil
 
 print("tabela com indices funcao:")
-i = 1; a={}
-while i <= 511 do a[function () return %i end] = i; i=i+1 end
+a={}
+for i=1,511 do local x; a[function () return x end] = i end
 stat(a)
 a = nil
 

@@ -5,6 +5,8 @@ print "testando programas longos (>64k)"
 -- template to create a very big test file
 prog = [[$
 
+local a,b
+
 b = {$1$
   b30009 = 65534,
   b30010 = 65535,

@@ -42,7 +42,8 @@ function setfallback (name, func)
   elseif name == 'arith' then
     oldfunc = gettagmethod(tag(0), 'pow')
     for _,n in {"add", "sub", "mul", "div", "unm", "pow"} do
-       func = function (a,b) return %func(a,b,%n) end
+       local f, n = func, n
+       func = function (a,b) return f(a,b,n) end
        fillvalids(n, func)
     end
   elseif name == 'order' then
@@ -54,5 +55,5 @@ function setfallback (name, func)
     oldfunc = gettagmethod(tag(nil), name)
     fillvalids(name, func)
   end
-  return oldfunc or rawget(%defaults, name)
+  return oldfunc or rawget(defaults, name)
 end

@@ -38,6 +38,17 @@ collectgarbage()  -- file should be closed by GC
 assert(io.input() == io.stdin and rawequal(io.output(), io.stdout))
 print('+')
 
+-- test GC for files
+collectgarbage()
+for i=1,120 do
+  for i=1,5 do
+    io.input(file)
+    assert(io.open(file, 'r'))
+    io.lines(file)
+  end
+  collectgarbage()
+end
+
 assert(os.rename(file, otherfile))
 assert(os.rename(file, otherfile) == nil)
 
@@ -45,7 +56,26 @@ io.output(io.open(otherfile, "a"))
 assert(io.write("\n\n\t\t  3450\n"));
 io.close()
 
+-- test line generators
 assert(os.rename(otherfile, file))
+io.output(otherfile)
+local f = io.lines(file)
+while f() do end;
+assert(not pcall(f))  -- read lines after EOF
+assert(not pcall(f))  -- read lines after EOF
+-- copy from file to otherfile
+for l in io.lines(file) do io.write(l, "\n") end
+io.close()
+-- copy from otherfile back to file
+local f = assert(io.open(otherfile))
+io.output(file)
+for l in f:lines() do io.write(l, "\n") end
+assert(f:close()); io.close()
+io.input(file)
+f = io.open(otherfile):lines()
+for l in io.lines() do assert(l == f()) end
+assert(os.remove(otherfile))
+
 io.input(file)
 assert(io.read(0) == "")   -- not eof
 assert(io.read(5, '*l') == '"álo"')

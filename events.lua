@@ -17,6 +17,9 @@ assert(eventtable{} == nil)
 local a, t = {10,20,30; x="10", y="20"}, {}
 assert(eventtable(a,t) == a)
 assert(eventtable(a) == t)
+assert(eventtable(a,nil) == a)
+assert(eventtable(a) == nil)
+assert(eventtable(a,t) == a)
 
 
 function f (t, i, e)

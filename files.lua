@@ -74,11 +74,11 @@ assert(read('*n') == 3450)
 assert(read(1) == '\n')
 assert(read(0) == nil)  -- end of file
 assert(read(1) == nil)  -- end of file
-assert({read(1)}[2] == nil)
+assert(({read(1)})[2] == nil)
 assert(read() == nil)  -- end of file
-assert({read()}[2] == nil)
+assert(({read()})[2] == nil)
 assert(read('*n') == nil)  -- end of file
-assert({read('*n')}[2] == nil)
+assert(({read('*n')})[2] == nil)
 assert(read('*a') == '')  -- end of file (OK for `*a')
 collectgarbage()
 print('+')

@@ -4,9 +4,11 @@ _ERRORMESSAGE = print
 
 function f(a,b,c) local d = 'a'; t={a,b,c,d} end
 
-f(1,2)
+f(  -- mudar de linha assim tem que poder
+  1,2)
 assert(t[1] == 1 and t[2] == 2 and t[3] == nil and t[4] == 'a')
-f(1,2,3,4)
+f(1,2,   -- idem
+      3,4)
 assert(t[1] == 1 and t[2] == 2 and t[3] == 3 and t[4] == 'a')
 
 function fat(x)
@@ -49,8 +51,8 @@ print('+')
 
 
 a = nil
-function (x) a=x end (23)
-assert(a == 23 and function (x) return x*2 end (20) == 40)
+(function (x) a=x end)(23)
+assert(a == 23 and (function (x) return x*2 end)(20) == 40)
 
 
 a = {}; lim = 1000

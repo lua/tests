@@ -236,6 +236,11 @@ assert(T.upvalue(f, 2) == "xuxu")
 
 -- testando locks (refs)
 
+-- reuse of references
+local i = T.ref{}
+T.unref(i)
+assert(T.ref{} == i)
+
 Arr = {}
 Lim = 100
 for i=1,Lim do   -- lock many objects
@@ -572,7 +577,7 @@ end)
 
 local testprog = [[
   local t = {x=10, y=234}
---  local function foo () return t end
+  local function foo () return t end
   for i=1,5 do t[i] = i; t[i..""] = i end
   t = {"x", "u", "x", "u"}
   a = string.rep("a", 10)

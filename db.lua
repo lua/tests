@@ -92,7 +92,7 @@ repeat
 until 1
 
 test([[if
-sin(1)
+math.sin(1)
 then
   a=1
 else
@@ -126,8 +126,8 @@ while a<=3 do
 end
 ]], {1,2,3,4,3,4,3,4,3,5})
 
-test([[while sin(1) do
-  if sin(1)
+test([[while math.sin(1) do
+  if math.sin(1)
   then
     break
   end
@@ -258,11 +258,16 @@ assert(debug.gethook() == nil)
 -- testando count hooks
 local a=0
 debug.sethook(function (e) a=a+1 end, "", 1)
-a=0; for i=1,1000 do end; assert(1000 < a and a < 1010)
-debug.sethook(function (e) a=a+1 end, "", 2)
+a=0; for i=1,1000 do end; assert(1000 < a and a < 1012)
+debug.sethook(function (e) a=a+1 end, "", 4)
 a=0; for i=1,1000 do end; assert(250 < a and a < 255)
 local f,m,c = debug.gethook()
-assert(m == "" and c == 2)
+assert(m == "" and c == 4)
+debug.sethook(function (e) a=a+1 end, "", 4000)
+a=0; for i=1,1000 do end; assert(a == 0)
+debug.sethook(print, "", 2^24 - 1)   -- count upperbound
+local f,m,c = debug.gethook()
+assert(({debug.gethook()})[3] == 2^24 - 1)
 debug.sethook()
 
 print'OK'

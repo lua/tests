@@ -249,4 +249,17 @@ assert(C[1] == nil)
 assert(f() == 43 and f() == 53)
 
 
+-- access to locals of erroneous coroutines
+local x = coroutine.create (function ()
+            local a = 10
+            _G.f = function () a=a+1; return a end
+            error('x')
+          end)
+
+assert(not coroutine.resume(x))
+-- overwrite previous position of local `a'
+assert(not coroutine.resume(x, 1, 1, 1, 1, 1, 1, 1))
+assert(_G.f() == 11)
+assert(_G.f() == 12)
+
 print'OK'

@@ -146,12 +146,21 @@ assert(a(3) == sin(3) and a ~= sin)
 local olderr, olda = _ERRORMESSAGE, _ALERT
 _ERRORMESSAGE, _ALERT = nil
 
-a,b = T.testC("call 2,3; pushvalue 2; insert -2; call 1,1; dostring 4; \
-               dostring 1; dostring 5; return 2",
+a,b = T.testC("call 2,3; pushvalue 2; insert -2; call 1,1; \
+               loadstring 4; call 0,0; \
+               loadstring 1; call 0,0; loadstring 5; call 0,0; \
+               return 2",
                sin, 1, "x=150", "x='a'+1", 1, 2, 3, 4, 5)
 _ERRORMESSAGE, _ALERT = olderr, olda
 assert(a == 1 and b == sin(2) and x == 150)
 
+function check3(p, ...)
+  assert(arg.n == 3)
+  assert(strfind(arg[3], p))
+end
+check3(":1:", T.testC("loadstring 2; gettop; return .", "x="))
+check3("cannot read", T.testC("loadfile 2; gettop; return .", "."))
+check3("cannot read xxxx", T.testC("loadfile 2; gettop; return .", "xxxx"))
 
 -- testando acesso a tabelas
 

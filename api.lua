@@ -33,42 +33,42 @@ a,b,c = T.testC("gettop; return 2", 10, 20, 30, 40)
 assert(a == 40 and b == 5 and not c)
 
 t = pack(T.testC("settop 5; gettop; return .", 2, 3))
-tcheck(t, {n=4;2,3})
+tcheck(t, {n=4,2,3})
 
 t = pack(T.testC("settop 0; settop 15; return 10", 3, 1, 23))
 assert(t.n == 10 and t[1] == nil and t[10] == nil)
 
 t = pack(T.testC("remove -2; gettop; return .", 2, 3, 4))
-tcheck(t, {n=2;2,4})
+tcheck(t, {n=2,2,4})
 
 t = pack(T.testC("insert -1; gettop; return .", 2, 3))
-tcheck(t, {n=2;2,3})
+tcheck(t, {n=2,2,3})
 
 t = pack(T.testC("insert 3; gettop; return .", 2, 3, 4, 5))
-tcheck(t, {n=4;2,5,3,4})
+tcheck(t, {n=4,2,5,3,4})
 
 t = pack(T.testC("replace 2; gettop; return .", 2, 3, 4, 5))
-tcheck(t, {n=3;5,3,4})
+tcheck(t, {n=3,5,3,4})
 
 t = pack(T.testC("replace -2; gettop; return .", 2, 3, 4, 5))
-tcheck(t, {n=3;2,3,5})
+tcheck(t, {n=3,2,3,5})
 
 t = pack(T.testC("remove 3; gettop; return .", 2, 3, 4, 5))
-tcheck(t, {n=3;2,4,5})
+tcheck(t, {n=3,2,4,5})
 
 t = pack(T.testC("insert 3; pushvalue 3; remove 3; pushvalue 2; remove 2; \
                   insert 2; pushvalue 1; remove 1; insert 1; \
       insert -2; pushvalue -2; remove -3; gettop; return .",
       2, 3, 4, 5, 10, 40, 90))
-tcheck(t, {n=7;2,3,4,5,10,40,90})
+tcheck(t, {n=7,2,3,4,5,10,40,90})
 
 t = pack(T.testC("concat 5; gettop; return .", "alo", 2, 3, "joao", 12))
-tcheck(t, {n=1;"alo23joao12"})
+tcheck(t, {n=1,"alo23joao12"})
 
 -- testando MULTRET
 t = pack(T.testC("rawcall 2,-1; gettop; return .",
      function (a,b) return 1,2,3,4,a,b end, "alo", "joao"))
-tcheck(t, {n=6;1,2,3,4,"alo", "joao"})
+tcheck(t, {n=6,1,2,3,4,"alo", "joao"})
 
 
 -- testando lessthan
@@ -182,12 +182,12 @@ assert(a[b] == 19)
 -- testando next
 a = {}
 t = pack(T.testC("next; gettop; return .", a, nil))
-tcheck(t, {n=1;a})
+tcheck(t, {n=1,a})
 a = {a=3}
 t = pack(T.testC("next; gettop; return .", a, nil))
-tcheck(t, {n=3;a,'a',3})
+tcheck(t, {n=3,a,'a',3})
 t = pack(T.testC("next; pop 1; next; gettop; return .", a, nil))
-tcheck(t, {n=1;a})
+tcheck(t, {n=1,a})
 
 
 -- testando upvalues
@@ -440,7 +440,7 @@ T.totalmem(32000000)  -- restaura limite alto (32M)
 -- de memoria gradativamente, de modo a dar erros em varios passos durante
 -- a criacao de um estado, ate' ter memoria suficiente para nao dar erro
 
-local args = {0;n=1}
+local args = {n=0}
 local M = T.totalmem()
 local oldM = M
 local a = nil
@@ -459,30 +459,31 @@ print("\nlimite para criar estado: "..M-oldM)
 -- teste de threads
 -------------------------------------------------------------------------
 
-function expand (n,x,s)
+function expand (n,s)
   if n==0 then return ""
-  else return format("T.doonnewstack(%d, [[ %s;\n collectgarbage(); %s]])\n",
-                                      x, s, expand(n-1,x,s))
+  else return format("T.doonnewstack([[ %s;\n collectgarbage(); %s]])\n",
+                                      s, expand(n-1,s))
   end
 end
 
 G=0; collectgarbage(); a =gcinfo()
-dostring(expand(20,100,"G=G+1"))
+dostring(expand(20,"G=G+1"))
 assert(G==20); collectgarbage(); assert(gcinfo() <= a+1)
 print'+'
 
-args = {10, "";n=2}
+args = {"x=1",n=1}
 M = T.totalmem()
 oldM = M
 a = nil
 while 1 do
   M = M+3   -- aumenta gradativamente a memoria
   T.totalmem(M)
-  a = call(T.doonnewstack, args, "x")  -- tenta criar pilha
-  if a ~= nil then break end       -- para quando conseguir
+  a = call(T.doonnewstack, args, "x")  -- tenta criar thread
+  if a == 0 then break end       -- para quando conseguir
+  collectgarbage()
 end
 T.totalmem(32000000)  -- restaura limite alto (32M)
-print("\nlimite para criar pilha: "..M-oldM)
+print("\nlimite para criar thread: "..M-oldM)
 
 
 -------------------------------------------------------------------------
@@ -490,7 +491,7 @@ print("\nlimite para criar pilha: "..M-oldM)
 -------------------------------------------------------------------------
 
 collectgarbage()
-args = {"x=1";n=1}
+args = {"x=1",n=1}
 x=nil
 M = T.totalmem()
 oldM = M
@@ -500,6 +501,7 @@ while 1 do
   T.totalmem(M)
   a = call(dostring, args, "x")  -- tenta fazer o dostring
   if a ~= nil then break end       -- para quando conseguir
+  collectgarbage()
 end
 T.totalmem(32000000)  -- restaura limite alto (32M)
 assert(x)

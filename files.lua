@@ -1,4 +1,14 @@
 print('testando i/o')
+
+a,b,c = readfrom('xuxu nao existe')
+assert(not a and type(b) == "string" and type(c) == "number")
+
+a,b,c = writeto('/a')
+assert(not a and type(b) == "string" and type(c) == "number")
+
+a,b,c = appendto('/a')
+assert(not a and type(b) == "string" and type(c) == "number")
+
 file = tmpname()
 otherfile = tmpname()
 

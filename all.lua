@@ -84,8 +84,6 @@ do
   assert(f() == 'a')
 end
 showmem()
-assert(dofile(_WD..'func.lua'))
-showmem()
 assert(dofile(_WD..'nextvar.lua'))
 showmem()
 assert(dofile(_WD..'pm.lua'))

@@ -1,12 +1,12 @@
 print('testando i/o')
 
-a,b,c = readfrom('xuxu nao existe')
+a,b,c = readfrom('xuxu_nao_existe')
 assert(not a and type(b) == "string" and type(c) == "number")
 
-a,b,c = writeto('/a')
+a,b,c = writeto('/a/b/c/d')
 assert(not a and type(b) == "string" and type(c) == "number")
 
-a,b,c = appendto('/a')
+a,b,c = appendto('/a/b/c/d')
 assert(not a and type(b) == "string" and type(c) == "number")
 
 file = tmpname()

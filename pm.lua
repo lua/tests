@@ -9,6 +9,19 @@ assert(strfind('alo123alo', '^12') == nil)
 assert(f('aaab', 'a*') == 'aaa')
 assert(f('aaa', '^.*$') == 'aaa')
 assert(f('aaa', 'b*') == '')
+assert(f('aaa', 'ab*a') == 'aa')
+assert(f('aba', 'ab*a') == 'aba')
+assert(f('aaab', 'a+') == 'aaa')
+assert(f('aaa', '^.+$') == 'aaa')
+assert(f('aaa', 'b+') == nil)
+assert(f('aaa', 'ab+a') == nil)
+assert(f('aba', 'ab+a') == 'aba')
+assert(f('a$a', '.$') == 'a')
+assert(f('a$a', '.%$') == 'a$')
+assert(f('a$a', '.$.') == 'a$a')
+assert(f('a$a', '$$') == nil)
+assert(f('a$b', 'a$') == nil)
+assert(f('a$a', '$') == '')
 assert(f('', 'b*') == '')
 assert(f('aaa', 'bb*') == nil)
 assert(f('aaab', 'a-') == '')
@@ -28,9 +41,10 @@ assert(f('aa', '^aa?a?a') == 'aa')
 assert(f(']]]áb', '[^]]') == 'á')
 print('+')
 
-assert(f('alo alx 123 bo bo', '(..*) %1') == "bo bo")
-assert(f('axz123= 4= 4 34', '(.*)=(.*)=%2 %1') == '3= 4= 4 3')
-assert(f('===========', '^([=]*)=%1$') == '===========')
+assert(f('alo alx 123 b\0o b\0o', '(..*) %1') == "b\0o b\0o")
+assert(f('axz123= 4= 4 34', '(.+)=(.*)=%2 %1') == '3= 4= 4 3')
+_,_,a = strfind('=======', '^(=*)=%1$')
+assert(a == '===')
 assert(f('==========', '^([=]*)=%1$') == nil)
 
   local abc = "\0\1\2\3\4\5\6\7\8\9\10\11\12\13\14\15\16\17\18\19\20\21" ..
@@ -72,34 +86,35 @@ function f(s, p)
   return c
 end
 
-assert(f("alo xyzK", "(%w*)K") == "xyz")
+assert(f("alo xyzK", "(%w+)K") == "xyz")
 assert(f("254 K", "(%d*)K") == "")
 assert(f("alo ", "(%w*)$") == "")
+assert(f("alo ", "(%w+)$") == nil)
 assert(strfind("(álo)", "%(á") == 1)
 _, _, a, b, c, d, e = strfind("âlo alo", "^(((.).).* (%w*))$")
 assert(a == 'âlo alo' and b == 'âl' and c == 'â' and d == 'alo' and e == nil)
-_, _, a, b, c, d  = strfind('0123456789', '(.*(.?)())')
+_, _, a, b, c, d  = strfind('0123456789', '(.+(.?)())')
 assert(a == '0123456789' and b == '' and c == '' and d == nil)
 print('+')
 
 assert(gsub('ülo ülo', 'ü', 'x') == 'xlo xlo')
-assert(gsub('alo úlo  ', '  *$', '') == 'alo úlo')  -- trim
-assert(gsub('alo  alo  \n 123\n ', '%s%s*', ' ') == 'alo alo 123 ')
+assert(gsub('alo úlo  ', ' +$', '') == 'alo úlo')  -- trim
+assert(gsub('alo  alo  \n 123\n ', '%s+', ' ') == 'alo alo 123 ')
 t = "abç d"
 a, b = gsub(t, '(.)', '%1@')
 assert('@'..a == gsub(t, '', '@') and b == 5)
 a, b = gsub('abçd', '(.)', '%1@', 2)
 assert(a == 'a@b@çd' and b == 2)
-assert(gsub("abc=xyz", "(%w*)(%p)(%w*)", "%3%2%1") == "xyz=abc")
+assert(gsub("abc=xyz", "(%w*)(%p)(%w+)", "%3%2%1") == "xyz=abc")
 assert(gsub('áéí', '$', '\0óú') == 'áéí\0óú')
 assert(gsub('', '^', 'r') == 'r')
 assert(gsub('', '$', 'r') == 'r')
 print('+')
 
-assert(gsub("um (dois) tres (quatro)", "(%(%w%w*%))", strupper) ==
+assert(gsub("um (dois) tres (quatro)", "(%(%w+%))", strupper) ==
             "um (DOIS) tres (QUATRO)")
 
-assert(gsub("a=roberto,roberto=a", "(%w%w*)=(%w%w*)", setglobal) == "roberto,a")
+assert(gsub("a=roberto,roberto=a", "(%w+)=(%w%w*)", setglobal) == "roberto,a")
 assert(a=="roberto" and roberto=="a")
 
 function f(a,b) return gsub(a,'.',b) end
@@ -118,8 +133,8 @@ function isbalanced (s)
   return strfind(gsub(s, "%b()", ""), "[()]") == nil
 end
 
-assert(isbalanced("(9 ((8))() 7) a b ()(c)() a"))
-assert(isbalanced("(9 ((8) 7) a b (c) a") == nil)
+assert(isbalanced("(9 ((8))(\0) 7) \0\0 a b ()(c)() a"))
+assert(isbalanced("(9 ((8) 7) a b (\0 c) a") == nil)
 assert(gsub("alo 'oi' alo", "%b''", '"') == 'alo " alo')
 
 
@@ -132,11 +147,17 @@ gsub("first second word", "(%w%w*)", function (w) %t.n=%t.n+1; %t[%t.n] = w end)
 assert(t[1] == "first" and t[2] == "second" and t[3] == "word" and t.n == 3)
 
 t = {n=0}
-gsub("first second word", "(%w%w*)",
+gsub("first second word", "(%w+)",
       function (w) %t.n=%t.n+1; %t[%t.n] = w end, 2)
 assert(t[1] == "first" and t[2] == "second" and t[3] == nil)
 
 assert(not call(gsub, {"alo", "(.", print}, "x", nil))
 assert(not call(gsub, {"alo", ".)", print}, "x", nil))
+
+-- big strings
+local a = strrep('a', 300000)
+assert(strfind(a, '^a*(.?)$'))
+assert(not strfind(a, '^a*(.?)b$'))
+assert(strfind(a, '^a-(.?)$'))
 
 print('OK')

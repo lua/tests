@@ -96,7 +96,7 @@ local function find (name)
 end
 
 local function find1 (name)
-  for n,v in _G do
+  for n,v in pairs(_G) do
     if n==name then return v end
   end
   return nil  -- not found
@@ -144,7 +144,7 @@ for i=0,10000 do
 end
 
 n = {n=0}
-for i,v in a do
+for i,v in pairs(a) do
   n.n = n.n+1
   assert(i and v and a[i] == v)
 end
@@ -158,7 +158,7 @@ do   -- clear global table
   local a = {}
   local preserve = {io = 1, string = 1, debug = 1, os = 1,
                     coroutine = 1, table = 1, math = 1}
-  for n,v in _G do a[n]=v end
+  for n,v in pairs(_G) do a[n]=v end
   for n,v in a do
     if not preserve[n] and type(v) ~= "function" and
        not string.find(n, "^[%u_]") then
@@ -169,9 +169,12 @@ do   -- clear global table
 end
 
 local function foo ()
-  local setglobals, assert, next = setglobals, assert, next
+  local getglobals, setglobals, assert, next =
+        getglobals, setglobals, assert, next
   local n = {gl1=3}
-  setglobals(n)
+  setglobals(foo, n)
+  assert(getglobals(foo) == getglobals(1))
+  assert(getglobals(foo) == n)
   assert(print == nil and gl1 == 3)
   gl1 = nil
   gl = 1
@@ -184,12 +187,12 @@ print'+'
 local function checknext (a)
   local b = {}
   table.foreach(a, function (k,v) b[k] = v end)
-  for k,v in b do assert(a[k] == v) end
+  for k,v in pairs(b) do assert(a[k] == v) end
   for k,v in a do assert(b[k] == v) end
   b = {}
   do local k,v = next(a); while k do b[k] = v; k,v = next(a,k) end end
-  for k,v in b do assert(a[k] == v) end
-  for k,v in a do assert(b[k] == v) end
+  for k,v in pairs(b) do assert(a[k] == v) end
+  for k,v in pairs(a) do assert(b[k] == v) end
 end
 
 checknext{1,x=1,y=2,z=3}
@@ -199,23 +202,39 @@ checknext{1,2,3,4,x=1,y=2,z=3}
 checknext{1,2,3,4,5,x=1,y=2,z=3}
 
 assert(table.getn{n=20} == 20)
+assert(table.getn{n=0} == 0)
+assert(table.getn{} == 0)
+a = {}; table.setn(a, 0); a[1] = 20; assert(table.getn(a) == 0 and a.n == nil)
+table.setn(a, 13); assert(table.getn(a) == 13 and a.n == nil)
+a = {n=0}; table.setn(a, 0); a[1] = 20; assert(table.getn(a) == 0 and a.n == 0)
+table.setn(a, 13); assert(table.getn(a) == 13 and a.n == 13)
 assert(table.getn{1,2,3, n=1} == 1)
 assert(table.getn{[-1] = 2} == 0)
-assert(table.getn{1,2,3,nil,5} == 5)
+assert(table.getn{1,2,3,nil,5} == 3)
 
 print("+")
 
+local function test (a)
+  table.insert(a, 10); table.insert(a, 2, 20);
+  table.insert(a, 1, -1); table.insert(a, 40);
+  table.insert(a, table.getn(a)+1, 50)
+  assert(table.remove(a,1) == -1)
+  assert(table.remove(a,1) == 10)
+  assert(table.remove(a,1) == 20)
+  assert(table.remove(a,1) == 40)
+  assert(table.remove(a,1) == 50)
+  assert(table.remove(a,1) == nil)
+end
+
 a = {n=0, [6] = "ban"}
-table.insert(a, 10); table.insert(a, 2, 20);
-table.insert(a, 1, -1); table.insert(a, 40);
-table.insert(a, a.n+1, 50)
-assert(table.remove(a,1) == -1)
-assert(table.remove(a,1) == 10)
-assert(table.remove(a,1) == 20)
-assert(table.remove(a,1) == 40)
-assert(table.remove(a,1) == 50)
-assert(table.remove(a,1) == nil)
+test(a)
 assert(a.n == 0 and a[6] == "ban")
+
+a = {[6] = "ban"}; table.setn(a, 0)
+test(a)
+assert(a.n == nil and table.getn(a) == 0 and a[6] == "ban")
+
+
 table.insert(a, 1, 10); table.insert(a, 1, 20); table.insert(a, 1, -1)
 assert(table.remove(a) == 10)
 assert(table.remove(a) == 20)
@@ -228,7 +247,7 @@ assert(table.remove(a, 1) == nil)
 assert(table.remove(a, 1) == nil)
 assert(table.remove(a, 1) == 'a')
 assert(table.remove(a, 1) == 'b')
-assert(table.getn(a) == 0)
+assert(table.getn(a) == 0 and a.n == nil)
 print("+")
 
 a = {}

@@ -71,12 +71,11 @@ sort(a, function (x, y)
         end)
 
 
-tt = newtag()
+tt = {lt = function (a,b) return a.val < b.val end}
 a = {}
-for i=1,10 do  a[i] = {val=random(100)}; settag(a[i], tt); end
-f = function (a,b) return a.val < b.val end
-settagmethod(tt, 'lt', f)
+for i=1,10 do  a[i] = {val=random(100)}; eventtable(a[i], tt); end
 sort(a)
-check(a, f)
+check(a, tt.lt)
+check(a)
 
 print"OK"

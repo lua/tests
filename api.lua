@@ -4,40 +4,6 @@ if T==nil then
   return
 end
 
--- modulo de compatibilidade com pushuserdata antigo
-ANYTAG = -1
-
-local old_newuserdata = T.newuserdata
-
-do
-
-local L = {}
-L.tab = weakmode({}, 'v')
-L.newuserdata = T.newuserdata
-
-function L.insert (res)
-  %L.tab[T.udataval(res)..'|'..tag(res)] = res
-  %L.tab[T.udataval(res)..'|'..ANYTAG] = res
-end
-
-T.pushuserdata = function (s, t)
-  local key = s .. '|' .. t
-  if %L.tab[key] then return %L.tab[key] end
-  if t == ANYTAG then t = 0 end
-  local res = T.newuserdatabox(s)
-  T.settag(res, t)
-  %L.insert(res)
-  return res, 1
-end
-
-T.newuserdata = function (s)
-  local res = %L.newuserdata(s)
-  %L.insert(res)
-  return res
-end
-
-end
-
 
 
 function tcheck (t1, t2)
@@ -101,13 +67,12 @@ assert(T.testC("lessthan 5 2, return 1", 4, 2, 2, 3, 2, 2))
 assert(not T.testC("lessthan 2 -3, return 1", "4", "2", "2", "3", "2", "2"))
 assert(not T.testC("lessthan -3 2, return 1", "3", "2", "2", "4", "2", "2"))
 
-settagmethod("table", "lt", function (a,b) return a[1] < b[1] end)
-assert(T.testC("lessthan 2 5, return 1", {3}, 2, 2, {4}, 2, 2))
-assert(T.testC("lessthan 5 -6, return 1", {4}, 2, 2, {3}, 2, 2))
-a,b = T.testC("lessthan 5 -6, return 2", {1}, 2, 2, {3}, 2, 20)
+local b = {lt = function (a,b) return a[1] < b[1] end}
+local a1,a3,a4 = eventtable({1}, b), eventtable({3}, b), eventtable({4}, b)
+assert(T.testC("lessthan 2 5, return 1", a3, 2, 2, a4, 2, 2))
+assert(T.testC("lessthan 5 -6, return 1", a4, 2, 2, a3, 2, 2))
+a,b = T.testC("lessthan 5 -6, return 2", a1, 2, 2, a3, 2, 20)
 assert(a == 20 and b == nil)
-
-settagmethod("table", "lt", nil)
 
 
 -- testando lua_is
@@ -188,12 +153,12 @@ assert(x == print)
 T.testC("settable 2", a, "x")    -- table and key are the same object!
 assert(a[a] == "x")
 
-b = settag({p = a}, newtag())
-settagmethod(tag(b), "index", function (t, i) return t.p[i] end)
+b = eventtable({p = a}, {})
+eventtable(b).index = function (t, i) return t.p[i] end
 k, x = T.testC("gettable 3, return 2", 4, b, 20, 35, "x")
 assert(x == 15 and k == 35)
-settagmethod(tag(b), "gettable", function (t, i) return a[i] end)
-settagmethod(tag(b), "settable", function (t, i,v ) a[i] = v end)
+eventtable(b).gettable = function (t, i) return a[i] end
+eventtable(b).settable = function (t, i,v ) a[i] = v end
 y = T.testC("insert 2; gettable -5; return 1", 2, 3, 4, "y", b)
 assert(y == 12)
 k = T.testC("settable -5, return 1", b, 3, 4, "x", 16)
@@ -271,10 +236,10 @@ collectgarbage()
 assert(type(T.getref(a)) == 'table')
 
 
--- colect in cl the `val' of all collected tables
-tt = T.newtag("NewTag", 0)
+-- colect in cl the `val' of all collected userdata
+tt = {}
 cl = {n=0}
-function f(x)
+function F(x)
   local udval = T.udataval(x)
   local d = T.newuserdata(100)   -- cria lixo
   d = nil
@@ -286,15 +251,13 @@ function f(x)
   A = x   -- ressucita userdata
   return 1,2,3
 end
-T.settagmethod(tt, 'gc', f)
+tt.gc = F
 
 do
   collectgarbage();
   local x = gcinfo();
-  local a = T.newuserdata(5000)
+  local a = T.newuserdata(5001)
   assert(gcinfo() >= x+4) 
-  assert(T.pushuserdata(T.udataval(a), 0) == a)
-  assert(T.pushuserdata(T.udataval(a), ANYTAG) == a)
   a = nil
   collectgarbage();
   assert(gcinfo() <= x+1)
@@ -304,32 +267,17 @@ end
 collectgarbage(10000000)
 
 -- create 3 userdatas with tag `tt' and values 1, 2, and 3
-a = T.pushuserdata(1, tt)
-b = T.pushuserdata(2, tt)
-c = T.pushuserdata(3, tt)
+a = T.newuserdatabox(1); T.eventtable(a, tt)
+b = T.newuserdatabox(2); T.eventtable(b, tt)
+c = T.newuserdatabox(3); T.eventtable(c, tt)
 
--- create userdata with tag 0
-x = T.pushuserdata(4, 0)
-y = T.pushuserdata(0, 0)
+-- create userdata without event table
+x = T.newuserdatabox(4)
+y = T.newuserdatabox(0)
 
-assert(tag(x) == 0 and T.udataval(x) == 4)
-assert(tag(y) == 0 and T.udataval(y) == 0)  -- check udata NULL
+assert(T.eventtable(x) == nil and T.udataval(x) == 4)
+assert(T.eventtable(y) == nil and T.udataval(y) == 0)  -- check udata NULL
 
-do
-  local d, new = T.pushuserdata(1, ANYTAG)
-  assert(tag(d) == tt and d == a and not new)
-  local t = T.newtag()
-  d, new = T.pushuserdata(1, t)
-  assert(tag(d) == t and new)
-  d, new = T.pushuserdata(1, tt)
-  assert(d == a and tag(a) == tt and not new)
-  d, new = T.pushuserdata(20, 0)
-  assert(tag(d) == 0 and new)
-  d, new = T.pushuserdata(21, t)
-  assert(tag(d) == t and new)
-  d, new = T.pushuserdata(22, ANYTAG)
-  assert(tag(d) == 0 and new)
-end
 
 d=T.ref(a);
 e=T.ref(b);
@@ -343,8 +291,8 @@ T.unref(e); T.unref(f)
 collectgarbage()
 
 x = T.getref(d)
-assert(rawtype(x) == 'userdata' and tag(x) == tt)
-x=nil
+assert(type(x) == 'userdata' and T.eventtable(x) == tt)
+x, tt=nil, nil
 
 -- check that unref objects have been collected
 assert(cl.n == 1 and not cl[2] and cl[3] and not cl[1])
@@ -358,8 +306,7 @@ for i=2,Lim,2 do   -- unlock the other half
   T.unref(Arr[i])
 end
 
--- create a userdata with tag `tt' and value 40
-x = T.pushuserdata(40, tt)
+x = T.newuserdatabox(40); T.eventtable(x, {gc=F})
 cl.n = 0; cl[40] = nil;
 a = {[x] = 1}
 x = nil
@@ -383,18 +330,18 @@ print'+'
 -- cria udata para ser coletado quando fechar o estado
 do
   local assert,type,print = assert,type,print
-  local tt = T.newtag("Final", 0)
+  local tt = {}
   local u = T.newuserdata(10)
-  T.settag(u, tt)
-  local settag = T.settag
-  T.settagmethod(tt, "gc", function (o)
-    %assert(%type(o) == "Final")
+  T.eventtable(u, tt)
+  local eventtable = T.eventtable
+  tt.gc = function (o)
+    %assert(%eventtable(o) == tt)
     -- cria objetos durante coleta de lixo
     local a = 'xuxu'..(10+3)..'joao', {}
     %assert(o == %u)  -- upvalue evita que u seja coletado antes do close
     A = o  -- ressucita objeto!
     %print(">>> fechando estado " .. "<<<\n")
-  end)
+  end
 
 end
 
@@ -422,8 +369,6 @@ a = T.doremote(L1, "strlibopen(); return strsub('xuxu', 1, 2)")
 assert(a == "xu")
 
 T.closestate(L1);
-
-T.settagmethod(tt, 'gc', nil)
 
 L1 = nil
 

@@ -175,7 +175,7 @@ do
   local a = {}
   for n,v in globals() do a[n]=v end
   for n,v in a do
-    if tag(v) ~= tag(print) and not strfind(n, "^[%u_]") then
+    if type(v) ~= type(print) and not strfind(n, "^[%u_]") then
       setglobal(n, nil);
     end
     collectgarbage()

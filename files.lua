@@ -1,6 +1,6 @@
 print('testando i/o')
 
-assert(type(_INPUT) == "FileHandle")
+assert(type(_INPUT) == "userdata")
 
 a,b,c = readfrom('xuxu_nao_existe')
 assert(not a and type(b) == "string" and type(c) == "number")
@@ -23,7 +23,7 @@ assert(_INPUT == _STDIN and _OUTPUT == _STDOUT)
 remove(file)
 assert(dofile(file) == nil)
 assert(readfrom(file) == nil)
-assert(rawtype(writeto(file)) == 'userdata')
+assert(type(writeto(file)) == 'userdata')
 assert(_OUTPUT ~= _STDOUT)
 
 assert(seek(_OUTPUT) == 0)
@@ -137,16 +137,13 @@ assert(writeto())
 filehandle = assert(openfile(file, 'r'))
 otherfilehandle = assert(openfile(otherfile, 'rb'))
 assert(filehandle ~= otherfilehandle)
-assert(rawtype(filehandle) == "userdata")
+assert(type(filehandle) == "userdata")
 assert(read(filehandle,'*l') == "qualquer coisa")
 _INPUT = otherfilehandle
 assert(read(strlen"outra coisa") == "outra coisa")
 assert(read(filehandle, '*l') == "mais qualquer coisa")
-assert(tag(filehandle) == tag(_INPUT))
 closefile(filehandle);
-assert(tag(filehandle) ~= tag(_INPUT))
-assert(rawtype(filehandle) == "userdata" and
-       type(filehandle) == "ClosedFileHandle")
+assert(type(filehandle) == "userdata")
 _INPUT = otherfilehandle
 assert(read(4) == "\0\1\3\0")
 assert(read(3) == "\0\0\0")
@@ -185,26 +182,6 @@ and the rest of the file
 assert(remove(file))
 collectgarbage()
 
-settagmethod(tag(_INPUT), 'gettable', read)
-settagmethod(tag(_OUTPUT), 'settable', function(f, _, a) write(f,a) end)
-x = writeto(file);
-y = writeto(otherfile);
-x.n, y.n = "abcdef", "012345";
-_OUTPUT = x
-writeto()
-_OUTPUT = y
-writeto()
-
-f1 = readfrom(file)
-f2 = readfrom(otherfile)
-assert(f1 and f2)
-assert(f1[1] == 'a' and f2[1] == '0')
-assert(f1[2] == 'bc' and f2[02] == '12')
-assert(f1['*a'] == 'def' and f2['*a'] == '345')
-_INPUT = f1; readfrom()
-_INPUT = f2; readfrom()
-
-assert(remove(file) and remove(otherfile))
 
 
 -- teste de read_until

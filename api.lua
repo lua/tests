@@ -287,9 +287,7 @@ assert(t[1] == a and t[2] == b and t[3] == c)
 t=nil; a=nil; c=nil;
 T.unref(e); T.unref(f)
 
-print(T.eventtable(_OUTPUT))
 collectgarbage()
-print(T.eventtable(_OUTPUT))
 
 x = T.getref(d)
 assert(type(x) == 'userdata' and T.eventtable(x) == tt)

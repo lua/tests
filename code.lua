@@ -44,14 +44,14 @@ end, 'LOADNIL')
 
 
 -- infinite loops
-check(function () while true do local a = 1 end end,
-'LOADINT', 'JMP', 'RETURN')
+check(function () while true do local a = -1 end end,
+'LOADK', 'JMP', 'RETURN')
 
 check(function () repeat local x = 1 until false end,
-'LOADINT', 'JMP', 'RETURN')
+'LOADK', 'JMP', 'RETURN')
 
-check(function () while 1 do local x = 1 end end,
-'LOADINT', 'JMP', 'RETURN')
+check(function () while 1 do local x = -1.4 end end,
+'LOADK', 'JMP', 'RETURN')
 
 
 -- not
@@ -76,7 +76,7 @@ checkequal(function () if (a==nil) then a=1 end; if a~=nil then a=1 end end,
            function () if (a==9) then a=1 end; if a~=9 then a=1 end end)
 
 check(function () if a==nil then a=1 end end,
-'GETGLOBAL', 'TESTNE', 'JMP', 'LOADINT', 'SETGLOBAL', 'RETURN')
+'GETGLOBAL', 'TESTNE', 'JMP', 'LOADK', 'SETGLOBAL', 'RETURN')
 
 -- de morgan
 checkequal(function () local a; if not (a or b) then b=a end end,

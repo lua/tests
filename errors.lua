@@ -24,6 +24,12 @@ function checksyntax (prog, extra, token, line)
 end
 
 
+-- test error message with no extra info
+assert(doit("error('hi', 0)") == 'hi')
+
+-- test error message with no info
+assert(doit("error()") == nil)
+
 
 -- testa erros comuns e/ou que voavam no passado
 assert(doit("unpack{n=2^30}"))

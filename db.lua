@@ -21,10 +21,10 @@ end
 do
   local a = getinfo(print)
   assert(a.name == "print" and a.what == "C" and a.namewhat == "global"
-         and a.short_src == "C")
+         and a.short_src == "[C]")
   local b = getinfo(test, "Sf")
   assert(b.name == nil and b.what == "Lua" and b.linedefined == 11 and
-         b.func == test and strfind(b.short_src, "^file "))
+         b.func == test and not strfind(b.short_src, "%["))
 end
 
 
@@ -32,17 +32,17 @@ end
 a = "function f () end"
 local dostring = function (s, x) return loadstring(s, x)() end
 dostring(a)
-assert(getinfo(f).short_src == format('string "%s"', a))
+assert(getinfo(f).short_src == format('[string "%s"]', a))
 dostring(a..format("; %s\n=1", strrep('p', 400)))
-assert(strfind(getinfo(f).short_src, '^string [^\n]*%.%.%."$'))
+assert(strfind(getinfo(f).short_src, '^%[string [^\n]*%.%.%."%]$'))
 dostring("\n"..a)
-assert(getinfo(f).short_src == 'string "..."')
+assert(getinfo(f).short_src == '[string "..."]')
 dostring(a, "")
-assert(getinfo(f).short_src == 'string ""')
+assert(getinfo(f).short_src == '[string ""]')
 dostring(a, "@xuxu")
-assert(getinfo(f).short_src == "file `xuxu'")
+assert(getinfo(f).short_src == "xuxu")
 dostring(a, "@"..strrep('p', 1000)..'t')
-assert(strfind(getinfo(f).short_src, "^file `%.%.%.p*t'$"))
+assert(strfind(getinfo(f).short_src, "^%.%.%.p*t$"))
 dostring(a, "=xuxu")
 assert(getinfo(f).short_src == "xuxu")
 dostring(a, format("=%s", strrep('x', 500)))

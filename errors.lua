@@ -16,9 +16,7 @@ end
 
 function checksyntax (prog, extra, token, line)
   local msg = doit(prog)
-  local pt =
-    format("^.-;\n  last token read: `%s' at line %d in string \".*\"$",
-                    token, line)
+  local pt = format([[^%%[string ".*"%%]:%d: .- near `%s'$]], line, token)
   assert(strfind(msg, pt))
   assert(strfind(msg, msg, 1, true))
 end
@@ -60,7 +58,7 @@ checkmessage("a=1; local a,bbbb=2,3; a = sin(1) and bbbb(3)",
        "local `bbbb'")
 checkmessage("a={}; do local a=1 end a:bbbb(3)", "method `bbbb'")
 checkmessage("local a={}; a.bbbb(3)", "field `bbbb'")
-assert(not strfind(doit"a={13}; local bbbb=1; a[bbbb](3)", "bbbb"))
+assert(not strfind(doit"a={13}; local bbbb=1; a[bbbb](3)", "`bbbb'"))
 checkmessage("a={13}; local bbbb=1; a[bbbb](3)", "number")
 
 aaa = nil
@@ -73,8 +71,8 @@ checkmessage("local aaa='a'; x=aaa+b", "local `aaa'")
 checkmessage("aaa={}; x=3/aaa", "global `aaa'")
 checkmessage("aaa='2'; b=nil;x=aaa*b", "global `b'")
 checkmessage("aaa={}; x=-aaa", "global `aaa'")
-assert(not strfind(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "aaa"))
-assert(not strfind(doit"aaa={}; (aaa or aaa)()", "aaa"))
+assert(not strfind(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "`aaa'"))
+assert(not strfind(doit"aaa={}; (aaa or aaa)()", "`aaa'"))
 
 checkmessage([[aaa=9
 repeat until 3==3
@@ -120,19 +118,23 @@ lineerror = nil
 C = 0
 function y () C=C+1; y() end
 
-local stackmsg = "stack overflow"
-assert(doit('y()') == stackmsg)
-assert(doit('y()') == stackmsg)
-assert(doit('y()') == stackmsg)
+function checkstackmessage (m)
+  return (str.find(m, "^.-:%d+: stack overflow$"))
+end
+assert(checkstackmessage(doit('y()')))
+assert(checkstackmessage(doit('y()')))
+assert(checkstackmessage(doit('y()')))
 -- teste de linhas em erro
 C = 0
 pcall(function (s)
-  if s ~= stackmsg then io.stderr:write("exiting!!\n"); os.exit(1) end
+  if not checkstackmessage(s) then print(s)
+    io.stderr:write("exiting!!\n"); os.exit(1)
+  end
   local l = getinfo(2, "l").currentline
-  assert(getinfo(1, "l").currentline == l+11)
+  assert(getinfo(1, "l").currentline == l+15)
   for i=1,C-1 do assert(getinfo(2+i, "l").currentline == l) end
   assert(getinfo(2+C, "l").currentline == -1)  -- `call'
-  assert(getinfo(3+C, "l").currentline == l+8)  -- this file
+  assert(getinfo(3+C, "l").currentline == l+10)  -- this file
 end, y)
 print('+')
 checksyntax(("syntax error"), "", "error", 1)

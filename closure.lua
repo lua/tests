@@ -21,7 +21,8 @@ end
 
 a = f(10)
 -- force a GC in this level
-local x = setmode({[1] = {}}, 'kv'); -- to detect a GC
+local x = {[1] = {}}   -- to detect a GC
+setmetatable(x, {__mode = 'kv'})
 while x[1] do   -- repeat until GC
   local a = A..A..A..A  -- create garbage
   A = A+1
@@ -34,7 +35,7 @@ assert(a[2]() == 20+A)
 assert(a[2]() == 30+A)
 assert(a[3]() == 20+A)
 assert(a[8]() == 10+A)
-assert(getmode(x) == 'kv')
+assert(getmetatable(x).__mode == 'kv')
 assert(B.g == 19)
 
 -- teste de closure com variavel de controle do for
@@ -229,7 +230,7 @@ assert(a == 5^4)
 
 
 -- access to locals of "dead" corroutines
-local C = {}; setmode(C, "kv")
+local C = {}; setmetatable(C, {__mode = "kv"})
 local x = coroutine.wrap (function ()
             local a = 10
             local function f () a = a+10; return a end

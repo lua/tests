@@ -145,7 +145,7 @@ return function ( a , b , c , d , e )
 end , { a = 1 , b = 2 >= 1 , } or { 1 };
 ]]
 f = gsub(f, "%s+", "\n");   -- force a SETLINE between opcodes
-f,a = dostring(f);
+f,a = loadstring(f)();
 assert(a.a == 1 and a.b)
 
 function g (a,b,c,d,e)

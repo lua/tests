@@ -114,5 +114,8 @@ assert(a==1 and b==1 and c==2 and d==nil)
 a,b,c,d = unpack(pack(ret2(f()), ret2(f())))
 assert(a==1 and b==1 and c==2 and d==nil)
 
+a = ret2{ unpack{1,2,3}, unpack{3,2,1}, unpack{"a", "b"}}
+assert(a[1] == 1 and a[2] == 3 and a[3] == "a" and a[4] == nil)
+
 print('OK')
 return deep

@@ -107,6 +107,19 @@ a,b,c,d = f()
 assert(a == 1 and b == 2 and c == 3 and d == nil)
 
 
+-- recursive
+function pf (n, i)
+  yield(n)
+  pf(n*i, i+1)
+end
+
+f = coroutine(pf, 1, 1)
+local s=1
+for i=1,10 do
+  assert(f() == s)
+  s = s*i
+end
+
 -- sieve
 function gen (n)
   return coroutine(function ()
@@ -139,8 +152,8 @@ assert(a.n == 25 and a[a.n] == 97)
 
 -- errors in coroutines
 function foo ()
-  assert(getinfo(1).currentline == 142)
-  assert(getinfo(2).currentline == 148)
+  assert(getinfo(1).currentline == 155)
+  assert(getinfo(2).currentline == 161)
   yield(3)
   error('a')
 end
@@ -148,8 +161,8 @@ end
 function goo() foo() end
 x = coroutine(goo)
 assert(x() == 3)
-local msg
-call(x, {}, "x", function (_msg) msg = _msg end)
-assert(msg == 'a')
+local msg = {}
+call(x, {}, "x", function (_msg) tinsert(msg, _msg) end)
+assert(msg[1] == 'a' and msg.n == 2)
 
 print'OK'

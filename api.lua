@@ -146,11 +146,13 @@ function showstringtables ()
     local j=0
     while j<s do
       j=j+1
-      print(querystr(i, j))
+      local str = call(querystr, {i,j}, "p")
+      call(print, str)
     end
     i = i+1
     n, s = querystr(i);
   end
 end
 
+--showstringtables()
 $end

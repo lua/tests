@@ -102,7 +102,7 @@ if not (nextvar and call(nextvar, {n=1}, "x", nil)) then
   print("obsolete functions not active")
 else
 
-  local _G = globals()
+  local _G = _G
   do
     local a,v
     while 1 do
@@ -173,11 +173,13 @@ do   -- remove those 10000 new global variables
   end
 end
 
-do
+do   -- clear global table
   local a = {}
+  local preserve = {io = 1, str = 1, dbg = 1, os = 1, co = 1,}
   for n,v in globals() do a[n]=v end
   for n,v in a do
-    if type(v) ~= type(print) and not strfind(n, "^[%u_]") then
+    if not preserve[n] and type(v) ~= "function" and
+       not strfind(n, "^[%u_]") then
       setglobal(n, nil);
     end
     collectgarbage()

@@ -104,12 +104,12 @@ print'+'
 
 function foo (a, ...)
   for i=1,getn(arg) do
-    assert(yield(unpack(arg[i])) == nil)
+    assert(co.yield(unpack(arg[i])) == nil)
   end
   return unpack(a)
 end
 
-local f = coroutine(foo, {1,2,3}, {}, {1}, {'a', 'b', 'c'})
+local f = co.create(foo, {1,2,3}, {}, {1}, {'a', 'b', 'c'})
 local a,b,c,d
 a,b,c,d = f()
 assert(a == nil)
@@ -123,11 +123,11 @@ assert(a == 1 and b == 2 and c == 3 and d == nil)
 
 -- recursive
 function pf (n, i)
-  yield(n)
+  co.yield(n)
   pf(n*i, i+1)
 end
 
-f = coroutine(pf, 1, 1)
+f = co.create(pf, 1, 1)
 local s=1
 for i=1,10 do
   assert(f() == s)
@@ -136,18 +136,18 @@ end
 
 -- sieve
 function gen (n)
-  return coroutine(function ()
-    for i=2,n do yield(i) end
+  return co.create(function ()
+    for i=2,n do co.yield(i) end
   end)
 end
 
 
 function filter (p, g)
-  return coroutine(function (g)
+  return co.create(function (g)
     while 1 do
       local n = g()
       if n == nil then return end
-      if mod(n, p) ~= 0 then yield(n) end
+      if mod(n, p) ~= 0 then co.yield(n) end
     end
   end, g)
 end
@@ -168,12 +168,12 @@ assert(a.n == 25 and a[a.n] == 97)
 function foo ()
   assert(getinfo(1).currentline == getinfo(foo).linedefined + 1)
   assert(getinfo(2).currentline == getinfo(goo).linedefined)
-  yield(3)
+  co.yield(3)
   error('a')
 end
 
 function goo() foo() end
-x = coroutine(goo)
+x = co.create(goo)
 assert(x() == 3)
 local msg = {}
 call(x, {}, "x", function (_msg) tinsert(msg, _msg) end)
@@ -182,7 +182,7 @@ assert(msg[1] == 'a' and msg.n == 2)
 
 -- co-routines x for loop
 function all (a, n, k)
-  if k == 0 then yield(a)
+  if k == 0 then co.yield(a)
   else
     for i=1,n do
       a[k] = i
@@ -192,7 +192,7 @@ function all (a, n, k)
 end
 
 local a = 0
-for t in coroutine(all, {}, 5, 4) do
+for t in co.create(all, {}, 5, 4) do
   a = a+1
 end
 assert(a == 5^4)

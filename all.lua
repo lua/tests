@@ -1,5 +1,23 @@
 #!../lua
 
+global in nil
+
+global io, os, str, co, _G, dbg
+
+global wd, _WD, LUA_PATH
+
+global print, gcinfo, assert, type, dofile, loadfile, _STDERR,
+       collectgarbage, error, showmem, globals
+
+global write in io
+
+global format in str
+
+global setlocale, clock in os
+
+global T
+
+
 --[[
   example of a long [comment],
   [[spanning several [lines]]]
@@ -10,7 +28,7 @@ local c = clock()
 
 _WD = wd or ""
 
-LUA_PATH = (LUA_PATH or getenv("LUA_PATH") or "./") .. ";" .. _WD
+LUA_PATH = (LUA_PATH or os.getenv("LUA_PATH") or "./") .. ";" .. _WD
 
 assert(setlocale"C")
 
@@ -49,7 +67,7 @@ f()
 showmem()
 assert(dofile(_WD..'db.lua'))
 showmem()
-assert(dofile(_WD..'calls.lua') == deep and deep)
+global deep; assert(dofile(_WD..'calls.lua') == deep and deep)
 showmem()
 assert(dofile(_WD..'strings.lua'))
 showmem()
@@ -61,7 +79,7 @@ assert(dofile(_WD..'locals.lua') == 5)
 assert(dofile(_WD..'constructs.lua'))
 assert(dofile(_WD..'code.lua'))
 do
-  local f = coroutine(assert(loadfile(_WD..'big.lua')))
+  local f = co.create(assert(loadfile(_WD..'big.lua')))
   assert(f() == 'b')
   assert(f() == 'a')
 end
@@ -96,18 +114,18 @@ showmem()
 
 print('limpando tudo!!!!')
 local preserve = {
-  _STDERR = _STDERR,
+  _STDERR = _G._STDERR,
   error = error,
-  _ERRORMESSAGE = _ERRORMESSAGE,
-  _ALERT = _ALERT,
-  tostring = tostring,
-  _INPUT=_INPUT,
-  _OUTPUT=_OUTPUT}
+  _ERRORMESSAGE = _G._ERRORMESSAGE,
+  _ALERT = _G._ALERT,
+  tostring = _G.tostring,
+  _INPUT=_G._INPUT,
+  _OUTPUT=_G._OUTPUT}
 
 local collectgarbage, showmem, print, format, clock =
       collectgarbage, showmem, print, format, clock
 
-setcallhook(function (a) %assert(%type(a) == 'string') end)
+dbg.setcallhook(function (a) %assert(%type(a) == 'string') end)
 globals(preserve)
 collectgarbage()
 collectgarbage()

@@ -72,7 +72,7 @@ local a1,a3,a4 = eventtable({1}, b), eventtable({3}, b), eventtable({4}, b)
 assert(T.testC("lessthan 2 5, return 1", a3, 2, 2, a4, 2, 2))
 assert(T.testC("lessthan 5 -6, return 1", a4, 2, 2, a3, 2, 2))
 a,b = T.testC("lessthan 5 -6, return 2", a1, 2, 2, a3, 2, 20)
-assert(a == 20 and b == nil)
+assert(a == 20 and b == false)
 
 
 -- testando lua_is

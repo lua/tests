@@ -21,19 +21,30 @@ assert(a==10 and b==11 and c==12 and d==nil)
 a,b = f(), 1, 2, 3, f()
 assert(a==10 and b==1)
 
+assert(a<b == false and a>b == true)
 assert((10 and 2) == 2)
 assert((10 or 2) == 10)
 assert((10 or assert(nil)) == 10)
 assert(not (nil and assert(nil)))
 assert((nil or "alo") == "alo")
+assert((nil and 10) == nil)
+assert((false and 10) == false)
+assert((true or 10) == true)
+assert((false or 10) == 10)
+assert(false ~= nil)
+assert(nil ~= false)
+assert(not nil == true)
+assert(not not nil == false)
+assert(not not 1 == true)
+assert(not not a == true)
 print('+')
 
 function f(a) return a end
 
 local a = {}
 for i=3000,-3000,-1 do a[i] = i; end
-a[10e30] = "alo"
-assert(a[10e30] == 'alo')
+a[10e30] = "alo"; a[true] = 10; a[false] = 20
+assert(a[10e30] == 'alo' and a[not 1] == 20 and a[10<20] == 10)
 for i=3000,-3000,-1 do assert(a[i] == i); end
 a[print] = assert
 a[f] = print

@@ -1,11 +1,15 @@
 print('testando tabelas de eventos')
 
-X = 20; A = nil
+X = 20; B = 30
 
 globals(eventtable({_G = globals()}, {index=globals()}))
 
 X = X+10
 assert(X == 30 and _G.X == 20)
+B = false
+assert(B == false)
+B = nil
+assert(B == 30)
 
 assert(eventtable{} == nil)
 -- assert(eventtable(4) == nil)
@@ -122,11 +126,11 @@ end
 c = {val="c"}; eventtable(c, t)
 d = {val="d"}; eventtable(d, t)
 
-A = 1
+A = true
 assert(c..d == 'cd')
 assert(0 .."a".."b"..c..d.."e".."f"..(5+3).."g" == "0abcdef8g")
 
-A = nil
+A = false
 x = c..d
 assert(eventtable(x) == t and x.val == 'cd')
 x = 0 .."a".."b"..c..d.."e".."f".."g"

@@ -164,7 +164,7 @@ function isbalanced (s)
 end
 
 assert(isbalanced("(9 ((8))(\0) 7) \0\0 a b ()(c)() a"))
-assert(isbalanced("(9 ((8) 7) a b (\0 c) a") == nil)
+assert(not isbalanced("(9 ((8) 7) a b (\0 c) a"))
 assert(gsub("alo 'oi' alo", "%b''", '"') == 'alo " alo')
 
 

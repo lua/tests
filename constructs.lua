@@ -14,7 +14,7 @@ assert(not(2+1 > 3*1) and "a".."b" > "a");
 local a,b = 1,nil;
 assert(-(1 or 2) == -1 and (1 and 2)+(-1.25 or -4) == 0.75);
 x = ((b or a)+1 == 2 and (10 or a)+1 == 11); assert(x);
-x = ((2<3)+1 == 2 and (2<3 and 4) == 4); assert(x);
+x = (((2<3) or 1) == true and (2<3 and 4) == 4); assert(x);
 
 x,y=1,2;
 assert((x>y) and x or y == 2);
@@ -156,7 +156,7 @@ function h (a,b,c,d,e)
   return 0;
 end;
 
-assert(f(2,1) == 1 and g(2,1) == 1 and h(2,1) == 1)
+assert(f(2,1) == true and g(2,1) == 1 and h(2,1) == 1)
 assert(f(1,2,'a') == 'a' and g(1,2,'a') == 1 and h(1,2,'a') == 1)
 assert(f(1,2,'a')
 ~=          -- force SETLINE before nil
@@ -169,8 +169,8 @@ assert(f(1,2,nil,nil,'x') == nil and g(1,2,nil,nil,'x') == 0 and
 assert(f(1,2,nil,1,nil) == nil and g(1,2,nil,1,nil) == 0 and
                                    h(1,2,nil,1,nil) == 0)
 
-assert(1 and 2<3 == 1 and 2<3 and 'a'<'b' == 1)
-x = 2<3 and not 3; assert(x==nil)
+assert(1 and 2<3 == true and 2<3 and 'a'<'b' == true)
+x = 2<3 and not 3; assert(x==false)
 x = 2<1 or (2>1 and 'a'); assert(x=='a')
 
 
@@ -184,8 +184,8 @@ function F(a)
   return a,2,3
 end
 
-a,b = F(1)~=nil; assert(a == 1 and b == nil);
-a,b = F(nil)==nil; assert(a == 1 and b == nil)
+a,b = F(1)~=nil; assert(a == true and b == nil);
+a,b = F(nil)==nil; assert(a == true and b == nil)
 
 ----------------------------------------------------------------
 -- creates all combinations of 

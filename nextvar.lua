@@ -76,7 +76,7 @@ function find (name)
   while 1 do
     n,v = next(_G, n)
     if not n then return nofind end
-    assert(v)
+    assert(v ~= nil)
     if n == name then return v end
   end
 end

@@ -46,12 +46,15 @@ prepfile("print(a)", otherprog)
 RUN("lua %s %s > %s", prog, otherprog, out)
 checkout("1\n2\n")
 
-prepfile
-[[assert(arg.n == 3 and arg[1] == 'a' and arg[2] == 'b' and arg[3] == 'c')
+local a = [[
+  assert(arg.n == 3 and arg[1] == 'a' and arg[2] == 'b' and arg[3] == 'c')
   x = getargs()
-  assert(x.n == 6 and x[1] == '-c' and x[x.n] == arg[3])
+  assert(x[1] == '-c' and x[x.n] == arg[3])
 ]]
+prepfile(a)
 RUN("lua -c -f %s a b c", prog)
+prepfile(a)
+RUN("lua -c -f%s a b c", prog)
 
 prepfile"assert(arg==nil)"
 RUN("lua %s", prog)
@@ -60,7 +63,7 @@ prepfile""
 RUN("lua - < %s > %s", prog, out)
 checkout("")
 
-RUN('lua -e "print(1)" a=b -e "print(a)" > %s', out)
+RUN('lua "-eprint(1)" a=b -e "print(a)" > %s', out)
 checkout("1\nb\n")
 
 prepfile[[

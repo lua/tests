@@ -38,7 +38,7 @@ end
 dofile = function (n)
   showmem()
   local f = assert(loadfile(n))
-  local b = stringdump(f)
+  local b = string.dump(f)
   f = assert(loadstring(b))
   return f()
 end

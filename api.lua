@@ -583,7 +583,7 @@ end)
 
 testamem("dump/undump", function ()
   local a = loadstring(testprog)
-  local b = a and stringdump(a)
+  local b = a and string.dump(a)
   a = b and loadstring(b)
   return a and a()
 end)

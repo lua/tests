@@ -5,7 +5,9 @@ function f(x)
   local a = {}
   for i=1,10000 do
     local y = 0
-    a[i] = function () y = y+x; return y+A end
+    do
+      a[i] = function () y = y+x; return y+A end
+    end
   end
   local dummy = function () return a[A] end
   collectgarbage()
@@ -61,7 +63,7 @@ function f(x)
     if x == 3 and not first then return end
     local a = 'xuxu'
     b = function (op, y) if op == 'set' then a = x+y else return a end end
-    if x == 1 then break
+    if x == 1 then do break end
     elseif x == 2 then return
     else if x ~= 3 then error() end
     end
@@ -192,6 +194,4 @@ for t in coroutine(all, {}, 5, 4) do
 end
 assert(a == 5^4)
   
-  
-
 print'OK'

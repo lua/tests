@@ -85,7 +85,7 @@ assert(strlen(abc) == 256)
 
 function strset (p)
   local res = {s=''}
-  gsub(%abc, '('..p..')', function (c) %res.s = %res.s .. c end)
+  gsub(%abc, p, function (c) %res.s = %res.s .. c end)
   return res.s
 end;
 
@@ -147,7 +147,7 @@ assert(gsub("trocar tudo em |teste|b| é |beleza|al|", "|([^|]*)|([^|]*)|", f) ==
 assert(gsub("alo $a=1$ novamente $return a$", "$([^$]*)%$", dostring) ==
             "alo  novamente 1")
 
-x = gsub("$x=gsub('alo', '(.)', strupper)$ assim vai para $return x$",
+x = gsub("$x=gsub('alo', '.', strupper)$ assim vai para $return x$",
          "$([^$]*)%$", dostring)
 assert(x == ' assim vai para ALO')
 
@@ -173,11 +173,11 @@ assert(gsub("x and x and x", "x", function () %t.n=%t.n+1; return %t[%t.n] end)
         == "apple and orange and lime")
 
 t = {n=0}
-gsub("first second word", "(%w%w*)", function (w) %t.n=%t.n+1; %t[%t.n] = w end)
+gsub("first second word", "%w%w*", function (w) %t.n=%t.n+1; %t[%t.n] = w end)
 assert(t[1] == "first" and t[2] == "second" and t[3] == "word" and t.n == 3)
 
 t = {n=0}
-gsub("first second word", "(%w+)",
+gsub("first second word", "%w+",
       function (w) %t.n=%t.n+1; %t[%t.n] = w end, 2)
 assert(t[1] == "first" and t[2] == "second" and t[3] == nil)
 
@@ -197,5 +197,32 @@ end
 
 local x = strrep('012345', 10)
 assert(rev(rev(x)) == x)
+
+
+-- tests for gfind
+local a = 0
+for i in gfind('abcde', '()') do assert(i == a+1); a=i end
+assert(a==6)
+
+t = {n=0}
+for w in gfind("first second word", "%w+") do
+      t.n=t.n+1; t[t.n] = w
+end
+assert(t[1] == "first" and t[2] == "second" and t[3] == "word")
+
+t = {3, 6, 9}
+for i in gfind ("xuxx uu ppar r", "()(.)%2") do
+  assert(i == tremove(t, 1))
+end
+assert(getn(t) == 0)
+
+t = {}
+for i,j in gfind("13 14 10 = 11, 15= 16, 22=23", "(%d+)%s*=%s*(%d+)") do
+  t[i] = j
+end
+a = 0
+for k,v in t do assert(k+1 == v+0); a=a+1 end
+assert(a == 3)
+
 
 print('OK')

@@ -16,6 +16,7 @@ end
 
 
 -- testa erros comuns e/ou que voavam no passado
+assert(doit("unpack{n=2^32}"))
 assert(doit("a=sin()"))
 assert(not doit("tostring(1)") and doit("tostring()"))
 assert(doit"tonumber()")
@@ -38,7 +39,9 @@ checkmessage([[
 
 -- testes para mensagens de erro mais explicativas
 
-checkmessage("a=1; bbbb=2; a=sin(3)+bbbb(3)", "global `bbbb'")
+checkmessage("global a, bbbb, sin; a=1; bbbb=2; a=sin(3)+bbbb(3)",
+             "global `bbbb'")
+checkmessage("global z in {}; x=2; a=sin(3)+z(3)", "global `z'")
 checkmessage("a=1; local a,bbbb=2,3; a = sin(1) and bbbb(3)",
        "local `bbbb'")
 checkmessage("a={}; do local a=1 end a:bbbb(3)", "field `bbbb'")

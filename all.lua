@@ -37,7 +37,7 @@ if type(T) == 'table' and false then   -- debug facilities available?
   local mt = {}
   local new = function ()
     local u = T.newuserdata(0)
-    T.metatable(u, mt)
+    T.setmetatable(u, mt)
   end
   mt.gc = function ()
     write(_STDERR, '.')
@@ -108,7 +108,7 @@ local collectgarbage, showmem, print, format, clock =
       collectgarbage, showmem, print, format, os.clock
 
 debug.setcallhook(function (a) %assert(%type(a) == 'string') end)
-globals(preserve)
+setglobals(preserve)
 collectgarbage()
 collectgarbage()
 collectgarbage()

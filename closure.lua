@@ -21,7 +21,7 @@ end
 
 a = f(10)
 -- force a GC in this level
-local x = metatable({[1] = {}}, {__weakmode='kv'}); -- to detect a GC
+local x = setmetatable({[1] = {}}, {__weakmode='kv'}); -- to detect a GC
 while x[1] do   -- repeat until GC
   local a = A..A..A..A  -- create garbage
   A = A+1
@@ -34,7 +34,7 @@ assert(a[2]() == 20+A)
 assert(a[2]() == 30+A)
 assert(a[3]() == 20+A)
 assert(a[8]() == 10+A)
-assert(metatable(x).__weakmode == 'kv')
+assert(getmetatable(x).__weakmode == 'kv')
 assert(B.g == 19)
 
 -- teste de closure com variavel de controle do for
@@ -174,10 +174,8 @@ end
 function goo() foo() end
 x = coroutine.create(goo)
 assert(x() == 3)
-local msg = {}
-local a,b = xpcall(function (_msg) tinsert(msg, _msg); return msg end, x)
-assert(not a and b == msg)
-assert(msg[1] == foo and msg.n == 2)
+local a,b = pcall(x)
+assert(not a and b == foo)
 
 
 -- co-routines x for loop

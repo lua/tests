@@ -28,8 +28,8 @@ assert(a == 55 and b == 2)
 a = call(c12, {1,2;n=1})
 assert(not a)
 assert(c12(1,2,3) == false)
-local a = vararg(call(next, {globals(),nil;n=2}))
-local b,c = next(globals())
+local a = vararg(call(next, {_G,nil;n=2}))
+local b,c = next(_G)
 assert(a[1] == b and a[2] == c and a.n == 2)
 a = vararg(call(call, {c12, {1,2}}))
 assert(a.n == 2 and a[1] == 55 and a[2] == 2)
@@ -60,6 +60,6 @@ call(g, a)
 a = {}
 i = 1
 while i <= lim do a[i] = i; i=i+1 end
-assert(call(max, a) == lim)
+assert(call(math.max, a) == lim)
 
 print('OK')

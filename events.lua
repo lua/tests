@@ -2,7 +2,9 @@ print('testando meta-tabelas')
 
 X = 20; B = 30
 
-globals(metatable({_G = globals()}, {__index=globals()}))
+setglobals(setmetatable({}, {__index=_G}))
+
+collectgarbage()
 
 X = X+10
 assert(X == 30 and _G.X == 20)
@@ -11,23 +13,23 @@ assert(B == false)
 B = nil
 assert(B == 30)
 
-assert(metatable{} == nil)
-assert(metatable(4) == nil)
-assert(metatable(nil) == nil)
-a={}; metatable(a, {__metatable = "xuxu",
+assert(getmetatable{} == nil)
+assert(getmetatable(4) == nil)
+assert(getmetatable(nil) == nil)
+a={}; setmetatable(a, {__metatable = "xuxu",
                     __weakmode = 45,  -- invalid mode, must be ignored
                     __tostring=function(x) return x.name end})
-assert(metatable(a) == "xuxu")
+assert(getmetatable(a) == "xuxu")
 assert(tostring(a) == nil)
 a.name = "gororoba"
 assert(tostring(a) == "gororoba")
 
 local a, t = {10,20,30; x="10", y="20"}, {}
-assert(metatable(a,t) == a)
-assert(metatable(a) == t)
-assert(metatable(a,nil) == a)
-assert(metatable(a) == nil)
-assert(metatable(a,t) == a)
+assert(setmetatable(a,t) == a)
+assert(getmetatable(a) == t)
+assert(setmetatable(a,nil) == a)
+assert(getmetatable(a) == nil)
+assert(setmetatable(a,t) == a)
 
 
 function f (t, i, e)
@@ -41,23 +43,26 @@ t.__index = f
 a.parent = {z=25, x=12, [4] = 24}
 assert(a[1] == 10 and a.z == 28 and a[4] == 27 and a.x == "10")
 
+collectgarbage()
 
+a = setmetatable({}, t)
 function f(t, i, v) rawset(t, i, v-3) end
-t.__settable = f
+t.__newindex = f
 a[1] = 30; a.x = "101"; a[5] = 200
 assert(a[1] == 27 and a.x == 98 and a[5] == 197)
 
 
 local c = {}
-t.__settable = c
+a = setmetatable({}, t)
+t.__newindex = c
 a[1] = 10; a[2] = 20; a[3] = 90
 assert(c[1] == 10 and c[2] == 20 and c[3] == 90)
 
 
 do
   local a;
-  a = metatable({}, {__index = metatable({},
-                     {__index = metatable({},
+  a = setmetatable({}, {__index = setmetatable({},
+                     {__index = setmetatable({},
                      {__index = function (_,n) return a[n-3]+4, "lixo" end})})})
   a[0] = 20
   for i=0,10 do
@@ -70,7 +75,7 @@ do  -- newindex
   local foi
   local a = {}
   for i=1,10 do a[i] = 0; a['a'..i] = 0; end
-  metatable(a, {__newindex = function (t,k,v) foi=true; rawset(t,k,v) end})
+  setmetatable(a, {__newindex = function (t,k,v) foi=true; rawset(t,k,v) end})
   foi = false; a[1]=0; assert(not foi)
   foi = false; a['a1']=0; assert(not foi)
   foi = false; a['a11']=0; assert(foi)
@@ -91,8 +96,8 @@ do
 end
 
 
-local b = metatable({}, t)
-metatable(b,t)
+local b = setmetatable({}, t)
+setmetatable(b,t)
 
 function f(...) cap = arg ; return arg[1] end
 t.__add = f
@@ -104,7 +109,7 @@ t.__pow = f
 
 assert(b+5 == b)
 assert(cap[1] == b and cap[2] == 5 and cap.n == 2)
-b=b-3; assert(metatable(b) == t)
+b=b-3; assert(getmetatable(b) == t)
 assert(5-a == 5)
 assert(cap[1] == 5 and cap[2] == a and cap.n == 2)
 assert(a*a == a)
@@ -121,13 +126,14 @@ assert(cap[1] == 4 and cap[2] == a and cap.n == 2)
 
 t = {}
 t.__lt = function (a,b,c)
+  collectgarbage()
   assert(c == nil)
   if type(a) == 'table' then a = a.x end
   if type(b) == 'table' then b = b.x end
  return a<b, "dummy"
 end
 
-function Op(x) return metatable({x=x}, t) end
+function Op(x) return setmetatable({x=x}, t) end
 
 local function test ()
 assert(not(Op(1)<Op(1)) and (Op(1)<Op(2)) and not(Op(2)<Op(1)))
@@ -157,7 +163,7 @@ test()  -- retest comparisons, now using both `lt' and `le'
 local function Set(x)
   local y = {}
   for _,k in x do y[k] = 1 end
-  return metatable(y, t)
+  return setmetatable(y, t)
 end
 
 t.__lt = function (a,b)
@@ -211,12 +217,12 @@ t.__concat = function (a,b,c)
   if type(b) == 'table' then b = b.val end
   if A then return a..b
   else
-    return metatable({val=a..b}, t)
+    return setmetatable({val=a..b}, t)
   end
 end
 
-c = {val="c"}; metatable(c, t)
-d = {val="d"}; metatable(d, t)
+c = {val="c"}; setmetatable(c, t)
+d = {val="d"}; setmetatable(d, t)
 
 A = true
 assert(c..d == 'cd')
@@ -224,7 +230,7 @@ assert(0 .."a".."b"..c..d.."e".."f"..(5+3).."g" == "0abcdef8g")
 
 A = false
 x = c..d
-assert(metatable(x) == t and x.val == 'cd')
+assert(getmetatable(x) == t and x.val == 'cd')
 x = 0 .."a".."b"..c..d.."e".."f".."g"
 assert(x.val == "0abcdefg")
 
@@ -240,18 +246,16 @@ local tt = {
   end
 }
 
-local a = metatable({}, tt)
-local b = metatable({f=a}, tt)
-local c = metatable({f=b}, tt)
+local a = setmetatable({}, tt)
+local b = setmetatable({f=a}, tt)
+local c = setmetatable({f=b}, tt)
 
 i = 0
 x = c(3,4,5)
 assert(i == 3 and x[1] == 3 and x[3] == 5)
 
 
-globals(_G); assert(metatable(globals()) == nil)
-
-assert(X == 20)
+assert(_G.X == 20)
 
 print 'OK'
 

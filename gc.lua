@@ -127,7 +127,7 @@ for i=1,lim do assert(a[i] == i) end
 
 
 print('weak tables')
-a = metatable({}, {__weakmode='k'})
+a = setmetatable({}, {__weakmode='k'})
 -- fill a with some `collectable' indices
 for i=1,lim do a[{}] = i end
 -- and some non-collectable ones
@@ -138,7 +138,7 @@ local i = 0
 for k,v in a do assert(k==v); i=i+1 end
 assert(i == 2*lim)
 
-a = metatable({}, {__weakmode='v'})
+a = setmetatable({}, {__weakmode='v'})
 -- fill a with some `collectable' values (in both parts of the table)
 for i=1,lim do a[i] = {} end
 for i=1,lim do a[i..'x'] = {} end
@@ -150,7 +150,7 @@ local i = 0
 for k,v in a do assert(k==v or k-lim..'x' == v); i=i+1 end
 assert(i == 2*lim)
 
-a = metatable({}, {__weakmode='vk'})
+a = setmetatable({}, {__weakmode='vk'})
 local x, y, z = {}, {}, {}
 -- keep only some items
 a[1], a[2], a[3] = x, y, z

@@ -21,6 +21,12 @@ assert(doit"a=1;;")
 assert(doit"return;;")
 assert(doit("function a (... , ...) end"))
 assert(doit("function a (, ...) end"))
+assert(strfind(doit'%a()', "line 1"))
+assert(strfind(doit[[
+  local other, var = 1
+  other = other or %var
+
+]], "line 2"))
 
 -- testes para mensagens de erro mais explicativas
 
@@ -32,15 +38,18 @@ assert(strfind(doit"local a={}; a.bbbb(3)", "field `bbbb'"))
 assert(not strfind(doit"a={13}; local bbbb=1; a[bbbb](3)", "bbbb"))
 assert(strfind(doit"a={13}; local bbbb=1; a[bbbb](3)", "number"))
 
+aaa = nil
 assert(strfind(doit"aaa.bbb:ddd(9)", "global `aaa'"))
 assert(strfind(doit"local aaa={bbb=1}; aaa.bbb:ddd(9)", "field `bbb'"))
 assert(strfind(doit"local aaa={bbb={}}; aaa.bbb:ddd(9)", "field `ddd'"))
 assert(doit"local aaa={bbb={ddd=next}}; aaa.bbb:ddd(nil)" == nil)
 
-assert(strfind(doit"local aaa={}; x=aaa+b", "local `aaa'"))
+assert(strfind(doit"local aaa='a'; x=aaa+b", "local `aaa'"))
 assert(strfind(doit"aaa={}; x=3/aaa", "global `aaa'"))
+assert(strfind(doit"aaa='2'; b=nil;x=aaa*b", "global `b'"))
 assert(strfind(doit"aaa={}; x=-aaa", "global `aaa'"))
 assert(not strfind(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "aaa"))
+assert(not strfind(doit"aaa={}; (aaa or aaa)()", "aaa"))
 
 assert(strfind(doit[[aaa=9
 repeat until 3==3
@@ -59,6 +68,7 @@ if sin(1) == 0 then return 3 end    -- return
 x.a()]], "field `a'"))
 
 assert(strfind(doit[[
+prefix = nil
 while 1 do  
   local a
   if nil then break end

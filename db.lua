@@ -11,7 +11,7 @@ end
 function test (s, l)
   collectgarbage()   -- avoid gc during trace
   local f = function (line)
-    if tremove(%l, 1) ~= line then print("wrong trace!!"); exit(1) end
+              assert(tremove(%l, 1) == line, "wrong trace!!")
   end
   setlinehook(f); dostring(s); assert(setlinehook() == f)
   assert(l.n == 0)
@@ -96,7 +96,7 @@ else
 end
 ]], {2,4,7})
 
-test([[
+test([[--
 if nil then
   a=1
 else

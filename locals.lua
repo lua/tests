@@ -5,7 +5,7 @@ f = nil
 local f
 x = 1
 
-assert(type(dostring('local a = {}')) == 'userdata')
+assert(type(dostring('local a = {}')) ~= 'table')
 
 function f (a)
   local _1, _2, _3, _4, _5

@@ -23,5 +23,12 @@ do
   assert(a:add(10):add(20):add(30).x == 60 and a.y == 20)
 end
 
+local a = {b={c={}}}
+
+function a.b.c.f1 (x) return x+1 end
+function a.b.c:f2 (x,y) self[x] = y end
+assert(a.b.c.f1(4) == 5)
+a.b.c:f2('k', 12); assert(a.b.c.k == 12)
+
 print('OK')
 

@@ -12,7 +12,7 @@ function c12 (...)
   return res, 2
 end
 
-function pack(...) return arg end
+function vararg (...) return arg end
 
 assert(f() == 0)
 assert(f({1,2,3}, 1, 2, 3) == 3)
@@ -26,10 +26,10 @@ assert(a == 55 and b == 2)
 a = call(c12, {1,2;n=1})
 assert(a == nil)
 assert(c12(1,2,3) == nil)
-local a = pack(call(next, {globals(),nil;n=2}))
+local a = vararg(call(next, {globals(),nil;n=2}))
 local b,c = next(globals())
 assert(a[1] == b and a[2] == c and a.n == 2)
-a = pack(call(call, {c12, {1,2}}))
+a = vararg(call(call, {c12, {1,2}}))
 assert(a.n == 2 and a[1] == 55 and a[2] == 2)
 a = call(print, {'+'})
 assert(a == nil)

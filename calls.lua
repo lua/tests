@@ -16,7 +16,8 @@ function fat(x)
 end
 
 assert(dostring "dostring 'assert(fat(6)==720)' ")
-a,b = dostring('return fat(5), 3')
+a = loadstring('return fat(5), 3')
+a,b = a()
 assert(a == 120 and b == 3)
 print('+')
 
@@ -43,6 +44,20 @@ deep(200)
 _ERRORMESSAGE = oldfb
 print('+')
 
+
+a = nil
+function (x) a=x end (23)
+assert(a == 23 and function (x) return x*2 end (20) == 40)
+
+
+a = {}; lim = 1000
+for i=1, lim do a[i]=i end
+x = {unpack(a)}
+assert(getn(x) == lim and x[1] == 1 and x[lim] == lim)
+a,x = unpack{1}
+assert(a==1 and x==nil)
+a,x = unpack{1,2;n=1}
+assert(a==1 and x==nil)
 
 
 -- testando closures
@@ -86,14 +101,14 @@ print('+')
 
 -- testando multiplos retornos
 
-function unpack (t, i)
+function unlpack (t, i)
   i = i or 1
   if (i <= getn(t)) then
-    return t[i], unpack(t, i+1)
+    return t[i], unlpack(t, i+1)
   end
 end
 
-function pack (...) return arg end
+function lpack (...) return arg end
 
 function equaltab (t1, t2)
   assert(getn(t1) == getn(t2))
@@ -105,18 +120,20 @@ end
 function f() return 1,2,30,4 end
 function ret2 (a,b) return a,b end
 
-a,b,c,d = unpack{1,2,3}
+a,b,c,d = unlpack{1,2,3}
 assert(a==1 and b==2 and c==3 and d==nil)
 a = {1,2,3,4,nil,10,'alo',nil,assert}
-equaltab(pack(unpack(a)), a)
-equaltab(pack(unpack(a), -1), {1,-1})
+equaltab(lpack(unlpack(a)), a)
+equaltab(lpack(unlpack(a), -1), {1,-1})
 a,b,c,d = ret2(f()), ret2(f())
 assert(a==1 and b==1 and c==2 and d==nil)
-a,b,c,d = unpack(pack(ret2(f()), ret2(f())))
+a,b,c,d = unlpack(lpack(ret2(f()), ret2(f())))
 assert(a==1 and b==1 and c==2 and d==nil)
+a,b,c,d = unlpack(lpack(ret2(f()), (ret2(f()))))
+assert(a==1 and b==1 and c==nil and d==nil)
 
-a = ret2{ unpack{1,2,3}, unpack{3,2,1}, unpack{"a", "b"}}
-assert(a[1] == 1 and a[2] == 3 and a[3] == "a" and a[4] == nil)
+a = ret2{ unlpack{1,2,3}, unlpack{3,2,1}, unlpack{"a", "b"}}
+assert(a[1] == 1 and a[2] == 3 and a[3] == "a" and a[4] == "b")
 
 print('OK')
 return deep

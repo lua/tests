@@ -42,6 +42,7 @@ function setfallback (name, func)
   elseif name == 'arith' then
     oldfunc = gettagmethod(tag(0), 'pow')
     for _,n in {"add", "sub", "mul", "div", "unm", "pow"} do
+       func = function (a,b) return %func(a,b,%n) end
        fillvalids(n, func)
     end
   elseif name == 'order' then

@@ -1,6 +1,6 @@
 print "testando operacoes W"
 
-_WD = _WD or ""
+require "checktable.lua"
 
 -- lots of empty lines (to force SETLINEW)
 
@@ -252,7 +252,6 @@ end
 assert(b.x == 23)
 print('+')
 
-assert(dofile(_WD.."checktable.lua"), "cannot open checktable.lua")
 stat(b)
 
 repeat

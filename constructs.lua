@@ -35,14 +35,14 @@ function f (i)
   if i > 0 then return i, f(i-1); end;
 end
 
-x = {f(3), f(5), f(10)};
-assert(x[1] == 3 and x[2] == 5 and x[3] == 10);
-x = {f'alo', f'xixi'};
-assert(x[1] == 'alo' and x[2] == 'xixi');
+x = {f(3), f(5), f(10),;};
+assert(x[1] == 3 and x[2] == 5 and x[3] == 10 and x[4] == 9 and x[12] == 1);
+x = {f'alo', f'xixi', nil};
+assert(x[1] == 'alo' and x[2] == 'xixi' and x[3] == nil);
 x = {f'alo'..'xixi'};
 assert(x[1] == 'aloxixi')
 x = {f{}}
-assert(next(x[1]) == nil)
+assert(x[2] == 'jojo' and type(x[1]) == 'table')
 
 
 local f = function (i)
@@ -58,7 +58,10 @@ for i=1,1000 do break; end;
 n=100;
 i=3;
 t = {};
-a=0; for i=1,n do for i=i,1,-1 do a=a+1; t[i]=1; end; end;
+a=nil
+while not a do
+  a=0; for i=1,n do for i=i,1,-1 do a=a+1; t[i]=1; end; end;
+end
 assert(a == n*(n+1)/2 and i==3);
 assert(t[1] and t[n] and not t[0] and not t[n+1])
 
@@ -116,8 +119,10 @@ f(10); g(10);
 
 do
   function f () return 1,2,3; end
-  local a, b, c = (f());
+  local a, b, c = f();
   assert(a==1 and b==2 and c==3)
+  a, b, c = (f());
+  assert(a==1 and b==nil and c==nil)
 end
 
 local a,b = 3 and f();
@@ -187,6 +192,8 @@ a,b = F(nil)==nil; assert(a == 1 and b == nil)
 -- [not] ([not] arg op [not] (arg op [not] arg ))
 -- and tests each one
 
+function ID(x) return x end
+
 function f(t, i)
   local b = t.n
   local res = mod(floor(i/c), b)+1
@@ -203,11 +210,17 @@ local neg = {" ", " not "; n=2}
 local i = 0
 repeat
   c = 1
-  local s = f(neg, i)..'('..f(neg, i)..f(arg, i)..f(op, i)..
-            f(neg, i)..'('..f(arg, i)..f(op, i)..f(neg, i)..f(arg, i)..'))'
-  s = gsub(s, "%s+", "\n")   -- force a SETLINE between opcodes
+  local s = f(neg, i)..'ID('..f(neg, i)..f(arg, i)..f(op, i)..
+            f(neg, i)..'ID('..f(arg, i)..f(op, i)..f(neg, i)..f(arg, i)..'))'
+  local s1 = gsub(s, 'ID', '')
   X,NX = nil
-  s = format("a = %s; local xxx; if %s then X,NX=a,not a else X,NX=not a,a end", s, s)
+  s = format([[
+      local a = %s
+      local b = not %s
+      local xxx; 
+      if %s then X = a  else X = b end
+      if %s then NX = b  else NX = a end
+  ]], s1, s, s1, s)
   assert(dostring(s))
   assert(X and not NX)
   if mod(i,4000) == 0 then print('+') end

@@ -1,6 +1,12 @@
 print("testando reais e bib. matematica")
 
-_WD = _WD or ""
+do
+  local a,b,c = "2", " 3e0 ", " 10  "
+  assert(a+b == 5 and -b == -3 and b+"2" == 5 and "10"-c == 0)
+  assert(type(a) == 'string' and type(b) == 'string' and type(c) == 'string')
+  assert(a == "2" and b == " 3e0 " and c == " 10  ")
+end
+
 
 function f(...) if arg.n == 1 then return arg[1] else return "***" end end
 
@@ -84,20 +90,18 @@ assert(8388607 + -8388607 == 0)
 
 if _soft then return end
 
-f = tmpname()
-assert(writeto(f))
-write("a = {")
+f = tmpfile()
+assert(f)
+write(f, "a = {")
 i = 1
 repeat
-  write("{", sin(i), ", ", cos(i), ", ", i/3, "},\n")
+  write(f, "{", sin(i), ", ", cos(i), ", ", i/3, "},\n")
   i=i+1
 until i > 1000
-write("}")
-writeto()
-assert(readfrom(f))
-dostring(read'*a')
-assert(readfrom())
-assert(remove(f))
+write(f, "}")
+seek(f, "set", 0)
+dostring(read(f, '*a'))
+assert(closefile(f))
 
 assert(eq(a[300][1], sin(300)))
 assert(eq(a[600][1], sin(600)))
@@ -107,7 +111,7 @@ assert(eq(a[200][3], 200/3))
 assert(eq(a[1000][3], 1000/3, 0.001))
 print('+')
 
-assert(dofile(_WD.."checktable.lua"), "cannot load checktable.lua");
+require "checktable.lua"
 stat(a)
 
 a = nil

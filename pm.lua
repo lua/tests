@@ -115,17 +115,19 @@ assert(strfind("(álo)", "%(á") == 1)
 _, _, a, b, c, d, e = strfind("âlo alo", "^(((.).).* (%w*))$")
 assert(a == 'âlo alo' and b == 'âl' and c == 'â' and d == 'alo' and e == nil)
 _, _, a, b, c, d  = strfind('0123456789', '(.+(.?)())')
-assert(a == '0123456789' and b == '' and c == '' and d == nil)
+assert(a == '0123456789' and b == '' and c == 11 and d == nil)
 print('+')
 
 assert(gsub('ülo ülo', 'ü', 'x') == 'xlo xlo')
 assert(gsub('alo úlo  ', ' +$', '') == 'alo úlo')  -- trim
+assert(gsub('  alo alo  ', '^%s*(.-)%s*$', '%1') == 'alo alo')  -- double trim
 assert(gsub('alo  alo  \n 123\n ', '%s+', ' ') == 'alo alo 123 ')
 t = "abç d"
 a, b = gsub(t, '(.)', '%1@')
 assert('@'..a == gsub(t, '', '@') and b == 5)
 a, b = gsub('abçd', '(.)', '%1@', 2)
 assert(a == 'a@b@çd' and b == 2)
+assert(gsub('alo alo', '()[al]', '%1') == '12o 56o')
 assert(gsub("abc=xyz", "(%w*)(%p)(%w+)", "%3%2%1") == "xyz=abc")
 assert(gsub('áéí', '$', '\0óú') == 'áéí\0óú')
 assert(gsub('', '^', 'r') == 'r')
@@ -148,6 +150,13 @@ assert(gsub("alo $a=1$ novamente $return a$", "$([^$]*)%$", dostring) ==
 x = gsub("$x=gsub('alo', '(.)', strupper)$ assim vai para $return x$",
          "$([^$]*)%$", dostring)
 assert(x == ' assim vai para ALO')
+
+t = {}
+gsub('a alo jose  joao', '()(%w+)()', function (a,w,b)
+  assert(strlen(w) == b-a);
+  t[a] = b-a;
+end)
+assert(t[1] == 1 and t[3] == 3 and t[7] == 4 and t[13] == 4)
 
 
 function isbalanced (s)

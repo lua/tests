@@ -11,6 +11,11 @@ assert('\0\0' < '\0\1')
 assert('\1\0a\0a' <= '\1\0a\0a')
 assert(not ('\1\0a\0b' <= '\1\0a\0a'))
 assert('\0\0\0' < '\0\0\0\0')
+assert(not('\0\0\0\0' < '\0\0\0'))
+assert('\0\0\0' <= '\0\0\0\0')
+assert(not('\0\0\0\0' <= '\0\0\0'))
+assert('\0\0\0' <= '\0\0\0')
+assert('\0\0\0' >= '\0\0\0')
 assert(not ('\0\0b' < '\0\0a\0'))
 print('+')
 
@@ -75,11 +80,12 @@ print('+')
 
 x = '"ílo"\n\\'
 assert(format('%q%s', x, x) == '"\\"ílo\\"\\\n\\\\""ílo"\n\\')
-assert(format("%c%c%x", strbyte("á"), strbyte("b"), 140) == "áb8c")
+assert(format("\0%c\0%c%x\0", strbyte("á"), strbyte("b"), 140) ==
+              "\0á\0b8c\0")
 assert(format('') == "")
 assert(format("%c",34)..format("%c",48)..format("%c",90)..format("%c",100) ==
        format("%c%c%c%c", 34, 48, 90, 100))
-assert(format("%s is not %s", 'not be', 'be') == 'not be is not be')
+assert(format("%s\0 is not \0%s", 'not be', 'be') == 'not be\0 is not \0be')
 assert(format("%%%d %010d", 10, 23) == "%10 0000000023")
 assert(tonumber(format("%f", 10.3)) == 10.3)
 x = format('"%-50s"', 'a')
@@ -90,8 +96,6 @@ assert(format("-%.20s.20s", strrep("%", 2000)) == "-"..strrep("%", 20)..".20s")
 assert(format('"-%20s.20s"', strrep("%", 2000)) ==
        format("%q", "-"..strrep("%", 2000)..".20s"))
 
-assert(format("-%2$s-%1$2d-", 2, "alo") == "-alo- 2-")
-assert(format("-%1$s-%1$2d-", 2, "alo") == "-2- 2-")
 
 -- longest number that can be formated
 assert(strlen(format('%99.99f', -1e308)) >= 100)

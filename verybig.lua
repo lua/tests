@@ -2,15 +2,10 @@ if _soft then return 10 end
 
 print "testando programas longos (>64k)"
 
-_WD = _WD or ""
-
 -- template to create a very big test file
 prog = [[$
-a = nil
 
-while a ~= 20 do
-if not a then
-b = nil or {$1$
+b = {$1$
   b30009 = 65534,
   b30010 = 65535,
   b30011 = 65536,
@@ -29,31 +24,29 @@ b = nil or {$1$
   b30024 = -4294967297,
   b30025 = 15012.5,
   $2$
-}; a=b else a = 20 end
-end
+};
 
 assert(b.a50008 == 25004 and b["a11"] == 5.5)
 assert(b.a33007 == 16503.5 and b.a50009 == 25004.5)
 assert(b["b"..30024] == -4294967297)
 
+function b:xxx (a,b) return a+b end
+assert(b:xxx(10, 12) == 22)   -- pushself with non-constant index
+b.xxx = nil
+
 s = 0; n=0
 for a,b in b do s=s+b; n=n+1 end
 assert(s==13977183656.5  and n==70001)
 
-if dofile(_WD.."checktable.lua") then
-  stat(b)
-else
-  print"no checktable"
-end
+require "checktable.lua"
+stat(b)
 
 a = nil; b = nil
 print'+'
 
 function f(x) b=x end
 
-repeat
 a = f{$3$} or 10
-until a and b
 
 assert(a==10)
 assert(b[1] == "a10" and b[2] == 5 and b[getn(b)-1] == "a50009")
@@ -66,7 +59,9 @@ assert(xxxx(3) == "a11")
 a = nil; b=nil
 xxxx = nil
 
-return 10]]
+return 10
+
+]]
 
 -- functions to fill in the $n$
 F = {
@@ -96,7 +91,7 @@ gsub(prog, "$([^$]+)", function (s)
   if not n then write(s) else F[n]() end
 end)
 assert(writeto())
-result = dofile(file)
+result = assert(dofile(file))
 assert(remove(file))
 print'OK'
 return result

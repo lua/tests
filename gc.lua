@@ -111,9 +111,10 @@ do  -- testa collectgarbage com valores
   assert(d == b)
 end
 
+lim = 15
 a = {}
 -- fill a with `collectable' indices
-for i=1,15 do a[{}] = i end
+for i=1,lim do a[{}] = i end
 b = {}
 for k,v in a do b[k]=v end
 -- remove all indices and collect them
@@ -125,8 +126,57 @@ end
 b = nil
 collectgarbage()
 for n,_ in a do error'cannot be here' end
-for i=1,15 do a[i] = i end
-for i=1,15 do assert(a[i] == i) end
+for i=1,lim do a[i] = i end
+for i=1,lim do assert(a[i] == i) end
+
+
+print('weak tables')
+assert(weakmode({}, '?') == "")
+a = weakmode({}, 'k')
+assert(weakmode(a, '?') == 'k')
+-- fill a with some `collectable' indices
+for i=1,lim do a[{}] = i end
+-- and some non-collectable ones
+for i=1,lim do local t={}; a[t]=t end
+collectgarbage()
+local i = 0
+for k,v in a do assert(k==v); i=i+1 end
+assert(i == lim)
+
+a = weakmode({}, 'v')
+assert(weakmode(a, '?') == 'v')
+-- fill a with some `collectable' values
+for i=1,lim do a[i] = {} end
+-- and some non-collectable ones
+for i=1,lim do local t={}; a[t]=t end
+collectgarbage()
+local i = 0
+for k,v in a do assert(k==v); i=i+1 end
+assert(i == lim)
+
+a = weakmode({}, 'vk')
+assert(weakmode(a, '?') == 'kv')
+local x, y, z = {}, {}, {}
+-- keep only some items
+a[1], a[2], a[3] = x, y, z
+-- fill a with some `collectable' values
+for i=4,lim do a[i] = {} end
+for i=1,lim do a[{}] = i end
+for i=1,lim do local t={}; a[t]=t end
+collectgarbage()
+assert(next(a) ~= nil)
+local i = 0
+for k,v in a do
+  assert((k == 1 and v == x) or
+         (k == 2 and v == y) or
+         (k == 3 and v == z));
+  i = i+1
+end
+assert(i == 3)
+x,y,z=nil
+collectgarbage()
+assert(next(a) == nil)
+
 
 if not _soft then
   print("deep structures")

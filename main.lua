@@ -6,10 +6,10 @@ prog = tmpname()
 otherprog = tmpname()
 out = tmpname()
 
-progname = getargs()[0]
+progname = '"'..getargs()[0]..'"'
 print(progname)
 
-function prepfile (s, p)
+local prepfile = function (s, p)
   p = p or prog
   assert(writeto(p))
   write(s)
@@ -19,9 +19,10 @@ end
 function checkout (s)
   assert(readfrom(out))
   local t = read("*a")
-  if s then assert(s == t) end
   readfrom()
   assert(remove(out))
+  if s ~= t then print(format("`%s' - `%s'\n", s, t)) end
+  assert(s == t)
   return t
 end
 
@@ -59,9 +60,7 @@ prepfile""
 RUN("lua - < %s > %s", prog, out)
 checkout("")
 
--- some "shells" (e.g. command.com) do not understand the quotes around
--- print(1); others require them...
-RUN("lua -e 'print(1)' a=b -e 'print(a)' > %s", out)
+RUN('lua -e "print(1)" a=b -e "print(a)" > %s', out)
 checkout("1\nb\n")
 
 prepfile[[
@@ -73,11 +72,20 @@ RUN("lua a=nil - < %s > %s", prog, out)
 checkout("1\tnil\n")
 
 prompt = "alo"
-prepfile[[
+prepfile[[ --
 a = 2
 ]]
 RUN("lua _PROMPT=%s -i < %s > %s", prompt, prog, out)
 checkout(strrep(prompt, 3).."\n")
+
+prepfile[[ -- \
+function f(x) \
+  return x+1    \
+  -- \\
+end
+print(f(10))]]
+RUN("lua -q < %s > %s", prog, out)
+checkout("11\n\n")
   
 prepfile[[#comment in 1st line without \n at the end]]
 RUN("lua %s", prog)

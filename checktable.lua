@@ -1,4 +1,6 @@
 
+assert(stat == nil)  -- module not loaded before
+
 if T == nil then
   stat = function () print"`querytab' nao ativo" end
   return
@@ -8,11 +10,12 @@ end
 function checktable (t)
   local size, ff = T.querytab(t)
   local l = {}
-  local i = 0
-  while i<size do
+  for i=0,size-1 do
     local key,val,next = T.querytab(t, i)
     if not key then
       assert(l[i] == nil and val==nil and next==nil)
+    elseif key == "<undef>" then
+      assert(val==nil)
     else
       local mp = T.hash(key, t)
       assert(t[key] == val)
@@ -31,7 +34,6 @@ function checktable (t)
         end
       end
     end
-    i = i+1
   end
   assert(l[ff] == nil)
   l.size = size; l.ff = ff
@@ -39,26 +41,18 @@ function checktable (t)
 end
 
 function mostra (t)
-  write(t.size, "  ", t.ff, "\n")
-  local i = 0
-  while i<t.size do
-    write(format("%5d: ", i))
-    if type(t[i]) ~= 'table' then
-      write(tostring(t[i]))
-    else
-      for j=1,getn(t[i]) do write(" ", t[i][j]) end
-    end
-    write("\n")
-    i = i+1
+  local size, ff = T.querytab(t)
+  print(size, ff)
+  for i=0,size-1 do
+    print(i, T.querytab(t, i))
   end
 end
 
 function stat (t)
   t = checktable(t)
-  local i = 0
   local nelem, nlist = 0, 0
   local maxlist = {}
-  while i < t.size do
+  for i=0,t.size-1 do
     if type(t[i]) == 'table' then
       local n = t[i].n
       nlist = nlist+1
@@ -66,7 +60,6 @@ function stat (t)
       if not maxlist[n] then maxlist[n] = 0 end
       maxlist[n] = maxlist[n]+1
     end
-    i = i+1
   end
   print(format("size=%d  elements=%d  load=%.2f  med.len=%.2f",
           t.size, nelem, nelem/t.size, nelem/nlist))

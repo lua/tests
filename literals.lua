@@ -6,6 +6,7 @@ assert(x == 'a\0a' and strlen(x) == 3)
 
 -- sequencias de escapes
 assert('\n\"\'\\' == [[
+
 "'\]])
 
 -- assume ASCII just for tests:
@@ -28,8 +29,10 @@ print('+')
 
 -- escapes --
 assert("\n\t" == [[
+
 	]])
 assert([[
+
  $debug]] == "\n $debug")
 assert([[ [ ]] ~= [[ ] ]])
 -- grandes strings --

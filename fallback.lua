@@ -1,6 +1,6 @@
 
 if setfallback==nil then
-  assert(dofile(_WD..'setfallback.lua'))
+  require "setfallback.lua"
 end
 
 print('testando fallbacks')

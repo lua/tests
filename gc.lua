@@ -1,5 +1,4 @@
 print('testando coleta de lixo')
-contCollected = 0
 
 collectgarbage()
 
@@ -7,53 +6,20 @@ setglobal("while", 234)
 
 limit = 5000
 
-tt = newtag()
-
-function fb (o)
-  local a = "hello" .. "\0world"   -- create a string
-  local b = {x=3}  -- create a table
-  settag(b, tt)   -- avoids calling fb when collected
-  assert(o == nil or type(o) == 'table')
-  if o then
-    contCollected = contCollected + 1
-  else
-    fim = 1
-  end
-  assert(b.x == 3)
-end
-
-settagmethod(tag{}, 'gc', fb)
-settagmethod(tag(nil), 'gc', fb)
-
 
 contCreate = 0
 
 print('tabelas')
 while contCreate <= limit do
   local a = {}; a = nil
---  if fim then
---    fim=nil; print(contCollected .. 'x' .. contCreate)
---    contCollected = 0;
---  end
   contCreate = contCreate+1
 end
-
-function fb1 (o)
-  assert(o == nil or type(o) == 'table')
-end
-
-
-settagmethod(tag{}, 'gc', fb)
-settagmethod(tag(nil), 'gc', fb)
 
 a = "a"
 
 contCreate = 0
 print('strings')
 while contCreate <= limit do
-  if (mod(contCreate, 5000) < 1) then
-      -- print("Criados " .. contCreate .. " Strings") 
-  end
   a = contCreate .. "b";
   a = gsub(a, '(%d%d*)', strupper)
   a = "a"
@@ -92,9 +58,8 @@ x = nil
 
 assert(getglobal("while") == 234)
 
-function f(x) i = nil end
 
-settagmethod(tag(nil), 'gc', f)
+local oldtm = settagmethod(tag(nil), 'gc', function (x) i = nil end)
 i = 1;
 while i do a = {} end  -- run until gc
 
@@ -103,41 +68,6 @@ i = 1
 collectgarbage()
 assert(i == nil)
 
-settagmethod(tag{}, 'gc', nil)
-settagmethod(tag(nil), 'gc', nil)
-
-print('+')
-
-
-
-ttb = newtag()
-function f(t)
-  assert(type(t) == 'table')
-  assert(tag(t) == ttb)
-  local x = {}
-  tb = tb+1
-end
-settagmethod(ttb, 'gc', f)
-
-
-function f () stop = 1 end
-settagmethod(tag(nil), 'gc', f)
-
-function cx ()
-  tb = 0
-  local i = 1
-  stop = nil
-  while not stop do
-    local t = {}; settag(t, ttb)
-    i = i+1
-  end
-  print(format("coletados %d tabelas em %d iteracoes", tb, i))
-end
-
-cx(); cx(); cx(); cx()
-
-settagmethod(tt, 'gc', nil)
-settagmethod(ttb, 'gc', nil)
-settagmethod(tag(nil), 'gc', nil)
+settagmethod(tag(nil), 'gc', oldtm)
 
 print('OK')

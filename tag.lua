@@ -131,6 +131,25 @@ assert(gettagmethod(tt1, 'concat') == f)
 assert(gettagmethod(tt1, 'lt') == f)
 
 
+-- teste de coleta de tabelas, se disponivel
+
+a = {n=0}
+f = function (t) a.n=a.n+1; a[t.v] = 1 end
+if not call(settagmethod, {tt1, 'gc', f}, "xp", nil) then
+  print "gc tag method para tabelas desabilitado"
+else
+  print "testando gc tag method para tabelas"
+  i = 0
+  while i<1000 do
+    i=i+1
+    local a = {v=i}
+    settag(a, tt1)
+  end
+  collectgarbage()  -- must collect all those tables
+  assert(a.n == 1000 and a[1] and a[1000] and not a[1001])
+  settagmethod(tt1, 'gc', nil)
+end
+
 
 print('OK')
 

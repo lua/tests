@@ -75,11 +75,11 @@ assert(type(testC("r51 o5")) == 'table')
 -- colect in cl 'val' of all collected tables
 tt = newtag()
 cl = {n=0}
-function f(x)  cl.n=cl.n+1; cl[x.val] = 1 end
-settagmethod(tt, 'gc', f)
+function f(x)  cl.n=cl.n+1; cl[extra('u',x)] = 1 end
+extra('t', tt, f)
 
-a = {val = 1}; b = {val = 2}; c = {val = 'v'}
-settag(a, tt); settag(b, tt); settag(c, tt)
+-- create 3 userdatas with tag `tt' and values 1, 2, and 3
+a = extra('U', 1, tt); b = extra('U', 2, tt); c = extra('U', 3, tt)
 
 -- lock[1] = a; lock[2] = b; lock[3] = c
 testC('g1a o1 l1 g1b o1 L2 g1c o1 L3')
@@ -90,11 +90,13 @@ t=nil a=nil b=nil c=nil
 
 collectgarbage()
 
-assert(type(testC("r51 o5")) == 'table')
--- testC("r52 o5")   -- must give an error
+assert(type(testC("r51 o5")) == 'userdata')
+assert(tag(testC("r51 o5")) == tt)
+-- atempt to get "collected object"; must gives an error
+assert(not call(testC, {"r52 o5"}, "xp", nil))
 
 -- check that unlocked objects have been collected
-assert(cl.n == 2 and cl[2] and cl.v and not cl[1])
+assert(cl.n == 2 and cl[2] and cl[3] and not cl[1])
 
 -- unlock(lock[1])
 testC("u1")
@@ -132,5 +134,23 @@ p = print
 -- r0 = x; push(r0); call p
 testC('G0X o0 fp')
 
+
+
+
+-- function to show all string tables
+function showstringtables ()
+  local i = 1
+  local n, s = querystr(i);
+  while n do
+    print("\n\t", n, s)
+    local j=0
+    while j<s do
+      j=j+1
+      print(querystr(i, j))
+    end
+    i = i+1
+    n, s = querystr(i);
+  end
+end
 
 $end

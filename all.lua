@@ -25,11 +25,18 @@ end
 
 assert(dofile(_WD..'main.lua'))
 
--- if type(T) == 'table' then   -- debug facilities available?
---   T.settagmethod(tag(nil), 'gc', function (a)
---     %write(_STDERR, '.')
---   end)
--- end
+if type(T, 'table') and false then   -- debug facilities available?
+  local mt = {}
+  local new = function ()
+    local u = T.newuserdata(0)
+    T.metatable(u, mt)
+  end
+  mt.gc = function ()
+    write(_STDERR, '.')
+    new()
+  end
+  new()
+end
 
 local f = assert(loadfile(_WD..'gc.lua'))
 f()
@@ -69,9 +76,9 @@ assert(dofile(_WD..'math.lua'))
 showmem()
 assert(dofile(_WD..'sort.lua'))
 showmem()
--- assert(dofile(_WD..'verybig.lua') == 10); collectgarbage()
--- showmem()
--- f()
+assert(dofile(_WD..'verybig.lua') == 10); collectgarbage()
+showmem()
+f()
 showmem()
 assert(dofile(_WD..'files.lua'))
 print("final OK !!!")

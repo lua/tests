@@ -72,6 +72,7 @@ function stat (t)
   print(format("size=%d  elements=%d  load=%.2f  med.len=%.2f",
           t.size, nelem, nelem/t.size, nelem/nlist))
   foreachi(maxlist, function(i,n)
+    n = n or 0
     print(format("%5d %10d %.2f%%", i, n, n*100/%nlist))
   end)
 end

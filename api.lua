@@ -28,6 +28,10 @@ assert(a == 2 and b == 3 and not c)
 -- test that all trues are equal
 a,b,c = T.testC("pushbool 1; pushbool 2; pushbool 0; return 3")
 assert(a == b and a == true and c == false)
+a,b,c = T.testC"pushbool 0; pushbool 10; pushnil;\
+                      tobool -3; tobool -3; tobool -3; return 3"
+assert(a==0 and b==1 and c==0)
+
 
 a,b,c = T.testC("gettop; return 2", 10, 20, 30, 40)
 assert(a == 40 and b == 5 and not c)

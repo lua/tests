@@ -70,6 +70,16 @@ do
   assert(pcall(setglobals, g, {}) == false)
 end
 
+-- test for global table of loaded chunks
+local function foo (s)
+  return loadstring(s)
+end
+
+assert(getglobals(foo("")) == _G)
+local a = {loadstring = loadstring}
+setglobals(foo, a)
+assert(getglobals(foo("")) == a)
+
 
 -- testando limites para instrucoes especiais
 

@@ -43,6 +43,12 @@ tcheck(t, {n=2;2,3})
 t = pack(T.testC("insert 3; gettop; return .", 2, 3, 4, 5))
 tcheck(t, {n=4;2,5,3,4})
 
+t = pack(T.testC("replace 2; gettop; return .", 2, 3, 4, 5))
+tcheck(t, {n=3;5,3,4})
+
+t = pack(T.testC("replace -2; gettop; return .", 2, 3, 4, 5))
+tcheck(t, {n=3;2,3,5})
+
 t = pack(T.testC("remove 3; gettop; return .", 2, 3, 4, 5))
 tcheck(t, {n=3;2,4,5})
 
@@ -187,11 +193,14 @@ function X (s)
   return (gsub(s, '$(%d+)', function (d) return REGISTRYINDEX-1-d end))
 end
 
-a = T.testC[[ pushnum 10; pushnum 20; pushcclosure 2; return 1]]
-t, b, c = a(X[[pushvalue $0; pushvalue $1; pushvalue $2; return 3]])
+local A = T.testC[[ pushnum 10; pushnum 20; pushcclosure 2; return 1]]
+t, b, c = A(X[[pushvalue $0; pushvalue $1; pushvalue $2; return 3]])
 assert(b == 10 and c == 20 and type(t) == 'table')
-a, b, c, d = a("pushnum 1; pushupvalues; pushnum 44; return 4")
+a, b, c, d = A("pushnum 1; pushupvalues; pushnum 44; return 4")
 assert(a == 1 and b == 10 and c == 20 and d == 44)
+A(X[[pushnum 100; pushnum 200; replace $2; replace $1]])
+b, c = A(X[[pushvalue $1; pushvalue $2; return 2]])
+assert(b == 100 and c == 200)
 
 
 -- testando locks (refs)

@@ -294,6 +294,15 @@ loadstring(os.date([[!assert(T.year==%Y and T.month==%m and T.day==%d and
   T.hour==%H and T.min==%M and T.sec==%S and
   T.wday==%w+1 and T.yday==%j and type(T.isdst) == 'boolean')]], t))()
 
+do
+  local T = os.date("*t")
+  local t = os.time(T)
+  assert(type(T.isdst) == 'boolean')
+  T.isdst = nil
+  local t1 = os.time(T)
+  assert(t == t1)   -- if isdst is absent uses correct default
+end   
+
 t = os.time(T)
 T.year = T.year-1;
 local t1 = os.time(T)

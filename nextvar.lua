@@ -63,6 +63,8 @@ end
 
 end
 
+print'+'
+
 
 
 nofind = {}
@@ -268,6 +270,9 @@ a = 0; for i=1e10, 1e10, -1 do a=a+1 end; assert(a==1)
 a = 0; for i=1, 0.99999, 1 do a=a+1 end; assert(a==0)
 a = 0; for i=99999, 1e5, -1 do a=a+1 end; assert(a==0)
 a = 0; for i=1, 0.99999, -1 do a=a+1 end; assert(a==1)
+
+-- conversion
+a = 0; for i="10","1","-2" do a=a+1 end; assert(a==5)
 
 
 collectgarbage()

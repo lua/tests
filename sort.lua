@@ -73,7 +73,7 @@ sort(a, function (x, y)
 
 tt = {lt = function (a,b) return a.val < b.val end}
 a = {}
-for i=1,10 do  a[i] = {val=random(100)}; eventtable(a[i], tt); end
+for i=1,10 do  a[i] = {val=random(100)}; metatable(a[i], tt); end
 sort(a)
 check(a, tt.lt)
 check(a)

@@ -18,7 +18,7 @@ end
 
 a = f(10)
 -- force a GC in this level
-local x = eventtable({[1] = {}}, {weakmode='kv'}); -- to detect a GC
+local x = metatable({[1] = {}}, {weakmode='kv'}); -- to detect a GC
 while x[1] do   -- repeat until GC
   local a = A..A..A..A  -- create garbage
   A = A+1
@@ -31,7 +31,7 @@ assert(a[2]() == 20+A)
 assert(a[2]() == 30+A)
 assert(a[3]() == 20+A)
 assert(a[8]() == 10+A)
-assert(eventtable(x).weakmode == 'kv')
+assert(metatable(x).weakmode == 'kv')
 
 -- teste de closure com variavel de controle do for
 a = {}

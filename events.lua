@@ -1,8 +1,8 @@
-print('testando tabelas de eventos')
+print('testando meta-tabelas')
 
 X = 20; B = 30
 
-globals(eventtable({_G = globals()}, {index=globals()}))
+globals(metatable({_G = globals()}, {index=globals()}))
 
 X = X+10
 assert(X == 30 and _G.X == 20)
@@ -11,15 +11,15 @@ assert(B == false)
 B = nil
 assert(B == 30)
 
-assert(eventtable{} == nil)
--- assert(eventtable(4) == nil)
+assert(metatable{} == nil)
+-- assert(metatable(4) == nil)
 
 local a, t = {10,20,30; x="10", y="20"}, {}
-assert(eventtable(a,t) == a)
-assert(eventtable(a) == t)
-assert(eventtable(a,nil) == a)
-assert(eventtable(a) == nil)
-assert(eventtable(a,t) == a)
+assert(metatable(a,t) == a)
+assert(metatable(a) == t)
+assert(metatable(a,nil) == a)
+assert(metatable(a) == nil)
+assert(metatable(a,t) == a)
 
 
 function f (t, i, e)
@@ -48,8 +48,8 @@ assert(c[1] == 10 and c[2] == 20 and c[3] == 90)
 
 do
   local a;
-  a = eventtable({}, {index = eventtable({},
-                     {index = eventtable({},
+  a = metatable({}, {index = metatable({},
+                     {index = metatable({},
                      {index = function (_,n) return a[n-3]+4, "lixo" end})})})
   a[0] = 20
   for i=0,10 do
@@ -69,8 +69,8 @@ do
 end
 
 
-local b = eventtable({}, t)
-eventtable(b,t)
+local b = metatable({}, t)
+metatable(b,t)
 
 function f(...) cap = arg ; return arg[1] end
 t.add = f
@@ -82,7 +82,7 @@ t.pow = f
 
 assert(b+5 == b)
 assert(cap[1] == b and cap[2] == 5 and cap.n == 2)
-b=b-3; assert(eventtable(b) == t)
+b=b-3; assert(metatable(b) == t)
 assert(5-a == 5)
 assert(cap[1] == 5 and cap[2] == a and cap.n == 2)
 assert(a*a == a)
@@ -104,7 +104,7 @@ t.lt = function (a,b,c)
  return a<b, "dummy"
 end
 
-function Op(x) return eventtable({x=x}, t) end
+function Op(x) return metatable({x=x}, t) end
 
 assert(not(Op(1)<Op(1)) and (Op(1)<Op(2)) and not(Op(2)<Op(1)))
 assert(not(Op('a')<Op('a')) and (Op('a')<Op('b')) and not(Op('b')<Op('a')))
@@ -122,12 +122,12 @@ t.concat = function (a,b,c)
   if type(b) == 'table' then b = b.val end
   if A then return a..b
   else
-    return eventtable({val=a..b}, t)
+    return metatable({val=a..b}, t)
   end
 end
 
-c = {val="c"}; eventtable(c, t)
-d = {val="d"}; eventtable(d, t)
+c = {val="c"}; metatable(c, t)
+d = {val="d"}; metatable(d, t)
 
 A = true
 assert(c..d == 'cd')
@@ -135,7 +135,7 @@ assert(0 .."a".."b"..c..d.."e".."f"..(5+3).."g" == "0abcdef8g")
 
 A = false
 x = c..d
-assert(eventtable(x) == t and x.val == 'cd')
+assert(metatable(x) == t and x.val == 'cd')
 x = 0 .."a".."b"..c..d.."e".."f".."g"
 assert(x.val == "0abcdefg")
 
@@ -151,16 +151,16 @@ local tt = {
   end
 }
 
-local a = eventtable({}, tt)
-local b = eventtable({f=a}, tt)
-local c = eventtable({f=b}, tt)
+local a = metatable({}, tt)
+local b = metatable({f=a}, tt)
+local c = metatable({f=b}, tt)
 
 i = 0
 x = c(3,4,5)
 assert(i == 3 and x[1] == 3 and x[3] == 5)
 
 
-globals(_G); assert(eventtable(globals()) == nil)
+globals(_G); assert(metatable(globals()) == nil)
 
 assert(X == 20)
 

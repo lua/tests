@@ -68,7 +68,7 @@ assert(not T.testC("lessthan 2 -3, return 1", "4", "2", "2", "3", "2", "2"))
 assert(not T.testC("lessthan -3 2, return 1", "3", "2", "2", "4", "2", "2"))
 
 local b = {lt = function (a,b) return a[1] < b[1] end}
-local a1,a3,a4 = eventtable({1}, b), eventtable({3}, b), eventtable({4}, b)
+local a1,a3,a4 = metatable({1}, b), metatable({3}, b), metatable({4}, b)
 assert(T.testC("lessthan 2 5, return 1", a3, 2, 2, a4, 2, 2))
 assert(T.testC("lessthan 5 -6, return 1", a4, 2, 2, a3, 2, 2))
 a,b = T.testC("lessthan 5 -6, return 2", a1, 2, 2, a3, 2, 20)
@@ -153,12 +153,12 @@ assert(x == print)
 T.testC("settable 2", a, "x")    -- table and key are the same object!
 assert(a[a] == "x")
 
-b = eventtable({p = a}, {})
-eventtable(b).index = function (t, i) return t.p[i] end
+b = metatable({p = a}, {})
+metatable(b).index = function (t, i) return t.p[i] end
 k, x = T.testC("gettable 3, return 2", 4, b, 20, 35, "x")
 assert(x == 15 and k == 35)
-eventtable(b).gettable = function (t, i) return a[i] end
-eventtable(b).settable = function (t, i,v ) a[i] = v end
+metatable(b).gettable = function (t, i) return a[i] end
+metatable(b).settable = function (t, i,v ) a[i] = v end
 y = T.testC("insert 2; gettable -5; return 1", 2, 3, 4, "y", b)
 assert(y == 12)
 k = T.testC("settable -5, return 1", b, 3, 4, "x", 16)
@@ -245,16 +245,16 @@ F = function (x)
   local udval = T.udataval(x)
   local d = T.newuserdata(100)   -- cria lixo
   d = nil
-  assert(T.eventtable(x).gc == F)
+  assert(T.metatable(x).gc == F)
   dostring("tinsert({}, {})")   -- cria mais lixo
   tinsert(cl, udval)
   collectgarbage()   -- forca coleta de lixo durante coleta!
-  assert(T.eventtable(x).gc == F)   -- coleta anterior nao melou isso?
+  assert(T.metatable(x).gc == F)   -- coleta anterior nao melou isso?
   local dummy = {}    -- cria lixo durante coleta
   if A ~= nil then
     assert(type(A) == "userdata")
     assert(T.udataval(A) == B)
-    assert(T.eventtable(A) == nil)
+    assert(T.metatable(A) == nil)
   end
   A = x   -- ressucita userdata
   B = udval
@@ -276,16 +276,16 @@ end
 collectgarbage(10000000)
 
 -- create 3 userdatas with tag `tt' and values 1, 2, and 3
-a = T.newuserdatabox(1); T.eventtable(a, tt)
-b = T.newuserdatabox(2); T.eventtable(b, tt)
-c = T.newuserdatabox(3); T.eventtable(c, tt)
+a = T.newuserdatabox(1); T.metatable(a, tt)
+b = T.newuserdatabox(2); T.metatable(b, tt)
+c = T.newuserdatabox(3); T.metatable(c, tt)
 
--- create userdata without event table
+-- create userdata without meta table
 x = T.newuserdatabox(4)
 y = T.newuserdatabox(0)
 
-assert(T.eventtable(x) == nil and T.udataval(x) == 4)
-assert(T.eventtable(y) == nil and T.udataval(y) == 0)  -- check udata NULL
+assert(T.metatable(x) == nil and T.udataval(x) == 4)
+assert(T.metatable(y) == nil and T.udataval(y) == 0)  -- check udata NULL
 
 
 d=T.ref(a);
@@ -300,7 +300,7 @@ T.unref(e); T.unref(f)
 collectgarbage()
 
 x = T.getref(d)
-assert(type(x) == 'userdata' and T.eventtable(x) == tt)
+assert(type(x) == 'userdata' and T.metatable(x) == tt)
 x =nil
 tt=nil    -- libera tt para GC
 
@@ -309,7 +309,7 @@ assert(cl.n == 1 and cl[1] == 3)
 
 b = nil
 T.unref(d);
-T.eventtable(T.newuserdatabox(5), {gc=F})
+T.metatable(T.newuserdatabox(5), {gc=F})
 collectgarbage()
 -- check order of collection
 assert(cl.n == 4 and cl[2] == 5 and cl[3] == 2 and cl[4] == 1)
@@ -317,7 +317,7 @@ assert(cl.n == 4 and cl[2] == 5 and cl[3] == 2 and cl[4] == 1)
 
 a = {}
 for i=30,1,-1 do
-  a[i] = T.eventtable(T.newuserdatabox(i), {gc=F})
+  a[i] = T.metatable(T.newuserdatabox(i), {gc=F})
 end
 cl.n = 0
 a = nil; collectgarbage()
@@ -329,7 +329,7 @@ for i=2,Lim,2 do   -- unlock the other half
   T.unref(Arr[i])
 end
 
-x = T.newuserdatabox(40); T.eventtable(x, {gc=F})
+x = T.newuserdatabox(40); T.metatable(x, {gc=F})
 cl.n = 0
 a = {[x] = 1}
 x = nil
@@ -355,10 +355,10 @@ do
   local assert,type,print = assert,type,print
   local tt = {}
   local u = T.newuserdata(10)
-  T.eventtable(u, tt)
-  local eventtable = T.eventtable
+  T.metatable(u, tt)
+  local metatable = T.metatable
   tt.gc = function (o)
-    %assert(%eventtable(o) == tt)
+    %assert(%metatable(o) == tt)
     -- cria objetos durante coleta de lixo
     local a = 'xuxu'..(10+3)..'joao', {}
     %assert(o == %u)  -- upvalue evita que u seja coletado antes do close
@@ -377,7 +377,7 @@ do   -- teste de erro durante coleta de lixo
     a[i] = T.newuserdatabox(i)   -- cria varios udata
   end
   for i=1,20,2 do   -- marca metade deles para dar erro durante coleta de lixo
-    T.eventtable(a[i], {gc = function () error"error inside gc" end})
+    T.metatable(a[i], {gc = function () error"error inside gc" end})
   end
   a = 0
   assert(not call(collectgarbage, {}, "x",
@@ -456,7 +456,7 @@ end
 G=0; collectgarbage(); a =gcinfo()
 dostring(expand(20,100,"G=G+1"))
 assert(G==20); collectgarbage(); assert(gcinfo() <= a+1)
-
+print'+'
 
 args = {10, "";n=2}
 M = T.totalmem()

@@ -117,4 +117,34 @@ for _, n in {"\n", "\r", "\n\r", "\r\n"} do
 end
 
 
+-- testando comentarios e strings com delimitador variavel
+a = [**[]*]**]
+assert(a == "]*")
+
+a = [***[[***[[*[]]*][****[]]***]***]***]
+assert(a == "[***[[*[]]*][****[]]***]***")
+
+--[**[
+x y z [**[ blu foo
+]**
+]
+]*]**]
+error error]*]**]
+
+-- generate all strings of four of these chars
+local x = {"*", "[", "]", "\n"}
+local len = 4
+local function gen (c, n)
+  if n==0 then coroutine.yield(c)
+  else
+    for _, a in pairs(x) do
+      gen(c..a, n-1)
+    end
+  end
+end
+
+for s in coroutine.wrap(function () gen("", len) end) do
+  assert(s == loadstring("return [****[\n"..s.."]****]")())
+end
+
 print('OK')

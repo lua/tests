@@ -214,27 +214,58 @@ tcheck(t, {n=3;a,'a',3})
 t = pack(T.testC("next; pop 1; next; gettop; return .", a, nil))
 tcheck(t, {n=1;a})
 
--- teste de muitos locks
+
+-- testando upvalues
+
+function X (s)
+  local REGISTRYINDEX = -10000
+  return (gsub(s, '$(%d+)', function (d) return REGISTRYINDEX-d end))
+end
+
+a = T.testC[[ pushnum 10; pushnum 20; pushcclosure 2; return 1]]
+t, b, c = a(X[[pushvalue $0; pushvalue $1; pushvalue $2; return 3]])
+assert(b == 10 and c == 20 and type(t) == 'table')
+a, b, c, d = a("pushnum 1; pushupvalues; pushnum 44; return 4")
+assert(a == 1 and b == 10 and c == 20 and d == 44)
+
+
+-- testando locks (refs)
+
 Arr = {}
 Lim = 100
 for i=1,Lim do   -- lock many objects
-  Arr[i] = T.ref({}, 1)
+  Arr[i] = T.ref({})
 end
 
+for i=1,Lim do   -- unlock all them
+  T.unref(Arr[i])
+end
+
+function printlocks ()
+  local n = T.testC("gettable -10000; return 1", "n")
+  print("n", n)
+  for i=0,n do
+    print(i, T.testC("gettable -10000; return 1", i))
+  end
+end
+
+
+for i=1,Lim do   -- lock many objects
+  Arr[i] = T.ref({})
+end
 
 for i=1,Lim,2 do   -- unlock half of them
   T.unref(Arr[i])
 end
 
-assert(T.getref(Arr[1]) == nil)
-assert(T.getref(Arr[2]))
+assert(type(T.getref(Arr[2])) == 'table')
+
 
 assert(T.getref(-1) == nil)
-assert(T.ref(nil, 1) == -1)      -- (-1 == LUA_REFNIL)
-assert(T.ref(nil, 0) == -1)      -- (-1 == LUA_REFNIL)
+assert(T.ref(nil) == -1)      -- (-1 == LUA_REFNIL)
 
 
-a = T.ref({}, 1)
+a = T.ref({})
 
 collectgarbage()
 
@@ -301,29 +332,26 @@ do
   assert(tag(d) == 0 and new)
 end
 
-d=T.ref(a, 1);
-e=T.ref(b, 0);
-f=T.ref(c, 0);
+d=T.ref(a);
+e=T.ref(b);
+f=T.ref(c);
 t = {T.getref(d), T.getref(e), T.getref(f)}
 assert(t[1] == a and t[2] == b and t[3] == c)
 
 t=nil; a=nil; c=nil;
+T.unref(e); T.unref(f)
 
 collectgarbage()
 
 x = T.getref(d)
 assert(rawtype(x) == 'userdata' and tag(x) == tt)
--- atempt to get "collected object"; must give an error
-assert(T.getref(f) == nil)
 x=nil
 
--- check that unreferenced unlocked objects have been collected
+-- check that unref objects have been collected
 assert(cl.n == 1 and not cl[2] and cl[3] and not cl[1])
-assert(T.getref(e) == b)
 b = nil
 
--- check that unref objects have been collected
-T.unref(d); T.unref(e); T.unref(f)
+T.unref(d);
 collectgarbage()
 assert(cl.n == 3 and cl[1])
 

@@ -19,7 +19,7 @@ local lim = 20
 local s = 'return {'
 for i=1,lim do
   s = s..i..','
-  local s = s..';'
+  local s = s
   for k=0,lim do 
     check(dostring(s..'}'), mp2(i), mp2(k+1))
     s = format('%sa%d=%d,', s, k, k)
@@ -208,14 +208,14 @@ function checknext (a)
   for k,v in a do assert(b[k] == v) end
 end
 
-checknext{1;x=1,y=2,z=3}
-checknext{1,2;x=1,y=2,z=3}
-checknext{1,2,3;x=1,y=2,z=3}
-checknext{1,2,3,4;x=1,y=2,z=3}
-checknext{1,2,3,4,5;x=1,y=2,z=3}
+checknext{1,x=1,y=2,z=3}
+checknext{1,2,x=1,y=2,z=3}
+checknext{1,2,3,x=1,y=2,z=3}
+checknext{1,2,3,4,x=1,y=2,z=3}
+checknext{1,2,3,4,5,x=1,y=2,z=3}
 
 assert(getn{n=20} == 20)
-assert(getn{1,2,3; n=1} == 1)
+assert(getn{1,2,3, n=1} == 1)
 assert(getn{[-1] = 2} == 0)
 assert(getn{1,2,3,nil,5} == 5)
 

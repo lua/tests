@@ -180,8 +180,8 @@ function lpack (...) return arg end
 
 function equaltab (t1, t2)
   assert(getn(t1) == getn(t2))
-  for i=1,getn(t1) do
-    assert(t1[i] == t2[i])
+  for i,v1 in ipairs(t1) do
+    assert(v1 == t2[i])
   end
 end
 

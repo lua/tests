@@ -111,6 +111,17 @@ assert(eq(a[200][3], 200/3))
 assert(eq(a[1000][3], 1000/3, 0.001))
 print('+')
 
+do   -- testando NaN
+  local NaN = 10e500 - 10e400
+  assert(NaN ~= NaN)
+  assert(not (NaN < NaN))
+  assert(not (NaN <= NaN))
+  assert(not (NaN > NaN))
+  assert(not (NaN >= NaN))
+  assert(not (0 < NaN))
+  assert(not (NaN < 0))
+end
+
 require "checktable"
 stat(a)
 

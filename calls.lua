@@ -9,8 +9,8 @@ f(1,2,3,4)
 assert(t[1] == 1 and t[2] == 2 and t[3] == 3 and t[4] == 'a')
 
 function fat(x)
-  return if x <= 1 then 1
-  else x*dostring("return fat(" .. x-1 .. ")")
+  if x <= 1 then return 1
+  else return x*dostring("return fat(" .. x-1 .. ")")
   end
 end
 
@@ -59,8 +59,8 @@ Y = function (le)
 
 F = function (f)
       return function (n)
-               return if n == 0 then 1
-               else n*%f(n-1) end
+               if n == 0 then return 1
+               else return n*%f(n-1) end
              end
     end
 

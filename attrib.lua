@@ -11,9 +11,6 @@ assert(a.x==1 and b==2 and a[1]==10)
 a[f()], b, a[f()+3] = f(), a, 'x'
 assert(a[10] == 10 and b == a and a[13] == 'x')
 
-assert(if f() then f() else 10 end == 10)
-assert(not if f() == 20 then f() end)
-assert(if nil then f() elseif 1 then 20 end == 20)
 
 a, b, c, d = 1 and nil, 1 or nil, (1 and (nil or 1)), 6
 assert(not a and b and c and d==6)

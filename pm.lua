@@ -1,7 +1,7 @@
 print('testando pattern matching')
 function f(s, p)
   local i,e = strfind(s, p)
-  return if i then strsub(s, i, e) end
+  if i then return strsub(s, i, e) end
 end
 
 assert(strfind('alo123alo', '12') == 4)

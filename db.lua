@@ -8,10 +8,12 @@ do
 local a=1
 end
 
-function test (s, l)
+function test (s, l, p)
   collectgarbage()   -- avoid gc during trace
   local function f (line)
-    assert(tremove(%l, 1) == line, "wrong trace!!")
+    local l = tremove(%l, 1)
+    if p then print(l, line) end
+    assert(l == line, "wrong trace!!")
   end
   setlinehook(f); loadstring(s)(); assert(setlinehook() == f)
   assert(l.n == 0)

@@ -57,22 +57,37 @@ assert(testC('1 fs') == nil)
 a = call(testC, {"1 g3x p12 P5 o1", "testando"}, "pack")
 assert(a.n == 1 and a[1] == "testando")
 
+-- teste de muitos locks
+A = {}
+Lim = 100
+i = 1
+while i<= Lim do  -- lock many objects
+  A[i] = testC("g1i o1 l1 o1")    -- A[i] = ref(i)
+  i = i+1
+end
+
+i = 1
+while i<= Lim do  -- unlock half of them
+  testC("p12 u1", A[i])    -- unref(a[i])
+  i = i+2
+end
+
 
 a = nil
--- r0 = a; push(r0); lock[2] = ref(1); r3 = lock[2]; push(r3)
-a = testC"g0a o0 l2 r32 o3"
-assert(not a)
+-- r0 = a; push(r0); r2 = ref(1); r3 = getref(r2); push(r3); push(r2)
+a,b = testC"g0a o0 l2 r32 o3 o2"
+assert(not a and b == -1)      -- (-1 == LUA_REFNIL)
 
--- r0 = {}; push(r0); lock[1] = ref(1)
-testC("c0 o0 l1")
+-- r0 = {}; push(r0); r1 = ref(1); push(r1)
+a = testC("c0 o0 l1 o1")
 
 collectgarbage()
 
--- r5 = lock[1]; push(r5)
-assert(type(testC("r51 o5")) == 'table')
+-- r5 = a; r5 = getref(r5); push(r5)
+assert(type(testC("g5a r55 o5")) == 'table')
 
 
--- colect in cl 'val' of all collected tables
+-- colect in cl the 'val' of all collected tables
 tt = newtag()
 cl = {n=0}
 function f(x)  cl.n=cl.n+1; cl[extra('u',x)] = 1 end
@@ -81,33 +96,43 @@ extra('t', tt, f)
 -- create 3 userdatas with tag `tt' and values 1, 2, and 3
 a = extra('U', 1, tt); b = extra('U', 2, tt); c = extra('U', 3, tt)
 
--- lock[1] = a; lock[2] = b; lock[3] = c
-testC('g1a o1 l1 g1b o1 L2 g1c o1 L3')
--- return lock[1], lock[2], lock[3]
-t = call(testC, {'r11 o1 r12 o1 r13 o1'}, "pack")
+--reg[1] = a; lock[2] = b; lock[3] = c
+-- r1 = ref(a,1); push(r1); r1 = ref(b,0); push(r1); r1 = ref(c,0); push(r1)
+d,e,f = testC('g1a o1 l1 o1 g1b o1 L1 o1 g1c o1 L1 o1')
+-- return lock[d], lock[e], lock[f]
+t = call(testC, {'g1d r21 o2 g1e r21 o2 g1f r21 o2'}, "pack")
 assert(t[1] == a and t[2] == b and t[3] == c)
 t=nil a=nil b=nil c=nil
 
 collectgarbage()
 
-assert(type(testC("r51 o5")) == 'userdata')
-assert(tag(testC("r51 o5")) == tt)
+assert(type(testC("p12 r51 o5", d)) == 'userdata')
+assert(tag(testC("p12 r51 o5", d)) == tt)
 -- atempt to get "collected object"; must gives an error
-assert(not call(testC, {"r52 o5"}, "xp", nil))
+assert(not call(testC, {"p12 r51 o5", e}, "xp", nil))
 
 -- check that unlocked objects have been collected
 assert(cl.n == 2 and cl[2] and cl[3] and not cl[1])
 
--- unlock(lock[1])
-testC("u1")
+-- unref(d); unref(e); unref(f)
+testC("p12 u1 p13 u1 p14 u1", d, e, f)
 collectgarbage()
 assert(cl.n == 3 and cl[1])
 
+i = 2
+while i<= Lim do  -- unlock the other half
+  testC("p12 u1", A[i])    -- unref(a[i])
+  i = i+2
+end
+
+print'+'
+
+
 t = testC
-s = 'p22 p33 o2 o3'
-f = testC("g1s o1 8 Ct2")
+f = testC("p12 o1 8 Ct2", 'p22 p33 o2 o3')
 a,b = f(4)
 assert(a == 8 and b == 4)
+
 
 -- testando lua_nextvar
 X = nil
@@ -147,6 +172,7 @@ function showstringtables ()
     while j<s do
       j=j+1
       local str = call(querystr, {i,j}, "p")
+      tinsert(str, 1, j)
       call(print, str)
     end
     i = i+1

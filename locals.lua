@@ -1,5 +1,35 @@
 print('testando variaveis locais e uns extras')
 
+-- testando escopos
+global a
+do
+  local getglobal = {}
+  global in getglobal
+  global assert
+  a = 9; b = 25
+  local a,b,c = 1,2,3
+  do
+    global a,b,g in {b=a+19; g={}}; a=10;
+    assert(a==10 and b==20 and c==3)
+    global in g
+    function f ()
+      assert(a==10 and b==20 and c==3)
+      a = a+1; b=b+1; c=c+1
+    end
+    f()
+    global a
+    x = 34
+    function f() assert(a==9 and b==21 and c==4) end
+    f()
+    assert(f == g.f and g.x == 34)
+    assert(a==9)
+  end
+  assert(a==1 and getglobal.b == 25)
+end
+assert(a==9)
+
+
+
 f = nil
 
 local f

@@ -353,6 +353,18 @@ a = nil
 b = nil
 a1 = nil
 
+print("tabela com indices tabela:")
+i = 1; a={}
+while i <= 1023 do a[{}] = i; i=i+1 end
+stat(a)
+a = nil
+
+print("tabela com indices funcao:")
+i = 1; a={}
+while i <= 511 do a[function () return %i end] = i; i=i+1 end
+stat(a)
+a = nil
+
 print'OK'
 
 return 'a'

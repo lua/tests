@@ -194,4 +194,21 @@ for i=1,lim do
   doit('a = 4+nil')
 end
 
+
+-- teste de limites de sintaxe
+local function testrep (init, rep)
+  local s = "local a; "..init .. string.rep(rep, 400)
+  local a,b = loadstring(s)
+  assert(not a and string.find(b, "syntax levels"))
+end
+testrep("a=", "{")
+testrep("a=", "(")
+testrep("", "a(")
+testrep("", "do ")
+testrep("", "while a do ")
+testrep("", "if a then else ")
+testrep("", "function foo () ")
+testrep("a=", "a..")
+testrep("a=", "a^")
+
 print('OK')

@@ -16,8 +16,8 @@ end
 
 function checksyntax (prog, extra, token, line)
   local msg = doit(prog)
-  local pt = string.format([[^%%[string ".*"%%]:%d: .- near `%s'
-$]], line, token)
+  local pt = string.format([[^%%[string ".*"%%]:%d: .- near `%s'$]],
+                           line, token)
   assert(string.find(msg, pt))
   assert(string.find(msg, msg, 1, true))
 end
@@ -114,6 +114,7 @@ end
 assert(lineerror"local a\n for i=1,'a' do \n print(i) \n end" == 2)
 assert(lineerror"\n local a \n for k,v in 3 \n do \n print(k) \n end" == 3)
 assert(lineerror"\n\n for k,v in \n 3 \n do \n print(k) \n end" == 4)
+assert(lineerror"function a.x.y ()\na=a+1\nend" == 1)
 
 local p = [[
 function g() f() end

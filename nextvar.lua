@@ -138,8 +138,8 @@ table.foreach({}, error)
 table.foreachi({x=10, y=20}, error)
 local a = {n = 1}
 table.foreachi({n=3}, function (i, v)
-  assert(%a.n == i and not v)
-  %a.n=%a.n+1
+  assert(a.n == i and not v)
+  a.n=a.n+1
 end)
 a = {10,20,30,nil,50}
 table.foreachi(a, function (i,v) assert(a[i] == v) end)

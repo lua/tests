@@ -12,7 +12,7 @@ function test (s, l, p)
   collectgarbage()   -- avoid gc during trace
   local function f (event, line)
     assert(event == 'line')
-    local l = table.remove(%l, 1)
+    local l = table.remove(l, 1)
     if p then print(l, line) end
     assert(l == line, "wrong trace!!")
   end
@@ -63,7 +63,7 @@ repeat
     assert(a.name == 'x' and a.namewhat == 'field')
     return 'xixi'
   end}
-  local f = function () return 1+1 and (not 1 or %g.x()) end
+  local f = function () return 1+1 and (not 1 or g.x()) end
   assert(f() == 'xixi')
   g = getinfo(f)
   assert(g.what == "Lua" and g.func == f and g.namewhat == "" and not g.name)

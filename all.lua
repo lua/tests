@@ -20,12 +20,12 @@ local T,print,gcinfo,format,write,assert,type =
       T,print,gcinfo,string.format,io.write,assert,type
 
 local showmem = function ()
-  if not %T then
-    %print(%format("    ---- memoria total: %dK ----\n", %gcinfo()))
+  if not T then
+    print(format("    ---- memoria total: %dK ----\n", gcinfo()))
   else
-    local a,b,c = %T.totalmem()
-    local d,e = %gcinfo()
-    %print(%format(
+    local a,b,c = T.totalmem()
+    local d,e = gcinfo()
+    print(format(
   "\n    ---- memoria total: %dK (%dK), maxima: %d,  blocos: %d\n",
                         a/1024,  d,      c/1024,           b))
   end
@@ -85,7 +85,7 @@ print("final OK !!!")
 
 print('limpando tudo!!!!')
 
-debug.sethook(function (a) %assert(%type(a) == 'string') end, "cr")
+debug.sethook(function (a) assert(type(a) == 'string') end, "cr")
 
 local _G, collectgarbage, showmem, print, format, clock =
       _G, collectgarbage, showmem, print, format, os.clock

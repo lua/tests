@@ -54,7 +54,7 @@ assert(a==10)
 assert(b[1] == "a10" and b[2] == 5 and b[getn(b)-1] == "a50009")
 
 
-function xxxx (x) return %b[x] end
+function xxxx (x) return b[x] end
 
 assert(xxxx(3) == "a11")
 

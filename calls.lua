@@ -41,7 +41,7 @@ assert(a.t:x(2,3) == -95)
 
 do
   local a = {x=0}
-  function a:add (x) self.x, %a.y = self.x+x, 20; return self end
+  function a:add (x) self.x, a.y = self.x+x, 20; return self end
   assert(a:add(10):add(20):add(30).x == 60 and a.y == 20)
 end
 
@@ -135,7 +135,7 @@ assert(a==1 and x==nil)
 -- operador de ponto fixo
 Y = function (le)
       local function a (f)
-        return %le(function (x) return %f(%f)(x) end)
+        return le(function (x) return f(f)(x) end)
       end
       return a(a)
     end
@@ -146,7 +146,7 @@ Y = function (le)
 F = function (f)
       return function (n)
                if n == 0 then return 1
-               else return n*%f(n-1) end
+               else return n*f(n-1) end
              end
     end
 

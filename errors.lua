@@ -40,12 +40,6 @@ assert(doit"assert(nil)")
 assert(doit"a=math.sin\n(3)")
 assert(doit("function a (... , ...) end"))
 assert(doit("function a (, ...) end"))
-checksyntax('%a()', "", "a", 1)
-checksyntax([[
-  local other, var = 1
-  other = other or %var
-
-]], "", "var", 2)
 
 checksyntax([[
   local a = {4

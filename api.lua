@@ -353,7 +353,7 @@ x = nil
 collectgarbage()
 -- old `x' cannot be collected (`a' still uses it)
 assert(cl.n == 0)
-for n,_ in a do a[n] = nil end
+for n in a do a[n] = nil end
 collectgarbage()
 assert(cl.n == 1 and cl[1] == 40)   -- old `x' must be collected
 

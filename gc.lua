@@ -118,14 +118,14 @@ for i=1,lim do a[{}] = i end
 b = {}
 for k,v in a do b[k]=v end
 -- remove all indices and collect them
-for n,_ in b do
+for n in b do
   a[n] = nil
   assert(type(n) == 'table' and next(n) == nil)
   collectgarbage()
 end
 b = nil
 collectgarbage()
-for n,_ in a do error'cannot be here' end
+for n in a do error'cannot be here' end
 for i=1,lim do a[i] = i end
 for i=1,lim do assert(a[i] == i) end
 

@@ -118,21 +118,21 @@ end
 
 
 -- testando comentarios e strings com delimitador variavel
-a = [**[]*]**]
-assert(a == "]*")
+a = [==[]=]==]
+assert(a == "]=")
 
-a = [***[[***[[*[]]*][****[]]***]***]***]
-assert(a == "[***[[*[]]*][****[]]***]***")
+a = [===[[===[[=[]]=][====[]]===]===]===]
+assert(a == "[===[[=[]]=][====[]]===]===")
 
---[**[
-x y z [**[ blu foo
-]**
+--[==[
+x y z [==[ blu foo
+]==
 ]
-]*]**]
-error error]*]**]
+]=]==]
+error error]=]==]
 
 -- generate all strings of four of these chars
-local x = {"*", "[", "]", "\n"}
+local x = {"=", "[", "]", "\n"}
 local len = 4
 local function gen (c, n)
   if n==0 then coroutine.yield(c)
@@ -144,7 +144,7 @@ local function gen (c, n)
 end
 
 for s in coroutine.wrap(function () gen("", len) end) do
-  assert(s == loadstring("return [****[\n"..s.."]****]")())
+  assert(s == loadstring("return [====[\n"..s.."]====]")())
 end
 
 print('OK')

@@ -2,9 +2,11 @@
 
 print ("testando opcoes de lua.c")
 
-prog = tmpname()
-otherprog = tmpname()
-out = tmpname()
+assert(os.execute() ~= 0)   -- machine has a system command
+
+prog = os.tmpname()
+otherprog = os.tmpname()
+out = os.tmpname()
 
 do
   local i = 0
@@ -15,53 +17,57 @@ print(progname)
 
 local prepfile = function (s, p)
   p = p or prog
-  assert(writeto(p))
-  write(s)
-  assert(writeto())
+  io.output(p)
+  io.write(s)
+  assert(io.close())
 end
 
 function checkout (s)
-  assert(readfrom(out))
-  local t = read("*a")
-  readfrom()
-  assert(remove(out))
-  if s ~= t then print(format("`%s' - `%s'\n", s, t)) end
+  io.input(out)
+  local t = io.read("*a")
+  io.input():close()
+  assert(os.remove(out))
+  if s ~= t then print(string.format("`%s' - `%s'\n", s, t)) end
   assert(s == t)
   return t
 end
 
-function auxrun (arg)
-  s = format(unpack(arg))
-  s = gsub(s, "lua", progname)
-  return execute(s)
+function auxrun (...)
+  s = string.format(...)
+  s = string.gsub(s, "lua", progname)
+  return os.execute(s)
 end
 
 function RUN (...)
-  assert(auxrun(arg) == 0)
+  assert(auxrun(...) == 0)
 end
 
 function NoRun (...)
-  assert(auxrun(arg) ~= 0)
+  print("\n(the next error is expected by the test)")
+  assert(auxrun(...) ~= 0)
 end
 
 -- test 2 files
 prepfile("print(1); a=2")
 prepfile("print(a)", otherprog)
-RUN("lua -l %s -l%s > %s", prog, otherprog, out)
-checkout("1\n2\n")
+RUN("lua -l %s -l%s -lstring -l io %s > %s", prog, otherprog, otherprog, out)
+checkout("1\n2\n2\n")
 
 local a = [[
   assert(table.getn(arg) == 3 and arg[1] == 'a' and
          arg[2] == 'b' and arg[3] == 'c')
   assert(arg[-1] == '--' and arg[-2] == "-e " and arg[-3] == %s)
   assert(arg[4] == nil and arg[-4] == nil)
+  local a, b, c = ...
+  assert(... == 'a' and a == 'a' and b == 'b' and c == 'c')
 ]]
-a = format(a, progname)
+a = string.format(a, progname)
 prepfile(a)
 RUN('lua "-e " -- %s a b c', prog)
 
 prepfile"assert(arg==nil)"
-RUN("lua -l%s", prog)
+prepfile("assert(arg==nil)", otherprog)
+RUN("lua -l%s - < %s", prog, otherprog)
 
 prepfile""
 RUN("lua - < %s > %s", prog, out)
@@ -87,12 +93,17 @@ print(a)
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
 checkout("6\n10\n10\n\n")
 
+prepfile("a = [[b\nc\nd\ne]]\n=a")
+print(prog)
+RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
+checkout("b\nc\nd\ne\n\n")
+
 prompt = "alo"
 prepfile[[ --
 a = 2
 ]]
 RUN([[lua "-e_PROMPT='%s'" -i < %s > %s]], prompt, prog, out)
-checkout(strrep(prompt, 3).."\n")
+checkout(string.rep(prompt, 3).."\n")
 
 s = [[ -- 
 function f ( x ) 
@@ -108,7 +119,7 @@ end
 =( f( 10 ) )
 assert( a == b )
 =f( 11 )  ]]
-s = gsub(s, ' ', '\n\n')
+s = string.gsub(s, ' ', '\n\n')
 prepfile(s)
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
 checkout("11\n1\t2\n\n")
@@ -129,16 +140,15 @@ prepfile(string.format([[io.output(%q); io.write('alo')]], out))
 RUN("lua %s", prog)
 checkout('alo')
 
-assert(remove(prog))
-assert(remove(otherprog))
-assert(not remove(out))
+assert(os.remove(prog))
+assert(os.remove(otherprog))
+assert(not os.remove(out))
 
 RUN("lua -v")
 
--- NoRun("lua -h")
--- NoRun("lua -e")
--- NoRun("lua -e a")
--- NoRun("lua -f")
--- NoRun("lua -s")
+NoRun("lua -h")
+NoRun("lua -e")
+NoRun("lua -e a")
+NoRun("lua -f")
 
 print("OK")

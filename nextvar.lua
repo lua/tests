@@ -1,5 +1,17 @@
 print('testando tables, next e fors')
 
+local a = {}
+
+-- make sure table has lots of space in hash part
+for i=1,100 do a[i.."+"] = true end
+for i=1,100 do a[i.."+"] = nil end
+-- fill hash part with numeric indices testing size operator
+for i=1,100 do
+  a[i] = true
+  assert(*a == i)
+end
+
+
 if T then
 -- testes de tamanhos
 
@@ -43,7 +55,9 @@ for i=1,lim do
   s = s..i..','
   local s = s
   for k=0,lim do 
-    check(loadstring(s..'}')(), fb(i), mp2(k))
+    local t = loadstring(s..'}')()
+    assert(*t == i)
+    check(t, fb(i), mp2(k))
     s = string.format('%sa%d=%d,', s, k, k)
   end
 end
@@ -54,9 +68,11 @@ local a = {}
 for i=1,lim do a[i] = i end   -- build auxiliary table
 for k=0,lim do
   local a = {unpack(a,1,k)}
+  assert(*a == k)
   check(a, k, 0)
   a = {1,2,3,unpack(a,1,k)}
   check(a, k+3, 0)
+  assert(*a == k + 3)
 end
 
 
@@ -70,12 +86,14 @@ a = {}; a[0] = 1; a[1] = 1; check(a, 1, 1)
 a = {}
 for i = 1,lim do
   a[i] = 1
+  assert(*a == i)
   check(a, mp2(i), 0)
 end
 
 a = {}
 for i = 1,lim do
   a['a'..i] = 1
+  assert(*a == 0)
   check(a, 0, mp2(i))
 end
 
@@ -111,11 +129,17 @@ function foo (n, ...)
   check(arg, mp2(n+1), 1)
 end
 local a = {}
-for i=1,lim do a[i] = true end
-for i=1,lim do a.n = i; foo(i, unpack(a)) end
+for i=1,lim do a[i] = true; foo(i, unpack(a)) end
 
 end
 
+
+-- test size operation on empty tables
+assert(*{} == 0)
+assert(*{nil} == 0)
+assert(*{nil, nil} == 0)
+assert(*{nil, nil, nil} == 0)
+assert(*{nil, nil, nil, nil} == 0)
 print'+'
 
 
@@ -240,15 +264,7 @@ checknext{1,2,3,x=1,y=2,z=3}
 checknext{1,2,3,4,x=1,y=2,z=3}
 checknext{1,2,3,4,5,x=1,y=2,z=3}
 
-assert(table.getn{n=20} == 20)
-assert(table.getn{n=0} == 0)
 assert(table.getn{} == 0)
-a = {}; assert(table.setn(a, 0) == a)
-a[1] = 20; assert(table.getn(a) == 0 and a.n == nil)
-table.setn(a, 13); assert(table.getn(a) == 13 and a.n == nil)
-a = {n=0}; table.setn(a, 0); a[1] = 20; assert(table.getn(a) == 0 and a.n == 0)
-table.setn(a, 13); assert(table.getn(a) == 13 and a.n == 0)
-assert(table.getn{1,2,3, n=1} == 1)
 assert(table.getn{[-1] = 2} == 0)
 assert(table.getn{1,2,3,nil,nil} == 3)
 for i=0,40 do
@@ -260,7 +276,7 @@ end
 
 -- int overflow
 a = {}
-for i=1,50 do a[math.pow(2,i)] = true end
+for i=0,50 do a[math.pow(2,i)] = true end
 assert(a[table.getn(a)])
 
 print("+")
@@ -285,7 +301,9 @@ local function test (a)
   table.insert(a, 10); table.insert(a, 2, 20);
   table.insert(a, 1, -1); table.insert(a, 40);
   table.insert(a, table.getn(a)+1, 50)
+  table.insert(a, 2, -2)
   assert(table.remove(a,1) == -1)
+  assert(table.remove(a,1) == -2)
   assert(table.remove(a,1) == 10)
   assert(table.remove(a,1) == 20)
   assert(table.remove(a,1) == 40)
@@ -293,13 +311,13 @@ local function test (a)
   assert(table.remove(a,1) == nil)
 end
 
-a = {n=0, [6] = "ban"}
+a = {n=0, [-7] = "ban"}
 test(a)
-assert(a.n == 0 and a[6] == "ban")
+assert(a.n == 0 and a[-7] == "ban")
 
-a = {[6] = "ban"}; table.setn(a, 0)
+a = {[-7] = "ban"};
 test(a)
-assert(a.n == nil and table.getn(a) == 0 and a[6] == "ban")
+assert(a.n == nil and table.getn(a) == 0 and a[-7] == "ban")
 
 
 table.insert(a, 1, 10); table.insert(a, 1, 20); table.insert(a, 1, -1)
@@ -307,11 +325,11 @@ assert(table.remove(a) == 10)
 assert(table.remove(a) == 20)
 assert(table.remove(a) == -1)
 
-a = {}
+a = {'c', 'd'}
 table.insert(a, 3, 'a')
 table.insert(a, 'b')
-assert(table.remove(a, 1) == nil)
-assert(table.remove(a, 1) == nil)
+assert(table.remove(a, 1) == 'c')
+assert(table.remove(a, 1) == 'd')
 assert(table.remove(a, 1) == 'a')
 assert(table.remove(a, 1) == 'b')
 assert(table.getn(a) == 0 and a.n == nil)

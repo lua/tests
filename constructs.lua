@@ -81,7 +81,7 @@ function f(b)
     if b==1 then local b=1; x=10; break
     elseif b==2 then x=20; break;
     elseif b==3 then x=30;
-    else local a,b,c,d=sin(1); x=x+1;
+    else local a,b,c,d=math.sin(1); x=x+1;
     end
   until x>=12;
   return x;
@@ -152,7 +152,7 @@ return function ( a , b , c , d , e )
   return x
 end , { a = 1 , b = 2 >= 1 , } or { 1 };
 ]]
-f = gsub(f, "%s+", "\n");   -- force a SETLINE between opcodes
+f = string.gsub(f, "%s+", "\n");   -- force a SETLINE between opcodes
 f,a = loadstring(f)();
 assert(a.a == 1 and a.b)
 
@@ -189,7 +189,7 @@ do
 end
 
 function F(a)
-  assert(getinfo(1, "n").name == 'F')
+  assert(debug.getinfo(1, "n").name == 'F')
   return a,2,3
 end
 
@@ -205,7 +205,7 @@ function ID(x) return x end
 
 function f(t, i)
   local b = t.n
-  local res = mod(floor(i/c), b)+1
+  local res = math.mod(math.floor(i/c), b)+1
   c = c*b
   return t[res]
 end
@@ -221,9 +221,9 @@ repeat
   c = 1
   local s = f(neg, i)..'ID('..f(neg, i)..f(arg, i)..f(op, i)..
             f(neg, i)..'ID('..f(arg, i)..f(op, i)..f(neg, i)..f(arg, i)..'))'
-  local s1 = gsub(s, 'ID', '')
+  local s1 = string.gsub(s, 'ID', '')
   K,X,NX,WX1,WX2 = nil
-  s = format([[
+  s = string.format([[
       local a = %s
       local b = not %s
       K = b
@@ -233,9 +233,9 @@ repeat
       while %s do WX1 = a; break end
       while %s do WX2 = a; break end
   ]], s1, s, s1, s, s1, s)
-  assert(dostring(s))
+  loadstring(s)()
   assert(X and not NX and not WX1 == K and not WX2 == K)
-  if mod(i,4000) == 0 then print('+') end
+  if math.mod(i,4000) == 0 then print('+') end
   i = i+1
 until i==c
 

@@ -27,8 +27,6 @@ os.remove(file)
 assert(loadfile(file) == nil)
 assert(io.open(file) == nil)
 io.output(file)
--- check internal representation
-assert(getmetatable(io.stdin)[2] == io.output())
 assert(io.output() ~= io.stdout)
 
 assert(io.output():seek() == 0)
@@ -86,8 +84,6 @@ assert(not pcall(io.close, f))   -- error trying to close again
 assert(tostring(f) == "file (closed)")
 assert(io.type(f) == "closed file")
 io.input(file)
--- check internal representation
-assert(getmetatable(io.stdin)[1] == io.input())
 f = io.open(otherfile):lines()
 for l in io.lines() do assert(l == f()) end
 assert(os.remove(otherfile))
@@ -124,6 +120,8 @@ assert(io.read('*a') == '')  -- end of file (OK for `*a')
 collectgarbage()
 print('+')
 io.close(io.input())
+assert(not pcall(io.read))
+
 assert(os.remove(file))
 
 local t = '0123456789'
@@ -133,6 +131,7 @@ assert(string.len(t) == 10*2^12)
 io.output(file)
 io.write("alo\n")
 io.close()
+assert(not pcall(io.write))
 local f = io.open(file, "a")
 io.output(f)
 collectgarbage()

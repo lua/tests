@@ -1,8 +1,7 @@
 #!../lua
 
-require "compat"
-
 math.randomseed(0)
+
 
 --[[
   example of a long [comment],
@@ -10,24 +9,38 @@ math.randomseed(0)
 
 ]]
 
+
 local c = os.clock()
 
 _WD = wd or ""
 
-assert(setlocale"C")
+assert(os.setlocale"C")
 
 local T,print,gcinfo,format,write,assert,type =
       T,print,gcinfo,string.format,io.write,assert,type
 
+local function formatmem (m)
+  if m < 1024 then return m
+  else
+    m = m/1024 - m/1024%1
+    if m < 1024 then return m.."K"
+    else
+      m = m/1024 - m/1024%1
+      return m.."M"
+    end
+  end
+end
+
 local showmem = function ()
   if not T then
-    print(format("    ---- memoria total: %dK ----\n", gcinfo()))
+    print(format("    ---- memoria total: %s ----\n", formatmem(gcinfo())))
   else
+    T.checkmemory()
     local a,b,c = T.totalmem()
     local d,e = gcinfo()
     print(format(
-  "\n    ---- memoria total: %dK (%dK), maxima: %d,  blocos: %d\n",
-                        a/1024,  d,      c/1024,           b))
+  "\n    ---- memoria total: %s (%dK), maxima: %s,  blocos: %d\n",
+                        formatmem(a),  d,      formatmem(c),           b))
   end
 end
 

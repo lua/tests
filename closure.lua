@@ -90,7 +90,13 @@ function f(x)
   while 1 do
     if x == 3 and not first then return end
     local a = 'xuxu'
-    b = function (op, y) if op == 'set' then a = x+y else return a end end
+    b = function (op, y)
+          if op == 'set' then
+            a = x+y
+          else
+            return a
+          end
+        end
     if x == 1 then do break end
     elseif x == 2 then return
     else if x ~= 3 then error() end
@@ -125,9 +131,23 @@ assert(y(20)(30) == 60+w)
 
 print'+'
 
+
+-- test for correctly closing upvalues in tail calls of vararg functions
+local function t ()
+  local function c(a,b) assert(a=="test" and b=="OK") end
+  local function v(f, ...) c("test", f() ~= 1 and "FAILED" or "OK") end
+  local x = 1
+  return v(function() return x end)
+end
+t()
+
+
 -- teste de co-rotinas
 
 local f
+
+assert(coroutine.running() == nil)
+
 
 -- tests for global environment
 
@@ -157,8 +177,10 @@ local function eqtab (t1, t2)
 end
 
 function foo (a, ...)
-  for i=1,arg.n do
-    assert(coroutine.status(f) == "running")
+  assert(coroutine.running() == f)
+  assert(coroutine.status(f) == "running")
+  local arg = {...}
+  for i=1,table.getn(arg) do
     _G.x = {coroutine.yield(unpack(arg[i]))}
   end
   return unpack(a)
@@ -278,7 +300,7 @@ end
 assert(a == 5^4)
 
 
--- access to locals of "dead" corroutines
+-- access to locals of collected corroutines
 local C = {}; setmetatable(C, {__mode = "kv"})
 local x = coroutine.wrap (function ()
             local a = 10
@@ -302,6 +324,7 @@ assert(f() == 43 and f() == 53)
 -- old bug: attempt to resume itself
 
 function co_func (current_co)
+  assert(coroutine.running() == current_co)
   assert(coroutine.resume(current_co) == false)
   assert(coroutine.resume(current_co) == false)
   return 10
@@ -359,5 +382,15 @@ else
 
   assert(B/A == 11)
 end
+
+
+-- leaving a pending coroutine open
+_X = coroutine.wrap(function ()
+      local a = 10
+      local x = function () a = a+1 end
+      coroutine.yield()
+    end)
+
+_X()
 
 print'OK'

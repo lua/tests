@@ -32,7 +32,7 @@ assert(doit("error()") == nil)
 
 
 -- testa erros comuns e/ou que voavam no passado
-assert(doit("unpack{n=2^30}"))
+assert(doit("unpack({}, 1, n=2^30)"))
 assert(doit("a=math.sin()"))
 assert(not doit("tostring(1)") and doit("tostring()"))
 assert(doit"tonumber()")
@@ -67,6 +67,7 @@ aaa = nil
 checkmessage("aaa.bbb:ddd(9)", "global `aaa'")
 checkmessage("local aaa={bbb=1}; aaa.bbb:ddd(9)", "field `bbb'")
 checkmessage("local aaa={bbb={}}; aaa.bbb:ddd(9)", "method `ddd'")
+checkmessage("local a,b,c; (function () a = b+1 end)()", "upvalue `b'")
 assert(not doit"local aaa={bbb={ddd=next}}; aaa.bbb:ddd(nil)")
 
 checkmessage("local aaa='a'; x=aaa+b", "local `aaa'")
@@ -216,5 +217,29 @@ testrep("", "if a then else ")
 testrep("", "function foo () ")
 testrep("a=", "a..")
 testrep("a=", "a^")
+
+
+-- testes de outros limites
+-- upvalues
+local  s = "function foo ()\n  local "
+for j = 1,70 do
+  s = s.."a"..j..", "
+end
+s = s.."b\n"
+for j = 1,70 do
+  s = s.."function foo"..j.." ()\n a"..j.."=3\n"
+end
+local a,b = loadstring(s)
+assert(string.find(b, "line 3"))
+
+-- variaveis locais
+s = "\nfunction foo ()\n  local "
+for j = 1,300 do
+  s = s.."a"..j..", " 
+end
+s = s.."b\n"
+local a,b = loadstring(s)
+assert(string.find(b, "line 2"))
+
 
 print('OK')

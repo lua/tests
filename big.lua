@@ -1,5 +1,18 @@
-print "testando operacoes W"
+print "testing string length overflow"
 
+local longs = string.rep("\0", 2^25)
+local function catter (i)
+  return assert(loadstring(
+    string.format("return function(a) return a%s end",
+                     string.rep("..a", i-1))))()
+end
+rep129 = catter(129)
+local a, b = pcall(rep129, longs)
+assert(not a and string.find(b, "overflow"))
+print('+')
+
+
+print "testando operacoes W"
 require "checktable"
 
 --[[ lots of empty lines (to force SETLINEW)
@@ -338,7 +351,7 @@ i = 1
 while b[i] do
   local r = a:findfield(b[i]);
   assert(a[b[i]] == r)
-  ii = max(ii,i)
+  ii = math.max(ii,i)
   i = i+1
 end
 

@@ -86,55 +86,60 @@ do  -- newindex
 end
 
 
-function f (t, ...) return t, arg end
+function f (t, ...) return t, {...} end
 t.__call = f
 
 do
   local x,y = a(unpack{'a', 1})
-  assert(x==a and y.n==2 and y[1]=='a' and y[2]==1)
+  assert(x==a and y[1]=='a' and y[2]==1 and y[3]==nil)
   x,y = a()
-  assert(x==a and y.n==0)
+  assert(x==a and y[1]==nil)
 end
 
 
 local b = setmetatable({}, t)
 setmetatable(b,t)
 
-function f(...) cap = arg ; return arg[1] end
-t.__add = f
-t.__sub = f
-t.__mul = f
-t.__div = f
-t.__unm = f
-t.__pow = f
+function f(op)
+  return function (...) cap = {[0] = op, ...} ; return (...) end
+end
+t.__add = f("add")
+t.__sub = f("sub")
+t.__mul = f("mul")
+t.__div = f("div")
+t.__mod = f("mod")
+t.__unm = f("unm")
+t.__pow = f("pow")
 
 assert(b+5 == b)
-assert(cap[1] == b and cap[2] == 5 and cap.n == 2)
+assert(cap[0] == "add" and cap[1] == b and cap[2] == 5 and cap[3]==nil)
 assert(b+'5' == b)
-assert(cap[1] == b and cap[2] == '5' and cap.n == 2)
+assert(cap[0] == "add" and cap[1] == b and cap[2] == '5' and cap[3]==nil)
 assert(5+b == 5)
-assert(cap[1] == 5 and cap[2] == b and cap.n == 2)
+assert(cap[0] == "add" and cap[1] == 5 and cap[2] == b and cap[3]==nil)
 assert('5'+b == '5')
-assert(cap[1] == '5' and cap[2] == b and cap.n == 2)
+assert(cap[0] == "add" and cap[1] == '5' and cap[2] == b and cap[3]==nil)
 b=b-3; assert(getmetatable(b) == t)
 assert(5-a == 5)
-assert(cap[1] == 5 and cap[2] == a and cap.n == 2)
+assert(cap[0] == "sub" and cap[1] == 5 and cap[2] == a and cap[3]==nil)
 assert('5'-a == '5')
-assert(cap[1] == '5' and cap[2] == a and cap.n == 2)
+assert(cap[0] == "sub" and cap[1] == '5' and cap[2] == a and cap[3]==nil)
 assert(a*a == a)
-assert(cap[1] == a and cap[2] == a and cap.n == 2)
+assert(cap[0] == "mul" and cap[1] == a and cap[2] == a and cap[3]==nil)
 assert(a/0 == a)
-assert(cap[1] == a and cap[2] == 0 and cap.n == 2)
+assert(cap[0] == "div" and cap[1] == a and cap[2] == 0 and cap[3]==nil)
+assert(a%2 == a)
+assert(cap[0] == "mod" and cap[1] == a and cap[2] == 2 and cap[3]==nil)
 assert(-a == a)
-assert(cap[1] == a and cap[2] == nil)
+assert(cap[0] == "unm" and cap[1] == a and cap[2] == nil)
 assert(a^4 == a)
-assert(cap[1] == a and cap[2] == 4 and cap.n == 2)
+assert(cap[0] == "pow" and cap[1] == a and cap[2] == 4 and cap[3]==nil)
 assert(a^'4' == a)
-assert(cap[1] == a and cap[2] == '4' and cap.n == 2)
+assert(cap[0] == "pow" and cap[1] == a and cap[2] == '4' and cap[3]==nil)
 assert(4^a == 4)
-assert(cap[1] == 4 and cap[2] == a and cap.n == 2)
+assert(cap[0] == "pow" and cap[1] == 4 and cap[2] == a and cap[3]==nil)
 assert('4'^a == '4')
-assert(cap[1] == '4' and cap[2] == a and cap.n == 2)
+assert(cap[0] == "pow" and cap[1] == '4' and cap[2] == a and cap[3]==nil)
 
 
 t = {}
@@ -313,6 +318,10 @@ for i=1,10 do assert(u[i] == i) end
 local k = newproxy(u)
 assert(getmetatable(k) == getmetatable(u))
 
+
+a = {}
+rawset(a, "x", 1, 2, 3)
+assert(a.x == 1 and rawget(a, "x", 3) == 1)
 
 print 'OK'
 

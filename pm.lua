@@ -1,28 +1,28 @@
 print('testando pattern matching')
 
 function f(s, p)
-  local i,e = strfind(s, p)
-  if i then return strsub(s, i, e) end
+  local i,e = string.find(s, p)
+  if i then return string.sub(s, i, e) end
 end
 
-a,b = strfind('', '')    -- empty patterns are tricky
+a,b = string.find('', '')    -- empty patterns are tricky
 assert(a == 1 and b == 0);
-a,b = strfind('alo', '')
+a,b = string.find('alo', '')
 assert(a == 1 and b == 0)
-a,b = strfind('a\0o a\0o a\0o', 'a', 1)   -- first position
+a,b = string.find('a\0o a\0o a\0o', 'a', 1)   -- first position
 assert(a == 1 and b == 1)
-a,b = strfind('a\0o a\0o a\0o', 'a\0o', 2)   -- starts in the midle
+a,b = string.find('a\0o a\0o a\0o', 'a\0o', 2)   -- starts in the midle
 assert(a == 5 and b == 7)
-a,b = strfind('a\0o a\0o a\0o', 'a\0o', 9)   -- starts in the midle
+a,b = string.find('a\0o a\0o a\0o', 'a\0o', 9)   -- starts in the midle
 assert(a == 9 and b == 11)
-a,b = strfind('a\0a\0a\0a\0\0ab', '\0ab', 2);  -- finds at the end
+a,b = string.find('a\0a\0a\0a\0\0ab', '\0ab', 2);  -- finds at the end
 assert(a == 9 and b == 11);
-a,b = strfind('a\0a\0a\0a\0\0ab', 'b')    -- last position
+a,b = string.find('a\0a\0a\0a\0\0ab', 'b')    -- last position
 assert(a == 11 and b == 11)
-assert(strfind('a\0a\0a\0a\0\0ab', 'b\0') == nil)   -- check ending
-assert(strfind('', '\0') == nil)
-assert(strfind('alo123alo', '12') == 4)
-assert(strfind('alo123alo', '^12') == nil)
+assert(string.find('a\0a\0a\0a\0\0ab', 'b\0') == nil)   -- check ending
+assert(string.find('', '\0') == nil)
+assert(string.find('alo123alo', '12') == 4)
+assert(string.find('alo123alo', '^12') == nil)
 
 assert(f('aaab', 'a*') == 'aaa');
 assert(f('aaa', '^.*$') == 'aaa');
@@ -63,7 +63,7 @@ print('+')
 
 assert(f('alo alx 123 b\0o b\0o', '(..*) %1') == "b\0o b\0o")
 assert(f('axz123= 4= 4 34', '(.+)=(.*)=%2 %1') == '3= 4= 4 3')
-_,_,a = strfind('=======', '^(=*)=%1$')
+_,_,a = string.find('=======', '^(=*)=%1$')
 assert(a == '===')
 assert(f('==========', '^([=]*)=%1$') == nil)
 
@@ -82,15 +82,15 @@ assert(f('==========', '^([=]*)=%1$') == nil)
   "\225\226\227\228\229\230\231\232\233\234\235\236\237\238\239\240\241\242" ..
   "\243\244\245\246\247\248\249\250\251\252\253\254\255";
 
-assert(strlen(abc) == 256)
+assert(string.len(abc) == 256)
 
 function strset (p)
   local res = {s=''}
-  gsub(abc, p, function (c) res.s = res.s .. c end)
+  string.gsub(abc, p, function (c) res.s = res.s .. c end)
   return res.s
 end;
 
-assert(strlen(strset('[\200-\210]')) == 11)
+assert(string.len(strset('[\200-\210]')) == 11)
 
 assert(strset('[a-z]') == "abcdefghijklmnopqrstuvwxyz")
 assert(strset('[a-z%d]') == strset('[%da-uu-z]'))
@@ -104,7 +104,7 @@ assert(strset('.') == strset('[\1-\255%z]'))
 print('+');
 
 function f(s, p)
-  local _, __, c = strfind(s, p);
+  local _, __, c = string.find(s, p);
   return c;
 end
 
@@ -112,93 +112,95 @@ assert(f("alo xyzK", "(%w+)K") == "xyz")
 assert(f("254 K", "(%d*)K") == "")
 assert(f("alo ", "(%w*)$") == "")
 assert(f("alo ", "(%w+)$") == nil)
-assert(strfind("(álo)", "%(á") == 1)
-_, _, a, b, c, d, e = strfind("âlo alo", "^(((.).).* (%w*))$")
+assert(string.find("(álo)", "%(á") == 1)
+local _, _, a, b, c, d, e = string.find("âlo alo", "^(((.).).* (%w*))$")
 assert(a == 'âlo alo' and b == 'âl' and c == 'â' and d == 'alo' and e == nil)
-_, _, a, b, c, d  = strfind('0123456789', '(.+(.?)())')
+_, _, a, b, c, d  = string.find('0123456789', '(.+(.?)())')
 assert(a == '0123456789' and b == '' and c == 11 and d == nil)
 print('+')
 
-assert(gsub('ülo ülo', 'ü', 'x') == 'xlo xlo')
-assert(gsub('alo úlo  ', ' +$', '') == 'alo úlo')  -- trim
-assert(gsub('  alo alo  ', '^%s*(.-)%s*$', '%1') == 'alo alo')  -- double trim
-assert(gsub('alo  alo  \n 123\n ', '%s+', ' ') == 'alo alo 123 ')
+assert(string.gsub('ülo ülo', 'ü', 'x') == 'xlo xlo')
+assert(string.gsub('alo úlo  ', ' +$', '') == 'alo úlo')  -- trim
+assert(string.gsub('  alo alo  ', '^%s*(.-)%s*$', '%1') == 'alo alo')  -- double trim
+assert(string.gsub('alo  alo  \n 123\n ', '%s+', ' ') == 'alo alo 123 ')
 t = "abç d"
-a, b = gsub(t, '(.)', '%1@')
-assert('@'..a == gsub(t, '', '@') and b == 5)
-a, b = gsub('abçd', '(.)', '%1@', 2)
+a, b = string.gsub(t, '(.)', '%1@')
+assert('@'..a == string.gsub(t, '', '@') and b == 5)
+a, b = string.gsub('abçd', '(.)', '%1@', 2)
 assert(a == 'a@b@çd' and b == 2)
-assert(gsub('alo alo', '()[al]', '%1') == '12o 56o')
-assert(gsub("abc=xyz", "(%w*)(%p)(%w+)", "%3%2%1") == "xyz=abc")
-assert(gsub('áéí', '$', '\0óú') == 'áéí\0óú')
-assert(gsub('', '^', 'r') == 'r')
-assert(gsub('', '$', 'r') == 'r')
+assert(string.gsub('alo alo', '()[al]', '%1') == '12o 56o')
+assert(string.gsub("abc=xyz", "(%w*)(%p)(%w+)", "%3%2%1") == "xyz=abc")
+assert(string.gsub('áéí', '$', '\0óú') == 'áéí\0óú')
+assert(string.gsub('', '^', 'r') == 'r')
+assert(string.gsub('', '$', 'r') == 'r')
 print('+')
 
-assert(gsub("um (dois) tres (quatro)", "(%(%w+%))", strupper) ==
+assert(string.gsub("um (dois) tres (quatro)", "(%(%w+%))", string.upper) ==
             "um (DOIS) tres (QUATRO)")
 
 do
-  gsub("a=roberto,roberto=a", "(%w+)=(%w%w*)", setglobal)
+  local function setglobal (n,v) _G[n] = v end
+  string.gsub("a=roberto,roberto=a", "(%w+)=(%w%w*)", setglobal)
   assert(_G.a=="roberto" and _G.roberto=="a")
 end
 
-function f(a,b) return gsub(a,'.',b) end
-assert(gsub("trocar tudo em |teste|b| é |beleza|al|", "|([^|]*)|([^|]*)|", f) ==
+function f(a,b) return string.gsub(a,'.',b) end
+assert(string.gsub("trocar tudo em |teste|b| é |beleza|al|", "|([^|]*)|([^|]*)|", f) ==
             "trocar tudo em bbbbb é alalalalalal")
 
-assert(gsub("alo $a=1$ novamente $return a$", "$([^$]*)%$", dostring) ==
+local function dostring (s) return loadstring(s)() end
+assert(string.gsub("alo $a=1$ novamente $return a$", "$([^$]*)%$", dostring) ==
             "alo  novamente 1")
 
-x = gsub("$x=gsub('alo', '.', strupper)$ assim vai para $return x$",
+x = string.gsub("$x=string.gsub('alo', '.', string.upper)$ assim vai para $return x$",
          "$([^$]*)%$", dostring)
 assert(x == ' assim vai para ALO')
 
 t = {}
-gsub('a alo jose  joao', '()(%w+)()', function (a,w,b)
-  assert(strlen(w) == b-a);
+string.gsub('a alo jose  joao', '()(%w+)()', function (a,w,b)
+  assert(string.len(w) == b-a);
   t[a] = b-a;
 end)
 assert(t[1] == 1 and t[3] == 3 and t[7] == 4 and t[13] == 4)
 
 
 function isbalanced (s)
-  return strfind(gsub(s, "%b()", ""), "[()]") == nil
+  return string.find(string.gsub(s, "%b()", ""), "[()]") == nil
 end
 
 assert(isbalanced("(9 ((8))(\0) 7) \0\0 a b ()(c)() a"))
 assert(not isbalanced("(9 ((8) 7) a b (\0 c) a"))
-assert(gsub("alo 'oi' alo", "%b''", '"') == 'alo " alo')
+assert(string.gsub("alo 'oi' alo", "%b''", '"') == 'alo " alo')
 
 
 local t = {"apple", "orange", "lime"; n=0}
-assert(gsub("x and x and x", "x", function () t.n=t.n+1; return t[t.n] end)
+assert(string.gsub("x and x and x", "x", function () t.n=t.n+1; return t[t.n] end)
         == "apple and orange and lime")
 
 t = {n=0}
-gsub("first second word", "%w%w*", function (w) t.n=t.n+1; t[t.n] = w end)
+string.gsub("first second word", "%w%w*", function (w) t.n=t.n+1; t[t.n] = w end)
 assert(t[1] == "first" and t[2] == "second" and t[3] == "word" and t.n == 3)
 
 t = {n=0}
-gsub("first second word", "%w+",
+string.gsub("first second word", "%w+",
       function (w) t.n=t.n+1; t[t.n] = w end, 2)
 assert(t[1] == "first" and t[2] == "second" and t[3] == nil)
 
-assert(not pcall(gsub, "alo", "(.", print))
-assert(not pcall(gsub, "alo", ".)", print))
+assert(not pcall(string.gsub, "alo", "(.", print))
+assert(not pcall(string.gsub, "alo", ".)", print))
 
 -- big strings
-local a = strrep('a', 300000)
-assert(strfind(a, '^a*(.?)$'))
-assert(not strfind(a, '^a*(.?)b$'))
-assert(strfind(a, '^a-(.?)$'))
+local a = string.rep('a', 300000)
+assert(string.find(a, '^a*(.?)$'))
+assert(not string.find(a, '^a*(.?)b$'))
+assert(string.find(a, '^a-(.?)$'))
 
 -- deep nest of gsubs
 function rev (s)
-  return gsub(s, "(.)(.+)", function (c,s1) return rev(s1)..c end)
+  return string.gsub(s, "(.)(.+)", function (c,s1) return rev(s1)..c end)
 end
 
-local x = strrep('012345', 10)
+local x = string.rep('012345', 10)
 assert(rev(rev(x)) == x)
 
 
@@ -215,9 +217,9 @@ assert(t[1] == "first" and t[2] == "second" and t[3] == "word")
 
 t = {3, 6, 9}
 for i in string.gfind ("xuxx uu ppar r", "()(.)%2") do
-  assert(i == tremove(t, 1))
+  assert(i == table.remove(t, 1))
 end
-assert(getn(t) == 0)
+assert(table.getn(t) == 0)
 
 t = {}
 for i,j in string.gfind("13 14 10 = 11, 15= 16, 22=23", "(%d+)%s*=%s*(%d+)") do

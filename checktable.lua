@@ -26,7 +26,7 @@ function checktable (t)
       else  -- list head
         l[mp] = {mp; n=1}   -- first element
         while next do
-          assert(ff < next and next < hsize)
+          assert(ff <= next and next < hsize)
           if l[next] then assert(l[next] == mp) else l[next] = mp end
           table.insert(l[mp], next)
           key,val,next = T.querytab(t, next)
@@ -35,7 +35,6 @@ function checktable (t)
       end
     end
   end
-  assert(l[ff] == nil)
   l.asize = asize; l.hsize = hsize; l.ff = ff
   return l
 end

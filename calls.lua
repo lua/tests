@@ -14,7 +14,7 @@ assert(type(f) == 'function')
 
 
 -- testa recursao de funcoes locais
-fact = nil
+fact = false
 do
   local res = 1
   local function fact (n)
@@ -24,7 +24,7 @@ do
   end
   assert(fact(5) == 120)
 end
-assert(fact == nil)
+assert(fact == false)
 
 -- testa declaracoes
 a = {i = 10}
@@ -55,9 +55,6 @@ a.b.c:f2('k', 12); assert(a.b.c.k == 12)
 print('+')
 
 
-oldfb = _ERRORMESSAGE
-_ERRORMESSAGE = print
-
 function f(a,b,c) local d = 'a'; t={a,b,c,d} end
 
 f(  -- mudar de linha assim tem que poder
@@ -69,11 +66,11 @@ assert(t[1] == 1 and t[2] == 2 and t[3] == 3 and t[4] == 'a')
 
 function fat(x)
   if x <= 1 then return 1
-  else return x*dostring("return fat(" .. x-1 .. ")")
+  else return x*loadstring("return fat(" .. x-1 .. ")")()
   end
 end
 
-assert(dostring "dostring 'assert(fat(6)==720)' ")
+assert(loadstring "loadstring 'assert(fat(6)==720)' () ")()
 a = loadstring('return fat(5), 3')
 a,b = a()
 assert(a == 120 and b == 3)
@@ -101,7 +98,6 @@ function deep (n)
 end
 deep(10)
 deep(200)
-_ERRORMESSAGE = oldfb
 
 -- testa tail call
 function deep (n) if n>0 then return deep(n-1) else return 101 end end
@@ -118,15 +114,27 @@ a = nil
 assert(a == 23 and (function (x) return x*2 end)(20) == 40)
 
 
+local x,y,z,a
 a = {}; lim = 2000
 for i=1, lim do a[i]=i end
+assert(select(lim, unpack(a)) == lim and select('#', unpack(a)) == lim)
 x = unpack(a)
 assert(x == 1)
 x = {unpack(a)}
-assert(getn(x) == lim and x[1] == 1 and x[lim] == lim)
+assert(table.getn(x) == lim and x[1] == 1 and x[lim] == lim)
+x = {unpack(a, lim-2)}
+assert(table.getn(x) == 3 and x[1] == lim-2 and x[3] == lim)
+x = {unpack(a, 10, 6)}
+assert(next(x) == nil)   -- no elements
+x = {unpack(a, 11, 10)}
+assert(next(x) == nil)   -- no elements
+x,y = unpack(a, 10, 10)
+assert(x == 10 and y == nil)
+x,y,z = unpack(a, 10, 11)
+assert(x == 10 and y == 11 and z == nil)
 a,x = unpack{1}
 assert(a==1 and x==nil)
-a,x = unpack{1,2;n=1}
+a,x = unpack({1,2}, 1, 1)
 assert(a==1 and x==nil)
 
 
@@ -171,33 +179,37 @@ print('+')
 
 function unlpack (t, i)
   i = i or 1
-  if (i <= getn(t)) then
+  if (i <= table.getn(t)) then
     return t[i], unlpack(t, i+1)
   end
 end
 
-function lpack (...) return arg end
-
 function equaltab (t1, t2)
-  assert(getn(t1) == getn(t2))
+  assert(table.getn(t1) == table.getn(t2))
   for i,v1 in ipairs(t1) do
     assert(v1 == t2[i])
   end
 end
 
+local function pack (...)
+  local x = {...}
+  x.n = select('#', ...)
+  return x
+end
+
 function f() return 1,2,30,4 end
 function ret2 (a,b) return a,b end
 
-a,b,c,d = unlpack{1,2,3}
+local a,b,c,d = unlpack{1,2,3}
 assert(a==1 and b==2 and c==3 and d==nil)
-a = {1,2,3,4,nil,10,'alo',nil,assert}
-equaltab(lpack(unlpack(a)), a)
-equaltab(lpack(unlpack(a), -1), {1,-1})
+a = {1,2,3,4,false,10,'alo',false,assert}
+equaltab(pack(unlpack(a)), a)
+equaltab(pack(unlpack(a), -1), {1,-1})
 a,b,c,d = ret2(f()), ret2(f())
 assert(a==1 and b==1 and c==2 and d==nil)
-a,b,c,d = unlpack(lpack(ret2(f()), ret2(f())))
+a,b,c,d = unlpack(pack(ret2(f()), ret2(f())))
 assert(a==1 and b==1 and c==2 and d==nil)
-a,b,c,d = unlpack(lpack(ret2(f()), (ret2(f()))))
+a,b,c,d = unlpack(pack(ret2(f()), (ret2(f()))))
 assert(a==1 and b==1 and c==nil and d==nil)
 
 a = ret2{ unlpack{1,2,3}, unlpack{3,2,1}, unlpack{"a", "b"}}
@@ -207,35 +219,50 @@ assert(a[1] == 1 and a[2] == 3 and a[3] == "a" and a[4] == "b")
 -- testa chamadas com parametros "incorretos"
 rawget({}, "x", 1)
 rawset({}, "x", 1, 2)
-assert(sin(1,2) == sin(1))
-sort({10,9,8,4,19,23,0,0}, function (a,b) return a<b end, "extra arg")
+assert(math.sin(1,2) == math.sin(1))
+table.sort({10,9,8,4,19,23,0,0}, function (a,b) return a<b end, "extra arg")
 
 
 -- test for generic load
 x = "-- a comment\0\0\0\n  x = 10 + \n23; return '\0'"
 local i = 0
-function read1 ()
-  collectgarbage()
-  i=i+1
-  return string.sub(x, i, i)
+function read1 (x)
+  return function ()
+    collectgarbage()
+    i=i+1
+    return string.sub(x, i, i)
+  end
 end
 
-a = assert(load(read1, "modname"))
-assert(a() == "\0" and x == 33)
+a = assert(load(read1(x), "modname"))
+assert(a() == "\0" and _G.x == 33)
 assert(debug.getinfo(a).source == "modname")
 
 x = string.dump(loadstring("x = 1; return x"))
 i = 0
-a = assert(load(read1))
-assert(a() == 1 and x == 1)
+a = assert(load(read1(x)))
+assert(a() == 1 and _G.x == 1)
 
-x = "*a = 123"
 i = 0
-local a, b = load(read1)
+local a, b = load(read1("*a = 123"))
 assert(not a and type(b) == "string" and i == 2)
 
 a, b = load(function () error("hhi") end)
 assert(not a and string.find(b, "hhi"))
+
+-- test generic load with nested functions
+x = [[
+  return function (x)
+    return function (y)
+     return function (z)
+       return x+y+z
+     end
+   end
+  end
+]]
+
+a = assert(load(read1(x)))
+assert(a()(2)(3)(10) == 15)
 
 
 -- test for dump/undump with upvalues

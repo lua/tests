@@ -8,7 +8,20 @@ do
 end
 
 
-function f(...) if arg.n == 1 then return arg[1] else return "***" end end
+do
+  local a,b = math.modf(3.5)
+  assert(a == 3 and b == 0.5)
+  assert(math.huge > 10e30)
+  assert(-math.huge < -10e30)
+end
+
+function f(...)
+  if select('#', ...) == 1 then
+    return (...)
+  else
+    return "***"
+  end
+end
 
 assert(tonumber{} == nil)
 assert(tonumber'+0.01' == 1/100 and tonumber'+.01' == 0.01 and
@@ -33,8 +46,8 @@ assert(tonumber('10', 36) == 36)
 --assert(tonumber('\n  -10  \n', 36) == -36)
 --assert(tonumber('-fFfa', 16) == -(10+(16*(15+(16*(15+(16*15)))))))
 assert(tonumber('fFfa', 15) == nil)
---assert(tonumber(strrep('1', 42), 2) + 1 == 2^42)
-assert(tonumber(strrep('1', 32), 2) + 1 == 2^32)
+--assert(tonumber(string.rep('1', 42), 2) + 1 == 2^42)
+assert(tonumber(string.rep('1', 32), 2) + 1 == 2^32)
 --assert(tonumber('-fffffFFFFF', 16)-1 == -2^40)
 assert(tonumber('ffffFFFF', 16)+1 == 2^32)
 
@@ -47,7 +60,7 @@ assert('1111111111111111'-'1111111111111110' == tonumber"  +0.001e+3 \n\t")
 
 function eq (a,b,limit)
   if not limit then limit = 10E-10 end
-  return abs(a-b) <= limit
+  return math.abs(a-b) <= limit
 end
 
 assert(0.1e-30 > 0.9E-31 and 0.9E30 < 0.1e31)
@@ -66,18 +79,32 @@ assert(not('a'>'a') and not('a'>'b') and ('b'>'a'))
 assert((1>=1) and not(1>=2) and (2>=1))
 assert(('a'>='a') and not('a'>='b') and ('b'>='a'))
 
-assert(eq(sin(-9.8)^2 + cos(-9.8)^2, 1))
-assert(eq(sin(90), 1) and eq(cos(90), 0))
-assert(eq(atan(1), 45) and eq(acos(0), 90) and eq(asin(1), 90))
-assert(eq(tan(deg(PI/4)), 1) and eq(rad(90), PI/2))
-assert(abs(-10) == 10)
-assert(eq(atan2(1,0), 90))
-assert(ceil(4.5) == 5.0)
-assert(floor(4.5) == 4.0)
-assert(mod(10,3) == 1)
-assert(eq(sqrt(10)^2, 10))
-assert(eq(log10(2), log(2)/log(10)))
-assert(eq(exp(0), 1))
+-- testing mod operator
+assert(-4%3 == 2)
+assert(4%-3 == -2)
+assert(math.pi - math.pi % 1 == 3)
+assert(math.pi - math.pi % 0.001 == 3.141)
+
+local function testbit(a, n)
+  return a/2^n % 2 >= 1
+end
+
+assert(eq(math.sin(-9.8)^2 + math.cos(-9.8)^2, 1))
+assert(eq(math.sin(math.pi/2), 1) and eq(math.cos(math.pi/2), 0))
+assert(eq(math.atan(1), math.pi/4) and eq(math.acos(0), math.pi/2) and
+       eq(math.asin(1), math.pi/2))
+assert(eq(math.deg(math.pi/2), 90) and eq(math.rad(90), math.pi/2))
+assert(math.abs(-10) == 10)
+assert(eq(math.atan2(1,0), math.pi/2))
+assert(math.ceil(4.5) == 5.0)
+assert(math.floor(4.5) == 4.0)
+assert(math.mod(10,3) == 1)
+assert(eq(math.sqrt(10)^2, 10))
+assert(eq(math.log10(2), math.log(2)/math.log(10)))
+assert(eq(math.exp(0), 1))
+assert(eq(math.sin(10), math.sin(10%(2*math.pi))))
+
+assert(eq(math.tanh(3.5), math.sinh(3.5)/math.cosh(3.5)))
 
 assert(tonumber(' 1.3e-2 ') == 1.3e-2)
 assert(tonumber(' -1.00000000000001 ') == -1.00000000000001)
@@ -90,23 +117,23 @@ assert(8388607 + -8388607 == 0)
 
 if _soft then return end
 
-f = tmpfile()
+f = io.tmpfile()
 assert(f)
-write(f, "a = {")
+f:write("a = {")
 i = 1
 repeat
-  write(f, "{", sin(i), ", ", cos(i), ", ", i/3, "},\n")
+  f:write("{", math.sin(i), ", ", math.cos(i), ", ", i/3, "},\n")
   i=i+1
 until i > 1000
-write(f, "}")
-seek(f, "set", 0)
-dostring(read(f, '*a'))
-assert(closefile(f))
+f:write("}")
+f:seek("set", 0)
+assert(loadstring(f:read('*a')))()
+assert(f:close())
 
-assert(eq(a[300][1], sin(300)))
-assert(eq(a[600][1], sin(600)))
-assert(eq(a[500][2], cos(500)))
-assert(eq(a[800][2], cos(800)))
+assert(eq(a[300][1], math.sin(300)))
+assert(eq(a[600][1], math.sin(600)))
+assert(eq(a[500][2], math.cos(500)))
+assert(eq(a[800][2], math.cos(800)))
 assert(eq(a[200][3], 200/3))
 assert(eq(a[1000][3], 1000/3, 0.001))
 print('+')
@@ -140,15 +167,15 @@ assert(a*b == 200 and a+b == 30 and a-b == -10 and a/b == 0.5 and -b == -20)
 assert(a == '10' and b == '20')
 
 
-randomseed(0)
+math.randomseed(0)
 
 local i = 0
 local Max = 0
 local Min = 2
 repeat
-  local t = random()
-  Max = max(Max, t)
-  Min = min(Min, t)
+  local t = math.random()
+  Max = math.max(Max, t)
+  Min = math.min(Min, t)
   i=i+1
   flag = eq(Max, 1, 0.001) and eq(Min, 0, 0.001)
 until flag or i>10000
@@ -156,7 +183,7 @@ assert(0 <= Min and Max<1)
 assert(flag);
 
 for i=1,10 do
-  local t = random(5)
+  local t = math.random(5)
   assert(1 <= t and t <= 5)
 end
 
@@ -164,9 +191,9 @@ i = 0
 Max = -200
 Min = 200
 repeat
-  local t = random(-10,0)
-  Max = max(Max, t)
-  Min = min(Min, t)
+  local t = math.random(-10,0)
+  Max = math.max(Max, t)
+  Min = math.min(Min, t)
   i=i+1
   flag = (Max == 0 and Min == -10)
 until flag or i>10000

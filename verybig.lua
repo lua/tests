@@ -51,7 +51,7 @@ function f(x) b=x end
 a = f{$3$} or 10
 
 assert(a==10)
-assert(b[1] == "a10" and b[2] == 5 and b[getn(b)-1] == "a50009")
+assert(b[1] == "a10" and b[2] == 5 and b[table.getn(b)-1] == "a50009")
 
 
 function xxxx (x) return b[x] end
@@ -69,32 +69,32 @@ return 10
 F = {
 function ()   -- $1$
   for i=10,50009 do
-    write('a', i, ' = ', 5+((i-10)/2), ',\n')
+    io.write('a', i, ' = ', 5+((i-10)/2), ',\n')
   end
 end,
 
 function ()   -- $2$
   for i=30026,50009 do
-    write('b', i, ' = ', 15013+((i-30026)/2), ',\n')
+    io.write('b', i, ' = ', 15013+((i-30026)/2), ',\n')
   end
 end,
 
 function ()   -- $3$
   for i=10,50009 do
-    write('"a', i, '", ', 5+((i-10)/2), ',\n')
+    io.write('"a', i, '", ', 5+((i-10)/2), ',\n')
   end
 end,
 }
 
-file = tmpname()
-assert(writeto(file))
+file = os.tmpname()
+io.output(file)
 for s in string.gfind(prog, "$([^$]+)") do
   local n = tonumber(s)
-  if not n then write(s) else F[n]() end
+  if not n then io.write(s) else F[n]() end
 end
-assert(writeto())
+io.close()
 result = dofile(file)
-assert(remove(file))
+assert(os.remove(file))
 print'OK'
 return result
 

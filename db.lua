@@ -1,6 +1,6 @@
 -- testes da biblioteca de depuracao
 
-
+local function dostring(s) return assert(loadstring(s))() end
 
 print"testando biblioteca de depuração e informacoes de debug"
 
@@ -22,11 +22,11 @@ end
 
 
 do
-  local a = getinfo(print)
+  local a = debug.getinfo(print)
   assert(a.what == "C" and a.short_src == "[C]")
-  local b = getinfo(test, "Sf")
+  local b = debug.getinfo(test, "Sf")
   assert(b.name == nil and b.what == "Lua" and b.linedefined == 11 and
-         b.func == test and not strfind(b.short_src, "%["))
+         b.func == test and not string.find(b.short_src, "%["))
 end
 
 
@@ -34,42 +34,42 @@ end
 a = "function f () end"
 local function dostring (s, x) return loadstring(s, x)() end
 dostring(a)
-assert(getinfo(f).short_src == format('[string "%s"]', a))
-dostring(a..format("; %s\n=1", strrep('p', 400)))
-assert(strfind(getinfo(f).short_src, '^%[string [^\n]*%.%.%."%]$'))
+assert(debug.getinfo(f).short_src == string.format('[string "%s"]', a))
+dostring(a..string.format("; %s\n=1", string.rep('p', 400)))
+assert(string.find(debug.getinfo(f).short_src, '^%[string [^\n]*%.%.%."%]$'))
 dostring("\n"..a)
-assert(getinfo(f).short_src == '[string "..."]')
+assert(debug.getinfo(f).short_src == '[string "..."]')
 dostring(a, "")
-assert(getinfo(f).short_src == '[string ""]')
+assert(debug.getinfo(f).short_src == '[string ""]')
 dostring(a, "@xuxu")
-assert(getinfo(f).short_src == "xuxu")
-dostring(a, "@"..strrep('p', 1000)..'t')
-assert(strfind(getinfo(f).short_src, "^%.%.%.p*t$"))
+assert(debug.getinfo(f).short_src == "xuxu")
+dostring(a, "@"..string.rep('p', 1000)..'t')
+assert(string.find(debug.getinfo(f).short_src, "^%.%.%.p*t$"))
 dostring(a, "=xuxu")
-assert(getinfo(f).short_src == "xuxu")
-dostring(a, format("=%s", strrep('x', 500)))
-assert(strfind(getinfo(f).short_src, "^x*"))
+assert(debug.getinfo(f).short_src == "xuxu")
+dostring(a, string.format("=%s", string.rep('x', 500)))
+assert(string.find(debug.getinfo(f).short_src, "^x*"))
 dostring(a, "=")
-assert(getinfo(f).short_src == "")
+assert(debug.getinfo(f).short_src == "")
 a = nil; f = nil;
 
 
 repeat
   local g = {x = function ()
-    local a = getinfo(2)
+    local a = debug.getinfo(2)
     assert(a.name == 'f' and a.namewhat == 'local')
-    a = getinfo(1)
+    a = debug.getinfo(1)
     assert(a.name == 'x' and a.namewhat == 'field')
     return 'xixi'
   end}
   local f = function () return 1+1 and (not 1 or g.x()) end
   assert(f() == 'xixi')
-  g = getinfo(f)
+  g = debug.getinfo(f)
   assert(g.what == "Lua" and g.func == f and g.namewhat == "" and not g.name)
 
   function f (x, name)   -- local!
     name = name or 'f'
-    local a = getinfo(1)
+    local a = debug.getinfo(1)
     assert(a.name == name and a.namewhat == 'local')
     return x
   end
@@ -79,7 +79,7 @@ repeat
   if 3<4 then a=1 else break end; f()
   while 1 do local x=10; break end; f()
   local b = 1
-  if 3>4 then return sin(1) end; f()
+  if 3>4 then return math.sin(1) end; f()
   a = 3<4; f()
   a = 3<4 or 1; f()
   repeat local x=20; if 4>3 then f() else break end; f() until 1
@@ -162,7 +162,7 @@ debug.sethook(function (e,l)
       oldglob = glob
     end
   elseif e == "call" then
-      local f = getinfo(2, "f").func
+      local f = debug.getinfo(2, "f").func
       a[f] = 1
   else assert(e == "return")
   end
@@ -170,22 +170,22 @@ end, "crl")
 
 function f(a,b)
   collectgarbage()
-  local _, x = getlocal(1, 1)
-  local _, y = getlocal(1, 2)
+  local _, x = debug.getlocal(1, 1)
+  local _, y = debug.getlocal(1, 2)
   assert(x == a and y == b)
-  assert(setlocal(2, 3, "pera") == "AA".."AA")
-  assert(setlocal(2, 4, "maçã") == "B")
-  x = getinfo(2)
+  assert(debug.setlocal(2, 3, "pera") == "AA".."AA")
+  assert(debug.setlocal(2, 4, "maçã") == "B")
+  x = debug.getinfo(2)
   assert(x.func == g and x.what == "Lua" and x.name == 'g' and
-         x.nups == 0 and strfind(x.source, "^@.*db%.lua"))
+         x.nups == 0 and string.find(x.source, "^@.*db%.lua"))
   glob = glob+1
-  assert(getinfo(1, "l").currentline == L+1)
-  assert(getinfo(1, "l").currentline == L+2)
+  assert(debug.getinfo(1, "l").currentline == L+1)
+  assert(debug.getinfo(1, "l").currentline == L+2)
 end
 
 function foo()
   glob = glob+1
-  assert(getinfo(1, "l").currentline == L+1)
+  assert(debug.getinfo(1, "l").currentline == L+1)
 end; foo()  -- set L
 -- check line counting inside strings and empty lines
 
@@ -195,18 +195,18 @@ alo' .. [[
 ]]
 --[[
 ]]
-assert(getinfo(1, "l").currentline == L+11)  -- check count of lines
+assert(debug.getinfo(1, "l").currentline == L+11)  -- check count of lines
 
 
 function g(...)
-  do local a,b,c; a=sin(40); end
+  do local a,b,c; a=math.sin(40); end
   local feijao
   local AAAA,B = "xuxu", "mamão"
   f(AAAA,B)
   assert(AAAA == "pera" and B == "maçã")
   do
      local B = 13
-     local x,y = getlocal(1,5)
+     local x,y = debug.getlocal(1,5)
      assert(x == 'B' and y == 13)
   end
 end
@@ -214,7 +214,7 @@ end
 g()
 
 
-assert(a[f] and a[g] and a[assert] and a[getlocal] and not a[print])
+assert(a[f] and a[g] and a[assert] and a[debug.getlocal] and not a[print])
  
 
 debug.sethook(nil);
@@ -241,7 +241,7 @@ debug.sethook(function (e)
     X = {}; local i = 1
     local x,y
     while 1 do
-      x,y = getlocal(2, i)
+      x,y = debug.getlocal(2, i)
       if x==nil then break end
       X[x] = y
       i = i+1
@@ -273,6 +273,7 @@ local a,b,c = 1,2,3
 local function foo1 (a) b = a; return c end
 local function foo2 (x) a = x; return c+b end
 assert(debug.getupvalue(foo1, 3) == nil)
+assert(debug.getupvalue(foo1, 0) == nil)
 assert(debug.setupvalue(foo1, 3, "xuxu") == nil)
 local t = getupvalues(foo1)
 assert(t.a == nil and t.b == 2 and t.c == 3)
@@ -353,7 +354,28 @@ foo(lim)
 
 print"+"
 
+
+-- testing traceback
+assert(debug.traceback(print) == print)
+--++assert(debug.traceback(print, 4) == print)
+--++assert(string.find(debug.traceback("hi", 4), "^hi\n"))
+assert(string.find(debug.traceback("hi"), "^hi\n"))
+assert(not string.find(debug.traceback("hi"), "`traceback'"))
+--++assert(string.find(debug.traceback("hi", 0), "`traceback'"))
+assert(string.find(debug.traceback(), "^stack traceback:\n"))
+
 -- testing debugging of coroutines
+
+local function checktraceback (co, p)
+  local tb = debug.traceback(co)
+  local i = 0
+  for l in string.gfind(tb, "[^\n]+\n?") do
+    assert(i == 0 or string.find(l, p[i]))
+    i = i+1
+  end
+  assert(p[i] == nil)
+end
+
 
 local co = coroutine.create(function (x)
              local a = 1
@@ -381,12 +403,30 @@ assert(table.getn(tr) == 2 and
 
 a,b,c = pcall(coroutine.resume, co)
 assert(a and b and c == l.currentline+1)
+checktraceback(co, {"yield", "in function <"})
 
 a,b = coroutine.resume(co)
 assert(a and b == "hi")
 assert(table.getn(tr) == 4 and tr[4] == l.currentline+2)
 assert(debug.gethook(co) == foo)
 assert(debug.gethook() == nil)
+checktraceback(co, {})
+
+
+-- check traceback of suspended (or dead with error) coroutines
+
+function f(i) if i==0 then error(i) else coroutine.yield(); f(i-1) end end
+
+co = coroutine.create(function (x) f(x) end)
+a, b = coroutine.resume(co, 3)
+t = {"`yield'", "`f'", "in function <"}
+while coroutine.status(co) == "suspended" do
+  checktraceback(co, t)
+  a, b = coroutine.resume(co)
+  table.insert(t, 2, "`f'")   -- one more recursive call to `f'
+end
+t[1] = "`error'"
+--++checktraceback(co, t)
 
 
 -- test acessing line numbers of a coroutine from a resume inside

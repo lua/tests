@@ -20,7 +20,9 @@ f = nil
 local f
 x = 1
 
-assert(type(dostring('local a = {}')) ~= 'table')
+a = nil
+loadstring('local a = {}')()
+assert(type(a) ~= 'table')
 
 function f (a)
   local _1, _2, _3, _4, _5
@@ -55,19 +57,16 @@ do
   local _G = _G
   for i=1,10 do f[i] = function (x) A=A+1; return A, _G.getfenv(x) end end
   A=10; assert(f[1]() == 11)
-  for i=1,10 do setfenv(f[i], {A=i}) end
+  for i=1,10 do assert(setfenv(f[i], {A=i}) == f[i]) end
   assert(f[3]() == 4 and A == 11)
   local a,b = f[8](1)
   assert(b.A == 9)
   a,b = f[8](0)
   assert(b.A == 11)   -- `real' global
-  local function f () setfenv(2, {a='10'}) end
-  local function g () f(); _G.assert(_G.getfenv(1).a == '10') end
+  local g
+  local function f () assert(setfenv(2, {a='10'}) == g) end
+  g = function () f(); _G.assert(_G.getfenv(1).a == '10') end
   g(); assert(getfenv(g).a == '10')
-  getfenv(g).__fenv = false
-  assert(getfenv(g) == false)
-  -- cannot change a protected global table
-  assert(pcall(setfenv, g, {}) == false)
 end
 
 -- test for global table of loaded chunks
@@ -90,16 +89,16 @@ local a
 local p = 4
 for i=2,31 do
   for j=-3,3 do
-    assert(dostring(format([[local a=%s;a=a+
+    assert(loadstring(string.format([[local a=%s;a=a+
                                             %s;
-                             assert(a
-                                      ==2^%s)]], j, p-j, i)))
-    assert(dostring(format([[local a=%s;
-                             a=a-%s;
-                             assert(a==-2^%s)]], -j, p-j, i)))
-    assert(dostring(format([[local a,b=0,%s;
-                             a=b-%s;
-                             assert(a==-2^%s)]], -j, p-j, i)))
+                                      assert(a
+                                      ==2^%s)]], j, p-j, i))) ()
+    assert(loadstring(string.format([[local a=%s;
+                                      a=a-%s;
+                                      assert(a==-2^%s)]], -j, p-j, i))) ()
+    assert(loadstring(string.format([[local a,b=0,%s;
+                                      a=b-%s;
+                                      assert(a==-2^%s)]], -j, p-j, i))) ()
   end
   p =2*p
 end
@@ -109,7 +108,7 @@ print'+'
 
 if querytab then
   -- testando remocao de elementos mortos dos indices de tabelas
-  collectgarbage(1000000)   -- stop GC
+  collectgarbage("stop")   -- stop GC
   local a = {[{}] = 4, [3] = 0, alo = 1, 
              a1234567890123456789012345678901234567890 = 10}
 

@@ -10,7 +10,7 @@ function check (f, ...)
   local c = T.listcode(f)
   for i=1, arg.n do
     -- print(arg[i], c[i])
-    assert(strfind(c[i], '- '..arg[i]..' *%d'))
+    assert(string.find(c[i], '- '..arg[i]..' *%d'))
   end
   assert(c[arg.n+2] == nil)
 end
@@ -19,9 +19,9 @@ end
 function checkequal (a, b)
   a = T.listcode(a)
   b = T.listcode(b)
-  for i = 1, getn(a) do
-    a[i] = gsub(a[i], '%b()', '')   -- remove line number
-    b[i] = gsub(b[i], '%b()', '')   -- remove line number
+  for i = 1, table.getn(a) do
+    a[i] = string.gsub(a[i], '%b()', '')   -- remove line number
+    b[i] = string.gsub(b[i], '%b()', '')   -- remove line number
     assert(a[i] == b[i])
   end
 end
@@ -30,7 +30,7 @@ end
 -- some basic instructions
 check(function ()
   (function () end){f()}
-end, 'CLOSURE', 'NEWTABLE', 'GETGLOBAL', 'CALL', 'SETLISTO', 'CALL', 'RETURN')
+end, 'CLOSURE', 'NEWTABLE', 'GETGLOBAL', 'CALL', 'SETLIST', 'CALL', 'RETURN')
 
 
 -- sequence of LOADNILs
@@ -86,8 +86,10 @@ check(function ()
   a = 1 - a
   b = 1/a
   b = 5+4
+  a[true] = false
 end,
-  'LOADNIL', 'SETTABLE', 'SETTABLE', 'SETTABLE', 'SUB', 'DIV', 'ADD', 'RETURN')
+  'LOADNIL', 'SETTABLE', 'SETTABLE', 'SETTABLE', 'SUB', 'DIV', 'ADD',
+  'SETTABLE', 'RETURN')
 
 check(function ()
   local a,b,c

@@ -3,7 +3,7 @@ print"verificando sort"
 
 function check (a, f)
   f = f or function (x,y) return x<y end;
-  for n=getn(a),2,-1 do
+  for n=table.getn(a),2,-1 do
     assert(not f(a[n], a[n-1]))
   end
 end
@@ -11,61 +11,54 @@ end
 a = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
      "Oct", "Nov", "Dec"}
 
-sort(a)
+table.sort(a)
 check(a)
 
 limit = 30000
-if _soft then limit = 5000 end
+if rawget(_G, "_soft") then limit = 5000 end
 
 a = {}
 for i=1,limit do
-  a[i] = random()
+  a[i] = math.random()
 end
 
-local x = clock()
-sort(a)
-print(format("Sorting %d elements in %.2f sec.", limit, clock()-x))
+local x = os.clock()
+table.sort(a)
+print(string.format("Sorting %d elements in %.2f sec.", limit, os.clock()-x))
 check(a)
 
-x = clock()
-sort(a)
-print(format("Re-sorting %d elements in %.2f sec.", limit, clock()-x))
+x = os.clock()
+table.sort(a)
+print(string.format("Re-sorting %d elements in %.2f sec.", limit, os.clock()-x))
 check(a)
 
 a = {}
 for i=1,limit do
-  a[i] = random()
+  a[i] = math.random()
 end
 
-x = clock(); i=0
-sort(a, function(x,y) i=i+1; return y<x end)
-print(format("Invert-sorting other %d elements in %.2f sec., with %i comparisons",
-      limit, clock()-x, i))
+x = os.clock(); i=0
+table.sort(a, function(x,y) i=i+1; return y<x end)
+print(string.format("Invert-sorting other %d elements in %.2f sec., with %i comparisons",
+      limit, os.clock()-x, i))
 check(a, function(x,y) return y<x end)
 
 
-sort{}  -- array vazio
+table.sort{}  -- array vazio
 
-a.n = 2
-sort(a)  -- so' 2 primeiros elementos
-assert(a[1] <= a[2] and a.n == 2)
-for i=3,limit-1 do
-  assert(a[i] >= a[i+1])
-end
-
-a = {n=limit}
-x = clock();
-sort(a, function(x,y) return nil end)
-print(format("Sorting %d equal elements in %.2f sec.", limit, clock()-x))
+for i=1,limit do a[i] = false end
+x = os.clock();
+table.sort(a, function(x,y) return nil end)
+print(string.format("Sorting %d equal elements in %.2f sec.", limit, os.clock()-x))
 check(a, function(x,y) return nil end)
-for i,v in a do assert (i=='n' and v==limit) end
+for i,v in a do assert(not v or i=='n' and v==limit) end
 
 a = {"álo", "\0first :-)", "alo", "then this one", "45", "and a new"}
-sort(a)
+table.sort(a)
 check(a)
 
-sort(a, function (x, y)
-          dostring(format("a[%q] = ''", x))
+table.sort(a, function (x, y)
+          loadstring(string.format("a[%q] = ''", x))()
           collectgarbage()
           return x<y
         end)
@@ -73,8 +66,8 @@ sort(a, function (x, y)
 
 tt = {__lt = function (a,b) return a.val < b.val end}
 a = {}
-for i=1,10 do  a[i] = {val=random(100)}; setmetatable(a[i], tt); end
-sort(a)
+for i=1,10 do  a[i] = {val=math.random(100)}; setmetatable(a[i], tt); end
+table.sort(a)
 check(a, tt.__lt)
 check(a)
 

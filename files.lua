@@ -1,10 +1,13 @@
 
 print('testando i/o')
 
-io.input(io.stdin); io.output(io.stdout)
+assert(io.input(io.stdin) == io.stdin)
+assert(io.output(io.stdout) == io.stdout)
 
 assert(type(io.input()) == "userdata" and io.type(io.output()) == "file")
 assert(io.type(8) == nil)
+local a = {}; setmetatable(a, {})
+assert(io.type(a) == nil)
 
 local a,b,c = io.open('xuxu_nao_existe')
 assert(not a and type(b) == "string" and type(c) == "number")

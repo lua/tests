@@ -49,9 +49,9 @@ checkout("1\n2\n")
 prepfile
 [[assert(arg.n == 3 and arg[1] == 'a' and arg[2] == 'b' and arg[3] == 'c')
   x = getargs()
-  assert(x.n == 7 and x[1] == '-s30' and x[x.n] == arg[3])
+  assert(x.n == 6 and x[1] == '-c' and x[x.n] == arg[3])
 ]]
-RUN("lua -s30 -c -f %s a b c", prog)
+RUN("lua -c -f %s a b c", prog)
 
 prepfile"assert(arg==nil)"
 RUN("lua %s", prog)
@@ -98,7 +98,7 @@ xuxu\n"
   --\\
 end
 assert( a == b )
-print( f( 10 ) ) ]]
+=( f( 10 ) ) ]]
 s = gsub(s, ' ', '\n\n')
 prepfile(s)
 RUN("lua _PROMPT= _PROMPT2= -i < %s > %s", prog, out)

@@ -44,7 +44,8 @@ prepfile""
 RUN("lua < %s > %s", prog, out)
 checkout("")
 
-
+-- some "shells" (e.g. command.com) do not understand the quotes around
+-- print(1); others require them...
 RUN("lua -e 'print(1)' a=b -e 'print(a)' > %s", out)
 checkout("1\nb\n")
 

@@ -21,7 +21,7 @@ end
 
 a = f(10)
 -- force a GC in this level
-local x = setmetatable({[1] = {}}, {__weakmode='kv'}); -- to detect a GC
+local x = setmode({[1] = {}}, 'kv'); -- to detect a GC
 while x[1] do   -- repeat until GC
   local a = A..A..A..A  -- create garbage
   A = A+1
@@ -34,7 +34,7 @@ assert(a[2]() == 20+A)
 assert(a[2]() == 30+A)
 assert(a[3]() == 20+A)
 assert(a[8]() == 10+A)
-assert(getmetatable(x).__weakmode == 'kv')
+assert(getmode(x) == 'kv')
 assert(B.g == 19)
 
 -- teste de closure com variavel de controle do for
@@ -102,7 +102,7 @@ print'+'
 -- teste de co-rotinas
 
 function foo (a, ...)
-  for i=1,getn(arg) do
+  for i=1,arg.n do
     assert(coroutine.yield(unpack(arg[i])) == nil)
   end
   return unpack(a)
@@ -119,6 +119,17 @@ assert(a == 'a' and b == 'b' and c == 'c' and d == nil)
 a,b,c,d = f()
 assert(a == 1 and b == 2 and c == 3 and d == nil)
 
+
+-- yields in tail calls
+local function foo (i) return coroutine.yield(i) end
+f = coroutine.create(function ()
+  for i=1,10 do
+    assert(foo(i) == nil)
+  end
+  return 'a'
+end)
+for i=1,10 do assert(f() == i) end
+assert(f() == 'a')
 
 -- recursive
 function pf (n, i)
@@ -146,7 +157,7 @@ function filter (p, g)
     while 1 do
       local n = g()
       if n == nil then return end
-      if mod(n, p) ~= 0 then coroutine.yield(n) end
+      if math.mod(n, p) ~= 0 then coroutine.yield(n) end
     end
   end, g)
 end
@@ -156,17 +167,17 @@ local a = {}
 while 1 do
   local n = x()
   if n == nil then break end
-  tinsert(a, n)
+  table.insert(a, n)
   x = filter(n, x)
 end
 
-assert(a.n == 25 and a[a.n] == 97)
+assert(table.getn(a) == 25 and a[table.getn(a)] == 97)
 
 
 -- errors in coroutines
 function foo ()
-  assert(getinfo(1).currentline == getinfo(foo).linedefined + 1)
-  assert(getinfo(2).currentline == getinfo(goo).linedefined)
+  assert(debug.getinfo(1).currentline == debug.getinfo(foo).linedefined + 1)
+  assert(debug.getinfo(2).currentline == debug.getinfo(goo).linedefined)
   coroutine.yield(3)
   error(foo)
 end

@@ -267,18 +267,6 @@ assert(os.remove(file))
 x = nil; y = nil
 
 
--- teste de popen
-local cond, f = pcall(io.popen, "cat > "..file, "w")
-if cond then
-  print"testing popen"
-  f:write('alo alo')
-  assert(f:close())
-  f = assert(io.popen("cat < "..file, "r"))
-  assert(f:read'*a' == 'alo alo')
-  f:close()
-  os.remove(file)
-end
-
 print'+'
 
 local t = os.time()

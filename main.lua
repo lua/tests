@@ -73,11 +73,11 @@ checkout("1\tnil\n")
 
 prepfile[[
 = (6*2-6) -- ===
-a \
-= 10\
+a 
+= 10
 print(a)
 = a]]
-RUN("lua -q < %s > %s", prog, out)
+RUN("lua _PROMPT= _PROMPT2= -i < %s > %s", prog, out)
 checkout("6\n10\n10\n\n")
 
 prompt = "alo"
@@ -87,13 +87,13 @@ a = 2
 RUN("lua _PROMPT=%s -i < %s > %s", prompt, prog, out)
 checkout(strrep(prompt, 3).."\n")
 
-prepfile[[ -- \
-function f(x) \
-  return x+1    \
+prepfile[[ -- 
+function f(x) 
+  return x+1 
   -- \\
 end
 print(f(10))]]
-RUN("lua -q < %s > %s", prog, out)
+RUN("lua _PROMPT= _PROMPT2= -i < %s > %s", prog, out)
 checkout("11\n\n")
   
 prepfile[[#comment in 1st line without \n at the end]]

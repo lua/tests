@@ -223,6 +223,7 @@ do
   f:write("x")
   assert(fr:read("*all") == "")  -- full buffer; output not written yet
   f:close()
+  fr:seek("set")
   assert(fr:read("*all") == "x")   -- `close' flushes it
   f = assert(io.open(file), "w")
   f:setvbuf("no")
@@ -233,8 +234,10 @@ do
   f = assert(io.open(file, "a"))
   f:setvbuf("line")
   f:write("x")
+  fr:seek("set", 1)
   assert(fr:read("*all") == "")   -- line buffer; no output without `\n'
   f:write("a\n")
+  fr:seek("set", 1)
   assert(fr:read("*all") == "xa\n")  -- now we have a whole line
   f:close(); fr:close()
 end

@@ -1,278 +1,257 @@
+global print, assert, type, collectgarbage, loadfile, loadstring, tonumber,
+       _VERSION, pcall
+global str, io, os, math
+global in nil
+
 print('testando i/o')
 
-assert(type(_INPUT) == "userdata")
+assert(type(io.input()) == "userdata")
 
-a,b,c = readfrom('xuxu_nao_existe')
+local a,b,c = io.open('xuxu_nao_existe')
 assert(not a and type(b) == "string" and type(c) == "number")
 
-a,b,c = writeto('/a/b/c/d')
+a,b,c = io.open('/a/b/c/d', 'w')
 assert(not a and type(b) == "string" and type(c) == "number")
 
-a,b,c = appendto('/a/b/c/d')
-assert(not a and type(b) == "string" and type(c) == "number")
+local file = os.tmpname()
+local otherfile = os.tmpname()
 
-file = tmpname()
-otherfile = tmpname()
+assert(os.setlocale('C', 'all'))
 
-assert(setlocale('C', 'all'))
+io.input(io.stdin); io.output(io.stdout);
 
-readfrom()
-writeto()
-assert(_INPUT == _STDIN and _OUTPUT == _STDOUT)
+os.remove(file)
+assert(loadfile(file) == nil)
+assert(io.open(file) == nil)
+io.output(file)
+assert(io.output() ~= io.stdout)
 
-remove(file)
-assert(dofile(file) == nil)
-assert(readfrom(file) == nil)
-assert(type(writeto(file)) == 'userdata')
-assert(_OUTPUT ~= _STDOUT)
+assert(io.output():seek() == 0)
+assert(io.write("alo alo"))
+assert(io.output():seek() == str.len("alo alo"))
+assert(io.output():seek("cur", -3) == str.len("alo alo")-3)
+assert(io.write("joao"))
+assert(io.output():seek("end") == str.len("alo joao"))
 
-assert(seek(_OUTPUT) == 0)
-assert(write("alo alo"))
-assert(seek(_OUTPUT) == strlen("alo alo"))
-assert(seek(_OUTPUT, "cur", -3) == strlen("alo alo")-3)
-assert(write("joao"))
-assert(seek(_OUTPUT, "end") == strlen("alo joao"))
+assert(io.output():seek("set") == 0)
 
-assert(seek(_OUTPUT, "set") == 0)
-
-assert(write('"álo"', "{a}\n", "second line\n", "third\0line \n"))
-assert(write('çfourth_line'))
-_OUTPUT = _STDOUT;
+assert(io.write('"álo"', "{a}\n", "second line\n", "third line \n"))
+assert(io.write('çfourth_line'))
+io.output(io.stdout)
 collectgarbage()  -- file should be closed by GC
-assert(_INPUT == _STDIN and _OUTPUT == _STDOUT)
+assert(io.input() == io.stdin and io.output() == io.stdout)
 print('+')
 
-assert(rename(file, otherfile))
-assert(rename(file, otherfile) == nil)
+assert(os.rename(file, otherfile))
+assert(os.rename(file, otherfile) == nil)
 
-assert(appendto(otherfile))
-assert(write("\n\n\t\t  3450\n"));
-assert(writeto())
+io.output(io.open(otherfile, "a"))
+assert(io.write("\n\n\t\t  3450\n"));
+io.close(io.output())
 
-assert(rename(otherfile, file))
-assert(readfrom(file))
-assert(read(0) == "")   -- not eof
-assert(read(5, '*l') == '"álo"')
-assert(read(0) == "")
-assert(read() == "second line")
-x = seek(_INPUT)
-assert(read() == "third\0line ")
-assert(seek(_INPUT, "set", x))
-assert(read('*l') == "third\0line ")
-if call(read, {"{a?}b?c?"}, "x", nil) then  -- read patterns implemented!
-  print "        testando read patterns (deprecated!)"
-  assert(read('.') == "ç")
-  assert(read'{%s*}%S+' == "fourth_line")
-else
-  assert(read(1) == "ç")
-  assert(read(strlen"fourth_line") == "fourth_line")
-end
-assert(seek(_INPUT, "cur", -strlen"fourth_line"))
-assert(read() == "fourth_line")
-assert(read() == "")  -- empty line
-assert(read('*n') == 3450)
-assert(read(1) == '\n')
-assert(read(0) == nil)  -- end of file
-assert(read(1) == nil)  -- end of file
-assert(({read(1)})[2] == nil)
-assert(read() == nil)  -- end of file
-assert(({read()})[2] == nil)
-assert(read('*n') == nil)  -- end of file
-assert(({read('*n')})[2] == nil)
-assert(read('*a') == '')  -- end of file (OK for `*a')
+assert(os.rename(otherfile, file))
+io.input(file)
+assert(io.read(0) == "")   -- not eof
+assert(io.read(5, '*l') == '"álo"')
+assert(io.read(0) == "")
+assert(io.read() == "second line")
+local x = io.input():seek()
+assert(io.read() == "third line ")
+assert(io.input():seek("set", x))
+assert(io.read('*l') == "third line ")
+assert(io.read(1) == "ç")
+assert(io.read(str.len"fourth_line") == "fourth_line")
+assert(io.input():seek("cur", -str.len"fourth_line"))
+assert(io.read() == "fourth_line")
+assert(io.read() == "")  -- empty line
+assert(io.read('*n') == 3450)
+assert(io.read(1) == '\n')
+assert(io.read(0) == nil)  -- end of file
+assert(io.read(1) == nil)  -- end of file
+assert(({io.read(1)})[2] == nil)
+assert(io.read() == nil)  -- end of file
+assert(({io.read()})[2] == nil)
+assert(io.read('*n') == nil)  -- end of file
+assert(({io.read('*n')})[2] == nil)
+assert(io.read('*a') == '')  -- end of file (OK for `*a')
+assert(io.read('*a') == '')  -- end of file (OK for `*a')
 collectgarbage()
 print('+')
-assert(readfrom())
-assert(remove(file))
+io.close(io.input())
+assert(os.remove(file))
 
-t = '0123456789'
-i=1
+local t = '0123456789'
 for i=1,12 do t = t..t; end
-l = strlen(t)
-assert(l == 10*2^12)
+assert(str.len(t) == 10*2^12)
 
-writeto(file)
-write("alo\n")
-writeto()
-f = appendto(file)
+io.output(file)
+io.write("alo\n")
+io.close(io.output())
+local f = io.open(file, "a")
+io.output(f)
 collectgarbage()
 
-assert(write(' ' .. t .. ' '))
-assert(write(';', 'end of file\n'))
-flush(f); flush()
-writeto()
+assert(io.write(' ' .. t .. ' '))
+assert(io.write(';', 'end of file\n'))
+f:flush(); io.flush()
+io.close(f)
 print('+')
 
-assert(readfrom(file))
-assert(read() == "alo")
-assert(read'*u ' == '')
-assert(read('*u ') == t)
-assert(read(0))
-assert(read('*a') == ';end of file\n')
-assert(read(0) == nil)
-assert(readfrom())
+io.input(file)
+assert(io.read() == "alo")
+assert(io.read(1) == ' ')
+assert(io.read(str.len(t)) == t)
+assert(io.read(1) == ' ')
+assert(io.read(0))
+assert(io.read('*a') == ';end of file\n')
+assert(io.read(0) == nil)
+assert(io.close(io.input()))
 
-assert(remove(file))
+assert(os.remove(file))
 print('+')
 
-x1 = "string\n\n\\com \"\"''coisas [[estranhas]] ]]'"
-assert(writeto(file))
-assert(write(format("x2 = %q\n-- comentário sem EOL no final", x1)))
-assert(writeto())
-assert(dofile(file))
-assert(x1 == x2)
+local x1 = "string\n\n\\com \"\"''coisas [[estranhas]] ]]'"
+io.output(file)
+assert(io.write(str.format("x2 = %q\n-- comentário sem EOL no final", x1)))
+io.close(io.output())
+assert(loadfile(file))()
+do global x2; assert(x1 == x2) end
 print('+')
-assert(remove(file))
-assert(remove(file) == nil)
-assert(remove(otherfile) == nil)
+assert(os.remove(file))
+assert(os.remove(file) == nil)
+assert(os.remove(otherfile) == nil)
 
-assert(writeto(file))
-assert(write("qualquer coisa\n"))
-assert(write("mais qualquer coisa"))
-assert(writeto())
-_OUTPUT = assert(openfile(otherfile, 'wb'))
-assert(write("outra coisa\0\1\3\0\0\0\0\255\0"))
-assert(writeto())
+io.output(file)
+assert(io.write("qualquer coisa\n"))
+assert(io.write("mais qualquer coisa"))
+io.close(io.output())
+io.output(assert(io.open(otherfile, 'wb')))
+assert(io.write("outra coisa\0\1\3\0\0\0\0\255\0"))
+io.close(io.output())
 
-filehandle = assert(openfile(file, 'r'))
-otherfilehandle = assert(openfile(otherfile, 'rb'))
+local filehandle = assert(io.open(file, 'r'))
+local otherfilehandle = assert(io.open(otherfile, 'rb'))
 assert(filehandle ~= otherfilehandle)
 assert(type(filehandle) == "userdata")
-assert(read(filehandle,'*l') == "qualquer coisa")
-_INPUT = otherfilehandle
-assert(read(strlen"outra coisa") == "outra coisa")
-assert(read(filehandle, '*l') == "mais qualquer coisa")
-closefile(filehandle);
+assert(filehandle:read('*l') == "qualquer coisa")
+io.input(otherfilehandle)
+assert(io.read(str.len"outra coisa") == "outra coisa")
+assert(filehandle:read('*l') == "mais qualquer coisa")
+io.close(filehandle);
 assert(type(filehandle) == "userdata")
-_INPUT = otherfilehandle
-assert(read(4) == "\0\1\3\0")
-assert(read(3) == "\0\0\0")
-assert(read(0) == "")        -- 255 is not eof
-assert(read(1) == "\255")
-assert(read('*a') == "\0")
-assert(not read(0))
-assert(otherfilehandle == _INPUT)
-readfrom()  -- close otherfilehandle
-assert(remove(file))
-assert(remove(otherfile))
-assert(_INPUT == _STDIN)
+io.input(otherfilehandle)
+assert(io.read(4) == "\0\1\3\0")
+assert(io.read(3) == "\0\0\0")
+assert(io.read(0) == "")        -- 255 is not eof
+assert(io.read(1) == "\255")
+assert(io.read('*a') == "\0")
+assert(not io.read(0))
+assert(otherfilehandle == io.input())
+io.close(otherfilehandle)
+assert(os.remove(file))
+assert(os.remove(otherfile))
 collectgarbage()
 
-assert(writeto(file))
-write[[
+io.output(file)
+io.write[[
  123.4	-56e-2  not a number
 second line
 third line
-a_word   another_word
+
 and the rest of the file
 ]]
-assert(writeto())
-assert(readfrom(file))
-_,a,b,c,d,e,f,g,h,__ = read(_INPUT, 1, '*n', '*n', '*l', '*l', '*l',
-                              '*uword', '*uword', '*a', 10)
-assert(readfrom())
+io.close(io.output())
+io.input(file)
+local _,a,b,c,d,e,h,__ = io.read(1, '*n', '*n', '*l', '*l', '*l', '*a', 10)
+assert(io.close(io.input()))
 assert(_ == ' ' and __ == nil)
 assert(type(a) == 'number' and a==123.4 and b==-56e-2)
 assert(d=='second line' and e=='third line')
-assert(f=='a_' and g=='   another_')
 assert(h==[[
 
 and the rest of the file
 ]])
-assert(remove(file))
+assert(os.remove(file))
 collectgarbage()
 
 
 
--- teste de read_until
-assert(writeto(file))
-write'01001000100001000001010101\n'
-write'01001000100001000001010101\n'
-write'01001000100001000001010101\n'
-writeto()
-assert(readfrom(file))
-assert(read("*u0001") == "01001")
-assert(read("*u101") == "0000100000")
-read()  -- go to next line
-assert(read("*u101\n") == "01001000100001000001010")
-assert(read("*u01\0") == "01001000100001000001010101\n")
-assert(read("*u01") == nil)
-assert(read("*u0") == nil)
-readfrom()
-assert(writeto(file))
-write'01'
-writeto()
-assert(readfrom(file)); assert(read('*u1') == '0')
-assert(readfrom(file)); assert(read('*u01') == '')
-assert(readfrom(file)); assert(read('*u01\0') == '01')
-assert(readfrom(file)); assert(read('*u001') == '01')
-assert(remove(file))
-
 -- teste de arquivos grandes (> BUFSIZ)
-assert(writeto(file))
-for i=1,5001 do write('0123456789123') end
-write('012346')
-writeto()
-assert(readfrom(file))
-x = read('*a')
-seek(_INPUT, 'set', 0)
-y = read(30001)..read(1005)..read(0)..read(1)..read(100003)
-assert(x == y and strlen(x) == 5001*13 + 6)
-seek(_INPUT, 'set', 0)
-y = read('*u012346')
-assert(x == y..'012346')
-seek(_INPUT, 'set', 0)
-y = read()  -- huge line
-assert(x == y)
-readfrom()
-assert(remove(file))
+io.output(file)
+for i=1,5001 do io.write('0123456789123') end
+io.write('\n12346')
+io.close(io.output())
+io.input(file)
+local x = io.read('*a')
+io.input():seek('set', 0)
+local y = io.read(30001)..io.read(1005)..io.read(0)..io.read(1)..io.read(100003)
+assert(x == y and str.len(x) == 5001*13 + 6)
+io.input():seek('set', 0)
+y = io.read()  -- huge line
+assert(x == y..'\n'..io.read())
+assert(io.read() == nil)
+io.close(io.input())
+assert(os.remove(file))
 x = nil; y = nil
 
-assert(_INPUT == _STDIN and _OUTPUT == _STDOUT)
+
+-- teste de popen
+local cond, f = pcall(nil, io.popen, "cat > "..file, "w")
+if cond then
+  print"testing popen"
+  f:write('alo alo')
+  assert(io.close(f))
+  f = assert(io.popen("cat < "..file, "r"))
+  assert(f:read'*a' == 'alo alo')
+  io.close(f)
+  os.remove(file)
+end
+
 print'+'
 
-local t = time()
-T = date("*t", t)
-assert(dostring(date([[assert(T.year==%Y and T.month==%m and T.day==%d and
+local t = os.time()
+global T; T = os.date("*t", t)
+loadstring(os.date([[assert(T.year==%Y and T.month==%m and T.day==%d and
   T.hour==%H and T.min==%M and T.sec==%S and
-  T.wday==%w+1 and T.yday==%j and tonumber(T.isdst))]], t)))
+  T.wday==%w+1 and T.yday==%j and tonumber(T.isdst))]], t))()
 
-assert(time(T) == t)
+assert(os.time(T) == t)
 
-T = date("!*t", t)
-assert(dostring(date([[!assert(T.year==%Y and T.month==%m and T.day==%d and
+T = os.date("!*t", t)
+loadstring(os.date([[!assert(T.year==%Y and T.month==%m and T.day==%d and
   T.hour==%H and T.min==%M and T.sec==%S and
-  T.wday==%w+1 and T.yday==%j and tonumber(T.isdst))]], t)))
+  T.wday==%w+1 and T.yday==%j and tonumber(T.isdst))]], t))()
 
-t = time(T)
+t = os.time(T)
 T.year = T.year-1;
-local t1 = time(T)
+local t1 = os.time(T)
 -- allow for leap years
-assert(abs(difftime(t,t1)/(24*3600) - 365) < 2)
+assert(math.abs(os.difftime(t,t1)/(24*3600) - 365) < 2)
 
-t = time()
-t1 = time(date("*t"))
-assert(difftime(t1,t) <= 2)
+t = os.time()
+t1 = os.time(os.date("*t"))
+assert(os.difftime(t1,t) <= 2)
 
-t1 = time{year=2000, month=10, day=1, hour=23, min=12, sec=17}
-t2 = time{year=2000, month=10, day=1, hour=23, min=10, sec=19}
-assert(difftime(t1,t2) == 60*2-2)
+local t1 = os.time{year=2000, month=10, day=1, hour=23, min=12, sec=17}
+local t2 = os.time{year=2000, month=10, day=1, hour=23, min=10, sec=19}
+assert(os.difftime(t1,t2) == 60*2-2)
 
-meses = { 'janeiro', 'fevereiro', 'março', 'abril',
+local meses = { 'janeiro', 'fevereiro', 'março', 'abril',
 'maio', 'junho', 'julho', 'agosto',
 'setembro', 'outubro', 'novembro', 'dezembro' }
 
-dias = {'domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'}
-assert(writeto())
-d = date('%d')
-m = tonumber(date('%m'))
-a = date('%Y')
-ds = date('%w') + 1
-h = date('%H')
-min = date('%M')
-s = date('%S')
-write(format('%s\n', date()))
-write(format('teste feito no dia %2.2d de %s de %4d (%s)',
+local dias = {'domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta',
+              'sábado'}
+io.output(io.stdout)
+local d = os.date('%d')
+local m = tonumber(os.date('%m'))
+local a = os.date('%Y')
+local ds = os.date('%w') + 1
+local h = os.date('%H')
+local min = os.date('%M')
+local s = os.date('%S')
+io.write(str.format('%s\n', os.date()))
+io.write(str.format('teste feito no dia %2.2d de %s de %4d (%s)',
           d, meses[m], a, dias[ds]))
-write(format(', as %2.2dh%2.2dm%2.2ds\n', h, min, s))
-write(format('%s\n', _VERSION))
+io.write(str.format(', as %2.2dh%2.2dm%2.2ds\n', h, min, s))
+io.write(str.format('%s\n', _VERSION))

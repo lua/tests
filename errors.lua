@@ -40,13 +40,12 @@ assert(doit"assert(nil)")
 assert(doit"a=math.sin\n(3)")
 assert(doit("function a (... , ...) end"))
 assert(doit("function a (, ...) end"))
---[[?? checksyntax('%a()', "", "a", 1)
+checksyntax('%a()', "", "a", 1)
 checksyntax([[
   local other, var = 1
   other = other or %var
 
 ]], "", "var", 2)
-]]
 
 checksyntax([[
   local a = {4
@@ -80,7 +79,7 @@ assert(not string.find(doit"aaa={}; (aaa or aaa)()", "`aaa'"))
 checkmessage([[aaa=9
 repeat until 3==3
 local x=math.sin(math.cos(3))
-if math.sin(1) == x then return 1,2,math.sin(1) end   -- tail call
+if math.sin(1) == x then return math.sin(1) end   -- tail call
 local a,b = 1, {
   {x='a'..'b'..'c', y='b', z=x},
   {1,2,3,4,5} or 3+3<=3+3,
@@ -100,6 +99,10 @@ while 1 do
   if nil then break end
   insert(prefix, w)
 end]], "global `insert'")
+
+checkmessage([[  -- tail call
+  return math.sin("a")
+]], "`sin'")
 
 print'+'
 

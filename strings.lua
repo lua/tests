@@ -104,11 +104,11 @@ assert(strlen(format('%99.99f', -1e308)) >= 100)
 assert(dostring("a = 1\n--comentário sem EOL no final"))
 
 
-assert(concat{} == "")
-assert(concat({}, 'x') == "")
-assert(concat({'\0', '\0\1', '\0\1\2'}, '.\0.') == "\0.\0.\0\1.\0.\0\1\2")
+assert(table.concat{} == "")
+assert(table.concat({}, 'x') == "")
+assert(table.concat({'\0', '\0\1', '\0\1\2'}, '.\0.') == "\0.\0.\0\1.\0.\0\1\2")
 local a = {}; for i=1,3000 do a[i] = "xuxu" end
-assert(concat(a, "123").."123" == strrep("xuxu123", 3000))
+assert(table.concat(a, "123").."123" == strrep("xuxu123", 3000))
 
 --locale 'ptb':         for MS-Windows
 --locale 'ISO-8859-1':  for Linux

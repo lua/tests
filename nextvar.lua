@@ -3,13 +3,13 @@ print('testando tables, next e fors')
 if T then
 -- testes de tamanhos
 
-function mp2 (n)   -- minimum power of 2 >= n
-  local mp = 2^ceil(log(n)/log(2))
+local function mp2 (n)   -- minimum power of 2 >= n
+  local mp = 2^math.ceil(math.log(n)/math.log(2))
   assert(mp/2 < n and n <= mp)
   return mp
 end
   
-function check (t, na, nh)
+local function check (t, na, nh)
   local a, h = T.querytab(t)
   if a ~= na or h ~= nh then
     print(na, nh, a, h)
@@ -24,8 +24,8 @@ for i=1,lim do
   s = s..i..','
   local s = s
   for k=0,lim do 
-    check(dostring(s..'}'), mp2(i), mp2(k+1))
-    s = format('%sa%d=%d,', s, k, k)
+    check(loadstring(s..'}')(), mp2(i), mp2(k+1))
+    s = string.format('%sa%d=%d,', s, k, k)
   end
 end
 
@@ -80,14 +80,13 @@ print'+'
 
 
 
-nofind = {}
+local nofind = {}
 
 a,b,c = 1,2,3
 a,b,c = nil
 
-function find (name)
+local function find (name)
   local n,v
-  local _G = globals()
   while 1 do
     n,v = next(_G, n)
     if not n then return nofind end
@@ -96,78 +95,50 @@ function find (name)
   end
 end
 
-function find1 (name)
-  for n,v in globals() do
+local function find1 (name)
+  for n,v in _G do
     if n==name then return v end
   end
   return nil  -- not found
 end
 
 do   -- create 10000 new global variables
-  for i=1,10000 do
-    setglobal(i, i)
-  end
+  for i=1,10000 do _G[i] = i end
 end
 
-
--- check deprecated functions
-if not (nextvar and call(nextvar, {n=1}, "x", nil)) then
-  print("obsolete functions not active")
-else
-
-  local _G = _G
-  do
-    local a,v
-    while 1 do
-      a,v = nextvar(a)
-      if not a then break end
-      assert(v and v == getglobal(a))
-    end
-  end
-
-  foreachvar(function (n, v)
-               assert(v and getglobal(n) == v)
-             end)
-
-  rawsetglobal('a', 'alo')
-  assert(_G.a == 'alo' and rawgetglobal('a') == _G.a)
-
-  a = {10,20}
-  rawsettable(a, 1, 100)
-  assert(a[1] == 100 and rawgettable(a, 2) == 20)
-
-end
 
 a = {x=90, y=8, z=23}
-assert(foreach(a, function(i,v) if i=='x' then return v end end) == 90)
-assert(foreach(a, function(i,v) if i=='a' then return v end end) == nil)
-foreach({}, error)
+assert(table.foreach(a, function(i,v) if i=='x' then return v end end) == 90)
+assert(table.foreach(a, function(i,v) if i=='a' then return v end end) == nil)
+table.foreach({}, error)
 
-foreachi({x=10, y=20}, error)
+table.foreachi({x=10, y=20}, error)
 local a = {n = 1}
-foreachi({n=3}, function (i, v) assert(%a.n == i and not v); %a.n=%a.n+1 end)
+table.foreachi({n=3}, function (i, v)
+  assert(%a.n == i and not v)
+  %a.n=%a.n+1
+end)
 a = {10,20,30,nil,50}
-foreachi(a, function (i,v) assert(a[i] == v) end)
-assert(foreachi({'a', 'b', 'c'}, function (i,v)
+table.foreachi(a, function (i,v) assert(a[i] == v) end)
+assert(table.foreachi({'a', 'b', 'c'}, function (i,v)
          if i==2 then return v end
        end) == 'b')
 
 
 assert(print==find("print") and print == find1("print"))
-assert(getglobal("print")==find("print"))
+assert(_G["print"]==find("print"))
 assert(assert==find1("assert"))
 assert(nofind==find("return"))
 assert(not find1("return"))
-setglobal("ret" .. "urn", nil)
+_G["ret" .. "urn"] = nil
 assert(nofind==find("return"))
-setglobal("xxx", 1)
-assert(getglobal("xxx", 1) == 1)
+_G["xxx"] = 1
 assert(xxx==find("xxx"))
 print('+')
 
 a = {}
 for i=0,10000 do
-  if mod(i,10) ~= 0 then
+  if math.mod(i,10) ~= 0 then
     a['x'..i] = i
   end
 end
@@ -180,42 +151,39 @@ end
 assert(n.n == 9000)
 a = nil
 
-do   -- remove those 10000 new global variables
-  for i=1,10000 do
-    setglobal(i, nil)
-  end
-end
+-- remove those 10000 new global variables
+for i=1,10000 do _G[i] = nil end
 
 do   -- clear global table
   local a = {}
   local preserve = {io = 1, string = 1, debug = 1, os = 1,
                     coroutine = 1, table = 1, math = 1}
-  for n,v in globals() do a[n]=v end
+  for n,v in _G do a[n]=v end
   for n,v in a do
     if not preserve[n] and type(v) ~= "function" and
-       not strfind(n, "^[%u_]") then
-      setglobal(n, nil);
+       not string.find(n, "^[%u_]") then
+     _G[n] = nil
     end
     collectgarbage()
   end
 end
 
-do
-  local globals, assert, next = globals, assert, next
+local function foo ()
+  local setglobals, assert, next = setglobals, assert, next
   local n = {gl1=3}
-  local a = globals(n)
+  setglobals(n)
   assert(print == nil and gl1 == 3)
   gl1 = nil
   gl = 1
   assert(n.gl == 1 and next(n, 'gl') == nil)
-  globals(a)
-
-  print'+'
 end
+foo()
 
-function checknext (a)
+print'+'
+
+local function checknext (a)
   local b = {}
-  foreach(a, function (k,v) b[k] = v end)
+  table.foreach(a, function (k,v) b[k] = v end)
   for k,v in b do assert(a[k] == v) end
   for k,v in a do assert(b[k] == v) end
   b = {}
@@ -230,36 +198,37 @@ checknext{1,2,3,x=1,y=2,z=3}
 checknext{1,2,3,4,x=1,y=2,z=3}
 checknext{1,2,3,4,5,x=1,y=2,z=3}
 
-assert(getn{n=20} == 20)
-assert(getn{1,2,3, n=1} == 1)
-assert(getn{[-1] = 2} == 0)
-assert(getn{1,2,3,nil,5} == 5)
+assert(table.getn{n=20} == 20)
+assert(table.getn{1,2,3, n=1} == 1)
+assert(table.getn{[-1] = 2} == 0)
+assert(table.getn{1,2,3,nil,5} == 5)
 
 print("+")
 
 a = {n=0, [6] = "ban"}
-tinsert(a, 10); tinsert(a, 2, 20); tinsert(a, 1, -1); tinsert(a, 40);
-tinsert(a, a.n+1, 50)
-assert(tremove(a,1) == -1)
-assert(tremove(a,1) == 10)
-assert(tremove(a,1) == 20)
-assert(tremove(a,1) == 40)
-assert(tremove(a,1) == 50)
-assert(tremove(a,1) == nil)
+table.insert(a, 10); table.insert(a, 2, 20);
+table.insert(a, 1, -1); table.insert(a, 40);
+table.insert(a, a.n+1, 50)
+assert(table.remove(a,1) == -1)
+assert(table.remove(a,1) == 10)
+assert(table.remove(a,1) == 20)
+assert(table.remove(a,1) == 40)
+assert(table.remove(a,1) == 50)
+assert(table.remove(a,1) == nil)
 assert(a.n == 0 and a[6] == "ban")
-tinsert(a, 1, 10); tinsert(a, 1, 20); tinsert(a, 1, -1)
-assert(tremove(a) == 10)
-assert(tremove(a) == 20)
-assert(tremove(a) == -1)
+table.insert(a, 1, 10); table.insert(a, 1, 20); table.insert(a, 1, -1)
+assert(table.remove(a) == 10)
+assert(table.remove(a) == 20)
+assert(table.remove(a) == -1)
 
 a = {}
-tinsert(a, 3, 'a')
-tinsert(a, 'b')
-assert(tremove(a, 1) == nil)
-assert(tremove(a, 1) == nil)
-assert(tremove(a, 1) == 'a')
-assert(tremove(a, 1) == 'b')
-assert(getn(a) == 0)
+table.insert(a, 3, 'a')
+table.insert(a, 'b')
+assert(table.remove(a, 1) == nil)
+assert(table.remove(a, 1) == nil)
+assert(table.remove(a, 1) == 'a')
+assert(table.remove(a, 1) == 'b')
+assert(table.getn(a) == 0)
 print("+")
 
 a = {}
@@ -296,7 +265,7 @@ collectgarbage()
 
 -- teste de for generico
 
-function f (n, p)
+local function f (n, p)
   local t = {}; for i=1,p do t[i] = i*10 end
   return function (_,n)
            if n > 0 then

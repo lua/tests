@@ -277,4 +277,25 @@ a = 0; for i="10","1","-2" do a=a+1 end; assert(a==5)
 
 collectgarbage()
 
+
+-- teste de for generico
+
+function f (n, p)
+  local t = {}; for i=1,p do t[i] = i*10 end
+  return function (a,b)
+           assert(a == nil and b == nil)
+           if n > 0 then
+             n = n-1
+             return unpack(t)
+           end
+         end
+end
+
+local x = 0
+for a,b,c,d in f(5,3) do
+  x = x+1
+  assert(a == 10 and b == 20 and c == 30 and d == nil)
+end
+assert(x == 5)
+
 print"OK"

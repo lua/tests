@@ -64,7 +64,7 @@ do
   local function f () setfenv(2, {a='10'}) end
   local function g () f(); _G.assert(_G.getfenv(1).a == '10') end
   g(); assert(getfenv(g).a == '10')
-  getfenv(g).__globals = false
+  getfenv(g).__fenv = false
   assert(getfenv(g) == false)
   -- cannot change a protected global table
   assert(pcall(setfenv, g, {}) == false)

@@ -2,9 +2,9 @@ print('testando pattern matching')
 
 global in {}
 
-global strfind, strsub, gsub, gfind, strlen, strupper, strrep
+global strfind, strsub, gsub, strlen, strupper, strrep
 global assert, print, dostring, call
-global tremove, getn
+global tremove, getn, str
 
 function f(s, p)
   local i,e = strfind(s, p)
@@ -211,23 +211,23 @@ assert(rev(rev(x)) == x)
 
 -- tests for gfind
 local a = 0
-for i in gfind('abcde', '()') do assert(i == a+1); a=i end
+for i in str.gfind('abcde', '()') do assert(i == a+1); a=i end
 assert(a==6)
 
 t = {n=0}
-for w in gfind("first second word", "%w+") do
+for w in str.gfind("first second word", "%w+") do
       t.n=t.n+1; t[t.n] = w
 end
 assert(t[1] == "first" and t[2] == "second" and t[3] == "word")
 
 t = {3, 6, 9}
-for i in gfind ("xuxx uu ppar r", "()(.)%2") do
+for i in str.gfind ("xuxx uu ppar r", "()(.)%2") do
   assert(i == tremove(t, 1))
 end
 assert(getn(t) == 0)
 
 t = {}
-for i,j in gfind("13 14 10 = 11, 15= 16, 22=23", "(%d+)%s*=%s*(%d+)") do
+for i,j in str.gfind("13 14 10 = 11, 15= 16, 22=23", "(%d+)%s*=%s*(%d+)") do
   t[i] = j
 end
 a = 0

@@ -233,6 +233,15 @@ tinsert(a, 1, 10); tinsert(a, 1, 20); tinsert(a, 1, -1)
 assert(tremove(a) == 10)
 assert(tremove(a) == 20)
 assert(tremove(a) == -1)
+
+a = {}
+tinsert(a, 3, 'a')
+tinsert(a, 'b')
+assert(tremove(a, 1) == nil)
+assert(tremove(a, 1) == nil)
+assert(tremove(a, 1) == 'a')
+assert(tremove(a, 1) == 'b')
+assert(getn(a) == 0)
 print("+")
 
 a = {}

@@ -1,6 +1,8 @@
 #!../lua
 $debug
 
+local c = clock()
+
 _WD = wd or ""
 
 assert(setlocale"C")
@@ -63,10 +65,11 @@ $ifnot _hard_i
 print('limpando tudo!!!!')
 local preserve = {showmem = 1, collectgarbage = 1, print = 1, tostring = 1,
   settag = 1, tag = 1, type = 1, _STDERR = 1, totalmem = 1, error = 1,
-  format = 1, execute = 1, }
+  format = 1, execute = 1, format = 1, clock = 1, }
 
 foreachvar(function (n) if not %preserve[n] then %setglobal(n, nil) end end)
 $end
 
 collectgarbage();showmem()
 
+print(format("\n\ntempo total: %.2f\n", clock()-c))

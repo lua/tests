@@ -371,12 +371,12 @@ for n,_ in a do a[n] = nil end
 collectgarbage()
 assert(cl.n == 1 and cl[40] == 1)   -- old `x' must be collected
 
-
-assert(T.equal(print, print))
-assert(T.equal('alo', "alo"))
-assert(not T.equal({}, {}))
-assert(not T.equal())
-assert(not T.equal(3))
+-- testando lua_equal
+assert(T.testC("equal 2 4; return 1", print, 1, print, 20))
+assert(T.testC("equal 3 2; return 1", 'alo', "alo"))
+assert(not T.testC("equal 2 3; return 1", {}, {}))
+assert(not T.testC("equal 2 3; return 1"))
+assert(not T.testC("equal 2 3; return 1", 3))
 
 print'+'
 

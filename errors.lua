@@ -186,6 +186,9 @@ checksyntax("1.000", "", "1.000", 1)
 checksyntax("[[a]]", "", "[[a]]", 1)
 checksyntax("'aa'", "", "'aa'", 1)
 
+-- test 255 as first char in a chunk
+checksyntax("\255a = 1", "", "\255", 1)
+
 doit('I = loadstring("a=9+"); a=3')
 assert(a==3 and I == nil)
 print('+')

@@ -116,6 +116,14 @@ checkout("11\n1\t2\n\n")
 prepfile[[#comment in 1st line without \n at the end]]
 RUN("lua %s", prog)
 
+prepfile("#comment with a binary file\n"..string.dump(loadstring("print(1)")))
+RUN("lua %s > %s", prog, out)
+checkout("1\n")
+
+prepfile("#comment with a binary file\r\n"..string.dump(loadstring("print(1)")))
+RUN("lua %s > %s", prog, out)
+checkout("1\n")
+
 -- close Lua with an open file
 prepfile(string.format([[io.output(%q); io.write('alo')]], out))
 RUN("lua %s", prog)

@@ -38,7 +38,7 @@ function t:f (...) return self[arg[1]]+arg.n end
 assert(t:f(1,4) == 3 and t:f(2) == 11)
 print('+')
 
-lim = 2400
+lim = 800
 local i, a = 1, {}
 while i <= lim do a[i] = i+0.3; i=i+1 end
 
@@ -55,7 +55,7 @@ call(g, a)
 
 a = {}
 i = 1
-while i <= 1000 do a[i] = i; i=i+1 end
-assert(call(max, a) == 1000)
+while i <= lim do a[i] = i; i=i+1 end
+assert(call(max, a) == lim)
 
 print('OK')

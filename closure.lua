@@ -143,7 +143,8 @@ end
 f = coroutine.wrap(foo)
 local a = {}
 assert(f(a) == _G)
-assert(f() == _G)
+local a,b = pcall(f)
+assert(a and b == _G)
 
 
 -- tests for multiple yield/resume arguments

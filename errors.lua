@@ -105,9 +105,9 @@ print'+'
 -- teste de linha do erro
 
 function lineerror (s)
-  local line
-  xpcall(function (s) line = getinfo(2, "l").currentline end, loadstring(s))
-  return line
+  local err,msg = pcall(loadstring(s))
+  local _, _, line = string.find(msg, ":(%d+):")
+  return line+0
 end
 
 assert(lineerror"local a\n for i=1,'a' do \n print(i) \n end" == 2)
@@ -117,37 +117,40 @@ assert(lineerror"\n\n for k,v in \n 3 \n do \n print(k) \n end" == 4)
 lineerror = nil
 
 C = 0
-function y () C=C+1; y() end
+local l = getinfo(1, "l").currentline; function y () C=C+1; y() end
 
-function checkstackmessage (m)
-  return (string.find(m, "^.-:%d+: stack overflow$"))
+local function checkstackmessage (m)
+  return (string.find(m, "^.-:%d+: stack overflow"))
 end
 assert(checkstackmessage(doit('y()')))
 assert(checkstackmessage(doit('y()')))
 assert(checkstackmessage(doit('y()')))
 -- teste de linhas em erro
 C = 0
-xpcall(function (s)
-  if not checkstackmessage(s) then print(s)
-    io.stderr:write("exiting!!\n"); os.exit(1)
-  end
-  local l = getinfo(2, "l").currentline
-  assert(getinfo(1, "l").currentline == l+15)
-  for i=1,C-1 do assert(getinfo(2+i, "l").currentline == l) end
-  assert(getinfo(2+C, "l").currentline == -1)  -- `call'
-  assert(getinfo(3+C, "l").currentline == l+10)  -- this file
-end, y)
+local l1
+local function g()
+  l1 = getinfo(1, "l").currentline; y()
+end
+local _, msg, stackmsg = pcall(g)
+assert(checkstackmessage(msg))
+local stack = {}
+for line in string.gfind(stackmsg, "[^\n]*") do
+  local _, _, curr = string.find(line, ":(%d+):")
+  if curr then table.insert(stack, curr+0) end
+end
+local i=1
+while stack[i] ~= l1 do
+  assert(stack[i] == l)
+  i = i+1
+end
+assert(i > 15)
+
 print('+')
 checksyntax(("syntax error"), "", "error", 1)
 
-doit('i = loadstring("a=9+"); a=3')
-assert(a==3 and i == nil)
+doit('I = loadstring("a=9+"); a=3')
+assert(a==3 and I == nil)
 print('+')
-
-do
-  local a,b = xpcall(error, function () a='x'+1 end)
-  assert(a == nil and b == "error in error handling")
-end
 
 lim = 1000
 if _soft then lim = 100 end

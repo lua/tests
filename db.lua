@@ -188,8 +188,8 @@ _ = 'alo\
 alo' .. [[
 
 ]]
-  	
-
+--[[
+]]
 assert(getinfo(1, "l").currentline == L+11)  -- check count of lines
 
 

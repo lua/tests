@@ -2,7 +2,7 @@ print "testando operacoes W"
 
 require "checktable.lua"
 
--- lots of empty lines (to force SETLINEW)
+--[[ lots of empty lines (to force SETLINEW)
 
 
 
@@ -206,7 +206,7 @@ require "checktable.lua"
 
 
 
-
+--]]
 
 
 a,b = nil,nil

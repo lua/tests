@@ -1,5 +1,11 @@
 #!../lua
 
+--[[
+  example of a long [comment],
+  [[spanning several [lines]]]
+
+]]
+
 local c = clock()
 
 _WD = wd or ""

@@ -14,6 +14,8 @@ end
 
 function vararg (...) return arg end
 
+local call = function (f, args) return f(unpack(args)) end
+
 assert(f() == 0)
 assert(f({1,2,3}, 1, 2, 3) == 3)
 assert(f({"alo", nil, 45, f, nil}, "alo", nil, 45, f, nil) == 5)

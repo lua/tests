@@ -74,10 +74,22 @@ for i=1,lim do
   check(a, mp2(i), 1)
 end
 
+-- size tests for vararg
+lim = 35
+function foo (n, ...)
+  check(arg, n, 2)
+  arg[n+1] = true
+  check(arg, mp2(n+1), 2)
+  arg.x = true
+  check(arg, mp2(n+1), 4)
+end
+local a = {}
+for i=1,lim do a[i] = true end
+for i=1,lim do a.n = i; foo(i, unpack(a)) end
+
 end
 
 print'+'
-
 
 
 local nofind = {}

@@ -1,21 +1,37 @@
 print("testando reais e bib. matematica")
 
 assert(tonumber{} == nil)
-assert(tonumber(-12) == -10-2)
-assert(tonumber('1e') == nil)
+assert(tonumber'+0.01' == 1/100 and tonumber'+.01' == 0.01 and
+       tonumber'.01' == 0.01    and tonumber'-1.' == -1 and
+       tonumber'+1.' == 1)
+assert(tonumber'+ 0.01' == nil and tonumber'+.e1' == nil and
+       tonumber'1e' == nil     and tonumber'1.0e+' == nil and
+       tonumber'.' == nil)
+assert(tonumber('-12') == -10-2)
+assert(tonumber('-1.2e2') == -120)
 assert(tonumber('1  a') == nil)
-assert(tonumber(' . ') == nil)
-assert(tonumber('1010', 2) == 10)
+assert(tonumber('e1') == nil)
+assert(tonumber('e  1') == nil)
+assert(tonumber(' 3.4.5 ') == nil)
+assert(tonumber('') == nil)
+assert(tonumber('  ') == nil)
+assert(tonumber('  ', 9) == nil)
+assert(tonumber('  1010  ', 2) == 10)
 assert(tonumber('10', 36) == 36)
-assert(tonumber('-10', 36) == -36)
-assert(tonumber('-fFfa', 16) == -(10+(16*(15+(16*(15+(16*15)))))))
+--assert(tonumber('-10', 36) == -36)
+--assert(tonumber('-fFfa', 16) == -(10+(16*(15+(16*(15+(16*15)))))))
+assert(tonumber('fFfa', 15) == nil)
+--assert(tonumber(strrep('1', 42), 2) + 1 == 2^42)
+assert(tonumber(strrep('1', 32), 2) + 1 == 2^32)
+--assert(tonumber('-fffffFFFFF', 16)-1 == -2^40)
+assert(tonumber('ffffFFFF', 16)+1 == 2^32)
 
 assert(1.1 == 1.+.1)
 assert(100.0 == 1e2 and .01 == 1e-2)
 assert(1111111111111111-1111111111111110== 1000.00e-03)
 --     1234567890123456
 assert(1.1 == '1.'+'.1')
-assert('1111111111111111'-'1111111111111110' == tonumber"  0.001e+3 \n\t")
+assert('1111111111111111'-'1111111111111110' == tonumber"  +0.001e+3 \n\t")
 
 function eq (a,b,limit)
   if not limit then limit = 10e-10 end
@@ -26,7 +42,7 @@ assert(0.1e-30 > 0.9E-31 and 0.9E30 < 0.1e31)
 
 assert(0.123456 > 0.123455)
 
-assert(tonumber('1.23e30') == 1.23e30)
+assert(tonumber('+1.23e30') == 1.23*10^30)
 
 assert(eq(sin(-9.8)^2 + cos(-9.8)^2, 1))
 assert(eq(sin(90), 1) and eq(cos(90), 0))

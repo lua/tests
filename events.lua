@@ -110,6 +110,10 @@ assert(b+5 == b)
 assert(cap[1] == b and cap[2] == 5 and cap.n == 2)
 assert(b+'5' == b)
 assert(cap[1] == b and cap[2] == '5' and cap.n == 2)
+assert(5+b == 5)
+assert(cap[1] == 5 and cap[2] == b and cap.n == 2)
+assert('5'+b == '5')
+assert(cap[1] == '5' and cap[2] == b and cap.n == 2)
 b=b-3; assert(getmetatable(b) == t)
 assert(5-a == 5)
 assert(cap[1] == 5 and cap[2] == a and cap.n == 2)
@@ -278,11 +282,11 @@ assert(getmetatable(newproxy(false)) == nil)
 
 local u = newproxy(true)
 
-getmetatable(u).__settable = function (u,k,v)
+getmetatable(u).__newindex = function (u,k,v)
   getmetatable(u)[k] = v
 end
 
-getmetatable(u).__gettable = function (u,k)
+getmetatable(u).__index = function (u,k)
   return getmetatable(u)[k]
 end
 

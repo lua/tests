@@ -1,12 +1,13 @@
 print "testando closures e co-rotinas"
 
-local A = 0
+local A,B = 0,{g=10}
+global g in B
 function f(x)
   local a = {}
   for i=1,10000 do
     local y = 0
     do
-      a[i] = function () y = y+x; return y+A end
+      a[i] = function () g = g+1; y = y+x; return y+A end
     end
   end
   local dummy = function () return a[A] end
@@ -15,12 +16,13 @@ function f(x)
   assert(a[1]() == x)
   assert(a[3]() == x)
   collectgarbage()
+  assert(g == 12)
   return a
 end
 
 a = f(10)
 -- force a GC in this level
-local x = metatable({[1] = {}}, {weakmode='kv'}); -- to detect a GC
+local x = metatable({[1] = {}}, {__weakmode='kv'}); -- to detect a GC
 while x[1] do   -- repeat until GC
   local a = A..A..A..A  -- create garbage
   A = A+1
@@ -33,7 +35,8 @@ assert(a[2]() == 20+A)
 assert(a[2]() == 30+A)
 assert(a[3]() == 20+A)
 assert(a[8]() == 10+A)
-assert(metatable(x).weakmode == 'kv')
+assert(metatable(x).__weakmode == 'kv')
+assert(g == 19)
 
 -- teste de closure com variavel de controle do for
 a = {}

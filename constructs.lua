@@ -23,6 +23,11 @@ assert((x>y) and x or y == 2);
 
 assert(1234567890 == tonumber('1234567890') and 1234567890+1 == 1234567891)
 
+
+-- loops bobos
+repeat until 1; repeat until true;
+while false do end; while nil do end;
+
 -- old constructor-syntax compatibility test
 x = {}; x={;}; x={x=1;}; x={;x=1}; x={1}; x={1;}; x={;1}; x={1;x=1}; x={x=1;1}
 x={x=1,;}; x={;x=1,}; x={1,}; x={1,;}; x={;1,}; x={1,;x=1,}; x={x=1,;1,}
@@ -214,16 +219,19 @@ repeat
   local s = f(neg, i)..'ID('..f(neg, i)..f(arg, i)..f(op, i)..
             f(neg, i)..'ID('..f(arg, i)..f(op, i)..f(neg, i)..f(arg, i)..'))'
   local s1 = gsub(s, 'ID', '')
-  X,NX = nil
+  K,X,NX,WX1,WX2 = nil
   s = format([[
       local a = %s
       local b = not %s
+      K = b
       local xxx; 
       if %s then X = a  else X = b end
       if %s then NX = b  else NX = a end
-  ]], s1, s, s1, s)
+      while %s do WX1 = a; break end
+      while %s do WX2 = a; break end
+  ]], s1, s, s1, s, s1, s)
   assert(dostring(s))
-  assert(X and not NX)
+  assert(X and not NX and not WX1 == K and not WX2 == K)
   if mod(i,4000) == 0 then print('+') end
   i = i+1
 until i==c

@@ -26,6 +26,10 @@ assert(1234567890 == tonumber('1234567890') and 1234567890+1 == 1234567891)
 x = {}; x={;}; x={x=1;}; x={;x=1}; x={1}; x={1;}; x={;1}; x={1;x=1}; x={x=1;1}
 x={x=1,;}; x={;x=1,}; x={1,}; x={1,;}; x={;1,}; x={1,;x=1,}; x={x=1,;1,}
 
+do  -- test old bug (first name could not be an `upvalue')
+ local a; function f(x) x={a=1}; x={x=1}; x={G=1} end
+end
+
 local f = function (i)
   if i < 10 then return 'a';
   elseif i < 20 then return 'b';
@@ -35,13 +39,6 @@ end
 
 assert(f(3) == 'a' and f(12) == 'b' and f(26) == 'c' and f(100) == nil)
 
-|loop| do
-  while 1 do
-    break loop
-  end
-  assert(nil)
-end
-
 for i=1,1000 do break end
 n=100
 i=3
@@ -49,17 +46,14 @@ t = {}
 a=0; for i=1,n do for i=i,1,-1 do a=a+1; t[i]=1 end end
 assert(a == n*(n+1)/2 and i==3)
 assert(t[1] and t[n] and not t[0] and not t[n+1])
-|b| do |a| break a; end
-|b| if 1 then |a| break b; end
 
 function f(b)
   local x = 1
-  |loop| repeat
+  repeat
     local a;
-|cond|
-    if b==1 then local b=1; x=10; break loop;
+    if b==1 then local b=1; x=10; break;
     elseif b==2 then x=20; break;
-    elseif b==3 then x=30; break cond
+    elseif b==3 then x=30;
     else local a,b,c,d=sin(1); x=x+1;
     end
   until x>=12;
@@ -124,12 +118,12 @@ print'+'
 
 
 f = [[
-return function (a,b,c,d,e)
+return function ( a , b , c , d , e )
   local x = a >= b or c or ( d and e ) or nil
   return x
 end , { a = 1 , b = 2 >= 1 , } or { 1 }
 ]]
-f = gsub(f, " ", "\n")   -- force a SETLINE between opcodes
+f = gsub(f, "%s+", "\n")   -- force a SETLINE between opcodes
 f,a = dostring(f)
 assert(a.a == 1 and a.b)
 
@@ -165,7 +159,10 @@ do
   assert(a==2)
 end
 
-function F(a) return a,2,3 end
+function F(a)
+  assert(getinfo(1, "n").name == 'F')
+  return a,2,3
+end
 
 a,b = F(1)~=nil; assert(a == 1 and b == nil)
 a,b = F(nil)==nil; assert(a == 1 and b == nil)
@@ -182,9 +179,9 @@ function f(t, i)
   return t[res]
 end
 
-local arg = {"(1<2)", "\n(1>=2)\n", "F(\n)", "nil"; n=4}
+local arg = {" ( 1 < 2 ) ", " ( 1 >= 2 ) ", " F ( ) ", "  nil "; n=4}
 
-local op = {" and\n", "\n or ", " == ", " ~= "; n=4}
+local op = {" and ", " or ", " == ", " ~= "; n=4}
 
 local neg = {" ", " not "; n=2}
 
@@ -193,8 +190,9 @@ repeat
   c = 1
   local s = f(neg, i)..'('..f(neg, i)..f(arg, i)..f(op, i)..
             f(neg, i)..'('..f(arg, i)..f(op, i)..f(neg, i)..f(arg, i)..'))'
+  s = gsub(s, "%s+", "\n")   -- force a SETLINE between opcodes
   X,NX = nil
-  s = format("a = %s; if %s then X,NX=a,not a else X,NX=not a,a end", s, s)
+  s = format("a = %s; local xxx; if %s then X,NX=a,not a else X,NX=not a,a end", s, s)
   assert(dostring(s))
   assert(X and not NX)
   i = i+1

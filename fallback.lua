@@ -1,9 +1,7 @@
 
-$ifnot setfallback
-
+if setfallback==nil then
   assert(dofile(_WD..'setfallback.lua'))
-
-$end
+end
 
 print('testando fallbacks')
 -- Inheritance

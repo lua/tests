@@ -35,8 +35,8 @@ assert(seek(_OUTPUT, "set") == 0)
 
 assert(write('"álo"', "{a}\n", "second line\n", "third line \n"))
 assert(write('çfourth_line'))
-writeto()
 _OUTPUT = _STDOUT;
+collectgarbage()  -- file should be closed by GC
 assert(_INPUT == _STDIN and _OUTPUT == _STDOUT)
 print('+')
 

@@ -41,15 +41,17 @@ function setfallback (name, func)
     oldfunc = settagmethod(tag(nil), 'getglobal', func)
   elseif name == 'arith' then
     oldfunc = gettagmethod(tag(0), 'pow')
-    foreach({"add", "sub", "mul", "div", "unm", "pow"},
-            function(_, n) %fillvalids(n, %func) end)
+    for _,n in {"add", "sub", "mul", "div", "unm", "pow"} do
+       fillvalids(n, func)
+    end
   elseif name == 'order' then
     oldfunc = gettagmethod(tag(nil), 'lt')
-    foreach({"lt", "gt", "le", "ge"},
-            function(_, n) %fillvalids(n, %func) end)
+    for _,n in {"lt", "gt", "le", "ge"} do
+       fillvalids(n, func)
+    end
   else
     oldfunc = gettagmethod(tag(nil), name)
     fillvalids(name, func)
   end
-  return oldfunc or rawgettable(%defaults, name)
+  return oldfunc or rawget(%defaults, name)
 end

@@ -49,9 +49,10 @@ print('+')
 
 -- operador de ponto fixo
 Y = function (le)
-      local a = function (f)
-                  return %le(function (x) return %f(%f)(x) end)
-                end
+      local a
+      function a (f)
+        return %le(function (x) return %f(%f)(x) end)
+      end
       return a(a)
     end
 

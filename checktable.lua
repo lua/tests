@@ -1,10 +1,9 @@
-$ifnot checktable
 
-$ifnot querytab
+if querytab == nil then
+  stat = function () print"`querytab' nao ativo" end
+  return
+end
 
-stat = function () print"`querytab' nao ativo" end
-
-$else
 
 function checktable (t)
   local size, ff = querytab(t)
@@ -47,7 +46,7 @@ function mostra (t)
     if type(t[i]) ~= 'table' then
       write(tostring(t[i]))
     else
-      foreachi(t[i], function(_,v) write(" ", v) end)
+      for j=1,getn(t[i]) do write(" ", t[i][j]) end
     end
     write("\n")
     i = i+1
@@ -71,12 +70,9 @@ function stat (t)
   end
   print(format("size=%d  elements=%d  load=%.2f  med.len=%.2f",
           t.size, nelem, nelem/t.size, nelem/nlist))
-  foreachi(maxlist, function(i,n)
-    n = n or 0
-    print(format("%5d %10d %.2f%%", i, n, n*100/%nlist))
-  end)
+  for i=1,getn(maxlist) do
+    n = maxlist[i] or 0
+    print(format("%5d %10d %.2f%%", i, n, n*100/nlist))
+  end
 end
 
-$end
-
-$end

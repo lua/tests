@@ -58,7 +58,7 @@ x = clock();
 sort(a, function(x,y) return nil end)
 print(format("Sorting %d equal elements in %.2f sec.", limit, clock()-x))
 check(a, function(x,y) return nil end)
-foreach(a, function(i,v) assert (i=='n' and v==limit) end)
+for i,v in a do assert (i=='n' and v==limit) end
 
 a = {"álo", "\0first :-)", "alo", "then this one", "45", "and a new"}
 sort(a)

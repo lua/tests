@@ -14,26 +14,56 @@ end
 assert(not doit("tostring(1)") and doit("tostring()"))
 assert(doit"tonumber()")
 assert(doit"repeat until 1; a")
-assert(doit"|label|")
 assert(strfind(doit"break label", "label"))
-assert(not doit"|label|a=1")
 assert(doit";")
 assert(doit"a=1;;")
 assert(doit"return;;")
+assert(doit("function a (... , ...) end"))
+assert(doit("function a (, ...) end"))
 
--- testes para mensagens de erro mais explicativas (implementacao desfeita...)
+-- testes para mensagens de erro mais explicativas
 
--- assert(strfind(doit"a=1; bbbb=2; bbbb(3)", "global `bbbb'"))
--- assert(strfind(doit"a=1; local a,bbbb=2,3; bbbb(3)", "local `bbbb'"))
--- assert(strfind(doit"a={}; a:bbbb(3)", "field `bbbb'"))
--- assert(strfind(doit"local a={}; a.bbbb(3)", "field `bbbb'"))
--- assert(not strfind(doit"a={13}; local bbbb=1; a[bbbb](3)", "bbbb"))
--- assert(strfind(doit"a={13}; local bbbb=1; a[bbbb](3)", "number"))
+assert(strfind(doit"a=1; bbbb=2; a=sin(3)+bbbb(3)", "global `bbbb'"))
+assert(strfind(doit"a=1; local a,bbbb=2,3; a = sin(1) and bbbb(3)",
+       "local `bbbb'"))
+assert(strfind(doit"a={}; do local a=1 end a:bbbb(3)", "field `bbbb'"))
+assert(strfind(doit"local a={}; a.bbbb(3)", "field `bbbb'"))
+assert(not strfind(doit"a={13}; local bbbb=1; a[bbbb](3)", "bbbb"))
+assert(strfind(doit"a={13}; local bbbb=1; a[bbbb](3)", "number"))
 
--- assert(strfind(doit"aaa.bbb:ddd(9)", "global `aaa'"))
--- assert(strfind(doit"local aaa={bbb=1}; aaa.bbb:ddd(9)", "field `bbb'"))
--- assert(strfind(doit"local aaa={bbb={}}; aaa.bbb:ddd(9)", "field `ddd'"))
--- assert(doit"local aaa={bbb={ddd=next}}; aaa.bbb:ddd(nil)" == nil)
+assert(strfind(doit"aaa.bbb:ddd(9)", "global `aaa'"))
+assert(strfind(doit"local aaa={bbb=1}; aaa.bbb:ddd(9)", "field `bbb'"))
+assert(strfind(doit"local aaa={bbb={}}; aaa.bbb:ddd(9)", "field `ddd'"))
+assert(doit"local aaa={bbb={ddd=next}}; aaa.bbb:ddd(nil)" == nil)
+
+assert(strfind(doit"local aaa={}; x=aaa+b", "local `aaa'"))
+assert(strfind(doit"aaa={}; x=3/aaa", "global `aaa'"))
+assert(strfind(doit"aaa={}; x=-aaa", "global `aaa'"))
+assert(not strfind(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "aaa"))
+
+assert(strfind(doit[[aaa=9
+repeat until 3==3
+local x=sin(cos(3))
+if sin(1) == x then return 1,2,sin(1) end   -- tail call
+local a,b = 1, {
+  {x='a'..'b'..'c', y='b', z=x},
+  {1,2,3,4,5} or 3+3<=3+3,
+  3+1>3+1,
+  {d = x and aaa[x or y]}}
+]], "global `aaa'"))
+
+assert(strfind(doit[[
+local x,y = {},1
+if sin(1) == 0 then return 3 end    -- return
+x.a()]], "field `a'"))
+
+assert(strfind(doit[[
+while 1 do  
+  local a
+  if nil then break end
+  insert(prefix, w)
+end]], "global `insert'"))
+
 
 i = 0
 function y () i=i+1; y() end

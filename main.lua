@@ -3,13 +3,15 @@
 print ("testando opcoes de lua.c")
 
 prog = tmpname()
+otherprog = tmpname()
 out = tmpname()
 
 progname = getargs()[0]
 print(progname)
 
-function prepfile (s)
-  assert(writeto(prog))
+function prepfile (s, p)
+  p = p or prog
+  assert(writeto(p))
   write(s)
   assert(writeto())
 end
@@ -23,25 +25,38 @@ function checkout (s)
   return t
 end
 
-function RUN (...)
+function auxrun (arg)
   s = call(format, arg)
   s = gsub(s, "lua", progname)
-  assert(execute(s) == 0)
+  return execute(s)
 end
 
+function RUN (...)
+  assert(auxrun(arg) == 0)
+end
 
-prepfile[[
-  assert(arg.n == 3 and arg[1] == 'a' and arg[2] == 'b' and arg[3] == 'c')
+function NoRun (...)
+  assert(auxrun(arg) ~= 0)
+end
+
+-- test 2 files
+prepfile("print(1); a=2")
+prepfile("print(a)", otherprog)
+RUN("lua %s %s > %s", prog, otherprog, out)
+checkout("1\n2\n")
+
+prepfile
+[[assert(arg.n == 3 and arg[1] == 'a' and arg[2] == 'b' and arg[3] == 'c')
   x = getargs()
-  assert(x.n == 7 and x[1] == '-s20' and x[x.n] == arg[3])
+  assert(x.n == 7 and x[1] == '-s30' and x[x.n] == arg[3])
 ]]
-RUN("lua -s20 -d -f %s a b c", prog)
+RUN("lua -s30 -c -f %s a b c", prog)
 
 prepfile"assert(arg==nil)"
 RUN("lua %s", prog)
 
 prepfile""
-RUN("lua < %s > %s", prog, out)
+RUN("lua - < %s > %s", prog, out)
 checkout("")
 
 -- some "shells" (e.g. command.com) do not understand the quotes around
@@ -64,8 +79,24 @@ a = 2
 RUN("lua _PROMPT=%s -i < %s > %s", prompt, prog, out)
 checkout(strrep(prompt, 3).."\n")
   
+prepfile[[#comment in 1st line without \n at the end]]
+RUN("lua %s", prog)
+
+-- close Lua with an open file
+prepfile(format([[writeto(%q); write('alo')]], out))
+RUN("lua -c %s", prog)
+checkout('alo')
+
 assert(remove(prog))
+assert(remove(otherprog))
 assert(not remove(out))
 
 RUN("lua -v")
+
+-- NoRun("lua -h")
+-- NoRun("lua -e")
+-- NoRun("lua -e a")
+-- NoRun("lua -f")
+-- NoRun("lua -s")
+
 print("OK")

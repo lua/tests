@@ -2,8 +2,7 @@ print('testando vararg')
 function f(a, ...)
   assert(type(arg) == 'table')
   assert(type(arg.n) == 'number')
-  local i = 1
-  foreachi(arg, function (i,v) assert(%a[i] == v) end)
+  for i=1,arg.n do assert(a[i]==arg[i]) end
   return arg.n
 end
 
@@ -25,8 +24,8 @@ assert(a == 55 and b == 2)
 a = call(c12, {1,2;n=1})
 assert(a == nil)
 assert(c12(1,2,3) == nil)
-local a = call(nextvar, {n=1}, "pack")
-local b,c = nextvar(nil)
+local a = call(next, {globals(),nil;n=2}, "pack")
+local b,c = next(globals())
 assert(a[1] == b and a[2] == c and a.n == 2)
 a = call(call, {c12, {1,2}, "pack"})
 assert(a.n == 2 and a[1] == 55 and a[2] == 2)
@@ -42,8 +41,9 @@ lim = 800
 local i, a = 1, {}
 while i <= lim do a[i] = i+0.3; i=i+1 end
 
-function f(...)
-  assert(arg[1] == 1.3 and arg[lim] == lim+0.3 and not arg[lim+1])
+function f(a, b, c, d, ...)
+  assert(a == 1.3 and arg[1] == 5.3 and
+         arg[lim-4] == lim+0.3 and not arg[lim-3])
 end
 
 function g(a,b,c)

@@ -21,8 +21,6 @@ settagmethod(tag(nil), 'gc', function (a)
 end)
 
 showmem()
-assert(dofile(_WD..'gc.lua'))
-showmem()
 assert(dofile(_WD..'db.lua'))
 showmem()
 assert(dofile(_WD..'calls.lua') == deep)
@@ -36,7 +34,6 @@ showmem()
 assert(dofile(_WD..'locals.lua') == 5)
 assert(dofile(_WD..'constructs.lua'))
 assert(dofile(_WD..'big.lua') == 'a')
-assert(dofile(_WD..'verybig.lua') == 10); collectgarbage()
 showmem()
 assert(dofile(_WD..'func.lua'))
 showmem()
@@ -50,8 +47,6 @@ assert(dofile(_WD..'tag.lua') == 12)
 showmem()
 assert(dofile(_WD..'vararg.lua'))
 showmem()
-assert(dofile(_WD..'pragmas.lua'))
-showmem()
 assert(dofile(_WD..'errors.lua'))
 showmem()
 assert(dofile(_WD..'fallback.lua'))
@@ -60,23 +55,30 @@ assert(dofile(_WD..'math.lua'))
 showmem()
 assert(dofile(_WD..'sort.lua'))
 showmem()
+assert(dofile(_WD..'verybig.lua') == 10); collectgarbage()
+showmem()
 assert(dofile(_WD..'gc.lua'))
 showmem()
 assert(dofile(_WD..'files.lua'))
 print("final OK !!!")
 showmem()
 
-$ifnot _hard_i
 print('limpando tudo!!!!')
-local preserve = {_STDERR = 1, error = 1, _ERRORMESSAGE = 1, _ALERT = 1,
-                  tostring = 1, _INPUT=1, _OUTPUT=1}
+local preserve = {
+  _STDERR = _STDERR,
+  error = error,
+  _ERRORMESSAGE = _ERRORMESSAGE,
+  _ALERT = _ALERT,
+  tostring = tostring,
+  _INPUT=_INPUT,
+  _OUTPUT=_OUTPUT}
 
 local collectgarbage, showmem, print, format, clock =
       collectgarbage, showmem, print, format, clock
 
 setcallhook(function (a) %assert(%type(a) == 'string') end)
-foreachvar(function (n) if not %preserve[n] then %setglobal(n, nil) end end)
-$end
+globals(preserve)
+collectgarbage()
 
 collectgarbage();showmem()
 

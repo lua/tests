@@ -1,4 +1,4 @@
-print('testando variaveis locais')
+print('testando variaveis locais e uns extras')
 
 f = nil
 
@@ -54,6 +54,25 @@ for i=2,31 do
                              assert(a==-2^%d)]], -j, p-j, i)))
   end
   p =2*p
+end
+
+print'+'
+
+
+if querytab then
+  -- testando remocao de elementos mortos dos indices de tabelas
+  collectgarbage(1000000)   -- stop GC
+  local a = {[{}] = 4, [3] = 0, alo = 1, 
+             a1234567890123456789012345678901234567890 = 10}
+
+  local t = querytab(a)
+
+  for k,_ in a do a[k] = nil end
+  collectgarbage()   -- restore GC and collect dead fiels in `a'
+  for i=0,t-1 do
+    local k = querytab(a, i)
+    assert(k == nil or type(k) == 'number' or k == 'alo')
+  end
 end
 
 print('OK')

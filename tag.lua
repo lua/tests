@@ -18,13 +18,13 @@ tt2 = tag(t2)
 
 t3 = {10,2,3}
 
-function f(t, i) return rawgettable(t, i)+3 end
+function f(t, i) return rawget(t, i)+3 end
 assert(gettagmethod(tt, 'gettable') == nil)
 assert(settagmethod(tt, 'gettable', f) == nil)
 assert(gettagmethod(tt, 'gettable') == f)
 assert(settagmethod(tt, 'gettable', f) == f)
 
-function f(t, i, v) rawsettable(t, i, v-3) end
+function f(t, i, v) rawset(t, i, v-3) end
 settagmethod(tt, 'settable', f)
 
 tt1 = newtag()
@@ -33,20 +33,20 @@ settag(t1, tt1)
 
 
 assert(t1[1] == 8)
-assert(rawgettable(t1, 1) == 5)
+assert(rawget(t1, 1) == 5)
 assert(t2[3] == 'alo')
-assert(rawgettable(t1, 3) == "noite")
-assert(rawgettable(t2, 1) == 1)
+assert(rawget(t1, 3) == "noite")
+assert(rawget(t2, 1) == 1)
 
 t1.x, a, b, t1.y, c = 10, 1, 1, 15
-assert(rawgettable(t1, 'x') == 7 and rawgettable(t1, 'y') == 12)
+assert(rawget(t1, 'x') == 7 and rawget(t1, 'y') == 12)
 assert(t1.x == 10 and t1.y == 15)
 settagmethod(tt, 'gettable', nil)
 copytagmethods(tt1, tt)
 assert(t1.x == 7)
 
 t2.x = 10
-assert(rawgettable(t2, 'x') == t3[1])
+assert(rawget(t2, 'x') == t3[1])
 assert(t2.x == 10)
 print('+')
 
@@ -83,20 +83,20 @@ function fg (name, value)
   return value.realvalue   -- retorna valor 'real' de x
 end
 settagmethod(tt, 'getglobal', fg)
-
+_G = globals()
 a,x,b = 2,10,1
 assert(x == 10 and a == 2 and b == 1 and y == 10 and getglobal('x') == 10 and
-       type(rawgetglobal('x')) == 'table')
+       type(rawget(_G, 'x')) == 'table')
 
 setglobal('x', print)
 assert(x == print and y == print and getglobal('x') == print and
-       type(rawgetglobal('x')) == 'table')
+       type(rawget(_G, 'x')) == 'table')
 
-rawsetglobal('x', 4)
+rawset(_G, 'x', 4)
 x = 12
 assert(x == 12 and y == print)
 
-rawsetglobal('x', nil); fs = nil; fg = nil;
+rawset(_G, 'x', nil); fs = nil; fg = nil;
 assert(x == nil)
 
 print('+')

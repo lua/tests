@@ -1,6 +1,13 @@
+-- testes da biblioteca de depuracao
+
+
+
 print"testando biblioteca de depuração"
 
-$debug
+do
+local a=1
+end
+
 
 function test (s, l)
   local f = function (line)
@@ -10,14 +17,59 @@ function test (s, l)
   assert(l.n == 0)
 end
 
+
+do
+  local a = getinfo(print)
+  assert(a.name == "print" and a.what == "C" and a.namewhat == "global")
+  local b = getinfo(test, "Sf")
+  assert(b.name == nil and b.what == "Lua" and b.linedefined == 12 and
+         b.func == test)
+end
+
+repeat
+  local g = {x = function ()
+    local a = getinfo(2)
+    assert(a.name == 'f' and a.namewhat == 'local')
+    a = getinfo(1)
+    assert(a.name == 'x' and a.namewhat == 'field')
+    return 'xixi'
+  end}
+  local f = function () return 1+1 and (not 1 or %g.x()) end
+  assert(f() == 'xixi')
+  g = getinfo(f)
+  assert(g.what == "Lua" and g.func == f and g.namewhat == "" and not g.name)
+
+  function f (x, name)   -- local!
+    name = name or 'f'
+    local a = getinfo(1)
+    assert(a.name == name and a.namewhat == 'local')
+    return x
+  end
+
+  -- breaks in different conditions
+  if 3>4 then break end; f()
+  if 3<4 then a=1 else break end; f()
+  while 1 do local x=10; break end; f()
+  local b = 1
+  if 3>4 then return sin(1) end; f()
+  a = 3<4; f()
+  a = 3<4 or 1; f()
+  repeat local x=20; if 4>3 then f() else break end; f() until 1
+  g = {}
+  f(g).x = f(2) and f(10)+f(9)
+  assert(g.x == f(19))
+  function g(x) if not x then return 3 end return x('a', 'x') end   -- tail call
+  assert(g(f) == 'a')
+until 1
+
 test([[if
-1
+sin(1)
 then
   a=1
 else
   a=2
 end
-]], {1,2,3,4,7})
+]], {2,4,7})
 
 test([[
 if nil then
@@ -25,20 +77,18 @@ if nil then
 else
   a=2
 end
-]], {2,4,5,6})
+]], {2,5,6})
 
 test([[a=1
 repeat
-  a=a
-
-+1
+  a=a+1
 until a==3
-]], {1,2,3,5,6,2,3,5,6})
+]], {1,3,4,3,4})
 
 test([[ do
   return
 end
-]], {1,2})
+]], {2})
 
 test([[local a
 a=1
@@ -47,13 +97,23 @@ while a<=3 do
 end
 ]], {1,2,3,4,3,4,3,4,3,5})
 
-test([[while 1 do
-  if 1
+test([[while sin(1) do
+  if sin(1)
   then
     break
   end
 end
-a=1]], {1,2,3,4,7})
+a=1]], {1,2,4,7})
+
+test([[for i=1,3 do
+  a=i
+end
+]], {1,2,2,2,3})
+
+test([[for i,v in {'a','b'} do
+  a=i..v
+end
+]], {1,2,2,3})
 
 
 
@@ -63,7 +123,7 @@ a = {}
 setcallhook(function (e)
   collectgarbage()   -- force GC during a hook
   if e == "call" then
-    local f = getstack(2, "f").func
+    local f = getinfo(2, "f").func
     a[f] = 1
   end 
 end)
@@ -82,30 +142,40 @@ function f(a,b)
   local _, x = getlocal(1, 1)
   local _, y = getlocal(1, 2)
   assert(x == a and y == b)
-  assert(setlocal(2, 1, "pera") == "AA".."AA")
-  assert(setlocal(2, 2, "maçã") == "B")
-  x = getstack(2)
+  assert(setlocal(2, 3, "pera") == "AA".."AA")
+  assert(setlocal(2, 4, "maçã") == "B")
+  x = getinfo(2)
   assert(x.func == g and x.what == "Lua" and x.name == 'g' and
          x.nups == 0 and strfind(x.source, "^@.*db%.lua"))
   glob = glob+1
-  assert(getstack(1, "l").currentline == L+1)
-  assert(getstack(1, "l").currentline == L+2)
+  assert(getinfo(1, "l").currentline == L+1)
+  assert(getinfo(1, "l").currentline == L+2)
 end
 
-glob = glob+1
-assert(getstack(1, "l").currentline == L+1)
+function foo()
+  glob = glob+1
+  assert(getinfo(1, "l").currentline == L+1)
+end; foo()  -- set L
+-- check line counting inside strings and empty lines
+
+_ = 'alo\
+alo' .. [[
+
+]]
+  	
+
+assert(getinfo(1, "l").currentline == L+11)  -- check count of lines
 
 
-assert(getstack(1, "l").currentline == L+4)  -- check count of empty lines
-
-
-function g()
+function g(...)
+  do local a,b,c; a=sin(40); end
+  local feijao
   local AAAA,B = "xuxu", "mamão"
   f(AAAA,B)
   assert(AAAA == "pera" and B == "maçã")
   do
      local B = 13
-     local x,y = getlocal(1,3)
+     local x,y = getlocal(1,5)
      assert(x == 'B' and y == 13)
   end
 end

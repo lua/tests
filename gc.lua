@@ -42,6 +42,9 @@ end
 
 a:test()
 
+-- coleta de funcao sem locais, globais, etc.
+do local f = function () end end
+
 print('strings longos')
 x = "01234567890123456789012345678901234567890123456789012345678901234567890123456789"
 assert(strlen(x)==80)
@@ -69,5 +72,28 @@ collectgarbage()
 assert(i == nil)
 
 settagmethod(tag(nil), 'gc', oldtm)
+
+a = {}
+-- fill a with `collectable' indices
+for i=1,15 do a[{}] = i end
+-- remove all indices and collect them
+for n,_ in a do
+  a[n] = nil
+  assert(type(n) == 'table' and next(n) == nil)
+  collectgarbage()
+end
+collectgarbage()
+for n,_ in a do error'cannot be here' end
+for i=1,15 do a[i] = i end
+for i=1,15 do assert(a[i] == i) end
+
+
+-- test deep structures
+local a = {}
+for i = 1,200000 do
+  a = {next = a}
+end
+collectgarbage()
+
 
 print('OK')

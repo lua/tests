@@ -1,12 +1,11 @@
 
-$ifnot testC
-
+if testC==nil then
   print('\a\n >>> testC nao ativo: pulando testes da API <<<\n\a')
+  return
+end
 
-$else
 
-
-  print('testando API com C')
+print('testando API com C')
 
 function checkstack (...) assert(arg.n == 0) end
 
@@ -85,7 +84,7 @@ testC[[
 	pushreg		r0
 	pushnum		1
 	pushnum		2
-	rawsettable
+	rawset
 	pushstring	a
 	pushreg		r0
 	setglobal	x
@@ -117,7 +116,8 @@ assert(a.n == 1 and a[1] == "testando")
 Arr = {}
 Lim = 100
 for i=1,Lim do   -- lock many objects
-  Arr[i] = testC("getglobal r1, i; pushreg r1; reflock r1; pushreg r1")
+  G = {}
+  Arr[i] = testC("getglobal r1, G; pushreg r1; reflock r1; pushreg r1")
 end
 
 for i=1,Lim,2 do   -- unlock half of them
@@ -231,6 +231,18 @@ for i=2,Lim,2 do   -- unlock the other half
   testC("getparam r1, 1; unref r1", Arr[i])    -- unref(Arr[i])
 end
 
+-- create a userdata with tag `tt' and value 40
+x = testC('getparam r1, 1; getparam r2, 2; pushusertag r1, r2', 40, tt);
+cl.n = 0; cl[40] = nil;
+a = {[x] = 1}
+x = nil
+collectgarbage()
+-- old `x' cannot be collected (`a' still uses it)
+assert(cl.n == 0 and not cl[40])
+for n,_ in a do a[n] = nil end
+collectgarbage()
+assert(cl.n == 1 and cl[40] == 1)   -- old `x' must be collected
+
 print'+'
 
 assert(testC("getparam r2, 1; getparam r3, 2; equal r2, r3",
@@ -250,53 +262,12 @@ assert(a == 8 and b == 4)
 --assert(testC"closure f, 0" == testC)
 
 
--- testando lua_nextvar
-X = nil
-local a,b,c,d,e,f,g = testC[[
-	getglobal	r2, X
-	pushnum		9
-	nextvar		r2
-	getresult	r5, 1
-	pop		r3
-	pushnum		8
-	getresult	r7, 2
-	nextvar		r3
-	pop		r4
-	getresult	r6, 1
-	pushreg		r3
-	pushreg		r5
-	pushreg		r4
-	pushreg		r6
-	getresult	r9, 2
-	pushreg		r7
-	pushreg		r9
-]]
-
-local x,y = nextvar(nil)
-assert(a==x and b==x and e==y)
-x,y = nextvar(x)
-assert(c==x and d==x and f==y)
-assert(not g)
-
-foreachvar(function (n) X=n end)   -- get 'last' global var
-local a,b = testC[[
-	pushnum		7
-	pushnum		8
-	pushnum		9
-	getglobal	r2, X
-	nextvar		r2
-	pop		r3
-	pushreg		r3
-	pushreg		r2
-]]
-assert(not a and b == X)
-
 -- testando lua_next
 X = {x="alo"}
 local a,b,c,d = testC[[
 	pushnum		0
 	pop		r1
-	rawgetglobal	r0, X
+	getglobal	r0, X
 	pushnum		8
 	next		r0, r1
 	getresult	r5, 1
@@ -321,7 +292,7 @@ prog = [[
 	beginblock
 	pushnum		1
 	getglobal	r0, prog
-	rawgetglobal	r1, print
+	getglobal	r1, print
 	pushnum		3
 	endblock
 ]]
@@ -353,9 +324,13 @@ a, b, c = testC("getparam r1, 1; getparam r2, 2; doremote r1, r2; pushnum 1",
       L1, "return f()")
 assert(a == 'alo' and b == '3' and c == 1)
 
-a, b = testC("getparam r1, 1; getparam r2, 2; doremote r1, r2; pushnum 1",
-      L1, "return tostring(1)")   -- error: `sin' is not defined
-assert(a == 1 and b == nil)
+a, b, c = testC("getparam r1, 1; getparam r2, 2; doremote r1, r2; pushnum 10",
+      L1, "return sin(1)")   -- error: `sin' is not defined
+assert(a == nil and b == 1 and c == 10)   -- 1 == run-time error
+
+a, b, c = testC("getparam r1, 1; getparam r2, 2; doremote r1, r2; pushnum 10",
+      L1, "return a+")   -- error: syntax error
+assert(a == nil and b == 3 and c == 10)   -- 3 == syntax error
 
 testC("getparam r1, 1; closestate r1", L1)
 
@@ -374,34 +349,55 @@ a,b,c,d = testC[[
 	pushnum		1
 	getglobal	r1, var
 	pushreg		r1
-	rawgetglobal	r2, var
+	pushglobals
+	pushstring	var
+	rawget		r2
 	pushreg		r2
 	pushnum		2
 ]]
-assert(a == 1 and b == sin(12) and c == rawgetglobal"var" and d == 2)
+assert(a == 1 and b == sin(12) and c == rawget(globals(), "var") and d == 2)
+
+
+-- testando funcoes obsoletas
+if not (nextvar and call(nextvar, {n=1}, "x", nil)) then
+  print("obsolete functions not active")
+else
+  rawsetglobal('x', 'alo')
+  assert(
+    testC[[
+	pushnum		1
+	rawsetglobal	a
+	rawgetglobal	r2, x
+	pushreg		r2]] == 'alo' and rawgetglobal'a' == 1)
+end
+
+
+-- testa limite de memoria
+collectgarbage()
+totalmem(totalmem()+5000)   -- seta limite `baixo' para memoria (+5k)
+assert(dostring"local a={}; for i=1,100000 do a[i]=i end" == nil)
+totalmem(32000000)  -- restaura limite alto (32M)
+
+
+-- testa erros de memoria na criacao de um estado; vai aumentando o limite
+-- de memoria gradativamente, de modo a dar erros em varios passos durante
+-- a criacao de um estado, ate' ter memoria suficiente para nao dar erro
+
+function novoestado () return testC"newstate 0, 1" end
+local args = {}
+local M = totalmem()
+local oldM = M
+local a = nil
+while 1 do
+  M = M+81   -- aumenta gradativamente a memoria
+  totalmem(M)
+  a = call(novoestado, args, "x")  -- tenta criar estado
+  if a ~= nil then break end       -- para quando conseguir
+end
+testC("getparam r1, 1; closestate r1", a)  -- fecha estado que conseguiu abrir
+totalmem(32000000)  -- restaura limite alto (32M)
+print("limite para criar estado: "..M-oldM)
 
 
 testC('endblock; pushstring OK; call print')
 
-
-
-
--- function to show all string tables
-function showstringtables ()
-  local i = 1
-  local n, s
-  while 1 do
-    n, s = querystr(i);
-    if not n then break end
-    print("\n\t", n, s)
-    for j=1,s do
-      local str = call(querystr, {i,j}, "p")
-      tinsert(str, 1, j)
-      call(print, str)
-    end
-    i = i+1
-  end
-end
-
---showstringtables()
-$end

@@ -204,6 +204,21 @@ t = pack(T.testC("next; pop 1; next; gettop; return .", a, nil))
 tcheck(t, {n=1,a})
 
 
+-- testando setn/getn (C)
+local a = {1,2,3}
+local x,y,z = T.testC("pushnum 5; getn -2; gettop; return 3", a)
+assert(x == 5 and y == 3 and z == 4)
+assert(T.testC("pushnum 10; setn -2; gettop; return 1", a) == 2)
+x,y,z = T.testC("getn -1; gettop; return 3", a)
+assert(x == a and y == 10 and z == 3)
+assert(table.getn(a) == 10)
+a.n=100
+x,y,z = T.testC("pushnum 5; getn -2; gettop; return 3", a)
+assert(x == 5 and y == 100 and z == 4)
+assert(T.testC("gettop; pushnum 20; setn -3; gettop; return 1", a) == 3)
+assert(a.n == 20 and table.getn(a) == 20)
+
+
 -- testando upvalues
 
 function X (s)

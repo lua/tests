@@ -69,6 +69,7 @@ io.close()
 -- copy from otherfile back to file
 local f = assert(io.open(otherfile))
 io.output(file)
+assert(io.output():read() == nil)
 for l in f:lines() do io.write(l, "\n") end
 assert(f:close()); io.close()
 assert(not pcall(io.close, f))   -- error trying to close again
@@ -79,6 +80,10 @@ for l in io.lines() do assert(l == f()) end
 assert(os.remove(otherfile))
 
 io.input(file)
+do  -- test error returns
+  local a,b,c = io.input():write("xuxu")
+  assert(not a and type(b) == "string" and type(c) == "number")
+end
 assert(io.read(0) == "")   -- not eof
 assert(io.read(5, '*l') == '"álo"')
 assert(io.read(0) == "")

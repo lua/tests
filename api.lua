@@ -75,7 +75,7 @@ assert(type(testC("r51 o5")) == 'table')
 -- colect in cl 'val' of all collected tables
 tt = newtag()
 cl = {n=0}
-function f(x)  cl.n=cl.n+1; cl[cl.n] = x.val end
+function f(x)  cl.n=cl.n+1; cl[x.val] = 1 end
 settagmethod(tt, 'gc', f)
 
 a = {val = 1}; b = {val = 2}; c = {val = 'v'}
@@ -94,12 +94,12 @@ assert(type(testC("r51 o5")) == 'table')
 -- testC("r52 o5")   -- must give an error
 
 -- check that unlocked objects have been collected
-assert(cl.n == 2 and cl[1] == 2 and cl[2] == 'v')
+assert(cl.n == 2 and cl[2] and cl.v and not cl[1])
 
 -- unlock(lock[1])
 testC("u1")
 collectgarbage()
-assert(cl.n == 3 and cl[3] == 1)
+assert(cl.n == 3 and cl[1])
 
 t = testC
 s = 'p22 p33 o2 o3'

@@ -252,7 +252,7 @@ end
 assert(b.x == 23)
 print('+')
 
-dofile(_WD.."checktable.lua")
+assert(dofile(_WD.."checktable.lua"), "cannot open checktable.lua")
 stat(b)
 
 repeat

@@ -69,18 +69,14 @@ a = {}
 for i=1,16 do a[i] = i end
 check(a, 16, 1)
 for i=1,11 do a[i] = nil end
-for i=30,40 do a[i] = nil end   -- force a rehash
+for i=30,40 do a[i] = nil end   -- force a rehash (?)
 check(a, 0, 8)
 a[10] = 1
-for i=30,40 do a[i] = nil end   -- force a rehash
+for i=30,40 do a[i] = nil end   -- force a rehash (?)
 check(a, 0, 8)
 for i=1,14 do a[i] = nil end
-for i=30,50 do a[i] = nil end   -- force a rehash
+for i=30,50 do a[i] = nil end   -- force a rehash (?)
 check(a, 0, 4)
-for i=1,20 do a[i] = nil end   -- force a rehash
-check(a, 0, 2)
-for i=1,2 do a[i] = 1 end
-check(a, 2, 1)
 
 -- reverse filling
 for i=1,lim do

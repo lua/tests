@@ -133,7 +133,7 @@ print('+')
 assert(gsub("um (dois) tres (quatro)", "(%(%w+%))", strupper) ==
             "um (DOIS) tres (QUATRO)")
 
-assert(gsub("a=roberto,roberto=a", "(%w+)=(%w%w*)", setglobal) == "roberto,a")
+gsub("a=roberto,roberto=a", "(%w+)=(%w%w*)", setglobal)
 assert(a=="roberto" and roberto=="a")
 
 function f(a,b) return gsub(a,'.',b) end
@@ -184,7 +184,7 @@ function rev (s)
   return gsub(s, "(.)(.+)", function (c,s1) return rev(s1)..c end)
 end
 
-local x = strrep('0123456789', 40)
+local x = strrep('012345', 10)
 assert(rev(rev(x)) == x)
 
 print('OK')

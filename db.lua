@@ -10,13 +10,14 @@ end
 
 function test (s, l, p)
   collectgarbage()   -- avoid gc during trace
-  local function f (line)
-    local l = tremove(%l, 1)
+  local function f (event, line)
+    assert(event == 'line')
+    local l = table.remove(%l, 1)
     if p then print(l, line) end
     assert(l == line, "wrong trace!!")
   end
-  setlinehook(f); loadstring(s)(); assert(setlinehook() == f)
-  assert(l.n == 0)
+  debug.sethook(f,"l"); loadstring(s)(); debug.sethook()
+  assert(table.getn(l) == 0)
 end
 
 
@@ -150,23 +151,23 @@ test([[for i=1,4 do a=1 end]], {1,1,1,1,1})
 print'+'
 
 a = {}
-setcallhook(function (e)
+local glob = 1
+local oldglob = glob
+debug.sethook(function (e,l)
   collectgarbage()   -- force GC during a hook
-  assert(getinfo(2, "l").currentline == -1)  -- no line info in call hooks
-  if e == "call" then
-    local f = getinfo(2, "f").func
-    a[f] = 1
-  end 
-end)
-
-glob = 1
-oldglob = glob
-setlinehook(function (l)
-  if glob ~= oldglob then
-    L = l-1   -- get the first line where "glob" has changed
-    oldglob = glob
+  local f, m, c = debug.gethook()
+  assert(m == 'crl' and c == 0)
+  if e == "line" then
+    if glob ~= oldglob then
+      L = l-1   -- get the first line where "glob" has changed
+      oldglob = glob
+    end
+  elseif e == "call" then
+      local f = getinfo(2, "f").func
+      a[f] = 1
+  else assert(e == "return")
   end
-end)
+end, "crl")
 
 function f(a,b)
   collectgarbage()
@@ -217,8 +218,8 @@ g()
 assert(a[f] and a[g] and a[assert] and a[getlocal] and not a[print])
  
 
-setcallhook(nil); setlinehook()
-assert(setcallhook() == nil and setlinehook(nil) == nil)
+debug.sethook(nil);
+assert(debug.gethook() == nil)
 
 
 -- testando pegar argumentos de funcao (locais existentes no inicio da funcao)
@@ -226,16 +227,16 @@ assert(setcallhook() == nil and setlinehook(nil) == nil)
 X = nil
 a = {}
 function a:f (a, b, ...) local c = 13 end
-setcallhook(function (e)
-  if e == 'return' then return end  -- so' quer `entradas'
+debug.sethook(function (e)
+  assert(e == "call")
   dostring("XX = 12")  -- testa dostring dentro de hooks
   -- testa erros dentro de hook (chamando _ERRORMESSAGE)
-  local olda = _ALERT; _ALERT = function (s) end;
-  pcall(loadstring("a='joao'+1"))
-  _ALERT = olda
-  setcallhook()  -- hook e' chamado uma unica vez
-  setlinehook(function (l) 
-    setlinehook()  -- hook e' chamado uma unica vez
+  assert(not pcall(loadstring("a='joao'+1")))
+  debug.sethook(function (e, l) 
+    local f,m,c = debug.gethook()
+    assert(e == "line")
+    assert(m == 'l' and c == 0)
+    debug.sethook(nil)  -- hook e' chamado uma unica vez
     assert(not X)  -- verifica fato acima
     X = {}; local i = 1
     local x,y
@@ -245,13 +246,24 @@ setcallhook(function (e)
       X[x] = y
       i = i+1
     end
-  end)
-end)
+  end, "l")
+end, "c")
 
 a:f(1,2,3,4,5)
 assert(X.self == a and X.a == 1   and X.b == 2 and X.arg.n == 3 and X.c == nil)
 assert(XX == 12)
+assert(debug.gethook() == nil)
+
+
+-- testando count hooks
+local a=0
+debug.sethook(function (e) a=a+1 end, "", 1)
+a=0; for i=1,1000 do end; assert(1000 < a and a < 1010)
+debug.sethook(function (e) a=a+1 end, "", 2)
+a=0; for i=1,1000 do end; assert(250 < a and a < 255)
+local f,m,c = debug.gethook()
+assert(m == "" and c == 2)
+debug.sethook()
+
 print'OK'
 
-
--- ..\lua\debug\lua db.lua

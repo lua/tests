@@ -3,12 +3,27 @@ print('testando tables, next e fors')
 if T then
 -- testes de tamanhos
 
+local l2 = math.log(2)
+local function log2 (x) return math.log(x)/l2 end
+
 local function mp2 (n)   -- minimum power of 2 >= n
-  local mp = 2^math.ceil(math.log(n)/math.log(2))
+  local mp = 2^math.ceil(log2(n))
   assert(mp/2 < n and n <= mp)
   return mp
 end
-  
+
+local function fb (x)   -- value of n represented as a `floating byte'
+  local n = x
+  local e = 1
+  while n >= 8 do
+    n = math.floor((n+1)/2)
+    e = 2*e
+  end
+  n = n*e
+  assert(n >= x and n <= x*1.25)
+  return n
+end
+ 
 local function check (t, na, nh)
   local a, h = T.querytab(t)
   if a ~= na or h ~= nh then
@@ -18,13 +33,13 @@ local function check (t, na, nh)
 end
 
 -- teste de tamanho de construtores
-local lim = 20
+local lim = 40
 local s = 'return {'
 for i=1,lim do
   s = s..i..','
   local s = s
   for k=0,lim do 
-    check(loadstring(s..'}')(), mp2(i), mp2(k+1))
+    check(loadstring(s..'}')(), fb(i), mp2(k+1))
     s = string.format('%sa%d=%d,', s, k, k)
   end
 end

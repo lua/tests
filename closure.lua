@@ -299,6 +299,20 @@ assert(C[1] == nil)
 assert(f() == 43 and f() == 53)
 
 
+-- old bug: attempt to resume itself
+
+function co_func (current_co)
+  assert(coroutine.resume(current_co) == false)
+  assert(coroutine.resume(current_co) == false)
+  return 10
+end
+
+local co = coroutine.create(co_func)
+local a,b = coroutine.resume(co, co)
+assert(a == true and b == 10)
+assert(coroutine.resume(co, co) == false)
+assert(coroutine.resume(co, co) == false)
+
 -- access to locals of erroneous coroutines
 local x = coroutine.create (function ()
             local a = 10

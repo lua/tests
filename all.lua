@@ -31,88 +31,83 @@ local showmem = function ()
   end
 end
 
-assert(dofile(_WD..'main.lua'))
+dofile(_WD..'main.lua')
 
-if type(T) == 'table' and false then   -- debug facilities available?
-  local mt = {}
-  local new = function ()
-    local u = T.newuserdata(0)
-    T.setmetatable(u, mt)
+do
+  local u = newproxy(true)
+  local newproxy, stderr = newproxy, io.stderr
+  getmetatable(u).__gc = function (o)
+    stderr:write'.'
+    newproxy(o)
   end
-  mt.gc = function ()
-    write(_STDERR, '.')
-    new()
-  end
-  new()
 end
 
 local f = assert(loadfile(_WD..'gc.lua'))
 f()
 showmem()
-assert(dofile(_WD..'db.lua'))
+dofile(_WD..'db.lua')
 showmem()
 assert(dofile(_WD..'calls.lua') == deep and deep)
 showmem()
-assert(dofile(_WD..'strings.lua'))
+dofile(_WD..'strings.lua')
 showmem()
-assert(dofile(_WD..'literals.lua'))
+dofile(_WD..'literals.lua')
 showmem()
 assert(dofile(_WD..'attrib.lua') == 27)
 showmem()
 assert(dofile(_WD..'locals.lua') == 5)
-assert(dofile(_WD..'constructs.lua'))
-assert(dofile(_WD..'code.lua'))
+dofile(_WD..'constructs.lua')
+dofile(_WD..'code.lua')
 do
   local f = coroutine.create(assert(loadfile(_WD..'big.lua')))
   assert(f() == 'b')
   assert(f() == 'a')
 end
 showmem()
-assert(dofile(_WD..'nextvar.lua'))
+dofile(_WD..'nextvar.lua')
 showmem()
-assert(dofile(_WD..'pm.lua'))
+dofile(_WD..'pm.lua')
 showmem()
-assert(dofile(_WD..'api.lua'))
+dofile(_WD..'api.lua')
 showmem()
 assert(dofile(_WD..'events.lua') == 12)
 showmem()
-assert(dofile(_WD..'vararg.lua'))
+dofile(_WD..'vararg.lua')
 showmem()
-assert(dofile(_WD..'closure.lua'))
+dofile(_WD..'closure.lua')
 showmem()
-assert(dofile(_WD..'errors.lua'))
+dofile(_WD..'errors.lua')
 showmem()
-assert(dofile(_WD..'math.lua'))
+dofile(_WD..'math.lua')
 showmem()
-assert(dofile(_WD..'sort.lua'))
+dofile(_WD..'sort.lua')
 showmem()
 assert(dofile(_WD..'verybig.lua') == 10); collectgarbage()
 showmem()
-f()
-showmem()
-assert(dofile(_WD..'files.lua'))
+dofile(_WD..'files.lua')
 print("final OK !!!")
 showmem()
 
+
 print('limpando tudo!!!!')
-local preserve = {
-  _STDERR = _G._STDERR,
-  error = error,
-  _ERRORMESSAGE = _G._ERRORMESSAGE,
-  _ALERT = _G._ALERT,
-  tostring = _G.tostring,
-  _INPUT=_G._INPUT,
-  _OUTPUT=_G._OUTPUT}
 
-local collectgarbage, showmem, print, format, clock =
-      collectgarbage, showmem, print, format, os.clock
+debug.sethook(function (a) %assert(%type(a) == 'string') end, "cr")
 
-debug.setcallhook(function (a) %assert(%type(a) == 'string') end)
-setglobals(preserve)
+local _G, collectgarbage, showmem, print, format, clock =
+      _G, collectgarbage, showmem, print, format, os.clock
+
+local a={}
+for n in pairs(_G) do a[n] = 1 end
+a.tostring = nil
+a.___Glob = nil
+for n in pairs(a) do _G[n] = nil end
+
+a = nil
 collectgarbage()
 collectgarbage()
 collectgarbage()
-
+collectgarbage()
+collectgarbage()
 collectgarbage();showmem()
 
 print(format("\n\ntempo total: %.2f\n", clock()-c))

@@ -82,7 +82,9 @@ assert(not T.testC("lessthan 2 -3, return 1", "4", "2", "2", "3", "2", "2"))
 assert(not T.testC("lessthan -3 2, return 1", "3", "2", "2", "4", "2", "2"))
 
 local b = {__lt = function (a,b) return a[1] < b[1] end}
-local a1,a3,a4 = metatable({1}, b), metatable({3}, b), metatable({4}, b)
+local a1,a3,a4 = setmetatable({1}, b),
+                 setmetatable({3}, b),
+                 setmetatable({4}, b)
 assert(T.testC("lessthan 2 5, return 1", a3, 2, 2, a4, 2, 2))
 assert(T.testC("lessthan 5 -6, return 1", a4, 2, 2, a3, 2, 2))
 a,b = T.testC("lessthan 5 -6, return 2", a1, 2, 2, a3, 2, 20)
@@ -143,17 +145,15 @@ assert(a(3) == sin(3) and a ~= sin)
 
 
 -- testando erros
-local olderr, olda = _ERRORMESSAGE, _ALERT
-_ERRORMESSAGE, _ALERT = nil
 
-a,b = T.testC("call 2,3; pushvalue 2; insert -2; call 1,1; \
-               loadstring 4; call 0,0; \
-               loadstring 1; call 0,0; loadstring 5; call 0,0; \
-               return 2",
-               sin, 1, "x=150", "x='a'+1", 1, 2, 3, 4, 5)
-_ERRORMESSAGE, _ALERT = olderr, olda
-print(a,b,x)
-assert(a == 1 and b == sin(2) and x == 150)
+a = T.testC([[
+  loadstring 2; call 0,1;
+  pushvalue 3; insert -2; call 1, 1;
+  call 0, 0;
+  return 1
+]], "x=150", function (a) assert(a==nil); return 3 end)
+
+assert(type(a) == 'string' and x == 150)
 
 function check3(p, ...)
   assert(arg.n == 3)
@@ -177,12 +177,12 @@ assert(x == print)
 T.testC("settable 2", a, "x")    -- table and key are the same object!
 assert(a[a] == "x")
 
-b = metatable({p = a}, {})
-metatable(b).__index = function (t, i) return t.p[i] end
+b = setmetatable({p = a}, {})
+getmetatable(b).__index = function (t, i) return t.p[i] end
 k, x = T.testC("gettable 3, return 2", 4, b, 20, 35, "x")
 assert(x == 15 and k == 35)
-metatable(b).__gettable = function (t, i) return a[i] end
-metatable(b).__settable = function (t, i,v ) a[i] = v end
+getmetatable(b).__index = function (t, i) return a[i] end
+getmetatable(b).__newindex = function (t, i,v ) a[i] = v end
 y = T.testC("insert 2; gettable -5; return 1", 2, 3, 4, "y", b)
 assert(y == 12)
 k = T.testC("settable -5, return 1", b, 3, 4, "x", 16)
@@ -398,25 +398,6 @@ end
 print'+'
 
 
--- cria udata para ser coletado quando fechar o estado
-do
-  local assert,type,print = assert,type,print
-  local tt = {}
-  local u = T.newuserdata(10)
-  T.ref(u)   -- evita que udata seja coletado antes da coleta final
-  T.metatable(u, tt)
-  local metatable = T.metatable
-  tt.__gc = function (o)
-    %assert(%metatable(o) == tt)
-    -- cria objetos durante coleta de lixo
-    local a = 'xuxu'..(10+3)..'joao', {}
-    A = o  -- ressucita objeto!
-    %print(">>> fechando estado " .. "<<<\n")
-  end
-
-end
-
-
 
 -------------------------------------------------------------------------
 do   -- teste de erro durante coleta de lixo
@@ -432,7 +413,11 @@ do   -- teste de erro durante coleta de lixo
   end
   _G.A = 0
   a = 0
-  xpcall(function (s) a=a+1;collectgarbage() end, collectgarbage)
+  while 1 do
+  if xpcall(collectgarbage, function (s) a=a+1 end) then
+    break   -- stop if no more errors
+  end
+  end
   assert(a == 10)  -- numero de erros
   assert(A == 10)  -- numero de coletas normais
 end
@@ -507,9 +492,7 @@ function testamem (s, f)
 end
 
 
--- testa erros de memoria na criacao de um estado; vai aumentando o limite
--- de memoria gradativamente, de modo a dar erros em varios passos durante
--- a criacao de um estado, ate' ter memoria suficiente para nao dar erro
+-- testa erros de memoria na criacao de um estado
 
 b = testamem("criar estado", T.newstate)
 T.closestate(b);  -- fecha estado que conseguiu abrir

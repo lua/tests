@@ -140,8 +140,8 @@ assert(to("tonumber", {}) == 0)
 assert(to("tonumber", "12") == 12)
 assert(to("tonumber", "s2") == 0)
 assert(to("tonumber", 1, 20) == 0)
-a = to("tocfunction", sin)
-assert(a(3) == sin(3) and a ~= sin)
+a = to("tocfunction", deg)
+assert(a(3) == deg(3) and a ~= deg)
 
 
 -- testando erros

@@ -1,5 +1,7 @@
 print("testando reais e bib. matematica")
 
+_WD = _WD or ""
+
 assert(tonumber{} == nil)
 assert(tonumber'+0.01' == 1/100 and tonumber'+.01' == 0.01 and
        tonumber'.01' == 0.01    and tonumber'-1.' == -1 and
@@ -82,6 +84,8 @@ assert(eq(a[5000][2], cos(5000)))
 assert(eq(a[200][3], 200/3))
 assert(eq(a[2000][3], 2000/3, 0.001))
 print('+')
+
+dofile(_WD.."checktable.lua"); stat(a)
 
 a = nil
 

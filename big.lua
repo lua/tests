@@ -1,5 +1,7 @@
 print "testando operacoes W"
 
+_WD = _WD or ""
+
 -- lots of empty lines (to force SETLINEW)
 
 
@@ -250,6 +252,9 @@ end
 assert(b.x == 23)
 print('+')
 
+dofile(_WD.."checktable.lua")
+stat(b)
+
 repeat
 a = {
 n1 = 1.5, n2 = 2.5, n3 = 3.5, n4 = 4.5, n5 = 5.5, n6 = 6.5, n7 = 7.5,
@@ -317,6 +322,8 @@ until 1
 assert(a.n299 == 299.5)
 xxx = 1
 assert(xxx == 1)
+
+stat(a)
 
 function a:findfield (f)
   local i,v = next(self, nil)

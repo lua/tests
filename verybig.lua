@@ -1,5 +1,7 @@
 print "testando LONGARGs"
 
+_WD = _WD or ""
+
 -- template to create a very big test file
 prog = [[$
 a = nil
@@ -35,6 +37,9 @@ assert(b["b"..30024] == -4294967297)
 s = 0; n=0
 foreach(b, function(a,b) s=s+b; n=n+1 end)
 assert(s==13977183656.5  and n==70001)
+
+dofile(_WD.."checktable.lua")
+stat(b)
 
 a = nil; b = nil
 print'+'

@@ -4,8 +4,25 @@ function f(s, p)
   if i then return strsub(s, i, e) end
 end
 
+a,b = strfind('', '')    -- empty patterns are tricky
+assert(a == 1 and b == 0)
+a,b = strfind('alo', '')
+assert(a == 1 and b == 0)
+a,b = strfind('a\0o a\0o a\0o', 'a', 1)   -- first position
+assert(a == 1 and b == 1)
+a,b = strfind('a\0o a\0o a\0o', 'a\0o', 2)   -- starts in the midle
+assert(a == 5 and b == 7)
+a,b = strfind('a\0o a\0o a\0o', 'a\0o', 9)   -- starts in the midle
+assert(a == 9 and b == 11)
+a,b = strfind('a\0a\0a\0a\0\0ab', '\0ab', 2)  -- finds at the end
+assert(a == 9 and b == 11)
+a,b = strfind('a\0a\0a\0a\0\0ab', 'b')    -- last position
+assert(a == 11 and b == 11)
+assert(strfind('a\0a\0a\0a\0\0ab', 'b\0') == nil)   -- check ending
+assert(strfind('', '\0') == nil)
 assert(strfind('alo123alo', '12') == 4)
 assert(strfind('alo123alo', '^12') == nil)
+
 assert(f('aaab', 'a*') == 'aaa')
 assert(f('aaa', '^.*$') == 'aaa')
 assert(f('aaa', 'b*') == '')

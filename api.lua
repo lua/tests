@@ -8,8 +8,8 @@ end
 
 function tcheck (t1, t2)
   tremove(t1, 1)  -- remove code
-  assert(t1.n == t2.n)
-  for i=1,t1.n do assert(t1[i] == t2[i]) end
+  assert(table.getn(t1) == table.getn(t2))
+  for i=1,table.getn(t1) do assert(t1[i] == t2[i]) end
 end
 
 function pack(...) return arg end
@@ -214,9 +214,9 @@ assert(x == a and y == 10 and z == 3)
 assert(table.getn(a) == 10)
 a.n=100
 x,y,z = T.testC("pushnum 5; getn -2; gettop; return 3", a)
-assert(x == 5 and y == 100 and z == 4)
+assert(x == 5 and y == 10 and z == 4)
 assert(T.testC("gettop; pushnum 20; setn -3; gettop; return 1", a) == 3)
-assert(a.n == 20 and table.getn(a) == 20)
+assert(a.n == 100 and table.getn(a) == 20)
 
 
 -- testando upvalues
@@ -381,7 +381,7 @@ T.unref(e); T.unref(f)
 collectgarbage()
 
 -- check that unref objects have been collected
-assert(cl.n == 1 and cl[1] == nc)
+assert(table.getn(cl) == 1 and cl[1] == nc)
 
 x = T.getref(d)
 assert(type(x) == 'userdata' and T.metatable(x) == tt)
@@ -393,7 +393,7 @@ b = nil
 T.unref(d);
 n5 = T.udataval(T.metatable(T.newuserdata(5), {__gc=F}))
 collectgarbage()
-assert(cl.n == 4)
+assert(table.getn(cl) == 4)
 -- check order of collection
 assert(cl[2] == n5 and cl[3] == nb and cl[4] == na)
 
@@ -403,9 +403,9 @@ for i=30,1,-1 do
   a[i] = T.metatable(T.newuserdata(i), {__gc=F})
   na[i] = T.udataval(a[i])
 end
-cl.n = 0
+table.setn(cl, 0)
 a = nil; collectgarbage()
-assert(cl.n == 30)
+assert(table.getn(cl) == 30)
 for i=1,30 do assert(cl[i] == na[i]) end
 na = nil
 
@@ -415,15 +415,15 @@ for i=2,Lim,2 do   -- unlock the other half
 end
 
 x = T.newuserdata(40); T.metatable(x, {__gc=F})
-cl.n = 0
+table.setn(cl, 0)
 a = {[x] = 1}
 x = T.udataval(x)
 collectgarbage()
 -- old `x' cannot be collected (`a' still uses it)
-assert(cl.n == 0)
+assert(table.getn(cl) == 0)
 for n in a do a[n] = nil end
 collectgarbage()
-assert(cl.n == 1 and cl[1] == x)   -- old `x' must be collected
+assert(table.getn(cl) == 1 and cl[1] == x)   -- old `x' must be collected
 
 -- testando lua_equal
 assert(T.testC("equal 2 4; return 1", print, 1, print, 20))

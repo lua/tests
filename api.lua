@@ -24,10 +24,10 @@ assert(a[4] == 8)
 
 function f(a,b,c,d)
   assert(a==b and d==nil);
-  return if c == nil then
+  if c == nil then
     -- push(3); push(3); push(1); f(); r1 = result(1); push(r1)
-    testC("3 3 1 ff p11 o1")
-  else a
+    return testC("3 3 1 ff p11 o1")
+  else return a
   end
 end
 

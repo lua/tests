@@ -16,6 +16,7 @@ end
 
 function checksyntax (prog, extra, token, line)
   local msg = doit(prog)
+  token = string.gsub(token, "(%p)", "%%%1")
   local pt = string.format([[^%%[string ".*"%%]:%d: .- near `%s'$]],
                            line, token)
   assert(string.find(msg, pt))
@@ -177,7 +178,10 @@ res, msg = xpcall(f, function (r) return {msg=r.msg..'y'} end)
 assert(msg.msg == 'xy')
 
 print('+')
-checksyntax(("syntax error"), "", "error", 1)
+checksyntax("syntax error", "", "error", 1)
+checksyntax("1.000", "", "1.000", 1)
+checksyntax("[[a]]", "", "[[a]]", 1)
+checksyntax("'aa'", "", "'aa'", 1)
 
 doit('I = loadstring("a=9+"); a=3')
 assert(a==3 and I == nil)

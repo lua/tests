@@ -39,6 +39,11 @@ assert(not not 1 == true)
 assert(not not a == true)
 print('+')
 
+a = {}
+a[true] = 20
+a[false] = 10
+assert(a[1<2] == 20 and a[1>2] == 10)
+
 function f(a) return a end
 
 local a = {}

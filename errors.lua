@@ -12,6 +12,7 @@ function y () i=i+1; y() end
 
 assert(doit('y()')=="stack size overflow")
 assert(doit('y()')=="stack size overflow")
+assert(doit('y()')=="stack size overflow")
 print('+')
 assert(strfind(doit("syntax error"), "syntax error"))
 

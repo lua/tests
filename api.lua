@@ -239,15 +239,25 @@ assert(type(T.getref(a)) == 'table')
 -- colect in cl the `val' of all collected userdata
 tt = {}
 cl = {n=0}
-function F(x)
+A = nil; B = nil
+local F
+F = function (x)
   local udval = T.udataval(x)
   local d = T.newuserdata(100)   -- cria lixo
   d = nil
+  assert(T.eventtable(x).gc == F)
   dostring("tinsert({}, {})")   -- cria mais lixo
-  --??? collectgarbage()   -- forca coleta de lixo durante coleta!
   tinsert(cl, udval)
-  udval = {}    -- cria lixo durante coleta
+  collectgarbage()   -- forca coleta de lixo durante coleta!
+  assert(T.eventtable(x).gc == F)   -- coleta anterior nao melou isso?
+  local dummy = {}    -- cria lixo durante coleta
+  if A ~= nil then
+    assert(type(A) == "userdata")
+    assert(T.udataval(A) == B)
+    assert(T.eventtable(A) == nil)
+  end
   A = x   -- ressucita userdata
+  B = udval
   return 1,2,3
 end
 tt.gc = F
@@ -303,6 +313,17 @@ T.eventtable(T.newuserdatabox(5), {gc=F})
 collectgarbage()
 -- check order of collection
 assert(cl.n == 4 and cl[2] == 5 and cl[3] == 2 and cl[4] == 1)
+
+
+a = {}
+for i=30,1,-1 do
+  a[i] = T.eventtable(T.newuserdatabox(i), {gc=F})
+end
+cl.n = 0
+a = nil; collectgarbage()
+assert(cl.n == 30)
+for i=1,30 do assert(cl[i] == i) end
+
 
 for i=2,Lim,2 do   -- unlock the other half
   T.unref(Arr[i])

@@ -56,13 +56,9 @@ end
 
 local f = assert(loadfile(_WD..'gc.lua'))
 f()
-showmem()
 dofile(_WD..'db.lua')
-showmem()
 assert(dofile(_WD..'calls.lua') == deep and deep)
-showmem()
 dofile(_WD..'strings.lua')
-showmem()
 dofile(_WD..'literals.lua')
 assert(dofile(_WD..'attrib.lua') == 27)
 assert(dofile(_WD..'locals.lua') == 5)

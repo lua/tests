@@ -137,4 +137,19 @@ end
 assert(a.n == 25 and a[a.n] == 97)
 
 
+-- errors in coroutines
+function foo ()
+  assert(getinfo(1).currentline == 142)
+  assert(getinfo(2).currentline == 148)
+  yield(3)
+  error('a')
+end
+
+function goo() foo() end
+x = coroutine(goo)
+assert(x() == 3)
+local msg
+call(x, {}, "x", function (_msg) msg = _msg end)
+assert(msg == 'a')
+
 print'OK'

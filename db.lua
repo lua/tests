@@ -84,7 +84,7 @@ function f(a,b)
   assert(x == a and y == b)
   assert(setlocal(2, 1, "pera") == "AA".."AA")
   assert(setlocal(2, 2, "maçã") == "B")
-  x = getstack(2, "fSun")
+  x = getstack(2)
   assert(x.func == g and x.what == "Lua" and x.name == 'g' and
          x.nups == 0 and strfind(x.source, "^@.*db%.lua"))
   glob = glob+1

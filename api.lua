@@ -244,9 +244,8 @@ function F(x)
   local d = T.newuserdata(100)   -- cria lixo
   d = nil
   dostring("tinsert({}, {})")   -- cria mais lixo
-  collectgarbage()   -- forca coleta de lixo durante coleta!
-  cl.n = cl.n+1
-  cl[udval] = 1
+  --??? collectgarbage()   -- forca coleta de lixo durante coleta!
+  tinsert(cl, udval)
   udval = {}    -- cria lixo durante coleta
   A = x   -- ressucita userdata
   return 1,2,3
@@ -288,34 +287,39 @@ assert(t[1] == a and t[2] == b and t[3] == c)
 t=nil; a=nil; c=nil;
 T.unref(e); T.unref(f)
 
+print(T.eventtable(_OUTPUT))
 collectgarbage()
+print(T.eventtable(_OUTPUT))
 
 x = T.getref(d)
 assert(type(x) == 'userdata' and T.eventtable(x) == tt)
-x, tt=nil, nil
+x =nil
+tt=nil    -- libera tt para GC
 
 -- check that unref objects have been collected
-assert(cl.n == 1 and not cl[2] and cl[3] and not cl[1])
-b = nil
+assert(cl.n == 1 and cl[1] == 3)
 
+b = nil
 T.unref(d);
+T.eventtable(T.newuserdatabox(5), {gc=F})
 collectgarbage()
-assert(cl.n == 3 and cl[1])
+-- check order of collection
+assert(cl.n == 4 and cl[2] == 5 and cl[3] == 2 and cl[4] == 1)
 
 for i=2,Lim,2 do   -- unlock the other half
   T.unref(Arr[i])
 end
 
 x = T.newuserdatabox(40); T.eventtable(x, {gc=F})
-cl.n = 0; cl[40] = nil;
+cl.n = 0
 a = {[x] = 1}
 x = nil
 collectgarbage()
 -- old `x' cannot be collected (`a' still uses it)
-assert(cl.n == 0 and not cl[40])
+assert(cl.n == 0)
 for n,_ in a do a[n] = nil end
 collectgarbage()
-assert(cl.n == 1 and cl[40] == 1)   -- old `x' must be collected
+assert(cl.n == 1 and cl[1] == 40)   -- old `x' must be collected
 
 -- testando lua_equal
 assert(T.testC("equal 2 4; return 1", print, 1, print, 20))

@@ -49,6 +49,24 @@ f(2)
 assert(type(f) == 'function')
 
 
+-- testando globais ;-)
+do
+  local f = {}
+  local _G = _G
+  for i=1,10 do f[i] = function (x) A=A+1; return A, _G.getglobals(x) end end
+  A=10; assert(f[1]() == 11)
+  for i=1,10 do setglobals(f[i], {A=i}) end
+  assert(f[3]() == 4 and A == 11)
+  local a,b = f[8](1)
+  assert(b.A == 9)
+  a,b = f[8](0)
+  assert(b.A == 11)   -- `real' global
+  local function f () setglobals(2, {a='10'}) end
+  local function g () f(); _G.assert(_G.getglobals(1).a == '10') end
+  g(); assert(getglobals(g).a == '10')
+end
+
+
 -- testando limites para instrucoes especiais
 
 local a

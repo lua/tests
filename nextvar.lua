@@ -109,7 +109,6 @@ for n,v in globals() do
   if tag(v) ~= tag(print) and not strfind(n, "^[%u_]") then
     setglobal(n, nil);
   end
-  n=nil;
   collectgarbage()
 end
 

@@ -71,6 +71,8 @@ local f = assert(io.open(otherfile))
 io.output(file)
 for l in f:lines() do io.write(l, "\n") end
 assert(f:close()); io.close()
+assert(not pcall(io.close, f))   -- error trying to close again
+assert(tostring(f) == "file (closed)")
 io.input(file)
 f = io.open(otherfile):lines()
 for l in io.lines() do assert(l == f()) end

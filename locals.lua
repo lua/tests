@@ -76,9 +76,12 @@ local function foo (s)
 end
 
 assert(getfenv(foo("")) == _G)
-local a = {loadstring = loadstring}
+local a = {loadstring = loadstring} 
 setfenv(foo, a)
+assert(getfenv(foo("")) == _G)
+setfenv(0, a)  -- change global environment
 assert(getfenv(foo("")) == a)
+setfenv(0, _G)
 
 
 -- testando limites para instrucoes especiais

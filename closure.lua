@@ -125,6 +125,25 @@ print'+'
 
 local f
 
+-- tests for global environment
+
+local function foo (a)
+  setfenv(0, a)
+  coroutine.yield(getfenv())
+  assert(getfenv(0) == a)
+  assert(getfenv(1) == _G)
+  assert(getfenv(loadstring"") == a)
+  return getfenv()
+end
+
+f = coroutine.wrap(foo)
+local a = {}
+assert(f(a) == _G)
+assert(f() == _G)
+
+
+-- tests for multiple yield/resume arguments
+
 local function eqtab (t1, t2)
   assert(table.getn(t1) == table.getn(t2))
   for i,v in ipairs(t1) do

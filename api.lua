@@ -547,11 +547,7 @@ testamem("loadstring", function ()
 end)
 
 
--- teste de memoria x dofile
-_G.a = nil
-local t =tmpname()
-local f = assert(io.open(t, "w"))
-f:write[[
+local testprog = [[
   local t = {x=10, y=234}
   for i=1,5 do t[i] = i; t[i..""] = i end
   t = {"x", "u", "x", "u"}
@@ -559,6 +555,12 @@ f:write[[
   for _, v in ipairs(t) do a=a..v end
   return true
 ]]
+
+-- teste de memoria x dofile
+_G.a = nil
+local t =tmpname()
+local f = assert(io.open(t, "w"))
+f:write(testprog)
 f:close()
 testamem("dofile", function ()
   return loadfile(t)()
@@ -572,6 +574,13 @@ assert(_G.a == "aaaaaaaaaaxuxu")
 testamem("criacao de strings", function ()
   local a, b = gsub("alo alo", "(a)", function (x) return x..'b' end)
   return (a == 'ablo ablo')
+end)
+
+testamem("dump/undump", function ()
+  local a = loadstring(testprog)
+  local b = stringdump(a)
+  a = loadstring(b)
+  return a()
 end)
 
 testamem("criacao de arquivos", function ()

@@ -233,6 +233,7 @@ debug.sethook(function (e)
   -- testa erros dentro de hook (chamando _ERRORMESSAGE)
   assert(not pcall(loadstring("a='joao'+1")))
   debug.sethook(function (e, l) 
+    assert(debug.getinfo(2, "l").currentline == l)
     local f,m,c = debug.gethook()
     assert(e == "line")
     assert(m == 'l' and c == 0)
@@ -349,6 +350,65 @@ local function foo (x)
 end
 
 foo(lim)
+
+
+print"+"
+
+-- testing debugging of coroutines
+
+local co = coroutine.create(function (x)
+             local a = 1
+             coroutine.yield(debug.getinfo(1, "l"))
+             coroutine.yield(debug.getinfo(1, "l").currentline)
+             return a
+           end)
+
+local tr = {}
+local foo = function (e, l) table.insert(tr, l) end
+debug.sethook(co, foo, "l")
+
+local _, l = coroutine.resume(co, 10)
+local x = debug.getinfo(co, 1, "l")
+assert(x.currentline == l.currentline)
+assert(debug.getinfo(co, 2) == nil)
+local a,b = debug.getlocal(co, 1, 1)
+assert(a == "x" and b == 10)
+a,b = debug.getlocal(co, 1, 2)
+assert(a == "a" and b == 1)
+debug.setlocal(co, 1, 2, "hi")
+assert(debug.gethook(co) == foo)
+assert(table.getn(tr) == 2 and
+       tr[1] == l.currentline-1 and tr[2] == l.currentline)
+
+a,b,c = pcall(coroutine.resume, co)
+assert(a and b and c == l.currentline+1)
+
+a,b = coroutine.resume(co)
+assert(a and b == "hi")
+assert(table.getn(tr) == 4 and tr[4] == l.currentline+2)
+assert(debug.gethook(co) == foo)
+assert(debug.gethook() == nil)
+
+
+-- test acessing line numbers of a coroutine from a resume inside
+-- a C function (this is a known bug in Lua 5.0)
+
+local function g(x)
+    coroutine.yield(x)
+end
+
+local function f (i)
+  debug.sethook(function () end, "l")
+  for j=1,1000 do
+    g(i+j)
+  end
+end
+
+local co = coroutine.wrap(f)
+co(10)
+pcall(co)
+pcall(co)
+
 
 print"OK"
 

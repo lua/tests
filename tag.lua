@@ -1,6 +1,11 @@
 print('testando tags e tag methods')
 
 assert(tag(2) == tag(0) and tag{} == tag{})
+assert(tag(function () end) == tag(function () local a = %print end))
+assert(tag(function () end) ~= tag(print))
+assert(tag(sin) == tag(read))
+assert(type(function () end) == 'function')
+assert(type(function () local a = %print end) == 'function')
 
 i = 1
 while i<=400 do newtag(); i=i+1 end
@@ -80,8 +85,8 @@ function fg (name, value)
 end
 settagmethod(tt, 'getglobal', fg)
 
-x = 10
-assert(x == 10 and y == 10 and getglobal('x') == 10 and
+a,x,b = 2,10,1
+assert(x == 10 and a == 2 and b == 1 and y == 10 and getglobal('x') == 10 and
        type(rawgetglobal('x')) == 'table')
 
 setglobal('x', print)

@@ -93,7 +93,7 @@ for s in string.gfind(prog, "$([^$]+)") do
   if not n then write(s) else F[n]() end
 end
 assert(writeto())
-result = assert(dofile(file))
+result = dofile(file)
 assert(remove(file))
 print'OK'
 return result

@@ -11,21 +11,22 @@ end
 
 
 function checkmessage (prog, msg)
-  assert(strfind(doit(prog), msg, 1, true))
+  assert(string.find(doit(prog), msg, 1, true))
 end
 
 function checksyntax (prog, extra, token, line)
   local msg = doit(prog)
-  local pt = format([[^%%[string ".*"%%]:%d: .- near `%s'$]], line, token)
-  assert(strfind(msg, pt))
-  assert(strfind(msg, msg, 1, true))
+  local pt = string.format([[^%%[string ".*"%%]:%d: .- near `%s'
+$]], line, token)
+  assert(string.find(msg, pt))
+  assert(string.find(msg, msg, 1, true))
 end
 
 
 
 -- testa erros comuns e/ou que voavam no passado
 assert(doit("unpack{n=2^30}"))
-assert(doit("a=sin()"))
+assert(doit("a=math.sin()"))
 assert(not doit("tostring(1)") and doit("tostring()"))
 assert(doit"tonumber()")
 assert(doit"repeat until 1; a")
@@ -35,7 +36,7 @@ assert(doit"a=1;;")
 assert(doit"return;;")
 assert(doit"assert(false)")
 assert(doit"assert(nil)")
-assert(doit"a=sin\n(3)")
+assert(doit"a=math.sin\n(3)")
 assert(doit("function a (... , ...) end"))
 assert(doit("function a (, ...) end"))
 --[[?? checksyntax('%a()', "", "a", 1)
@@ -54,12 +55,12 @@ checksyntax([[
 
 -- testes para mensagens de erro mais explicativas
 
-checkmessage("a=1; bbbb=2; a=sin(3)+bbbb(3)", "global `bbbb'")
-checkmessage("a=1; local a,bbbb=2,3; a = sin(1) and bbbb(3)",
+checkmessage("a=1; bbbb=2; a=math.sin(3)+bbbb(3)", "global `bbbb'")
+checkmessage("a=1; local a,bbbb=2,3; a = math.sin(1) and bbbb(3)",
        "local `bbbb'")
 checkmessage("a={}; do local a=1 end a:bbbb(3)", "method `bbbb'")
 checkmessage("local a={}; a.bbbb(3)", "field `bbbb'")
-assert(not strfind(doit"a={13}; local bbbb=1; a[bbbb](3)", "`bbbb'"))
+assert(not string.find(doit"a={13}; local bbbb=1; a[bbbb](3)", "`bbbb'"))
 checkmessage("a={13}; local bbbb=1; a[bbbb](3)", "number")
 
 aaa = nil
@@ -72,13 +73,13 @@ checkmessage("local aaa='a'; x=aaa+b", "local `aaa'")
 checkmessage("aaa={}; x=3/aaa", "global `aaa'")
 checkmessage("aaa='2'; b=nil;x=aaa*b", "global `b'")
 checkmessage("aaa={}; x=-aaa", "global `aaa'")
-assert(not strfind(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "`aaa'"))
-assert(not strfind(doit"aaa={}; (aaa or aaa)()", "`aaa'"))
+assert(not string.find(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "`aaa'"))
+assert(not string.find(doit"aaa={}; (aaa or aaa)()", "`aaa'"))
 
 checkmessage([[aaa=9
 repeat until 3==3
-local x=sin(cos(3))
-if sin(1) == x then return 1,2,sin(1) end   -- tail call
+local x=math.sin(math.cos(3))
+if math.sin(1) == x then return 1,2,math.sin(1) end   -- tail call
 local a,b = 1, {
   {x='a'..'b'..'c', y='b', z=x},
   {1,2,3,4,5} or 3+3<=3+3,
@@ -88,7 +89,7 @@ local a,b = 1, {
 
 checkmessage([[
 local x,y = {},1
-if sin(1) == 0 then return 3 end    -- return
+if math.sin(1) == 0 then return 3 end    -- return
 x.a()]], "field `a'")
 
 checkmessage([[
@@ -107,17 +108,27 @@ print'+'
 function lineerror (s)
   local err,msg = pcall(loadstring(s))
   local _, _, line = string.find(msg, ":(%d+):")
-  return line+0
+  return line and line+0
 end
 
 assert(lineerror"local a\n for i=1,'a' do \n print(i) \n end" == 2)
 assert(lineerror"\n local a \n for k,v in 3 \n do \n print(k) \n end" == 3)
 assert(lineerror"\n\n for k,v in \n 3 \n do \n print(k) \n end" == 4)
 
+local p = [[
+function g() f() end
+function f(x) error('a', X) end
+g()
+]]
+X=3;assert(lineerror(p) == 3)
+X=0;assert(lineerror(p) == nil)
+X=1;assert(lineerror(p) == 2)
+X=2;assert(lineerror(p) == 1)
+
 lineerror = nil
 
 C = 0
-local l = getinfo(1, "l").currentline; function y () C=C+1; y() end
+local l = debug.getinfo(1, "l").currentline; function y () C=C+1; y() end
 
 local function checkstackmessage (m)
   return (string.find(m, "^.-:%d+: stack overflow"))
@@ -129,10 +140,9 @@ assert(checkstackmessage(doit('y()')))
 C = 0
 local l1
 local function g()
-  l1 = getinfo(1, "l").currentline; y()
+  l1 = debug.getinfo(1, "l").currentline; y()
 end
-local _, msg, stackmsg = pcall(g)
-assert(checkstackmessage(msg))
+local _, stackmsg = xpcall(g, debug.traceback)
 local stack = {}
 for line in string.gfind(stackmsg, "[^\n]*") do
   local _, _, curr = string.find(line, ":(%d+):")
@@ -144,6 +154,26 @@ while stack[i] ~= l1 do
   i = i+1
 end
 assert(i > 15)
+
+
+-- error in error handling
+local res, msg = xpcall(error, error)
+assert(not res and type(msg) == 'string')
+
+local function f (x)
+  if x==0 then error('a\n')
+  else
+    local aux = function () return f(x-1) end
+    local a,b = xpcall(aux, aux)
+    return a,b
+  end
+end
+f(3)
+
+-- non string messages
+function f() error{msg='x'} end
+res, msg = xpcall(f, function (r) return {msg=r.msg..'y'} end)
+assert(msg.msg == 'xy')
 
 print('+')
 checksyntax(("syntax error"), "", "error", 1)

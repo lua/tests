@@ -215,6 +215,29 @@ and the rest of the file
 assert(os.remove(file))
 collectgarbage()
 
+-- teste de buffer
+do
+  local f = assert(io.open(file, "w"))
+  local fr = assert(io.open(file, "r"))
+  f:setvbuf("full")
+  f:write("x")
+  assert(fr:read("*all") == "")  -- full buffer; output not written yet
+  f:close()
+  assert(fr:read("*all") == "x")   -- `close' flushes it
+  f = assert(io.open(file), "w")
+  f:setvbuf("no")
+  f:write("x")
+  fr:seek("set")
+  assert(fr:read("*all") == "x")  -- no buffer; output is ready
+  f:close()
+  f = assert(io.open(file, "a"))
+  f:setvbuf("line")
+  f:write("x")
+  assert(fr:read("*all") == "")   -- line buffer; no output without `\n'
+  f:write("a\n")
+  assert(fr:read("*all") == "xa\n")  -- now we have a whole line
+  f:close(); fr:close()
+end
 
 
 -- teste de arquivos grandes (> BUFSIZ)

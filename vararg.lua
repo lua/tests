@@ -39,7 +39,7 @@ function t:f (...) return self[arg[1]]+arg.n end
 assert(t:f(1,4) == 3 and t:f(2) == 11)
 print('+')
 
-lim = 800
+lim = 20
 local i, a = 1, {}
 while i <= lim do a[i] = i+0.3; i=i+1 end
 

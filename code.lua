@@ -76,6 +76,19 @@ end,
   'DIV', 'ADD', 'GETTABLE', 'SUB', 'GETTABLE', 'POW',
     'UNM', 'SETTABLE', 'SETTABLE', 'RETURN')
 
+
+-- direct access to constants
+check(function ()
+  local a,b
+  a.x = 0
+  a.x = b
+  a[b] = 'y'
+  a = 1 - a
+  b = 1/a
+  b = 5+4
+end,
+  'LOADNIL', 'SETTABLE', 'SETTABLE', 'SETTABLE', 'SUB', 'DIV', 'ADD', 'RETURN')
+
 check(function ()
   local a,b,c
   b[c], a = c, b

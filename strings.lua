@@ -109,19 +109,26 @@ assert(table.concat({}, 'x') == "")
 assert(table.concat({'\0', '\0\1', '\0\1\2'}, '.\0.') == "\0.\0.\0\1.\0.\0\1\2")
 local a = {}; for i=1,3000 do a[i] = "xuxu" end
 assert(table.concat(a, "123").."123" == strrep("xuxu123", 3000))
+assert(table.concat(a, "b", 20, 20) == "xuxu")
+assert(table.concat(a, "", 20, 21) == "xuxuxuxu")
+assert(table.concat(a, "", 22, 21) == "")
+assert(table.concat(a, "3", 2999) == "xuxu3xuxu")
 
---locale 'ptb':         for MS-Windows
---locale 'ISO-8859-1':  for Linux
+local locales = { "ptb", "ISO-8859-1", "pt_BR" }
+local function trylocale (w)
+  for _, l in ipairs(locales) do
+    if setlocale(l, w) then return true end
+  end
+  return false
+end
 
-if not setlocale('ptb', "collate") 
-   and not setlocale('ISO-8859-1', "collate") then
+if not trylocale("collate")  then
   print("locale not supported")
 else
   assert("alo" < "αlo" and "αlo" < "amo")
 end
 
-if not setlocale('ptb', "ctype") 
-   and not setlocale('ISO-8859-1', "ctype") then
+if not trylocale("ctype") then
   print("locale not supported")
 else
   assert(gsub("αινσϊ", "%a", "x") == "xxxxx")

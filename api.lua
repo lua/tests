@@ -48,10 +48,93 @@ t = pack(T.testC("concat 5; gettop; return .", "alo", 2, 3, "joao", 12))
 tcheck(t, {n=1;"alo23joao12"})
 
 -- testando MULTRET
-t = pack(T.testC("call 2,-1; gettop; return .",
+t = pack(T.testC("rawcall 2,-1; gettop; return .",
      function (a,b) return 1,2,3,4,a,b end, "alo", "joao"))
 tcheck(t, {n=6;1,2,3,4,"alo", "joao"})
 
+
+-- testando lua_is
+
+function count (x, n)
+  n = n or 2
+  local prog = [[
+    isnumber %1$d;
+    isstring %1$d;
+    isfunction %1$d;
+    iscfunction %1$d;
+    istable %1$d;
+    isuserdata %1$d;
+    isnil %1$d;
+    isnull %1$d;
+    return 8
+  ]]
+  prog = format(prog, n)
+  local a,b,c,d,e,f,g,h = T.testC(prog, x)
+  return a+b+c+d+e+f+g+h
+end
+
+assert(count(3) == 2)
+assert(count('alo') == 1)
+assert(count('32') == 2)
+assert(count({}) == 1)
+assert(count(print) == 2)
+assert(count(function () end) == 1)
+assert(count(nil) == 1)
+assert(count(_INPUT) == 1)
+assert(count(nil, 15) == 1)
+
+-- testando lua_to...
+
+function to (s, x, n)
+  n = n or 2
+  return T.testC(format("%s %d; return 1", s, n), x)
+end
+
+assert(to("tostring", {}) == nil)
+assert(to("tostring", "alo") == "alo")
+assert(to("tostring", 12) == "12")
+assert(to("tostring", 12, 3) == nil)
+assert(to("strlen", {}) == 0)
+assert(to("strlen", "alo\0\0a") == 6)
+assert(to("strlen", 12) == 2)
+assert(to("strlen", 12, 3) == 0)
+assert(to("tonumber", {}) == 0)
+assert(to("tonumber", "12") == 12)
+assert(to("tonumber", "s2") == 0)
+assert(to("tonumber", 1, 20) == 0)
+a = to("tocfunction", sin)
+assert(a(3) == sin(3) and a ~= sin)
+
+
+-- testando erros
+local olderr = _ERRORMESSAGE
+_ERRORMESSAGE = nil
+
+a,b = T.testC("call 2,3; pushvalue 2; insert -2; call 1,1; dostring 4; \
+               dostring 1; dostring 5; return 2",
+               sin, 1, "x=150", "x='a'+1", 1, 2, 3, 4, 5)
+_ERRORMESSAGE = olderr
+assert(a == 1 and b == sin(2) and x == 150)
+
+
+-- testando tabelas
+a = {x=0, y=12}
+x, y = T.testC("gettable 2; pushvalue 4; gettable 2; return 2",
+                a, 3, "y", 4, "x")
+assert(x == 0 and y == 12)
+T.testC("settable -5", a, 3, 4, "x", 15)
+assert(a.x == 15)
+
+b = settag({p = a}, newtag())
+settagmethod(tag(b), "index", function (t, i) return t.p[i] end)
+k, x = T.testC("gettable 3, return 2", 4, b, 20, 35, "x")
+assert(x == 15 and k == 35)
+settagmethod(tag(b), "gettable", function (t, i) return a[i] end)
+settagmethod(tag(b), "settable", function (t, i,v ) a[i] = v end)
+y = T.testC("insert 2; gettable -5; return 1", 2, 3, 4, "y", b)
+assert(y == 12)
+k = T.testC("settable -5, return 1", b, 3, 4, "x", 16)
+assert(a.x == 16 and k == 4)
 
 -- testando next
 a = {}
@@ -76,6 +159,7 @@ for i=1,Lim,2 do   -- unlock half of them
 end
 
 assert(T.getref(-1) == nil)
+assert(type(T.getref(0)) == 'table')  -- API table
 assert(T.ref(nil, 1) == -1)      -- (-1 == LUA_REFNIL)
 assert(T.ref(nil, 0) == -1)      -- (-1 == LUA_REFNIL)
 
@@ -97,6 +181,19 @@ function f(x)
 end
 T.settagmethod(tt, 'gc', f)
 
+do
+  collectgarbage();
+  local x = gcinfo();
+  local a = T.newuserdata(5000)
+  assert(gcinfo() >= x+5) 
+  assert(T.newuserdata(T.udataval(a), 0) == a)
+  assert(T.newuserdata(T.udataval(a), -1) == a)
+  a = nil
+  collectgarbage();
+  assert(gcinfo() <= x+1)
+end
+
+
 collectgarbage(10000000)
 
 -- create 3 userdatas with tag `tt' and values 1, 2, and 3
@@ -104,11 +201,10 @@ a = T.newuserdata(1, tt)
 b = T.newuserdata(2, tt)
 c = T.newuserdata(3, tt)
 
--- create a userdata with tag 0 and another with tag 500 (old uses...)
+-- create a userdata with tag 0
 x = T.newuserdata(4, 0)
-y = T.newuserdata(4, 500)
 
-assert(tag(x) == 0 and tag(y) == 500)
+assert(tag(x) == 0)
 
 do   -- test ANYTAG (-1)
   local d = T.newuserdata(1, -1)
@@ -168,7 +264,7 @@ print'+'
 
 
 -- testando multiplos estados
-T.closestate(T.newstate(100)); print(1)
+T.closestate(T.newstate(100));
 L1 = T.newstate(15)
 assert(type(L1) == 'userdata')
 assert(pack(T.doremote(L1, "function f () return 'alo', 3 end; f()")).n == 0)
@@ -176,6 +272,7 @@ assert(pack(T.doremote(L1, "function f () return 'alo', 3 end; f()")).n == 0)
 a, b = T.doremote(L1, "return f()")
 assert(a == 'alo' and b == '3')
 
+T.doremote(L1, "_ERRORMESSAGE = nil")
 -- error: `sin' is not defined
 a, b = T.doremote(L1, "return sin(1)")
 assert(a == nil and b == 1)   -- 1 == run-time error
@@ -184,7 +281,7 @@ assert(a == nil and b == 1)   -- 1 == run-time error
 a, b = T.doremote(L1, "return a+")
 assert(a == nil and b == 3)   -- 3 == syntax error
 
-T.closestate(L1); print(2)
+T.closestate(L1);
 
 T.settagmethod(tt, 'gc', nil)
 
@@ -209,8 +306,7 @@ while 1 do
   a = call(T.newstate, args, "x")  -- tenta criar estado
   if a ~= nil then break end       -- para quando conseguir
 end
-print(4)
-T.closestate(a); print(3)  -- fecha estado que conseguiu abrir
+T.closestate(a);  -- fecha estado que conseguiu abrir
 T.totalmem(32000000)  -- restaura limite alto (32M)
 print("limite para criar estado: "..M-oldM)
 

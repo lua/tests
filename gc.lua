@@ -45,6 +45,32 @@ a:test()
 -- coleta de funcao sem locais, globais, etc.
 do local f = function () end end
 
+
+print("funcoes com erros")
+prog = [[
+do
+  a = 10;
+  function foo(x,y)
+    a = sin(a+0.456-0.23e-12);
+    return function (z) return sin(%x+z) end
+  end
+  local x = function (w) a=a+w; end
+end
+]]
+do
+  local old = _ERRORMESSAGE
+  local a = {msg=nil}
+  _ERRORMESSAGE = function (s) %a.msg = s end
+  local step = 1
+  if _soft then step = 13 end
+  for i=1, strlen(prog), step do
+    for j=i, strlen(prog), step do
+      dostring(strsub(prog, i, j))
+    end
+  end
+  _ERRORMESSAGE = old
+end
+
 print('strings longos')
 x = "01234567890123456789012345678901234567890123456789012345678901234567890123456789"
 assert(strlen(x)==80)
@@ -62,16 +88,28 @@ x = nil
 assert(getglobal("while") == 234)
 
 
-local oldtm = settagmethod(tag(nil), 'gc', function (x) i = nil end)
-i = 1;
-while i do a = {} end  -- run until gc
+local bytes = gcinfo()
+while 1 do
+  local nbytes = gcinfo()
+  if nbytes < bytes then break end   -- run until gc
+  bytes = nbytes
+  a = {}
+end
 
 collectgarbage()
-i = 1
-collectgarbage()
-assert(i == nil)
 
-settagmethod(tag(nil), 'gc', oldtm)
+do  -- testa collectgarbage com valores
+  local a,b = gcinfo()
+  collectgarbage(b+10)
+  local c,d = gcinfo(); assert(c<=d)
+  assert(d == b+10)
+  collectgarbage(2^30)
+  c,d = gcinfo(); assert(c<=d)
+  assert(d == 2^22-1)   -- ULONG_MAX/1K
+  collectgarbage(b)     -- restore original value
+  c,d = gcinfo(); assert(c<=d)
+  assert(d == b)
+end
 
 a = {}
 -- fill a with `collectable' indices

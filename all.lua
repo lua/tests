@@ -9,16 +9,20 @@ assert(setlocale"C")
 local showmem = function ()
   if %T then
     local a,b,c = %T.totalmem()
-    %print(%format("\n ---- memoria total: %d, maxima: %d,  blocos: %d\n",
-                    a, c, b))
+    local d,e = %gcinfo()
+    %print(%format(
+  "\n ---- memoria total: %dK (%dK), maxima: %d,  blocos: %d\n",
+                        a/1024,  d,      c/1024,           b))
   end
 end
 
 assert(dofile(_WD..'main.lua'))
 
-settagmethod(tag(nil), 'gc', function (a)
-  %write(_STDERR, '.')
-end)
+if type(T) == 'table' then   -- debug facilities available?
+  T.settagmethod(tag(nil), 'gc', function (a)
+    %write(_STDERR, '.')
+  end)
+end
 
 showmem()
 assert(dofile(_WD..'db.lua'))

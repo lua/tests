@@ -2,7 +2,7 @@
 
 
 
-print"testando biblioteca de depuração"
+print"testando biblioteca de depuração e informacoes de debug"
 
 do
 local a=1
@@ -13,7 +13,7 @@ function test (s, l)
   local f = function (line)
     if tremove(%l, 1) ~= line then print("wrong trace!!"); exit(1) end
   end
-  setlinehook(f); dostring(s); setlinehook()
+  setlinehook(f); dostring(s); assert(setlinehook() == f)
   assert(l.n == 0)
 end
 
@@ -26,6 +26,30 @@ do
   assert(b.name == nil and b.what == "Lua" and b.linedefined == 11 and
          b.func == test and strfind(b.short_src, "^file "))
 end
+
+
+-- testa truncagem de nomes de arquivos e strings
+a = "function f () end"
+dostring(a)
+assert(getinfo(f).short_src == format('string "%s"', a))
+dostring(a..format("; %s\n=1", strrep('p', 400)))
+assert(strfind(getinfo(f).short_src, '^string [^\n]*%.%.%."$'))
+dostring("\n"..a)
+assert(getinfo(f).short_src == 'string "..."')
+dostring(a, "")
+assert(getinfo(f).short_src == 'string ""')
+dostring(a, "@xuxu")
+assert(getinfo(f).short_src == "file `xuxu'")
+dostring(a, "@"..strrep('p', 1000)..'t')
+assert(strfind(getinfo(f).short_src, "^file `%.%.%.p*t'$"))
+dostring(a, "=xuxu")
+assert(getinfo(f).short_src == "xuxu")
+dostring(a, format("=%s", strrep('x', 500)))
+assert(strfind(getinfo(f).short_src, "^x*"))
+dostring(a, "=")
+assert(getinfo(f).short_src == "")
+a = nil; f = nil;
+
 
 repeat
   local g = {x = function ()
@@ -196,6 +220,11 @@ X = nil
 a = {}
 function a:f (a, b, ...) local c = 13 end
 setcallhook(function ()
+  dostring("XX = 12")  -- testa dostring dentro de hooks
+  -- testa erros dentro de hook (chamando _ERRORMESSAGE)
+  local olda = _ALERT; _ALERT = function (s) end;
+  call(dostring, {"a='joao'+1"}, 'x')
+  _ALERT = olda
   setcallhook()  -- hook e' chamado uma unica vez
   setlinehook(function (l) 
     setlinehook()  -- hook e' chamado uma unica vez
@@ -213,6 +242,7 @@ end)
 
 a:f(1,2,3,4,5)
 assert(X.self == a and X.a == 1   and X.b == 2 and X.arg.n == 3 and X.c == nil)
+assert(XX == 12)
 print'OK'
 
 

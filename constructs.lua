@@ -30,6 +30,21 @@ do  -- test old bug (first name could not be an `upvalue')
  local a; function f(x) x={a=1}; x={x=1}; x={G=1} end
 end
 
+function f (i)
+  if type(i) ~= 'number' then return i,'jojo' end
+  if i > 0 then return i, f(i-1) end
+end
+
+x = {f(3), f(5), f(10)}
+assert(x[1] == 3 and x[2] == 5 and x[3] == 10)
+x = {f'alo', f'xixi'}
+assert(x[1] == 'alo' and x[2] == 'xixi')
+x = {f'alo'..'xixi'}
+assert(x[1] == 'aloxixi')
+x = {f{}}
+assert(next(x[1]) == nil)
+
+
 local f = function (i)
   if i < 10 then return 'a';
   elseif i < 20 then return 'b';
@@ -195,6 +210,7 @@ repeat
   s = format("a = %s; local xxx; if %s then X,NX=a,not a else X,NX=not a,a end", s, s)
   assert(dostring(s))
   assert(X and not NX)
+  if mod(i,4000) == 0 then print('+') end
   i = i+1
 until i==c
 

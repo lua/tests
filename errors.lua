@@ -11,6 +11,7 @@ end
 
 
 -- testa erros comuns e/ou que voavam no passado
+assert(doit("a=sin()"))
 assert(not doit("tostring(1)") and doit("tostring()"))
 assert(doit"tonumber()")
 assert(doit"repeat until 1; a")
@@ -79,7 +80,14 @@ doit('i = dostring("a=9+"); a=3')
 assert(a==3 and i == nil)
 print('+')
 
-for i=1,1000 do
+do
+  local a,b = call(dostring, {"a='x'+1"}, 'x', error)
+  assert(a == nil and b == "error in error handling")
+end
+
+lim = 1000
+if _soft then lim = 100 end
+for i=1,lim do
   doit('a = ')
   doit('a = 4+nil')
 end

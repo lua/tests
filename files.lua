@@ -136,7 +136,9 @@ assert(read(filehandle,'*l') == "qualquer coisa")
 _INPUT = otherfilehandle
 assert(read(strlen"outra coisa") == "outra coisa")
 assert(read(filehandle, '*l') == "mais qualquer coisa")
+assert(tag(filehandle) == tag(_INPUT))
 closefile(filehandle);
+assert(tag(filehandle) ~= tag(_INPUT))
 _INPUT = otherfilehandle
 assert(read(4) == "\0\1\3\0")
 assert(read(4) == "\0\0\0\255")

@@ -18,12 +18,13 @@ assert(f(tonumber('e1')) == nil)
 assert(f(tonumber('e  1')) == nil)
 assert(f(tonumber(' 3.4.5 ')) == nil)
 assert(f(tonumber('')) == nil)
+assert(f(tonumber('', 8)) == nil)
 assert(f(tonumber('  ')) == nil)
 assert(f(tonumber('  ', 9)) == nil)
 assert(f(tonumber('99', 8)) == nil)
 assert(tonumber('  1010  ', 2) == 10)
 assert(tonumber('10', 36) == 36)
---assert(tonumber('-10', 36) == -36)
+--assert(tonumber('\n  -10  \n', 36) == -36)
 --assert(tonumber('-fFfa', 16) == -(10+(16*(15+(16*(15+(16*15)))))))
 assert(tonumber('fFfa', 15) == nil)
 --assert(tonumber(strrep('1', 42), 2) + 1 == 2^42)
@@ -74,6 +75,14 @@ assert(eq(exp(0), 1))
 
 assert(tonumber(' 1.3e-2 ') == 1.3e-2)
 assert(tonumber(' -1.00000000000001 ') == -1.00000000000001)
+
+-- testando limites de constantes
+-- 2^23 = 8388608
+assert(8388609 + -8388609 == 0)
+assert(8388608 + -8388608 == 0)
+assert(8388607 + -8388607 == 0)
+
+if _soft then return end
 
 f = tmpname()
 assert(writeto(f))
@@ -136,11 +145,5 @@ until flag or i>10000
 assert(-10 <= Min and Max<=0)
 assert(flag);
 
-
--- testando limites de constantes
--- 2^23 = 8388608
-assert(8388609 + -8388609 == 0)
-assert(8388608 + -8388608 == 0)
-assert(8388607 + -8388607 == 0)
 
 print('OK')

@@ -1,8 +1,18 @@
 print('testando tags e tag methods')
 
+-- teste "sujo" (tags nao precisam ter necessariamente esses valores)
+assert(tag(nil) == 1)
+assert(tag(2) == 2)
+assert(tag('a') == 3)
+assert(tag{} == 4)
+assert(tag(function () end) == 5)
+assert(tag(function () %sin(3) end) == 5)
+assert(tag(sin) == 5)
+assert(tag(read) == 5)
+assert(tag(_INPUT) > 5)
+
 assert(tag(2) == tag(0) and tag{} == tag{})
 assert(tag(function () end) == tag(function () local a = %print end))
-assert(tag(function () end) ~= tag(print))
 assert(tag(sin) == tag(read))
 assert(type(function () end) == 'function')
 assert(type(function () local a = %print end) == 'function')
@@ -174,6 +184,27 @@ assert(x.val == "0abcdefg")
 tt1 = newtag()
 assert(copytagmethods(tt1, tt) == tt1)
 assert(gettagmethod(tt1, 'concat') == conctag)
+
+-- teste de multiplos niveis de calls
+do
+  local tt = newtag()
+
+  settagmethod(tt, 'function', function (t, ...)
+    i = i+1
+    if t.f then return call(t.f, arg)
+    else return arg
+    end
+  end)
+
+  i = 0
+  local a = settag({}, tt)
+  local b = settag({f=a}, tt)
+  local c = settag({f=b}, tt)
+
+  x = c(3,4,5)
+  assert(i == 3 and x[1] == 3 and x[3] == 5)
+  print'+'
+end
 
 
 -- teste de coleta de tabelas, se disponivel

@@ -4,11 +4,16 @@ print "testing require"
 
 local DIR="tmp/"
 
-local files = {"A.lua", "B.lua", "A.lc", "A", "L"}
+local files = {["A.lua"] = "",
+  ["B.lua"] = "assert(_REQUIREDNAME=='B');require 'A'",
+  ["A.lc"] = "", ["A"] = "", ["L"] = "",
+}
 
-for _,n in ipairs(files) do
+for n,c in pairs(files) do
   io.output(DIR..n)
+  io.write(c)
   io.write("NAME = '"..n.."'\n")
+  io.write("REQUIRED = _REQUIREDNAME\n")
   io.close(io.output())
 end
 
@@ -20,18 +25,20 @@ local try = function (p, n)
   NAME = nil
   require(p)
   assert(NAME == n)
-  assert(_REQUIREDNAME == p)
+  assert(REQUIRED == p)
 end
 
 try('B', 'B.lua')
 assert(_LOADED.B)
+assert(_LOADED.A)
+_LOADED.A = nil
 try('B', nil)   -- should not reload package
 try('A', 'A.lua')
 _LOADED.A = nil
 os.remove(DIR..'A.lua')
 try('A', 'A.lc')  -- now must find second option
 try('K', 'L')     -- default option
-
+assert(_REQUIREDNAME == nil)
 
 
 for _,n in ipairs(files) do

@@ -1,3 +1,56 @@
+do --[
+
+print "testing require"
+
+global in nil
+
+global assert, str, io, os, math, nexti, require
+
+local DIR="tmp/"
+
+local files = {"A.lua", "B.lua", "A.lc", "A", "L"}
+
+for _,n in nexti(files) do
+  io.output(DIR..n)
+  io.write("NAME = '"..n.."'\n")
+  io.close(io.output())
+end
+
+global LUA_PATH, _LOADED, _REQUIREDNAME
+
+local oldpath = LUA_PATH
+
+global NAME
+
+LUA_PATH = str.gsub("D/?.lua;D/?.lc;D/?;D/L", "D/", DIR)
+
+local try = function (p, n)
+  NAME = nil
+  require(p)
+  assert(NAME == n)
+  assert(_REQUIREDNAME == p)
+end
+
+try('B', 'B.lua')
+assert(_LOADED.B)
+try('B', nil)   -- should not reload package
+try('A', 'A.lua')
+_LOADED.A = nil
+os.remove(DIR..'A.lua')
+try('A', 'A.lc')  -- now must find second option
+try('K', 'L')     -- default option
+
+
+
+for _,n in nexti(files) do
+  os.remove(DIR..n)
+end
+
+LUA_PATH = oldpath
+end  --]
+
+print('+')
+
 print("testando atribuicoes, operadores logicos e construtores")
 
 local res, res2 = 27
@@ -10,6 +63,21 @@ a.x, b, a[1] = 1, 2, f()
 assert(a.x==1 and b==2 and a[1]==10)
 a[f()], b, a[f()+3] = f(), a, 'x'
 assert(a[10] == 10 and b == a and a[13] == 'x')
+
+do
+  local f = function (n) local x = {}; for i=1,n do x[i]=i end;
+                         return unpack(x) end;
+  local a,b,c
+  global A,B
+  a,b = 0, f(1)
+  assert(a == 0 and b == 1)
+  A,b = 0, f(1)
+  assert(A == 0 and b == 1)
+  a,b,c = 0,5,f(4)
+  assert(a==0 and b==5 and c==1)
+  a,b,c = 0,5,f(0)
+  assert(a==0 and b==5 and c==nil)
+end
 
 
 a, b, c, d = 1 and nil, 1 or nil, (1 and (nil or 1)), 6

@@ -509,6 +509,10 @@ function testamem (s, f)
     a, b = pcall(f)
     if a and b then break end       -- para quando conseguir
     collectgarbage()
+    if not a and not string.find(b, "memory") then   -- `real' error?
+      T.totalmem(32000000)  -- restaura limite alto (32M)
+      error(b, 0)
+    end
   end
   T.totalmem(32000000)  -- restaura limite alto (32M)
   print("\nlimite para " .. s .. ": " .. M-oldM)
@@ -563,7 +567,8 @@ local f = assert(io.open(t, "w"))
 f:write(testprog)
 f:close()
 testamem("dofile", function ()
-  return loadfile(t)()
+  local a = loadfile(t)
+  return a and a()
 end)
 assert(os.remove(t))
 assert(_G.a == "aaaaaaaaaaxuxu")
@@ -578,9 +583,9 @@ end)
 
 testamem("dump/undump", function ()
   local a = loadstring(testprog)
-  local b = stringdump(a)
-  a = loadstring(b)
-  return a()
+  local b = a and stringdump(a)
+  a = b and loadstring(b)
+  return a and a()
 end)
 
 testamem("criacao de arquivos", function ()
@@ -603,6 +608,15 @@ testamem("criacao de closures", function ()
    return function (x) return a+b+c+x end
   end
   return (close(2,3)(4) == 10)
+end)
+
+testamem("corotinas", function ()
+  local a = coroutine.wrap(function ()
+              coroutine.yield(string.rep("a", 10))
+              return {}
+            end)
+  assert(string.len(a()) == 10)
+  return a()
 end)
 
 print'OK'

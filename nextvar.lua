@@ -195,6 +195,16 @@ do
   print'+'
 end
 
+a = {1,2,3,4,5;x=1,y=2,z=3}
+b = {}
+foreach(a, function (k,v) b[k] = v end)
+for k,v in b do assert(a[k] == v) end
+for k,v in a do assert(b[k] == v) end
+b = {}
+do local k,v = next(a); while k do b[k] = v; k,v = next(a,k) end end
+for k,v in b do assert(a[k] == v) end
+for k,v in a do assert(b[k] == v) end
+
 assert(getn{n=20} == 20)
 assert(getn{1,2,3; n=1} == 1)
 assert(getn{[-1] = 2} == 0)

@@ -8,7 +8,6 @@ function mp2 (n)   -- minimum power of 2 >= n
 end
   
 function check (t, na, nh, p)
-  if nh < 2 then nh = 2 end   -- tamanho minimo de hash
   local a, h = T.querytab(t)
   if p then print(na, nh, a, h) end
   assert(a == na and (nh == -1 or h == nh))
@@ -25,21 +24,21 @@ for i=1,lim do
     s = format('%sa%d=%d,', s, k, k)
   end
 end
-check({}, 0, 2)
+check({}, 0, 1)
 
 print'+'
 
 -- teste de tamanho com construcao dinamica
 for i = 4,100 do
   local a = {}
-  local p = mp2(i-1)     -- -1 because 1 always may be in hash part
+  local p = mp2(i)
   for j=1,i do a[j] = 1 end
-  check(a, p, 2)
+  check(a, p, 1)
 end
 
 local a = {}
 for i=1,16 do a[i] = i end
-check(a, 16, 2)
+check(a, 16, 1)
 for i=1,10 do a[i] = nil end
 for i=30,40 do a[i] = nil end   -- force a rehash
 check(a, 0, 8)
@@ -50,15 +49,15 @@ for i=1,13 do a[i] = nil end
 for i=30,50 do a[i] = nil end   -- force a rehash
 check(a, 0, 4)
 for i=1,20 do a[i] = nil end   -- force a rehash
-check(a, 0, 2)
+check(a, 0, 1)
 for i=1,2 do a[i] = 1 end
-check(a, 2, 2)
+check(a, 2, 1)
 
 -- reverse filling
 for i=10,200 do
   local a = {}
   for i=i,1,-1 do a[i] = i end   -- fill in reverse
-  check(a, mp2(i), 2)
+  check(a, mp2(i), 1)
 end
 
 end
@@ -175,7 +174,7 @@ end
 
 do   -- clear global table
   local a = {}
-  local preserve = {io = 1, str = 1, dbg = 1, os = 1, co = 1,}
+  local preserve = {io = 1, str = 1, dbg = 1, os = 1, co = 1, tab = 1, math = 1}
   for n,v in globals() do a[n]=v end
   for n,v in a do
     if not preserve[n] and type(v) ~= "function" and
@@ -284,17 +283,16 @@ collectgarbage()
 
 function f (n, p)
   local t = {}; for i=1,p do t[i] = i*10 end
-  return function (a,b)
-           assert(a == nil and b == nil)
+  return function (_,n)
            if n > 0 then
              n = n-1
-             return unpack(t)
+             return n, unpack(t)
            end
-         end
+         end, nil, n
 end
 
 local x = 0
-for a,b,c,d in f(5,3) do
+for n,a,b,c,d in f(5,3) do
   x = x+1
   assert(a == 10 and b == 20 and c == 30 and d == nil)
 end

@@ -148,17 +148,15 @@ end
 
 function Op(x) return setmetatable({x=x}, t) end
 
-function O(x) return {x=x} end
-
 local function test ()
-assert(not(Op(1)<Op(1)) and (Op(1)<Op(2)) and not(Op(2)<Op(1)))
-assert(not(Op('a')<Op('a')) and (Op('a')<Op('b')) and not(Op('b')<Op('a')))
-assert((O(1)<=Op(1)) and (Op(1)<=Op(2)) and not(Op(2)<=Op(1)))
-assert((Op('a')<=O('a')) and (Op('a')<=Op('b')) and not(Op('b')<=Op('a')))
-assert(not(Op(1)>Op(1)) and not(Op(1)>Op(2)) and (Op(2)>Op(1)))
-assert(not(Op('a')>Op('a')) and not(Op('a')>Op('b')) and (Op('b')>Op('a')))
-assert((Op(1)>=Op(1)) and not(Op(1)>=O(2)) and (Op(2)>=Op(1)))
-assert((Op('a')>=Op('a')) and not(O('a')>=Op('b')) and (Op('b')>=Op('a')))
+  assert(not(Op(1)<Op(1)) and (Op(1)<Op(2)) and not(Op(2)<Op(1)))
+  assert(not(Op('a')<Op('a')) and (Op('a')<Op('b')) and not(Op('b')<Op('a')))
+  assert((Op(1)<=Op(1)) and (Op(1)<=Op(2)) and not(Op(2)<=Op(1)))
+  assert((Op('a')<=Op('a')) and (Op('a')<=Op('b')) and not(Op('b')<=Op('a')))
+  assert(not(Op(1)>Op(1)) and not(Op(1)>Op(2)) and (Op(2)>Op(1)))
+  assert(not(Op('a')>Op('a')) and not(Op('a')>Op('b')) and (Op('b')>Op('a')))
+  assert((Op(1)>=Op(1)) and not(Op(1)>=Op(2)) and (Op(2)>=Op(1)))
+  assert((Op('a')>=Op('a')) and not(Op('a')>=Op('b')) and (Op('b')>=Op('a')))
 end
 
 test()
@@ -248,6 +246,23 @@ x = c..d
 assert(getmetatable(x) == t and x.val == 'cd')
 x = 0 .."a".."b"..c..d.."e".."f".."g"
 assert(x.val == "0abcdefg")
+
+
+-- test comparison compatibilities
+local t1, t2, c, d
+t1 = {};  c = {}; setmetatable(c, t1)
+d = {}
+t1.__eq = function () return true end
+t1.__lt = function () return true end
+assert(c ~= d and not pcall(function () return c < d end))
+setmetatable(d, t1)
+assert(c == d and c < d and not(d <= c))
+t2 = {}
+t2.__eq = t1.__eq
+t2.__lt = t1.__lt
+setmetatable(d, t2)
+assert(c == d and c < d and not(d <= c))
+
 
 
 -- teste de multiplos niveis de calls

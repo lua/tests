@@ -108,7 +108,7 @@ function count (x, n)
   ]]
   prog = format(prog, n, n, n, n, n, n, n, n)
   local a,b,c,d,e,f,g,h = T.testC(prog, x)
-  return a+b+c+d+e+f+g+h
+  return a+b+c+d+e+f+g+(100*h)
 end
 
 assert(count(3) == 2)
@@ -119,7 +119,7 @@ assert(count(print) == 2)
 assert(count(function () end) == 1)
 assert(count(nil) == 1)
 assert(count(_INPUT) == 1)
-assert(count(nil, 15) == 1)
+assert(count(nil, 15) == 100)
 
 -- testando lua_to...
 

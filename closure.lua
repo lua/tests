@@ -85,6 +85,12 @@ pcall(f, 4);
 assert(b('get') == 'xuxu')
 b('set', 10); assert(b('get') == 14)
 
+for i=1,3 do
+  f = function () return i end
+  break
+end
+assert(f() == 1)
+
 
 local w
 -- teste de closure com varios niveis

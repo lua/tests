@@ -54,7 +54,11 @@ showmem()
 assert(dofile(_WD..'locals.lua') == 5)
 assert(dofile(_WD..'constructs.lua'))
 assert(dofile(_WD..'code.lua'))
-assert(dofile(_WD..'big.lua') == 'a')
+do
+  local f = coroutine(assert(loadfile(_WD..'big.lua')))
+  assert(f() == 'b')
+  assert(f() == 'a')
+end
 showmem()
 assert(dofile(_WD..'func.lua'))
 showmem()

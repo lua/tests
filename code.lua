@@ -41,8 +41,8 @@ check(function ()
 end, 'LOADNIL')
 
 
--- single return  (no more tests; optimization incompatible with CLOSE)
--- check (function (a,b,c) return a end, 'RETURN')
+-- single return
+check (function (a,b,c) return a end, 'RETURN')
 
 
 -- infinite loops

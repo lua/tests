@@ -141,5 +141,12 @@ assert(a==1 and b==1 and c==nil and d==nil)
 a = ret2{ unlpack{1,2,3}, unlpack{3,2,1}, unlpack{"a", "b"}}
 assert(a[1] == 1 and a[2] == 3 and a[3] == "a" and a[4] == "b")
 
+
+-- testa chamadas com parametros "incorretos"
+rawget({}, "x", 1)
+rawset({}, "x", 1, 2)
+assert(sin(1,2) == sin(1))
+sort({10,9,8,4,19,23,0,0}, function (a,b) return a<b end, "extra arg")
+
 print('OK')
 return deep

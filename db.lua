@@ -13,7 +13,7 @@ function test (s, l)
   local f = function (line)
               assert(tremove(%l, 1) == line, "wrong trace!!")
   end
-  setlinehook(f); dostring(s); assert(setlinehook() == f)
+  setlinehook(f); assert(dostring(s)); assert(setlinehook() == f)
   assert(l.n == 0)
 end
 

@@ -211,7 +211,7 @@ assert(sin(1,2) == sin(1))
 sort({10,9,8,4,19,23,0,0}, function (a,b) return a<b end, "extra arg")
 
 
--- testa load generico
+-- test for generic load
 x = "-- a comment\0\0\0\n  x = 10 + \n23; return '\0'"
 local i = 0
 function read1 ()
@@ -236,6 +236,25 @@ assert(not a and type(b) == "string" and i == 2)
 
 a, b = load(function () error("hhi") end)
 assert(not a and string.find(b, "hhi"))
+
+
+-- test for dump/undump with upvalues
+local a, b = 20, 30
+x = loadstring(string.dump(function (x)
+  if x == "set" then a = 10+b; b = b+1 else
+  return a
+  end
+end))
+assert(x() == nil)
+assert(debug.setupvalue(x, 1, "hi") == "a")
+assert(x() == "hi")
+assert(debug.setupvalue(x, 2, 13) == "b")
+assert(not debug.setupvalue(x, 3, 10))   -- only 2 upvalues
+x("set")
+assert(x() == 23)
+x("set")
+assert(x() == 24)
+
 
 print('OK')
 return deep

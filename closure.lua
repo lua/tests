@@ -43,6 +43,15 @@ assert(a[2].get() == 10)
 a[2].set('a')
 assert(a[1].get() == 'a')
 
+a = {}
+for i in {'a', 'b'} do
+  a[i] = {set = function(x) i=x end, get = function () return i end}
+end
+a[1].set(10)
+assert(a[2].get() == 10)
+a[2].set('a')
+assert(a[1].get() == 'a')
+
 -- teste de closure x break x return x erros
 
 local b
@@ -152,8 +161,8 @@ assert(a.n == 25 and a[a.n] == 97)
 
 -- errors in coroutines
 function foo ()
-  assert(getinfo(1).currentline == 155)
-  assert(getinfo(2).currentline == 161)
+  assert(getinfo(1).currentline == getinfo(foo).linedefined + 1)
+  assert(getinfo(2).currentline == getinfo(goo).linedefined)
   yield(3)
   error('a')
 end

@@ -4,6 +4,7 @@ print('testando i/o')
 assert(io.input(io.stdin) == io.stdin)
 assert(io.output(io.stdout) == io.stdout)
 
+
 assert(type(io.input()) == "userdata" and io.type(io.output()) == "file")
 assert(io.type(8) == nil)
 local a = {}; setmetatable(a, {})
@@ -26,6 +27,8 @@ os.remove(file)
 assert(loadfile(file) == nil)
 assert(io.open(file) == nil)
 io.output(file)
+-- check internal representation
+assert(getmetatable(io.stdin)[2] == io.output())
 assert(io.output() ~= io.stdout)
 
 assert(io.output():seek() == 0)
@@ -83,6 +86,8 @@ assert(not pcall(io.close, f))   -- error trying to close again
 assert(tostring(f) == "file (closed)")
 assert(io.type(f) == "closed file")
 io.input(file)
+-- check internal representation
+assert(getmetatable(io.stdin)[1] == io.input())
 f = io.open(otherfile):lines()
 for l in io.lines() do assert(l == f()) end
 assert(os.remove(otherfile))

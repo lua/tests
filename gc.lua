@@ -138,21 +138,24 @@ assert(weakmode(a, '?') == 'k')
 for i=1,lim do a[{}] = i end
 -- and some non-collectable ones
 for i=1,lim do local t={}; a[t]=t end
+for i=1,lim do a[i] = i end
 collectgarbage()
 local i = 0
 for k,v in a do assert(k==v); i=i+1 end
-assert(i == lim)
+assert(i == 2*lim)
 
 a = weakmode({}, 'v')
 assert(weakmode(a, '?') == 'v')
--- fill a with some `collectable' values
+-- fill a with some `collectable' values (in both parts of the table)
 for i=1,lim do a[i] = {} end
+for i=1,lim do a[i..'x'] = {} end
 -- and some non-collectable ones
 for i=1,lim do local t={}; a[t]=t end
+for i=1,lim do a[i+lim]=i..'x' end
 collectgarbage()
 local i = 0
-for k,v in a do assert(k==v); i=i+1 end
-assert(i == lim)
+for k,v in a do assert(k==v or k-lim..'x' == v); i=i+1 end
+assert(i == 2*lim)
 
 a = weakmode({}, 'vk')
 assert(weakmode(a, '?') == 'kv')

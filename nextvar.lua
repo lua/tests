@@ -1,4 +1,70 @@
-print('testando next e fors')
+print('testando tables, next e fors')
+
+if T then
+-- testes de tamanhos
+
+function mp2 (n)   -- minimum power of 2 >= n
+  return 2^ceil(log(n)/log(2))
+end
+  
+function check (t, na, nh, p)
+  if nh < 2 then nh = 2 end   -- tamanho minimo de hash
+  local a, h = T.querytab(t)
+  if p then print(na, nh, a, h) end
+  assert(a == na and (nh == -1 or h == nh))
+end
+
+-- teste de tamanho de construtores
+local lim = 20
+local s = 'return {'
+for i=1,lim do
+  s = s..i..','
+  local s = s..';'
+  for k=0,lim do 
+    check(dostring(s..'}'), mp2(i), mp2(k+1))
+    s = format('%sa%d=%d,', s, k, k)
+  end
+end
+check({}, 0, 2)
+
+print'+'
+
+-- teste de tamanho com construcao dinamica
+for i = 4,100 do
+  local a = {}
+  local p = mp2(i-1)     -- -1 because 1 always may be in hash part
+  for j=1,i do a[j] = 1 end
+  check(a, p, 2)
+end
+
+local a = {}
+for i=1,16 do a[i] = i end
+check(a, 16, 2)
+for i=1,10 do a[i] = nil end
+for i=30,40 do a[i] = nil end   -- force a rehash
+check(a, 0, 8)
+a[1] = 1
+for i=30,40 do a[i] = nil end   -- force a rehash
+check(a, 0, 16)
+for i=1,13 do a[i] = nil end
+for i=30,50 do a[i] = nil end   -- force a rehash
+check(a, 0, 4)
+for i=1,20 do a[i] = nil end   -- force a rehash
+check(a, 0, 2)
+for i=1,2 do a[i] = 1 end
+check(a, 2, 2)
+
+-- reverse filling
+for i=10,200 do
+  local a = {}
+  for i=i,1,-1 do a[i] = i end   -- fill in reverse
+  check(a, mp2(i), 2)
+end
+
+end
+
+
+
 nofind = {}
 
 a,b,c = 1,2,3

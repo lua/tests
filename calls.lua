@@ -20,7 +20,7 @@ assert(a == 120 and b == 3)
 print('+')
 
 function err_on_n (n)
-  if n==0 then error("+"); assert(nil);
+  if n==0 then error(); assert(nil);
   else err_on_n (n-1); assert(nil);
   end
 end
@@ -80,6 +80,21 @@ f = g(10)
 assert(f(9, 16) == 10+11+12+13+10+9+16+10)
 
 Y, F, f = nil
-print('OK')
+print('+')
 
+-- testando multiplos retornos
+
+function f(t, i)
+  i = i or 1
+  local n = getn(t)
+  if (i <= n) then
+    return t[i], f(t, i+1)
+  end
+end
+
+a,b,c,d = f{1,2,3}
+assert(a==1 and b==2 and c==3 and d==nil)
+
+
+print('OK')
 return deep

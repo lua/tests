@@ -1,7 +1,3 @@
-global print, assert, type, collectgarbage, loadfile, loadstring, tonumber,
-       _VERSION, pcall
-global str, io, os, math
-global in nil
 
 print('testando i/o')
 
@@ -115,7 +111,7 @@ io.output(file)
 assert(io.write(str.format("x2 = %q\n-- comentário sem EOL no final", x1)))
 io.close(io.output())
 assert(loadfile(file))()
-do global x2; assert(x1 == x2) end
+assert(x1 == x2)
 print('+')
 assert(os.remove(file))
 assert(os.remove(file) == nil)
@@ -210,7 +206,7 @@ end
 print'+'
 
 local t = os.time()
-global T; T = os.date("*t", t)
+T = os.date("*t", t)
 loadstring(os.date([[assert(T.year==%Y and T.month==%m and T.day==%d and
   T.hour==%H and T.min==%M and T.sec==%S and
   T.wday==%w+1 and T.yday==%j and tonumber(T.isdst))]], t))()

@@ -55,9 +55,7 @@ checksyntax([[
 
 -- testes para mensagens de erro mais explicativas
 
-checkmessage("global a, bbbb, sin; a=1; bbbb=2; a=sin(3)+bbbb(3)",
-             "global `bbbb'")
-checkmessage("global z in {}; x=2; a=sin(3)+z(3)", "global `z'")
+checkmessage("a=1; bbbb=2; a=sin(3)+bbbb(3)", "global `bbbb'")
 checkmessage("a=1; local a,bbbb=2,3; a = sin(1) and bbbb(3)",
        "local `bbbb'")
 checkmessage("a={}; do local a=1 end a:bbbb(3)", "method `bbbb'")
@@ -119,7 +117,6 @@ assert(lineerror"\n\n for k,v in \n 3 \n do \n print(k) \n end" == 4)
 
 lineerror = nil
 
-global C
 C = 0
 function y () C=C+1; y() end
 

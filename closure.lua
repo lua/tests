@@ -1,13 +1,12 @@
 print "testando closures e co-rotinas"
 
 local A,B = 0,{g=10}
-global g in B
 function f(x)
   local a = {}
   for i=1,1000 do
     local y = 0
     do
-      a[i] = function () g = g+1; y = y+x; return y+A end
+      a[i] = function () B.g = B.g+1; y = y+x; return y+A end
     end
   end
   local dummy = function () return a[A] end
@@ -16,7 +15,7 @@ function f(x)
   assert(a[1]() == x)
   assert(a[3]() == x)
   collectgarbage()
-  assert(g == 12)
+  assert(B.g == 12)
   return a
 end
 
@@ -36,7 +35,7 @@ assert(a[2]() == 30+A)
 assert(a[3]() == 20+A)
 assert(a[8]() == 10+A)
 assert(metatable(x).__weakmode == 'kv')
-assert(g == 19)
+assert(B.g == 19)
 
 -- teste de closure com variavel de controle do for
 a = {}

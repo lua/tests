@@ -2,10 +2,6 @@ do --[
 
 print "testing require"
 
-global in nil
-
-global assert, str, io, os, math, nexti, require
-
 local DIR="tmp/"
 
 local files = {"A.lua", "B.lua", "A.lc", "A", "L"}
@@ -16,11 +12,7 @@ for _,n in nexti(files) do
   io.close(io.output())
 end
 
-global LUA_PATH, _LOADED, _REQUIREDNAME
-
 local oldpath = LUA_PATH
-
-global NAME
 
 LUA_PATH = str.gsub("D/?.lua;D/?.lc;D/?;D/L", "D/", DIR)
 
@@ -68,7 +60,6 @@ do
   local f = function (n) local x = {}; for i=1,n do x[i]=i end;
                          return unpack(x) end;
   local a,b,c
-  global A,B
   a,b = 0, f(1)
   assert(a == 0 and b == 1)
   A,b = 0, f(1)

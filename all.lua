@@ -2,22 +2,6 @@
 
 require "compat"
 
-global in nil
-
-global io, os, str, co, _G, dbg
-
-global wd, _WD
-
-global print, gcinfo, assert, type, dofile, loadfile, _STDERR,
-       collectgarbage, error, showmem, globals
-
-global write in io
-
-global format in str
-
-global setlocale, clock in os
-
-global T
 
 
 --[[
@@ -26,14 +10,14 @@ global T
 
 ]]
 
-local c = clock()
+local c = os.clock()
 
 _WD = wd or ""
 
 assert(setlocale"C")
 
 local T,print,gcinfo,format,write,assert,type =
-      T,print,gcinfo,format,write,assert,type
+      T,print,gcinfo,str.format,io.write,assert,type
 
 local showmem = function ()
   if not %T then
@@ -67,7 +51,7 @@ f()
 showmem()
 assert(dofile(_WD..'db.lua'))
 showmem()
-global deep; assert(dofile(_WD..'calls.lua') == deep and deep)
+assert(dofile(_WD..'calls.lua') == deep and deep)
 showmem()
 assert(dofile(_WD..'strings.lua'))
 showmem()
@@ -121,7 +105,7 @@ local preserve = {
   _OUTPUT=_G._OUTPUT}
 
 local collectgarbage, showmem, print, format, clock =
-      collectgarbage, showmem, print, format, clock
+      collectgarbage, showmem, print, format, os.clock
 
 dbg.setcallhook(function (a) %assert(%type(a) == 'string') end)
 globals(preserve)

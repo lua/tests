@@ -201,14 +201,16 @@ function X (s)
   return (gsub(s, '$(%d+)', function (d) return REGISTRYINDEX-1-d end))
 end
 
-local A = T.testC[[ pushnum 10; pushnum 20; pushcclosure 2; return 1]]
-t, b, c = A(X[[pushvalue $0; pushvalue $1; pushvalue $2; return 3]])
-assert(b == 10 and c == 20 and type(t) == 'table')
-a, b, c, d = A("pushnum 1; pushupvalues; pushnum 44; return 4")
-assert(a == 1 and b == 10 and c == 20 and d == 44)
-A(X[[pushnum 100; pushnum 200; replace $2; replace $1]])
-b, c = A(X[[pushvalue $1; pushvalue $2; return 2]])
-assert(b == 100 and c == 200)
+do
+  local A = T.testC[[ pushnum 10; pushnum 20; pushcclosure 2; return 1]]
+  t, b, c = A(X[[pushvalue $0; pushvalue $1; pushvalue $2; return 3]])
+  assert(b == 10 and c == 20 and type(t) == 'table')
+  a, b, c, d = A("pushnum 1; pushupvalues; pushnum 44; return 4")
+  assert(a == 1 and b == 10 and c == 20 and d == 44)
+  A(X[[pushnum 100; pushnum 200; replace $2; replace $1]])
+  b, c = A(X[[pushvalue $1; pushvalue $2; return 2]])
+  assert(b == 100 and c == 200)
+end
 
 
 -- testando locks (refs)
@@ -400,7 +402,7 @@ do   -- teste de erro durante coleta de lixo
   for i=2,20,2 do   -- marca outra metade para contar e criar mais lixo
     T.metatable(a[i], {__gc = function (x) dostring("A=A+1") end})
   end
-  global A; A = 0
+  _G.A = 0
   a = 0
   pcall(function (s) a=a+1;collectgarbage() end, collectgarbage)
   assert(a == 10)  -- numero de erros
@@ -409,8 +411,6 @@ end
 -------------------------------------------------------------------------
 -- teste de userdata vals
 do
-  global in nil
-  global assert, T
   local a = {}; local lim = 30
   for i=0,lim do a[i] = T.pushuserdata(i) end
   for i=0,lim do assert(T.udataval(a[i]) == i) end

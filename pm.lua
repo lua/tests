@@ -1,11 +1,5 @@
 print('testando pattern matching')
 
-global in {}
-
-global strfind, strsub, gsub, strlen, strupper, strrep
-global assert, print, dostring, pcall
-global tremove, getn, str
-
 function f(s, p)
   local i,e = strfind(s, p)
   if i then return strsub(s, i, e) end
@@ -145,9 +139,8 @@ assert(gsub("um (dois) tres (quatro)", "(%(%w+%))", strupper) ==
             "um (DOIS) tres (QUATRO)")
 
 do
-  global setglobal, a, roberto
   gsub("a=roberto,roberto=a", "(%w+)=(%w%w*)", setglobal)
-  assert(a=="roberto" and roberto=="a")
+  assert(_G.a=="roberto" and _G.roberto=="a")
 end
 
 function f(a,b) return gsub(a,'.',b) end

@@ -129,6 +129,10 @@ else
   assert(strupper"·¡È{xuxu}Á„o" == "¡¡…{XUXU}«√O")
 end
 
+setlocale("")
+assert(setlocale() == 'C')
+assert(setlocale(nil, "numeric") == 'C')
+
 print('OK')
 
 

@@ -35,7 +35,7 @@ assert(io.write('"álo"', "{a}\n", "second line\n", "third line \n"))
 assert(io.write('çfourth_line'))
 io.output(io.stdout)
 collectgarbage()  -- file should be closed by GC
-assert(io.input() == io.stdin and io.output() == io.stdout)
+assert(io.input() == io.stdin and rawequal(io.output(), io.stdout))
 print('+')
 
 assert(os.rename(file, otherfile))
@@ -43,7 +43,7 @@ assert(os.rename(file, otherfile) == nil)
 
 io.output(io.open(otherfile, "a"))
 assert(io.write("\n\n\t\t  3450\n"));
-io.close(io.output())
+io.close()
 
 assert(os.rename(otherfile, file))
 io.input(file)
@@ -82,7 +82,7 @@ assert(string.len(t) == 10*2^12)
 
 io.output(file)
 io.write("alo\n")
-io.close(io.output())
+io.close()
 local f = io.open(file, "a")
 io.output(f)
 collectgarbage()
@@ -90,7 +90,7 @@ collectgarbage()
 assert(io.write(' ' .. t .. ' '))
 assert(io.write(';', 'end of file\n'))
 f:flush(); io.flush()
-io.close(f)
+f:close()
 print('+')
 
 io.input(file)
@@ -109,7 +109,7 @@ print('+')
 local x1 = "string\n\n\\com \"\"''coisas [[estranhas]] ]]'"
 io.output(file)
 assert(io.write(string.format("x2 = %q\n-- comentário sem EOL no final", x1)))
-io.close(io.output())
+io.close()
 assert(loadfile(file))()
 assert(x1 == x2)
 print('+')
@@ -120,10 +120,10 @@ assert(os.remove(otherfile) == nil)
 io.output(file)
 assert(io.write("qualquer coisa\n"))
 assert(io.write("mais qualquer coisa"))
-io.close(io.output())
+io.close()
 io.output(assert(io.open(otherfile, 'wb')))
 assert(io.write("outra coisa\0\1\3\0\0\0\0\255\0"))
-io.close(io.output())
+io.close()
 
 local filehandle = assert(io.open(file, 'r'))
 local otherfilehandle = assert(io.open(otherfile, 'rb'))
@@ -133,7 +133,7 @@ assert(filehandle:read('*l') == "qualquer coisa")
 io.input(otherfilehandle)
 assert(io.read(string.len"outra coisa") == "outra coisa")
 assert(filehandle:read('*l') == "mais qualquer coisa")
-io.close(filehandle);
+filehandle:close();
 assert(type(filehandle) == "userdata")
 io.input(otherfilehandle)
 assert(io.read(4) == "\0\1\3\0")
@@ -143,7 +143,7 @@ assert(io.read(1) == "\255")
 assert(io.read('*a') == "\0")
 assert(not io.read(0))
 assert(otherfilehandle == io.input())
-io.close(otherfilehandle)
+otherfilehandle:close()
 assert(os.remove(file))
 assert(os.remove(otherfile))
 collectgarbage()
@@ -156,7 +156,7 @@ third line
 
 and the rest of the file
 ]]
-io.close(io.output())
+io.close()
 io.input(file)
 local _,a,b,c,d,e,h,__ = io.read(1, '*n', '*n', '*l', '*l', '*l', '*a', 10)
 assert(io.close(io.input()))
@@ -176,7 +176,7 @@ collectgarbage()
 io.output(file)
 for i=1,5001 do io.write('0123456789123') end
 io.write('\n12346')
-io.close(io.output())
+io.close()
 io.input(file)
 local x = io.read('*a')
 io.input():seek('set', 0)
@@ -192,14 +192,14 @@ x = nil; y = nil
 
 
 -- teste de popen
-local cond, f = pcall(nil, io.popen, "cat > "..file, "w")
+local cond, f = pcall(io.popen, "cat > "..file, "w")
 if cond then
   print"testing popen"
   f:write('alo alo')
-  assert(io.close(f))
+  assert(f:close())
   f = assert(io.popen("cat < "..file, "r"))
   assert(f:read'*a' == 'alo alo')
-  io.close(f)
+  f:close()
   os.remove(file)
 end
 

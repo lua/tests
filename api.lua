@@ -152,6 +152,7 @@ a,b = T.testC("call 2,3; pushvalue 2; insert -2; call 1,1; \
                return 2",
                sin, 1, "x=150", "x='a'+1", 1, 2, 3, 4, 5)
 _ERRORMESSAGE, _ALERT = olderr, olda
+print(a,b,x)
 assert(a == 1 and b == sin(2) and x == 150)
 
 function check3(p, ...)
@@ -372,9 +373,27 @@ assert(cl.n == 1 and cl[1] == x)   -- old `x' must be collected
 -- testando lua_equal
 assert(T.testC("equal 2 4; return 1", print, 1, print, 20))
 assert(T.testC("equal 3 2; return 1", 'alo', "alo"))
+assert(T.testC("equal 2 3; return 1", nil, nil))
 assert(not T.testC("equal 2 3; return 1", {}, {}))
 assert(not T.testC("equal 2 3; return 1"))
 assert(not T.testC("equal 2 3; return 1", 3))
+
+-- testando lua_equal com fallbacks
+do
+  local map = {}
+  local t = {__eq = function (a,b) return map[a] == map[b] end}
+  local function f(x)
+    local u = T.metatable(T.newuserdata(0), t)
+    map[u] = x
+    return u
+  end
+  assert(f(10) == f(10))
+  assert(f(10) ~= f(11))
+  assert(T.testC("equal 2 3; return 1", f(10), f(10)))
+  assert(not T.testC("equal 2 3; return 1", f(10), f(20)))
+  t.__eq = nil
+  assert(f(10) ~= f(10))
+end
 
 print'+'
 

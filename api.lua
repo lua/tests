@@ -271,7 +271,7 @@ F = function (x)
   if A ~= nil then
     assert(type(A) == "userdata")
     assert(T.udataval(A) == B)
-    assert(T.metatable(A) == nil)
+    T.metatable(A)    -- just acess it
   end
   A = x   -- ressucita userdata
   B = udval
@@ -316,14 +316,15 @@ T.unref(e); T.unref(f)
 
 collectgarbage()
 
-x = T.getref(d)
-assert(type(x) == 'userdata' and T.metatable(x) == tt)
-x =nil
-tt=nil    -- libera tt para GC
-
 -- check that unref objects have been collected
 assert(cl.n == 1 and cl[1] == 3)
 
+x = T.getref(d)
+assert(type(x) == 'userdata' and T.metatable(x) == tt)
+x =nil
+tt.b = b  -- cria ciclo
+tt=nil    -- libera tt para GC
+A = nil
 b = nil
 T.unref(d);
 T.metatable(T.newuserdatabox(5), {__gc=F})
@@ -372,13 +373,13 @@ do
   local assert,type,print = assert,type,print
   local tt = {}
   local u = T.newuserdata(10)
+  T.ref(u)   -- evita que udata seja coletado antes da coleta final
   T.metatable(u, tt)
   local metatable = T.metatable
   tt.__gc = function (o)
     %assert(%metatable(o) == tt)
     -- cria objetos durante coleta de lixo
     local a = 'xuxu'..(10+3)..'joao', {}
-    %assert(o == %u)  -- upvalue evita que u seja coletado antes do close
     A = o  -- ressucita objeto!
     %print(">>> fechando estado " .. "<<<\n")
   end
@@ -394,11 +395,10 @@ do   -- teste de erro durante coleta de lixo
     a[i] = T.newuserdatabox(i)   -- cria varios udata
   end
   for i=1,20,2 do   -- marca metade deles para dar erro durante coleta de lixo
-    T.metatable(a[i], {__gc = function () error"error inside gc" end})
+    T.metatable(a[i], {__gc = function (x) error("error inside gc") end})
   end
   a = 0
-  assert(not call(collectgarbage, {}, "x",
-                  function (s) collectgarbage(); a=a+1 end))
+  call(collectgarbage, {}, "x", function (s) a=a+1;collectgarbage() end)
   assert(a == 10)  -- numero de erros
 end
 -------------------------------------------------------------------------

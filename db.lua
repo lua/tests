@@ -255,6 +255,36 @@ assert(XX == 12)
 assert(debug.gethook() == nil)
 
 
+-- testando acesso a upvalues
+local function getupvalues (f)
+  local t = {}
+  local i = 1
+  while true do
+    local name, value = debug.getupvalue(f, i)
+    if not name then break end
+    assert(not t[name])
+    t[name] = value
+    i = i + 1
+  end
+  return t
+end
+
+local a,b,c = 1,2,3
+local function foo1 (a) b = a; return c end
+local function foo2 (x) a = x; return c+b end
+assert(debug.getupvalue(foo1, 3) == nil)
+assert(debug.setupvalue(foo1, 3, "xuxu") == nil)
+local t = getupvalues(foo1)
+assert(t.a == nil and t.b == 2 and t.c == 3)
+t = getupvalues(foo2)
+assert(t.a == 1 and t.b == 2 and t.c == 3)
+assert(debug.setupvalue(foo1, 1, "xuxu") == "b")
+assert(({debug.getupvalue(foo2, 3)})[2] == "xuxu")
+-- cannot manipulate C upvalues from Lua
+assert(debug.getupvalue(io.read, 1) == nil)  
+assert(debug.setupvalue(io.read, 1, 10) == nil)  
+
+
 -- testando count hooks
 local a=0
 debug.sethook(function (e) a=a+1 end, "", 1)

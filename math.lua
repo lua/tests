@@ -120,12 +120,25 @@ do   -- testando NaN
   assert(not (NaN >= NaN))
   assert(not (0 < NaN))
   assert(not (NaN < 0))
+  local a = {}
+  assert(not pcall(function () a[NaN] = 1 end))
+  assert(a[NaN] == nil)
+  a[1] = 1
+  assert(not pcall(function () a[NaN] = 1 end))
+  assert(a[NaN] == nil)
 end
 
 require "checktable"
 stat(a)
 
 a = nil
+
+-- testando conversoes implicitas
+
+local a,b = '10', '20'
+assert(a*b == 200 and a+b == 30 and a-b == -10 and a/b == 0.5 and -b == -20)
+assert(a == '10' and b == '20')
+
 
 randomseed(date'%S')
 

@@ -57,6 +57,8 @@ assert(a == 23 and (function (x) return x*2 end)(20) == 40)
 
 a = {}; lim = 1000
 for i=1, lim do a[i]=i end
+x = unpack(a)
+assert(x == 1)
 x = {unpack(a)}
 assert(getn(x) == lim and x[1] == 1 and x[lim] == lim)
 a,x = unpack{1}

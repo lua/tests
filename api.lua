@@ -223,6 +223,17 @@ do
 end
 
 
+local x, y = T.upvalue(io.read, 1)
+assert(type(x) == "table" and y == "")
+assert(T.upvalue(io.read, 2) == nil)
+local f = T.testC[[ pushnum 10; pushnum 20; pushcclosure 2; return 1]]
+assert(T.upvalue(f, 1) == 10 and
+       T.upvalue(f, 2) == 20 and
+       T.upvalue(f, 3) == nil)
+T.upvalue(f, 2, "xuxu")
+assert(T.upvalue(f, 2) == "xuxu")
+
+
 -- testando locks (refs)
 
 Arr = {}
@@ -473,12 +484,20 @@ a, b = T.doremote(L1, "return sin(1)")
 assert(a == nil and b == 1)   -- 1 == run-time error
 
 -- error: syntax error
-a, b = T.doremote(L1, "return a+")
-assert(a == nil and b == 3)   -- 3 == syntax error
+a, b, c = T.doremote(L1, "return a+")
+assert(a == nil and b == 3 and type(c) == "string")   -- 3 == syntax error
 
 T.loadlib(L1)
-a = T.doremote(L1, "strlibopen(); return string.sub('xuxu', 1, 2)")
-assert(a == "xu")
+a, b = T.doremote(L1, [[
+  baselibopen();
+  a = strlibopen(); assert(type(a.sub) == "function")
+  a = iolibopen(); assert(type(a.read) == "function")
+  a = tablibopen(); assert(type(a.insert) == "function")
+  a = dblibopen(); assert(type(a.getlocal) == "function")
+  a = mathlibopen(); assert(type(a.sin) == "function")
+  return string.sub('okinama', 1, 2)
+]])
+assert(a == "ok")
 
 T.closestate(L1);
 
@@ -553,6 +572,7 @@ end)
 
 local testprog = [[
   local t = {x=10, y=234}
+--  local function foo () return t end
   for i=1,5 do t[i] = i; t[i..""] = i end
   t = {"x", "u", "x", "u"}
   a = string.rep("a", 10)

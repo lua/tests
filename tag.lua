@@ -7,8 +7,7 @@ assert(tag(sin) == tag(read))
 assert(type(function () end) == 'function')
 assert(type(function () local a = %print end) == 'function')
 
-i = 1
-while i<=400 do newtag(); i=i+1 end
+for i=1,400 do newtag() end
 
 t1 = settag({5,6,"noite"}, newtag())
 tt = tag(t1)
@@ -103,40 +102,78 @@ assert(x == nil)
 print('+')
 
 
+do
 tt = newtag()
 a = {}
+local b = {}
 settag(a, tt)
+settag(b, tt)
 
 function f(...) cap = arg ; return arg[1] end
 settagmethod(tt, 'add', f)
+settagmethod(tt, 'sub', f)
+settagmethod(tt, 'mul', f)
+settagmethod(tt, 'div', f)
+settagmethod(tt, 'unm', f)
 
-assert(a+5 == a)
-assert(cap[1] == a and cap[2] == 5 and cap[3] == 'add')
+assert(b+5 == b)
+assert(cap[1] == b and cap[2] == 5 and cap[3] == 'add')
+b=b-3; assert(tag(b) == tt)
+assert(5-a == 5)
+assert(cap[1] == 5 and cap[2] == a and cap[3] == 'sub')
+assert(a*a == a)
+assert(cap[1] == a and cap[2] == a and cap[3] == 'mul')
+assert(a/0 == a)
+assert(cap[1] == a and cap[2] == 0 and cap[3] == 'div')
+assert(-a == a)
+assert(cap[1] == a and cap[2] == nil and cap[3] == 'unm')
 
-assert(5+a == 5)
-assert(cap[1] == 5 and cap[2] == a and cap[3] == 'add')
+end
 
-settagmethod(tt, 'lt', f)
+settagmethod(tt, 'lt', function (a,b)
+  if type(a) == 'table' then a = a.x end
+  if type(b) == 'table' then b = b.x end
+ return a<b
+end)
 
-assert(a<5 == a)
-assert(cap[1] == a and cap[2] == 5 and cap[3] == 'lt')
+function Op(x) local a = {x=x}; settag(a, tt); return a end
 
-assert(5<a == 5)
-assert(cap[1] == 5 and cap[2] == a and cap[3] == 'lt')
+assert(not(Op(1)<Op(1)) and (Op(1)<Op(2)) and not(Op(2)<Op(1)))
+assert(not(Op('a')<Op('a')) and (Op('a')<Op('b')) and not(Op('b')<Op('a')))
+assert((1<=Op(1)) and (Op(1)<=Op(2)) and not(Op(2)<=Op(1)))
+assert((Op('a')<='a') and (Op('a')<=Op('b')) and not(Op('b')<=Op('a')))
+assert(not(Op(1)>Op(1)) and not(Op(1)>Op(2)) and (Op(2)>Op(1)))
+assert(not(Op('a')>Op('a')) and not(Op('a')>Op('b')) and (Op('b')>Op('a')))
+assert((Op(1)>=Op(1)) and not(Op(1)>=2) and (Op(2)>=Op(1)))
+assert((Op('a')>=Op('a')) and not('a'>=Op('b')) and (Op('b')>=Op('a')))
 
-settagmethod(tt, 'concat', f)
+local conctag = function (a,b,c)
+  assert(c == 'concat')
+  if type(a) == 'table' then a = a.val end
+  if type(b) == 'table' then b = b.val end
+  if A then return a..b
+  else
+    local res = {val=a..b}
+    settag(res, tt)
+    return res
+ end
+end
 
-assert(a .. 'alo' == a)
-assert(cap[1] == a and cap[2] == 'alo' and cap[3] == 'concat')
+settagmethod(tt, 'concat', conctag)
+c = {val="c"}; settag(c, tt)
+d = {val="d"}; settag(d, tt)
 
-assert('alo' .. a == 'alo')
-assert(cap[1] == 'alo' and cap[2] == a and cap[3] == 'concat')
+A = 1
+assert(0 .."a".."b"..c..d.."e".."f"..(5+3).."g" == "0abcdef8g")
+
+A = nil
+x = 0 .."a".."b"..c..d.."e".."f".."g"
+assert(x.val == "0abcdefg")
 
 
 tt1 = newtag()
 assert(copytagmethods(tt1, tt) == tt1)
-assert(gettagmethod(tt1, 'concat') == f)
-assert(gettagmethod(tt1, 'lt') == f)
+assert(gettagmethod(tt1, 'concat') == conctag)
 
 
 -- teste de coleta de tabelas, se disponivel
@@ -147,9 +184,7 @@ if not call(settagmethod, {tt1, 'gc', f}, "xp", nil) then
   print "gc tag method para tabelas desabilitado"
 else
   print "testando gc tag method para tabelas"
-  i = 0
-  while i<1000 do
-    i=i+1
+  for i=1,1000 do
     local a = {v=i}
     settag(a, tt1)
   end

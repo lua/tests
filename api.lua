@@ -5,9 +5,10 @@ $ifnot testC
 
 $else
 
-$debug
 
   print('testando API com C')
+
+function checkstack (...) assert(arg.n == 0) end
 
 testC"beginblock"
 
@@ -19,6 +20,7 @@ testC[[
 	pushnum		4
 	setglobal	a
 	setglobal	b
+	call		checkstack
 ]]
 assert(a == 4 and b == 1)
 
@@ -31,6 +33,7 @@ a = testC[[
 	pushnum		4
 	pushnum		8
 	settable
+	call		checkstack
 	pushreg		r1
 ]]
 assert(a[4] == 8)
@@ -113,16 +116,12 @@ assert(a.n == 1 and a[1] == "testando")
 -- teste de muitos locks
 Arr = {}
 Lim = 100
-i = 1
-while i<= Lim do  -- lock many objects
+for i=1,Lim do   -- lock many objects
   Arr[i] = testC("getglobal r1, i; pushreg r1; reflock r1; pushreg r1")
-  i = i+1
 end
 
-i = 1
-while i<= Lim do  -- unlock half of them
+for i=1,Lim,2 do   -- unlock half of them
   testC("getparam r1, 1; unref r1", Arr[i])
-  i = i+2
 end
 
 
@@ -161,6 +160,18 @@ testC([[getparam r1, 1; pushreg r1;
 a = testC('getparam r1, 1; getparam r2, 2; pushusertag r1, r2', 1, tt);
 b = testC('getparam r1, 1; getparam r2, 2; pushusertag r1, r2', 2, tt);
 c = testC('getparam r1, 1; getparam r2, 2; pushusertag r1, r2', 3, tt);
+
+-- create a userdata with tag 0 and another with tag 500 (old uses...)
+x = testC('getparam r1, 1; getparam r2, 2; pushusertag r1, r2', 4, 0);
+y = testC('getparam r1, 1; getparam r2, 2; pushusertag r1, r2', 5, 500);
+
+assert(tag(x) == 0 and tag(y) == 500)
+
+do   -- test ANYTAG (-1)
+  local d = testC('getparam r1, 1; getparam r2, 2; pushusertag r1, r2', 1, -1);
+  assert(tag(d) == tt and d == a)
+end
+
 
 d,e,f = testC[[
 	getglobal	r1, a
@@ -211,14 +222,13 @@ testC([[
 	unref		r2
 	unref		r3
 	unref		r4
+	call		checkstack
 ]], d, e, f)
 collectgarbage()
 assert(cl.n == 3 and cl[1])
 
-i = 2
-while i<= Lim do  -- unlock the other half
+for i=2,Lim,2 do   -- unlock the other half
   testC("getparam r1, 1; unref r1", Arr[i])    -- unref(Arr[i])
-  i = i+2
 end
 
 print'+'
@@ -237,6 +247,7 @@ f = testC("getparam r1, 1; pushreg r1; pushnum 8; closure testC, 2",
           "getparam r2, 1; getparam r3, 2; pushreg r2; pushreg r3")
 a,b = f(4)
 assert(a == 8 and b == 4)
+--assert(testC"closure f, 0" == testC)
 
 
 -- testando lua_nextvar
@@ -330,7 +341,7 @@ assert(a==5 and b==prog and c==nil)
 -- testando multiplos estados
 testC("newstate 100, 1; pop r1; closestate r1")
 L1, a = testC([[
-	newstate	13, 0
+	newstate	15, 0
 	pop		r1
 	getparam	r2, 1
 	doremote	r1, r2
@@ -378,18 +389,17 @@ testC('endblock; pushstring OK; call print')
 -- function to show all string tables
 function showstringtables ()
   local i = 1
-  local n, s = querystr(i);
-  while n do
+  local n, s
+  while 1 do
+    n, s = querystr(i);
+    if not n then break end
     print("\n\t", n, s)
-    local j=0
-    while j<s do
-      j=j+1
+    for j=1,s do
       local str = call(querystr, {i,j}, "p")
       tinsert(str, 1, j)
       call(print, str)
     end
     i = i+1
-    n, s = querystr(i);
   end
 end
 

@@ -12,7 +12,7 @@ assert(not a and type(b) == "string" and type(c) == "number")
 file = tmpname()
 otherfile = tmpname()
 
-assert(setlocale('C', 'all') == 'C')
+assert(setlocale('C', 'all'))
 
 readfrom()
 writeto()
@@ -35,8 +35,8 @@ assert(seek(_OUTPUT, "set") == 0)
 
 assert(write('"álo"', "{a}\n", "second line\n", "third line \n"))
 assert(write('çfourth_line'))
+writeto()
 _OUTPUT = _STDOUT;
-collectgarbage()  -- file should be closed by GC
 assert(_INPUT == _STDIN and _OUTPUT == _STDOUT)
 print('+')
 
@@ -78,7 +78,7 @@ assert(remove(file))
 
 t = '0123456789'
 i=1
-while i<=12 do t = t..t; i=i+1 end
+for i=1,12 do t = t..t; end
 l = strlen(t)
 assert(l == 10*2^12)
 

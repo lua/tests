@@ -36,7 +36,7 @@ function setfallback (name, func)
   assert(type(func) == 'function')
   local oldfunc
   if name == 'error' then
-    oldfunc = seterrormethod(func)
+    oldfunc = _ERRORMESSAGE; _ERRORMESSAGE = func;
   elseif name == 'getglobal' then
     oldfunc = settagmethod(tag(nil), 'getglobal', func)
   elseif name == 'arith' then

@@ -5,13 +5,13 @@ a,b,c = 1,2,3
 a,b,c = nil
 
 function find (name)
-  local n,v = nextvar(nil)
-  while n do
+  local n,v
+  while 1 do
+    n,v = nextvar(n)
+    if not n then return nofind end
     assert(v)
     if n == name then return v end
-    n,v = nextvar(n)
   end
-  return nofind
 end
 
 function find1 (name)
@@ -19,19 +19,18 @@ function find1 (name)
 end
 
 do   -- create 10000 new global variables
-  local i=1
-  while i<=10000 do
+  for i=1,10000 do
     setglobal(i, i)
-    i = i+1
   end
 end
 
 
 do
-  local a,v = nextvar(nil)
-  while a do
-    assert(v and v == getglobal(a))
+  local a,v
+  while 1 do
     a,v = nextvar(a)
+    if not a then break end
+    assert(v and v == getglobal(a))
   end
 end
 
@@ -56,12 +55,10 @@ assert(foreach(a, function(i,v) if i=='x' then return v end end) == 90)
 assert(foreach(a, function(i,v) if i=='a' then return v end end) == nil)
 
 a = {}
-i = 0
-while i < 10000 do
+for i=0,10000 do
   if mod(i,10) ~= 0 then
     a['x'..i] = i
   end
-  i = i+1
 end
 
 n = {n=0}
@@ -73,10 +70,8 @@ assert(n.n == 9000)
 a = nil
 
 do   -- remove those 10000 new global variables
-  local i=1
-  while i<=10000 do
+  for i=1,10000 do
     setglobal(i, nil)
-    i = i+1
   end
 end
 
@@ -93,7 +88,7 @@ do
         setglobal, foreachvar, foreach, nextvar, assert, error
   local a = {}
 
-  foreachvar(function (n, v) %a[n] = v; %setglobal(n, nil) end)
+  foreachvar(function (n, v) %a[n] = v; %rawsetglobal(n, nil) end)
   assert(nextvar(nil) == nil)
   foreachvar(error)
   foreach(a, function (i, v) %setglobal(i, %a[i]) end)
@@ -132,11 +127,9 @@ assert(tremove(a) == 20)
 assert(tremove(a) == -1)
 print("+")
 
-i = 1
 a = {}
-while i <= 1000 do
+for i=1,1000 do
   a[i] = i; a[i-1] = nil
-  i = i+1
 end
 assert(next(a,nil) == 1000 and next(a,1000) == nil)
 

@@ -1,5 +1,6 @@
 print("testando chamadas")
-oldfb = seterrormethod(print)
+oldfb = _ERRORMESSAGE
+_ERRORMESSAGE = print
 
 function f(a,b,c) local d = 'a'; t={a,b,c,d} end
 
@@ -39,7 +40,7 @@ function deep (n)
 end
 deep(10)
 deep(200)
-assert(seterrormethod(oldfb) == print)
+_ERRORMESSAGE = oldfb
 print('+')
 
 
@@ -95,10 +96,8 @@ function pack (...) return arg end
 
 function equaltab (t1, t2)
   assert(getn(t1) == getn(t2))
-  local i, n = 1, getn(t1)
-  while i<=n do
+  for i=1,getn(t1) do
     assert(t1[i] == t2[i])
-    i = i+1
   end
 end
 
@@ -111,9 +110,9 @@ a = {1,2,3,4,nil,10,'alo',nil,assert}
 equaltab(pack(unpack(a)), a)
 equaltab(pack(unpack(a), -1), {1,-1})
 a,b,c,d = ret2(f()), ret2(f())
-assert(a==1, b==1, c==2, d==30)
+assert(a==1 and b==1 and c==2 and d==nil)
 a,b,c,d = unpack(pack(ret2(f()), ret2(f())))
-assert(a==1, b==1, c==2, d==30)
+assert(a==1 and b==1 and c==2 and d==nil)
 
 print('OK')
 return deep

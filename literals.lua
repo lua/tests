@@ -15,6 +15,8 @@ assert("\099" == '\99')
 assert("\099\n" == 'c\10')
 assert('\0\0\0alo' == '\0' .. '\0\0' .. 'alo')
 
+assert(010 .. 020 .. -030 == "1020-30")
+
 -- grandes variaveis
 
 var = strrep('a', 15000)

@@ -1,4 +1,4 @@
-print "testando LONGARGs"
+print "testando programas longos (>64k)"
 
 _WD = _WD or ""
 
@@ -38,8 +38,11 @@ s = 0; n=0
 foreach(b, function(a,b) s=s+b; n=n+1 end)
 assert(s==13977183656.5  and n==70001)
 
-dofile(_WD.."checktable.lua")
-stat(b)
+if dofile(_WD.."checktable.lua") then
+  stat(b)
+else
+  print"no checktable"
+end
 
 a = nil; b = nil
 print'+'
@@ -66,26 +69,20 @@ return 10]]
 -- functions to fill in the $n$
 F = {
 function ()   -- $1$
-  local i = 10
-  while i<=50009 do
+  for i=10,50009 do
     write('a', i, ' = ', 5+((i-10)/2), ',\n')
-    i = i+1
   end
 end,
 
 function ()   -- $2$
-  local i = 30026
-  while i<=50009 do
+  for i=30026,50009 do
     write('b', i, ' = ', 15013+((i-30026)/2), ',\n')
-    i = i+1
   end
 end,
 
 function ()   -- $3$
-  local i = 10
-  while i<=50009 do
+  for i=10,50009 do
     write('"a', i, '", ', 5+((i-10)/2), ',\n')
-    i = i+1
   end
 end,
 }

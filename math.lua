@@ -2,6 +2,8 @@ print("testando reais e bib. matematica")
 
 _WD = _WD or ""
 
+function f(...) if arg.n == 1 then return arg[1] else return "***" end end
+
 assert(tonumber{} == nil)
 assert(tonumber'+0.01' == 1/100 and tonumber'+.01' == 0.01 and
        tonumber'.01' == 0.01    and tonumber'-1.' == -1 and
@@ -10,14 +12,15 @@ assert(tonumber'+ 0.01' == nil and tonumber'+.e1' == nil and
        tonumber'1e' == nil     and tonumber'1.0e+' == nil and
        tonumber'.' == nil)
 assert(tonumber('-12') == -10-2)
-assert(tonumber('-1.2e2') == -120)
-assert(tonumber('1  a') == nil)
-assert(tonumber('e1') == nil)
-assert(tonumber('e  1') == nil)
-assert(tonumber(' 3.4.5 ') == nil)
-assert(tonumber('') == nil)
-assert(tonumber('  ') == nil)
-assert(tonumber('  ', 9) == nil)
+assert(tonumber('-1.2e2') == - - -120)
+assert(f(tonumber('1  a')) == nil)
+assert(f(tonumber('e1')) == nil)
+assert(f(tonumber('e  1')) == nil)
+assert(f(tonumber(' 3.4.5 ')) == nil)
+assert(f(tonumber('')) == nil)
+assert(f(tonumber('  ')) == nil)
+assert(f(tonumber('  ', 9)) == nil)
+assert(f(tonumber('99', 8)) == nil)
 assert(tonumber('  1010  ', 2) == 10)
 assert(tonumber('10', 36) == 36)
 --assert(tonumber('-10', 36) == -36)
@@ -29,14 +32,14 @@ assert(tonumber(strrep('1', 32), 2) + 1 == 2^32)
 assert(tonumber('ffffFFFF', 16)+1 == 2^32)
 
 assert(1.1 == 1.+.1)
-assert(100.0 == 1e2 and .01 == 1e-2)
+assert(100.0 == 1E2 and .01 == 1e-2)
 assert(1111111111111111-1111111111111110== 1000.00e-03)
 --     1234567890123456
 assert(1.1 == '1.'+'.1')
 assert('1111111111111111'-'1111111111111110' == tonumber"  +0.001e+3 \n\t")
 
 function eq (a,b,limit)
-  if not limit then limit = 10e-10 end
+  if not limit then limit = 10E-10 end
   return abs(a-b) <= limit
 end
 
@@ -44,7 +47,17 @@ assert(0.1e-30 > 0.9E-31 and 0.9E30 < 0.1e31)
 
 assert(0.123456 > 0.123455)
 
-assert(tonumber('+1.23e30') == 1.23*10^30)
+assert(tonumber('+1.23E30') == 1.23*10^30)
+
+-- testando operadores de ordem
+assert(not(1<1) and (1<2) and not(2<1))
+assert(not('a'<'a') and ('a'<'b') and not('b'<'a'))
+assert((1<=1) and (1<=2) and not(2<=1))
+assert(('a'<='a') and ('a'<='b') and not('b'<='a'))
+assert(not(1>1) and not(1>2) and (2>1))
+assert(not('a'>'a') and not('a'>'b') and ('b'>'a'))
+assert((1>=1) and not(1>=2) and (2>=1))
+assert(('a'>='a') and not('a'>='b') and ('b'>='a'))
 
 assert(eq(sin(-9.8)^2 + cos(-9.8)^2, 1))
 assert(eq(sin(90), 1) and eq(cos(90), 0))
@@ -85,7 +98,8 @@ assert(eq(a[200][3], 200/3))
 assert(eq(a[2000][3], 2000/3, 0.001))
 print('+')
 
-dofile(_WD.."checktable.lua"); stat(a)
+assert(dofile(_WD.."checktable.lua"), "cannot load checktable.lua");
+stat(a)
 
 a = nil
 
@@ -104,11 +118,9 @@ until flag or i>10000
 assert(0 <= Min and Max<1)
 assert(flag);
 
-i=0
-while i<10 do
+for i=1,10 do
   local t = random(5)
   assert(1 <= t and t <= 5)
-  i = i+1
 end
 
 i = 0
@@ -123,5 +135,12 @@ repeat
 until flag or i>10000
 assert(-10 <= Min and Max<=0)
 assert(flag);
+
+
+-- testando limites de constantes
+-- 2^23 = 8388608
+assert(8388609 + -8388609 == 0)
+assert(8388608 + -8388608 == 0)
+assert(8388607 + -8388607 == 0)
 
 print('OK')

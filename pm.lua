@@ -5,7 +5,7 @@ function f(s, p)
 end
 
 a,b = strfind('', '')    -- empty patterns are tricky
-assert(a == 1 and b == 0)
+assert(a == 1 and b == 0);
 a,b = strfind('alo', '')
 assert(a == 1 and b == 0)
 a,b = strfind('a\0o a\0o a\0o', 'a', 1)   -- first position
@@ -14,8 +14,8 @@ a,b = strfind('a\0o a\0o a\0o', 'a\0o', 2)   -- starts in the midle
 assert(a == 5 and b == 7)
 a,b = strfind('a\0o a\0o a\0o', 'a\0o', 9)   -- starts in the midle
 assert(a == 9 and b == 11)
-a,b = strfind('a\0a\0a\0a\0\0ab', '\0ab', 2)  -- finds at the end
-assert(a == 9 and b == 11)
+a,b = strfind('a\0a\0a\0a\0\0ab', '\0ab', 2);  -- finds at the end
+assert(a == 9 and b == 11);
 a,b = strfind('a\0a\0a\0a\0\0ab', 'b')    -- last position
 assert(a == 11 and b == 11)
 assert(strfind('a\0a\0a\0a\0\0ab', 'b\0') == nil)   -- check ending
@@ -23,9 +23,9 @@ assert(strfind('', '\0') == nil)
 assert(strfind('alo123alo', '12') == 4)
 assert(strfind('alo123alo', '^12') == nil)
 
-assert(f('aaab', 'a*') == 'aaa')
-assert(f('aaa', '^.*$') == 'aaa')
-assert(f('aaa', 'b*') == '')
+assert(f('aaab', 'a*') == 'aaa');
+assert(f('aaa', '^.*$') == 'aaa');
+assert(f('aaa', 'b*') == '');
 assert(f('aaa', 'ab*a') == 'aa')
 assert(f('aba', 'ab*a') == 'aba')
 assert(f('aaab', 'a+') == 'aaa')
@@ -56,6 +56,8 @@ assert(f('ábl', 'á?b?l?') == 'ábl')
 assert(f('  ábl', 'á?b?l?') == '')
 assert(f('aa', '^aa?a?a') == 'aa')
 assert(f(']]]áb', '[^]]') == 'á')
+assert(f("0alo alo", "%x*") == "0a")
+assert(f("alo alo", "%C+") == "alo alo")
 print('+')
 
 assert(f('alo alx 123 b\0o b\0o', '(..*) %1') == "b\0o b\0o")
@@ -77,7 +79,7 @@ assert(f('==========', '^([=]*)=%1$') == nil)
   "\189\190\191\192\193\194\195\196\197\198\199\200\201\202\203\204\205\206" ..
   "\207\208\209\210\211\212\213\214\215\216\217\218\219\220\221\222\223\224" ..
   "\225\226\227\228\229\230\231\232\233\234\235\236\237\238\239\240\241\242" ..
-  "\243\244\245\246\247\248\249\250\251\252\253\254\255"
+  "\243\244\245\246\247\248\249\250\251\252\253\254\255";
 
 assert(strlen(abc) == 256)
 
@@ -85,7 +87,7 @@ function strset (p)
   local res = {s=''}
   gsub(%abc, '('..p..')', function (c) %res.s = %res.s .. c end)
   return res.s
-end
+end;
 
 assert(strlen(strset('[\200-\210]')) == 11)
 
@@ -98,11 +100,11 @@ assert(strset('[a%-z]') == '-az')
 assert(strset('[%^%[%-a%]%-b]') == '-[]^ab')
 assert(strset('%Z') == strset('[\1-\255]'))
 assert(strset('.') == strset('[\1-\255%z]'))
-print('+')
+print('+');
 
 function f(s, p)
-  local _, __, c = strfind(s, p)
-  return c
+  local _, __, c = strfind(s, p);
+  return c;
 end
 
 assert(f("alo xyzK", "(%w+)K") == "xyz")

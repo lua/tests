@@ -1,5 +1,4 @@
 #!../lua
-$debug
 
 local c = clock()
 
@@ -9,13 +8,18 @@ assert(setlocale"C")
 
 local showmem = function ()
   if %totalmem then
-    local a,b = %totalmem()
-    %print(%format("\n ---- memoria total: %d,  blocos: %d\n", a, b))
+    local a,b,c = %totalmem()
+    %print(%format("\n ---- memoria total: %d, maxima: %d,  blocos: %d\n",
+                    a, c, b))
   end
 end
 
 assert(dofile(_WD..'main.lua'))
-assert(dofile(_WD..'tracgc.lua'))
+
+settagmethod(tag(nil), 'gc', function (a)
+  %write(_STDERR, '.')
+end)
+
 showmem()
 assert(dofile(_WD..'gc.lua'))
 showmem()
@@ -65,12 +69,12 @@ showmem()
 $ifnot _hard_i
 print('limpando tudo!!!!')
 local preserve = {_STDERR = 1, error = 1, _ERRORMESSAGE = 1, _ALERT = 1,
-                  tostring = 1, }
+                  tostring = 1, _INPUT=1, _OUTPUT=1}
 
 local collectgarbage, showmem, print, format, clock =
       collectgarbage, showmem, print, format, clock
 
-setcallhook(function (a) %assert(a == nil or %type(a) == 'function') end)
+setcallhook(function (a) %assert(%type(a) == 'string') end)
 foreachvar(function (n) if not %preserve[n] then %setglobal(n, nil) end end)
 $end
 

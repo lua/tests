@@ -3,10 +3,15 @@ print("testando erros")
 local old = _ERRORMESSAGE
 
 function doit (s)
-  local m = {msg = nil}
-  call(dostring, {s}, '', function (s) %m.msg = s end)
+  local msg = nil
+  call(dostring, {s}, '', function (s) msg = s end)
   assert(%old == _ERRORMESSAGE and %old~=nil)
-  return m.msg;
+  return msg;
+end
+
+
+function checkmessage (prog, msg)
+  assert(strfind(doit(prog), msg))
 end
 
 
@@ -15,7 +20,7 @@ assert(doit("a=sin()"))
 assert(not doit("tostring(1)") and doit("tostring()"))
 assert(doit"tonumber()")
 assert(doit"repeat until 1; a")
-assert(strfind(doit"break label", "label"))
+checkmessage("break label", "label")
 assert(doit";")
 assert(doit"a=1;;")
 assert(doit"return;;")
@@ -24,37 +29,37 @@ assert(doit"assert(nil)")
 assert(doit"a=sin\n(3)")
 assert(doit("function a (... , ...) end"))
 assert(doit("function a (, ...) end"))
-assert(strfind(doit'%a()', "line 1"))
-assert(strfind(doit[[
+checkmessage('%a()', "line 1")
+checkmessage([[
   local other, var = 1
   other = other or %var
 
-]], "line 2"))
+]], "line 2")
 
 -- testes para mensagens de erro mais explicativas
 
-assert(strfind(doit"a=1; bbbb=2; a=sin(3)+bbbb(3)", "global `bbbb'"))
-assert(strfind(doit"a=1; local a,bbbb=2,3; a = sin(1) and bbbb(3)",
-       "local `bbbb'"))
-assert(strfind(doit"a={}; do local a=1 end a:bbbb(3)", "field `bbbb'"))
-assert(strfind(doit"local a={}; a.bbbb(3)", "field `bbbb'"))
+checkmessage("a=1; bbbb=2; a=sin(3)+bbbb(3)", "global `bbbb'")
+checkmessage("a=1; local a,bbbb=2,3; a = sin(1) and bbbb(3)",
+       "local `bbbb'")
+checkmessage("a={}; do local a=1 end a:bbbb(3)", "field `bbbb'")
+checkmessage("local a={}; a.bbbb(3)", "field `bbbb'")
 assert(not strfind(doit"a={13}; local bbbb=1; a[bbbb](3)", "bbbb"))
-assert(strfind(doit"a={13}; local bbbb=1; a[bbbb](3)", "number"))
+checkmessage("a={13}; local bbbb=1; a[bbbb](3)", "number")
 
 aaa = nil
-assert(strfind(doit"aaa.bbb:ddd(9)", "global `aaa'"))
-assert(strfind(doit"local aaa={bbb=1}; aaa.bbb:ddd(9)", "field `bbb'"))
-assert(strfind(doit"local aaa={bbb={}}; aaa.bbb:ddd(9)", "field `ddd'"))
+checkmessage("aaa.bbb:ddd(9)", "global `aaa'")
+checkmessage("local aaa={bbb=1}; aaa.bbb:ddd(9)", "field `bbb'")
+checkmessage("local aaa={bbb={}}; aaa.bbb:ddd(9)", "field `ddd'")
 assert(doit"local aaa={bbb={ddd=next}}; aaa.bbb:ddd(nil)" == nil)
 
-assert(strfind(doit"local aaa='a'; x=aaa+b", "local `aaa'"))
-assert(strfind(doit"aaa={}; x=3/aaa", "global `aaa'"))
-assert(strfind(doit"aaa='2'; b=nil;x=aaa*b", "global `b'"))
-assert(strfind(doit"aaa={}; x=-aaa", "global `aaa'"))
+checkmessage("local aaa='a'; x=aaa+b", "local `aaa'")
+checkmessage("aaa={}; x=3/aaa", "global `aaa'")
+checkmessage("aaa='2'; b=nil;x=aaa*b", "global `b'")
+checkmessage("aaa={}; x=-aaa", "global `aaa'")
 assert(not strfind(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "aaa"))
 assert(not strfind(doit"aaa={}; (aaa or aaa)()", "aaa"))
 
-assert(strfind(doit[[aaa=9
+checkmessage([[aaa=9
 repeat until 3==3
 local x=sin(cos(3))
 if sin(1) == x then return 1,2,sin(1) end   -- tail call
@@ -63,20 +68,37 @@ local a,b = 1, {
   {1,2,3,4,5} or 3+3<=3+3,
   3+1>3+1,
   {d = x and aaa[x or y]}}
-]], "global `aaa'"))
+]], "global `aaa'")
 
-assert(strfind(doit[[
+checkmessage([[
 local x,y = {},1
 if sin(1) == 0 then return 3 end    -- return
-x.a()]], "field `a'"))
+x.a()]], "field `a'")
 
-assert(strfind(doit[[
+checkmessage([[
 prefix = nil
 while 1 do  
   local a
   if nil then break end
   insert(prefix, w)
-end]], "global `insert'"))
+end]], "global `insert'")
+
+print'+'
+
+
+-- teste de linha do erro
+
+function lineerror (s)
+  local line
+  call(dostring, {s}, '', function (s) line = getinfo(2, "l").currentline end)
+  return line
+end
+
+assert(lineerror"local a\n for i=1,'a' do \n print(i) \n end" == 2)
+assert(lineerror"\n local a \n for k,v in 3 \n do \n print(k) \n end" == 3)
+assert(lineerror"\n\n for k,v in \n 3 \n do \n print(k) \n end" == 4)
+
+lineerror = nil
 
 
 i = 0
@@ -87,7 +109,7 @@ assert(doit('y()') == stackmsg)
 assert(doit('y()') == stackmsg)
 assert(doit('y()') == stackmsg)
 print('+')
-assert(strfind(doit("syntax error"), "syntax error"))
+checkmessage(("syntax error"), "syntax error")
 
 doit('i = dostring("a=9+"); a=3')
 assert(a==3 and i == nil)

@@ -70011,7 +70011,12 @@ b = nil or {
 end
 
 assert(b.a50008 == 25004 and b["a11"] == 5.5)
+assert(b.a33007 == 16503.5 and b.a50009 == 25004.5)
 assert(b["b"..30024] == -4294967297)
+
+s = 0; n=0
+foreach(b, function(a,b) s=s+b; n=n+1 end)
+assert(s==13977183656.5  and n==70001)
 
 a = nil; b = nil
 print'+'
@@ -120035,3 +120040,5 @@ a = nil; b=nil
 xxxx = nil
 
 print"OK"
+
+return 10

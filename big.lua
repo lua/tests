@@ -347,3 +347,5 @@ b = nil
 a1 = nil
 
 print'OK'
+
+return 'a'

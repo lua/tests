@@ -1,4 +1,7 @@
 print('testando vararg')
+
+_G.arg = nil
+
 function f(a, ...)
   assert(type(arg) == 'table')
   assert(type(arg.n) == 'number')
@@ -6,8 +9,9 @@ function f(a, ...)
   return arg.n
 end
 
-function c12 (...)
-  local res = (arg.n==2 and arg[1] == 1 and arg[2] == 2)
+function c12 (...=x)
+  local res = (x.n==2 and x[1] == 1 and x[2] == 2)
+  assert(arg == nil)
   if res then res = 55 end
   return res, 2
 end
@@ -45,9 +49,9 @@ lim = 20
 local i, a = 1, {}
 while i <= lim do a[i] = i+0.3; i=i+1 end
 
-function f(a, b, c, d, ...)
-  assert(a == 1.3 and arg[1] == 5.3 and
-         arg[lim-4] == lim+0.3 and not arg[lim-3])
+function f(a, b, c, d, ... = more)
+  assert(a == 1.3 and more[1] == 5.3 and
+         more[lim-4] == lim+0.3 and not more[lim-3])
 end
 
 function g(a,b,c)

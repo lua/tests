@@ -209,14 +209,14 @@ local t = os.time()
 T = os.date("*t", t)
 loadstring(os.date([[assert(T.year==%Y and T.month==%m and T.day==%d and
   T.hour==%H and T.min==%M and T.sec==%S and
-  T.wday==%w+1 and T.yday==%j and tonumber(T.isdst))]], t))()
+  T.wday==%w+1 and T.yday==%j and type(T.isdst) == 'boolean')]], t))()
 
 assert(os.time(T) == t)
 
 T = os.date("!*t", t)
 loadstring(os.date([[!assert(T.year==%Y and T.month==%m and T.day==%d and
   T.hour==%H and T.min==%M and T.sec==%S and
-  T.wday==%w+1 and T.yday==%j and tonumber(T.isdst))]], t))()
+  T.wday==%w+1 and T.yday==%j and type(T.isdst) == 'boolean')]], t))()
 
 t = os.time(T)
 T.year = T.year-1;

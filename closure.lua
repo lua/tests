@@ -102,6 +102,8 @@ print'+'
 
 -- teste de co-rotinas
 
+local f
+
 local function eqtab (t1, t2)
   assert(table.getn(t1) == table.getn(t2))
   for i,v in ipairs(t1) do
@@ -111,16 +113,17 @@ end
 
 function foo (a, ...)
   for i=1,arg.n do
+    assert(coroutine.status(f) == "running")
     _G.x = {coroutine.yield(unpack(arg[i]))}
   end
   return unpack(a)
 end
 
-local f = coroutine.create(foo)
-assert(type(f) == "thread")
+f = coroutine.create(foo)
+assert(type(f) == "thread" and coroutine.status(f) == "suspended")
 local s,a,b,c,d
 s,a,b,c,d = coroutine.resume(f, {1,2,3}, {}, {1}, {'a', 'b', 'c'})
-assert(s and a == nil)
+assert(s and a == nil and coroutine.status(f) == "suspended")
 s,a,b,c,d = coroutine.resume(f)
 eqtab(_G.x, {})
 assert(s and a == 1 and b == nil)
@@ -130,8 +133,9 @@ assert(s and a == 'a' and b == 'b' and c == 'c' and d == nil)
 s,a,b,c,d = coroutine.resume(f, "xuxu")
 eqtab(_G.x, {"xuxu"})
 assert(s and a == 1 and b == 2 and c == 3 and d == nil)
+assert(coroutine.status(f) == "dead")
 s, a = coroutine.resume(f, "xuxu")
-assert(not s and string.find(a, "dead"))
+assert(not s and string.find(a, "dead") and coroutine.status(f) == "dead")
 
 
 -- yields in tail calls
@@ -206,9 +210,9 @@ x = coroutine.create(goo)
 a,b = coroutine.resume(x)
 assert(a and b == 3)
 a,b = coroutine.resume(x)
-assert(not a and b == foo)
+assert(not a and b == foo and coroutine.status(x) == "dead")
 a,b = coroutine.resume(x)
-assert(not a and string.find(b, "dead"))
+assert(not a and string.find(b, "dead") and coroutine.status(x) == "dead")
 
 
 -- co-routines x for loop

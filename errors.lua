@@ -11,8 +11,18 @@ end
 
 
 function checkmessage (prog, msg)
-  assert(strfind(doit(prog), msg))
+  assert(strfind(doit(prog), msg, 1, true))
 end
+
+function checksyntax (prog, extra, token, line)
+  local msg = doit(prog)
+  local pt =
+    format("^.-;\n  last token read: `%s' at line %d in string \".*\"$",
+                    token, line)
+  assert(strfind(msg, pt))
+  assert(strfind(msg, msg, 1, true))
+end
+
 
 
 -- testa erros comuns e/ou que voavam no passado
@@ -21,7 +31,7 @@ assert(doit("a=sin()"))
 assert(not doit("tostring(1)") and doit("tostring()"))
 assert(doit"tonumber()")
 assert(doit"repeat until 1; a")
-checkmessage("break label", "label")
+checksyntax("break label", "", "label", 1)
 assert(doit";")
 assert(doit"a=1;;")
 assert(doit"return;;")
@@ -30,12 +40,18 @@ assert(doit"assert(nil)")
 assert(doit"a=sin\n(3)")
 assert(doit("function a (... , ...) end"))
 assert(doit("function a (, ...) end"))
-checkmessage('%a()', "line 1")
-checkmessage([[
+checksyntax('%a()', "", "a", 1)
+checksyntax([[
   local other, var = 1
   other = other or %var
 
-]], "line 2")
+]], "", "var", 2)
+
+checksyntax([[
+  local a = {4
+
+]], "`}' expected (to close `{' at line 1)", "<eof>", 3)
+
 
 -- testes para mensagens de erro mais explicativas
 
@@ -122,7 +138,7 @@ pcall(function (s)
   assert(getinfo(3+C, "l").currentline == l+8)  -- this file
 end, y)
 print('+')
-checkmessage(("syntax error"), "syntax error")
+checksyntax(("syntax error"), "", "error", 1)
 
 doit('i = loadstring("a=9+"); a=3')
 assert(a==3 and i == nil)

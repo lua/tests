@@ -12,7 +12,15 @@ B = nil
 assert(B == 30)
 
 assert(metatable{} == nil)
--- assert(metatable(4) == nil)
+assert(metatable(4) == nil)
+assert(metatable(nil) == nil)
+a={}; metatable(a, {__metatable = "xuxu",
+                    __weakmode = 45,  -- invalid mode, must be ignored
+                    __tostring=function(x) return x.name end})
+assert(metatable(a) == "xuxu")
+assert(tostring(a) == nil)
+a.name = "gororoba"
+assert(tostring(a) == "gororoba")
 
 local a, t = {10,20,30; x="10", y="20"}, {}
 assert(metatable(a,t) == a)

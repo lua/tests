@@ -20,6 +20,8 @@ function checkequal (a, b)
   a = T.listcode(a)
   b = T.listcode(b)
   for i = 1, getn(a) do
+    a[i] = gsub(a[i], '%b()', '')   -- remove line number
+    b[i] = gsub(b[i], '%b()', '')   -- remove line number
     assert(a[i] == b[i])
   end
 end

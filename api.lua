@@ -368,6 +368,25 @@ do
 
 end
 
+
+
+-------------------------------------------------------------------------
+do   -- teste de erro durante coleta de lixo
+  local a = {}
+  for i=1,20 do
+    a[i] = T.newuserdatabox(i)   -- cria varios udata
+  end
+  for i=1,20,2 do   -- marca metade deles para dar erro durante coleta de lixo
+    T.eventtable(a[i], {gc = function () error"error inside gc" end})
+  end
+  a = 0
+  assert(not call(collectgarbage, {}, "x",
+                  function (s) collectgarbage(); a=a+1 end))
+  assert(a == 10)  -- numero de erros
+end
+-------------------------------------------------------------------------
+
+
 -------------------------------------------------------------------------
 -- testando multiplos estados
 T.closestate(T.newstate(100));

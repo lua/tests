@@ -1,7 +1,10 @@
 
 print('testando i/o')
 
-assert(type(io.input()) == "userdata")
+io.input(io.stdin); io.output(io.stdout)
+
+assert(type(io.input()) == "userdata" and io.type(io.output()) == "file")
+assert(io.type(8) == nil)
 
 local a,b,c = io.open('xuxu_nao_existe')
 assert(not a and type(b) == "string" and type(c) == "number")
@@ -68,12 +71,14 @@ for l in io.lines(file) do io.write(l, "\n") end
 io.close()
 -- copy from otherfile back to file
 local f = assert(io.open(otherfile))
+assert(io.type(f) == "file")
 io.output(file)
 assert(io.output():read() == nil)
 for l in f:lines() do io.write(l, "\n") end
 assert(f:close()); io.close()
 assert(not pcall(io.close, f))   -- error trying to close again
 assert(tostring(f) == "file (closed)")
+assert(io.type(f) == "closed file")
 io.input(file)
 f = io.open(otherfile):lines()
 for l in io.lines() do assert(l == f()) end

@@ -76,7 +76,7 @@ checkequal(function () if (a==nil) then a=1 end; if a~=nil then a=1 end end,
            function () if (a==9) then a=1 end; if a~=9 then a=1 end end)
 
 check(function () if a==nil then a=1 end end,
-'GETGLOBAL', 'TESTNE', 'CJMP', 'LOADINT', 'SETGLOBAL', 'RETURN')
+'GETGLOBAL', 'TESTNE', 'JMP', 'LOADINT', 'SETGLOBAL', 'RETURN')
 
 -- de morgan
 checkequal(function () local a; if not (a or b) then b=a end end,

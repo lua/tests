@@ -5,7 +5,11 @@ $ifnot testC
 
 $else
 
+$debug
+
   print('testando API com C')
+
+testC"beginblock"
 
 a,b = testC("pushnum 1; pushnum 2")
 assert(a == 1 and b == 2)
@@ -18,7 +22,7 @@ testC[[
 ]]
 assert(a == 4 and b == 1)
 
-com = "getparam r1 1; pushreg r1"
+com = "getparam r1 0; pushreg r1"
 assert(testC(com) == com)
 
 a = testC[[
@@ -100,7 +104,7 @@ assert(testC('pushnum 1; call sin') == nil)
 a = call(testC, {[[
 	pushnum		1
 	getglobal	r3, x
-	getparam	r1, 2
+	getparam	r1, 1
 	pop		r5
 	pushreg		r1
 ]], "testando"}, "pack")
@@ -117,7 +121,7 @@ end
 
 i = 1
 while i<= Lim do  -- unlock half of them
-  testC("getparam r1, 2; unref r1", Arr[i])
+  testC("getparam r1, 1; unref r1", Arr[i])
   i = i+2
 end
 
@@ -144,19 +148,19 @@ assert(type(testC("getglobal r5, a; getref r5, r5; pushreg r5")) == 'table')
 tt = newtag()
 cl = {n=0}
 function f(x)
-  local udval = testC('getparam r2, 2; udataval r1, r2; pushreg r1',x)
+  local udval = testC('getparam r2, 1; udataval r1, r2; pushreg r1',x)
   cl.n = cl.n+1
   cl[udval] = 1
 end
-testC([[getparam r1, 2; pushreg r1;
-       getparam r2, 3;
+testC([[getparam r1, 1; pushreg r1;
+       getparam r2, 2;
        settagmethod r2, gc
 ]], f, tt)
 
 -- create 3 userdatas with tag `tt' and values 1, 2, and 3
-a = testC('getparam r1, 2; getparam r2, 3; pushusertag r1, r2', 1, tt);
-b = testC('getparam r1, 2; getparam r2, 3; pushusertag r1, r2', 2, tt);
-c = testC('getparam r1, 2; getparam r2, 3; pushusertag r1, r2', 3, tt);
+a = testC('getparam r1, 1; getparam r2, 2; pushusertag r1, r2', 1, tt);
+b = testC('getparam r1, 1; getparam r2, 2; pushusertag r1, r2', 2, tt);
+c = testC('getparam r1, 1; getparam r2, 2; pushusertag r1, r2', 3, tt);
 
 d,e,f = testC[[
 	getglobal	r1, a
@@ -189,10 +193,10 @@ t=nil a=nil b=nil c=nil
 
 collectgarbage()
 
-x = testC("getparam r1, 2; getref r5, r1; pushreg r5", d)
+x = testC("getparam r1, 1; getref r5, r1; pushreg r5", d)
 assert(type(x) == 'userdata' and tag(x) == tt)
 -- atempt to get "collected object"; must gives an error
-call(testC, {"getparam r1, 2; getref r5, r1; pushreg r5" , e},
+call(testC, {"getparam r1, 1; getref r5, r1; pushreg r5" , e},
                 "px", function (s) x=s end)
 assert(strfind(x, "NOOBJECT"))
 
@@ -201,9 +205,9 @@ assert(cl.n == 2 and cl[2] and cl[3] and not cl[1])
 
 -- unref(d); unref(e); unref(f)
 testC([[
-	getparam	r2, 2
-	getparam	r3, 3
-	getparam	r4, 4
+	getparam	r2, 1
+	getparam	r3, 2
+	getparam	r4, 3
 	unref		r2
 	unref		r3
 	unref		r4
@@ -213,24 +217,24 @@ assert(cl.n == 3 and cl[1])
 
 i = 2
 while i<= Lim do  -- unlock the other half
-  testC("getparam r1, 2; unref r1", Arr[i])    -- unref(Arr[i])
+  testC("getparam r1, 1; unref r1", Arr[i])    -- unref(Arr[i])
   i = i+2
 end
 
 print'+'
 
-assert(testC("getparam r2, 2; getparam r3, 3; equal r2, r3",
+assert(testC("getparam r2, 1; getparam r3, 2; equal r2, r3",
               print, print) == 1)
-assert(testC("getparam r2, 2; getparam r3, 3; equal r2, r3",
+assert(testC("getparam r2, 1; getparam r3, 2; equal r2, r3",
              'alo', "alo") == 1)
-assert(testC("getparam r2, 2; getparam r3, 2; equal r2, r3", {}) == 1)
-assert(testC("getparam r2, 2; getparam r3, 3; equal r2, r3",
+assert(testC("getparam r2, 1; getparam r3, 1; equal r2, r3", {}) == 1)
+assert(testC("getparam r2, 1; getparam r3, 2; equal r2, r3",
              {}, {}) == 0)
-assert(testC("getparam r2, 2; getparam r3, 3; equal r2, r3",
+assert(testC("getparam r2, 1; getparam r3, 2; equal r2, r3",
              print, 34) == 0)
 
-f = testC("getparam r1, 2; pushreg r1; pushnum 8; closure testC, 2",
-          "getparam r2, 2; getparam r3, 3; pushreg r2; pushreg r3")
+f = testC("getparam r1, 1; pushreg r1; pushnum 8; closure testC, 2",
+          "getparam r2, 1; getparam r3, 2; pushreg r2; pushreg r3")
 a,b = f(4)
 assert(a == 8 and b == 4)
 
@@ -297,7 +301,71 @@ local a,b,c,d = testC[[
 assert(a==0 and b=='x' and c=='alo' and d == nil)
 
 
-testC('pushstring OK; call print')
+-- testando begin/end block
+prog = strrep("beginblock ", 10000)  -- too many open blocks
+a = call(testC, {prog}, "px", function (s) var=s end)
+assert(a == nil and var == 'too many nested blocks')
+
+prog = [[
+	beginblock
+	pushnum		1
+	getglobal	r0, prog
+	rawgetglobal	r1, print
+	pushnum		3
+	endblock
+]]
+
+prog = strrep(prog, 3000)
+prog = [[
+	pushnum		1
+	getglobal	r5, prog
+]]..prog..[[
+	pushnum 	5
+	pushreg		r5
+]]
+
+a,b,c = testC(prog)
+assert(a==5 and b==prog and c==nil)
+
+-- testando multiplos estados
+testC("newstate 100, 1; pop r1; closestate r1")
+L1, a = testC([[
+	newstate	13, 0
+	pop		r1
+	getparam	r2, 1
+	doremote	r1, r2
+	pushreg		r1
+]], "function f () return 'alo', 3 end; f()")
+assert(type(L1) == 'userdata' and a == nil)
+
+a, b, c = testC("getparam r1, 1; getparam r2, 2; doremote r1, r2; pushnum 1",
+      L1, "return f()")
+assert(a == 'alo' and b == '3' and c == 1)
+
+a, b = testC("getparam r1, 1; getparam r2, 2; doremote r1, r2; pushnum 1",
+      L1, "return tostring(1)")   -- error: `sin' is not defined
+assert(a == 1 and b == nil)
+
+testC("getparam r1, 1; closestate r1", L1)
+
+print'+'
+
+
+-- testando tag methods
+var = {var=12}; settag(var, tt);
+settagmethod(tt, "getglobal", function (n, v) return sin(v[n]) end)
+a,b,c,d = testC[[
+	pushnum		1
+	getglobal	r1, var
+	pushreg		r1
+	rawgetglobal	r2, var
+	pushreg		r2
+	pushnum		2
+]]
+assert(a == 1 and b == sin(12) and c == rawgetglobal"var" and d == 2)
+
+
+testC('endblock; pushstring OK; call print')
 
 
 

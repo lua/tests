@@ -2,7 +2,7 @@ print('testando meta-tabelas')
 
 X = 20; B = 30
 
-setglobals(setmetatable({}, {__index=_G}))
+setglobals(1, setmetatable({}, {__index=_G}))
 
 collectgarbage()
 
@@ -17,7 +17,6 @@ assert(getmetatable{} == nil)
 assert(getmetatable(4) == nil)
 assert(getmetatable(nil) == nil)
 a={}; setmetatable(a, {__metatable = "xuxu",
-                    __weakmode = 45,  -- invalid mode, must be ignored
                     __tostring=function(x) return x.name end})
 assert(getmetatable(a) == "xuxu")
 assert(tostring(a) == nil)
@@ -109,9 +108,13 @@ t.__pow = f
 
 assert(b+5 == b)
 assert(cap[1] == b and cap[2] == 5 and cap.n == 2)
+assert(b+'5' == b)
+assert(cap[1] == b and cap[2] == '5' and cap.n == 2)
 b=b-3; assert(getmetatable(b) == t)
 assert(5-a == 5)
 assert(cap[1] == 5 and cap[2] == a and cap.n == 2)
+assert('5'-a == '5')
+assert(cap[1] == '5' and cap[2] == a and cap.n == 2)
 assert(a*a == a)
 assert(cap[1] == a and cap[2] == a and cap.n == 2)
 assert(a/0 == a)
@@ -120,8 +123,12 @@ assert(-a == a)
 assert(cap[1] == a and cap[2] == nil)
 assert(a^4 == a)
 assert(cap[1] == a and cap[2] == 4 and cap.n == 2)
+assert(a^'4' == a)
+assert(cap[1] == a and cap[2] == '4' and cap.n == 2)
 assert(4^a == 4)
 assert(cap[1] == 4 and cap[2] == a and cap.n == 2)
+assert('4'^a == '4')
+assert(cap[1] == '4' and cap[2] == a and cap.n == 2)
 
 
 t = {}
@@ -135,15 +142,17 @@ end
 
 function Op(x) return setmetatable({x=x}, t) end
 
+function O(x) return {x=x} end
+
 local function test ()
 assert(not(Op(1)<Op(1)) and (Op(1)<Op(2)) and not(Op(2)<Op(1)))
 assert(not(Op('a')<Op('a')) and (Op('a')<Op('b')) and not(Op('b')<Op('a')))
-assert((1<=Op(1)) and (Op(1)<=Op(2)) and not(Op(2)<=Op(1)))
-assert((Op('a')<='a') and (Op('a')<=Op('b')) and not(Op('b')<=Op('a')))
+assert((O(1)<=Op(1)) and (Op(1)<=Op(2)) and not(Op(2)<=Op(1)))
+assert((Op('a')<=O('a')) and (Op('a')<=Op('b')) and not(Op('b')<=Op('a')))
 assert(not(Op(1)>Op(1)) and not(Op(1)>Op(2)) and (Op(2)>Op(1)))
 assert(not(Op('a')>Op('a')) and not(Op('a')>Op('b')) and (Op('b')>Op('a')))
-assert((Op(1)>=Op(1)) and not(Op(1)>=2) and (Op(2)>=Op(1)))
-assert((Op('a')>=Op('a')) and not('a'>=Op('b')) and (Op('b')>=Op('a')))
+assert((Op(1)>=Op(1)) and not(Op(1)>=O(2)) and (Op(2)>=Op(1)))
+assert((Op('a')>=Op('a')) and not(O('a')>=Op('b')) and (Op('b')>=Op('a')))
 end
 
 test()
@@ -167,7 +176,7 @@ local function Set(x)
 end
 
 t.__lt = function (a,b)
-  for k in next,a do
+  for k in pairs(a) do
     if not b[k] then return false end
     b[k] = nil
   end
@@ -183,7 +192,7 @@ assert((Set{1,2,3,4} >= Set{1,2,3,4}))
 assert((Set{1,3} <= Set{3,5}))   -- wrong!! model needs a `le' method ;-)
 
 t.__le = function (a,b)
-  for k in next,a do
+  for k in pairs(a) do
     if not b[k] then return false end
   end
   return true
@@ -194,7 +203,7 @@ assert(not(Set{1,3} <= Set{3,5}))
 assert(not(Set{1,3} >= Set{3,5}))
 
 t.__eq = function (a,b)
-  for k in next,a do
+  for k in pairs(a) do
     if not b[k] then return false end
     b[k] = nil
   end
@@ -256,6 +265,33 @@ assert(i == 3 and x[1] == 3 and x[3] == 5)
 
 
 assert(_G.X == 20)
+assert(_G == getglobals(0))
+
+print'+'
+
+local _g = _G
+setglobals(1, setmetatable({}, {__index=function (_,k) return _g[k] end}))
+
+-- testando proxies
+assert(getmetatable(newproxy()) == nil)
+assert(getmetatable(newproxy(false)) == nil)
+
+local u = newproxy(true)
+
+getmetatable(u).__settable = function (u,k,v)
+  getmetatable(u)[k] = v
+end
+
+getmetatable(u).__gettable = function (u,k)
+  return getmetatable(u)[k]
+end
+
+for i=1,10 do u[i] = i end
+for i=1,10 do assert(u[i] == i) end
+
+local k = newproxy(u)
+assert(getmetatable(k) == getmetatable(u))
+
 
 print 'OK'
 

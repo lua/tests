@@ -109,20 +109,23 @@ function foo (a, ...)
 end
 
 local f = coroutine.create(foo, {1,2,3}, {}, {1}, {'a', 'b', 'c'})
-local a,b,c,d
-a,b,c,d = f()
-assert(a == nil)
-a,b,c,d = f()
-assert(a == 1 and b == nil)
-a,b,c,d = f()
-assert(a == 'a' and b == 'b' and c == 'c' and d == nil)
-a,b,c,d = f()
-assert(a == 1 and b == 2 and c == 3 and d == nil)
+assert(type(f) == "thread")
+local s,a,b,c,d
+s,a,b,c,d = coroutine.resume(f)
+assert(s and a == nil)
+s,a,b,c,d = coroutine.resume(f)
+assert(s and a == 1 and b == nil)
+s,a,b,c,d = coroutine.resume(f)
+assert(s and a == 'a' and b == 'b' and c == 'c' and d == nil)
+s,a,b,c,d = coroutine.resume(f)
+assert(s and a == 1 and b == 2 and c == 3 and d == nil)
+s, a = coroutine.resume(f)
+assert(not s and string.find(a, "dead"))
 
 
 -- yields in tail calls
 local function foo (i) return coroutine.yield(i) end
-f = coroutine.create(function ()
+f = coroutine.wrap(function ()
   for i=1,10 do
     assert(foo(i) == nil)
   end
@@ -137,7 +140,7 @@ function pf (n, i)
   pf(n*i, i+1)
 end
 
-f = coroutine.create(pf, 1, 1)
+f = coroutine.wrap(pf, 1, 1)
 local s=1
 for i=1,10 do
   assert(f() == s)
@@ -146,14 +149,14 @@ end
 
 -- sieve
 function gen (n)
-  return coroutine.create(function ()
+  return coroutine.wrap(function ()
     for i=2,n do coroutine.yield(i) end
   end)
 end
 
 
 function filter (p, g)
-  return coroutine.create(function (g)
+  return coroutine.wrap(function (g)
     while 1 do
       local n = g()
       if n == nil then return end
@@ -183,7 +186,7 @@ function foo ()
 end
 
 function goo() foo() end
-x = coroutine.create(goo)
+x = coroutine.wrap(goo)
 assert(x() == 3)
 local a,b = pcall(x)
 assert(not a and b == foo)
@@ -201,9 +204,31 @@ function all (a, n, k)
 end
 
 local a = 0
-for t in coroutine.create(all, {}, 5, 4) do
+for t in coroutine.wrap(all, {}, 5, 4) do
   a = a+1
 end
 assert(a == 5^4)
-  
+
+
+-- access to locals of "dead" corroutines
+local C = {}; setmode(C, "kv")
+local x = coroutine.wrap (function ()
+            local a = 10
+            local function f () a = a+10; return a end
+            while true do
+              a = a+1
+              coroutine.yield(f)
+            end
+          end)
+
+C[1] = x;
+
+local f = x()
+assert(f() == 21 and x()() == 32 and x() == f)
+x = nil
+collectgarbage()
+assert(C[1] == nil)
+assert(f() == 43 and f() == 53)
+
+
 print'OK'

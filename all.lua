@@ -59,7 +59,7 @@ assert(dofile(_WD..'locals.lua') == 5)
 dofile(_WD..'constructs.lua')
 dofile(_WD..'code.lua')
 do
-  local f = coroutine.create(assert(loadfile(_WD..'big.lua')))
+  local f = coroutine.wrap(assert(loadfile(_WD..'big.lua')))
   assert(f() == 'b')
   assert(f() == 'a')
 end

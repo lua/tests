@@ -64,6 +64,10 @@ do
   local function f () setglobals(2, {a='10'}) end
   local function g () f(); _G.assert(_G.getglobals(1).a == '10') end
   g(); assert(getglobals(g).a == '10')
+  getglobals(g).__globals = false
+  assert(getglobals(g) == false)
+  -- cannot change a protected global table
+  assert(pcall(setglobals, g, {}) == false)
 end
 
 

@@ -448,35 +448,46 @@ T.closestate(L1);
 L1 = nil
 
 print('+')
+
 -------------------------------------------------------------------------
--- testa limite de memoria
+-- testa limites de memoria
 -------------------------------------------------------------------------
 collectgarbage()
 T.totalmem(T.totalmem()+5000)   -- seta limite `baixo' para memoria (+5k)
-assert(not dostring"local a={}; for i=1,100000 do a[i]=i end")
+assert(not pcall(nil, loadstring"local a={}; for i=1,100000 do a[i]=i end"))
 T.totalmem(32000000)  -- restaura limite alto (32M)
+
+
+-- testa erros de memoria; vai aumentando o limite de memoria
+-- gradativamente, de modo a dar erros em varios passos durante
+-- determinada atividade, ate' ter memoria suficiente para nao dar erro
+function testamem (s, f)
+  collectgarbage()
+  local M = T.totalmem()
+  local oldM = M
+  local a,b = nil
+  while 1 do
+    M = M+3   -- aumenta gradativamente a memoria
+    T.totalmem(M)
+    a, b = pcall(nil, f)
+    if a and b then break end       -- para quando conseguir
+    collectgarbage()
+  end
+  T.totalmem(32000000)  -- restaura limite alto (32M)
+  print("\nlimite para " .. s .. ": " .. M-oldM)
+  return b
+end
+
 
 -- testa erros de memoria na criacao de um estado; vai aumentando o limite
 -- de memoria gradativamente, de modo a dar erros em varios passos durante
 -- a criacao de um estado, ate' ter memoria suficiente para nao dar erro
 
-local M = T.totalmem()
-local oldM = M
-local a,b = nil
-while 1 do
-  M = M+3   -- aumenta gradativamente a memoria
-  T.totalmem(M)
-  a,b = pcall(nil, T.newstate)  -- tenta criar estado
-  if a and b then break end       -- para quando conseguir
-end
+b = testamem("criar estado", T.newstate)
 T.closestate(b);  -- fecha estado que conseguiu abrir
-T.totalmem(32000000)  -- restaura limite alto (32M)
-print("\nlimite para criar estado: "..M-oldM)
 
 
--------------------------------------------------------------------------
 -- teste de threads
--------------------------------------------------------------------------
 
 function expand (n,s)
   if n==0 then return ""
@@ -488,39 +499,46 @@ end
 G=0; collectgarbage(); a =gcinfo()
 dostring(expand(20,"G=G+1"))
 assert(G==20); collectgarbage();  -- assert(gcinfo() <= a+1)
-print'+'
 
-M = T.totalmem()
-oldM = M
-while 1 do
-  M = M+3   -- aumenta gradativamente a memoria
-  T.totalmem(M)
-  a, b = pcall(nil, T.doonnewstack, "x=1")  -- tenta criar thread
-  if b == 0 then break end       -- para quando conseguir
-  collectgarbage()
-end
-T.totalmem(32000000)  -- restaura limite alto (32M)
-print("\nlimite para criar thread: "..M-oldM)
+testamem("criar thread", function ()
+  return T.doonnewstack("x=1") == 0  -- tenta criar thread
+end)
 
 
--------------------------------------------------------------------------
 -- teste de memoria x compilador
--------------------------------------------------------------------------
 
-collectgarbage()
-x=nil
-local M = T.totalmem()
-local oldM = M
-while 1 do
-  M = M+3   -- aumenta gradativamente a memoria
-  T.totalmem(M)
-  local a = pcall(nil, loadstring("x=1"))  -- tenta fazer o dostring
-  if a then break end       -- para quando conseguir
-  collectgarbage()
-end
-T.totalmem(32000000)  -- restaura limite alto (32M)
-assert(x == 1)
-print("\nlimite para dostring: "..M-oldM)
+testamem("dostring", function ()
+  return loadstring("x=1")  -- tenta fazer o dostring
+end)
+
+
+-- testes mais genericos
+
+testamem("teste criacao de strings", function ()
+  local a, b = gsub("alo alo", "(a)", function (x) return x..'b' end)
+  return (a == 'ablo ablo')
+end)
+
+testamem("teste criacao de arquivos", function ()
+  local t = tmpname()
+  local f = assert(io.open(t, 'w'))
+  assert (not io.open"nomenaoexistente")
+  io.close(f); os.remove(t)
+  return not loadfile'nomenaoexistente'
+end)
+
+testamem("teste criacao de tabelas", function ()
+  local a, lim = {}, 10
+  for i=1,lim do a[i] = i; a[i..'a'] = {} end
+  return (type(a[lim..'a']) == 'table' and a[lim] == lim)
+end)
+
+testamem("teste criacao de closures", function ()
+  function close (a,b,c)
+   return function (x) return a+b+c+x end
+  end
+  return (close(1,2,3)(4) == 10)
+end)
 
 print'OK'
 

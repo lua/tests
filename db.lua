@@ -11,9 +11,9 @@ end
 function test (s, l)
   collectgarbage()   -- avoid gc during trace
   local f = function (line)
-              assert(tremove(%l, 1) == line, "wrong trace!!")
+    assert(tremove(%l, 1) == line, "wrong trace!!")
   end
-  setlinehook(f); assert(dostring(s)); assert(setlinehook() == f)
+  setlinehook(f); loadstring(s)(); assert(setlinehook() == f)
   assert(l.n == 0)
 end
 
@@ -83,7 +83,7 @@ repeat
   g = {}
   f(g).x = f(2) and f(10)+f(9)
   assert(g.x == f(19))
-  function g(x) if not x then return 3 end return x('a', 'x') end   -- tail call
+  function g(x) if not x then return 3 end return (x('a', 'x')) end
   assert(g(f) == 'a')
 until 1
 
@@ -133,12 +133,14 @@ a=1]], {1,2,4,7})
 test([[for i=1,3 do
   a=i
 end
-]], {1,2,2,2,3})
+]], {1,2,1,2,1,2,1,3})
 
 test([[for i,v in {'a','b'} do
   a=i..v
 end
 ]], {1,2,1,2,1,3})
+
+test([[for i=1,4 do a=1 end]], {1,1,1,1,1})
 
 
 
@@ -147,7 +149,7 @@ print'+'
 a = {}
 setcallhook(function (e)
   collectgarbage()   -- force GC during a hook
-  assert(({[-1]=1, [167]=1, [182]=1, [197]=1})[getinfo(2).currentline])
+  assert(getinfo(2, "l").currentline == -1)  -- no line info in call hooks
   if e == "call" then
     local f = getinfo(2, "f").func
     a[f] = 1
@@ -212,8 +214,8 @@ g()
 assert(a[f] and a[g] and a[assert] and a[getlocal] and not a[print])
  
 
-setcallhook(); setlinehook()
-assert(setcallhook() == nil and setlinehook() == nil)
+setcallhook(nil); setlinehook()
+assert(setcallhook() == nil and setlinehook(nil) == nil)
 
 
 -- testando pegar argumentos de funcao (locais existentes no inicio da funcao)
@@ -221,7 +223,8 @@ assert(setcallhook() == nil and setlinehook() == nil)
 X = nil
 a = {}
 function a:f (a, b, ...) local c = 13 end
-setcallhook(function ()
+setcallhook(function (e)
+  if e == 'return' then return end  -- so' quer `entradas'
   dostring("XX = 12")  -- testa dostring dentro de hooks
   -- testa erros dentro de hook (chamando _ERRORMESSAGE)
   local olda = _ALERT; _ALERT = function (s) end;

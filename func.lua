@@ -8,18 +8,6 @@ assert(type(true) == 'boolean' and type(false) == 'boolean')
 assert(type(nil) == 'nil' and type(-3) == 'number' and type'x' == 'string' and
        type{} == 'table' and type(type) == 'function')
 
-assert(type(0, 'number') == true and type(0, 'string') == false)
-assert(type(nil, 'nil') and
-       type(-3, 'number') and
-       type('x', 'string') and
-       type({}, 'table') and
-       type(type, 'function') and
-       type(true, 'boolean'))
-assert(not type(nil, 'boolean') and
-       not type(false, 'nil') and
-       not type(1, ''))
-
-
 assert(type(assert) == type(print))
 f = nil
 function f (x) return a:x (x) end

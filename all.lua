@@ -31,7 +31,7 @@ end
 
 assert(dofile(_WD..'main.lua'))
 
-if type(T, 'table') and false then   -- debug facilities available?
+if type(T) == 'table' and false then   -- debug facilities available?
   local mt = {}
   local new = function ()
     local u = T.newuserdata(0)

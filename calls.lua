@@ -12,6 +12,20 @@ f = nil
 function f (x) return a:x (x) end
 assert(type(f) == 'function')
 
+
+-- testa recursao de funcoes locais
+fact = nil
+do
+  local res = 1
+  local function fact (n)
+    if n==0 then return res
+    else return n*fact(n-1)
+    end
+  end
+  assert(fact(5) == 120)
+end
+assert(fact == nil)
+
 -- testa declaracoes
 a = {i = 10}
 self = 20
@@ -120,8 +134,7 @@ assert(a==1 and x==nil)
 
 -- operador de ponto fixo
 Y = function (le)
-      local a
-      function a (f)
+      local function a (f)
         return %le(function (x) return %f(%f)(x) end)
       end
       return a(a)
@@ -141,8 +154,8 @@ fat = Y(F)
 
 assert(fat(0) == 1 and fat(4) == 24 and Y(F)(5)==5*Y(F)(4))
 
-local g = function (z)
-  local f = function (a,b,c,d)
+local function g (z)
+  local function f (a,b,c,d)
     return function (x,y) return a+b+c+d+a+x+y+z end
   end
   return f(z,z+1,z+2,z+3)

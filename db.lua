@@ -10,7 +10,7 @@ end
 
 function test (s, l)
   collectgarbage()   -- avoid gc during trace
-  local f = function (line)
+  local function f (line)
     assert(tremove(%l, 1) == line, "wrong trace!!")
   end
   setlinehook(f); loadstring(s)(); assert(setlinehook() == f)
@@ -30,7 +30,7 @@ end
 
 -- testa truncagem de nomes de arquivos e strings
 a = "function f () end"
-local dostring = function (s, x) return loadstring(s, x)() end
+local function dostring (s, x) return loadstring(s, x)() end
 dostring(a)
 assert(getinfo(f).short_src == format('[string "%s"]', a))
 dostring(a..format("; %s\n=1", strrep('p', 400)))

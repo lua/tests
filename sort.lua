@@ -14,8 +14,8 @@ a = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
 sort(a)
 check(a)
 
-
 limit = 30000
+if _soft then limit = 5000 end
 
 a = {}
 for i=1,limit do

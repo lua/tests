@@ -50,6 +50,7 @@ assert(writeto())
 assert(rename(otherfile, file))
 assert(readfrom(file))
 assert(read(5, '*l') == '"álo"')
+assert(read(0) == "")
 assert(read() == "second line")
 x = seek(_INPUT)
 assert(read() == "third line ")
@@ -65,12 +66,12 @@ else
 end
 assert(seek(_INPUT, "cur", -strlen"fourth_line"))
 assert(read() == "fourth_line")
-assert(read() == "")
+assert(read() == "")  -- empty line
 assert(read('*n') == 3450)
 assert(read(1) == '\n')
-assert(read(1) == nil)
-assert(read() == nil)
-assert(read('*a') == '')
+assert(read(1) == nil)  -- end of file
+assert(read() == nil)  -- end of file
+assert(read('*a') == '')  -- end of file (OK for `*a')
 collectgarbage()
 print('+')
 assert(readfrom())
@@ -99,6 +100,7 @@ assert(readfrom(file))
 assert(read() == "alo")
 assert(read('*w') == t)
 assert(read('*a') == ' ;end of file\n')
+assert(read(0) == "")
 assert(readfrom())
 
 assert(remove(file))
@@ -185,6 +187,26 @@ _INPUT = f1; readfrom()
 _INPUT = f2; readfrom()
 
 assert(remove(file) and remove(otherfile))
+
+
+-- teste de arquivos grandes (> BUFSIZ)
+assert(writeto(file))
+for i=1,5001 do write('0123456789123') end
+writeto()
+assert(readfrom(file))
+x = read('*a')
+seek(_INPUT, 'set', 0)
+y = read(30001)..read(1005)..read(0)..read(1)..read(100003)
+assert(x == y and strlen(x) == 5001*13)
+seek(_INPUT, 'set', 0)
+y = read('*w')  -- huge word
+assert(x == y)
+seek(_INPUT, 'set', 0)
+y = read()  -- huge line
+assert(x == y)
+readfrom()
+assert(remove(file))
+x = nil; y = nil
 
 meses = { 'janeiro', 'fevereiro', 'março', 'abril',
 'maio', 'junho', 'julho', 'agosto',

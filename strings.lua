@@ -93,6 +93,9 @@ assert(format('"-%20s.20s"', strrep("%", 2000)) ==
 assert(format("-%2$s-%1$2d-", 2, "alo") == "-alo- 2-")
 assert(format("-%1$s-%1$2d-", 2, "alo") == "-2- 2-")
 
+-- longest number that can be formated
+assert(strlen(format('%99.99f', -1e308)) >= 100)
+
 assert(dostring("a = 1\n--comentário sem EOL no final"))
 
 

@@ -82,7 +82,7 @@ i = 1
 repeat
   write("{", sin(i), ", ", cos(i), ", ", i/3, "},\n")
   i=i+1
-until i >= 10000
+until i > 1000
 write("}")
 writeto()
 assert(readfrom(f))
@@ -91,11 +91,11 @@ assert(readfrom())
 assert(remove(f))
 
 assert(eq(a[300][1], sin(300)))
-assert(eq(a[3000][1], sin(3000)))
+assert(eq(a[600][1], sin(600)))
 assert(eq(a[500][2], cos(500)))
-assert(eq(a[5000][2], cos(5000)))
+assert(eq(a[800][2], cos(800)))
 assert(eq(a[200][3], 200/3))
-assert(eq(a[2000][3], 2000/3, 0.001))
+assert(eq(a[1000][3], 1000/3, 0.001))
 print('+')
 
 assert(dofile(_WD.."checktable.lua"), "cannot load checktable.lua");

@@ -8,8 +8,8 @@ do
 local a=1
 end
 
-
 function test (s, l)
+  collectgarbage()   -- avoid gc during trace
   local f = function (line)
     if tremove(%l, 1) ~= line then print("wrong trace!!"); exit(1) end
   end
@@ -20,10 +20,11 @@ end
 
 do
   local a = getinfo(print)
-  assert(a.name == "print" and a.what == "C" and a.namewhat == "global")
+  assert(a.name == "print" and a.what == "C" and a.namewhat == "global"
+         and a.short_src == "C")
   local b = getinfo(test, "Sf")
-  assert(b.name == nil and b.what == "Lua" and b.linedefined == 12 and
-         b.func == test)
+  assert(b.name == nil and b.what == "Lua" and b.linedefined == 11 and
+         b.func == test and strfind(b.short_src, "^file "))
 end
 
 repeat

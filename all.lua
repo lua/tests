@@ -7,8 +7,8 @@ _WD = wd or ""
 assert(setlocale"C")
 
 local showmem = function ()
-  if %totalmem then
-    local a,b,c = %totalmem()
+  if %T then
+    local a,b,c = %T.totalmem()
     %print(%format("\n ---- memoria total: %d, maxima: %d,  blocos: %d\n",
                     a, c, b))
   end

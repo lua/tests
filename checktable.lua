@@ -1,20 +1,20 @@
 
-if querytab == nil then
+if T == nil then
   stat = function () print"`querytab' nao ativo" end
   return
 end
 
 
 function checktable (t)
-  local size, ff = querytab(t)
+  local size, ff = T.querytab(t)
   local l = {}
   local i = 0
   while i<size do
-    local key,val,next = querytab(t, i)
+    local key,val,next = T.querytab(t, i)
     if not key then
       assert(l[i] == nil and val==nil and next==nil)
     else
-      local mp = hash(key, t)
+      local mp = T.hash(key, t)
       assert(t[key] == val)
       if l[i] then
         assert(l[i] == mp)
@@ -26,7 +26,7 @@ function checktable (t)
           assert(size > next and next > ff)
           if l[next] then assert(l[next] == mp) else l[next] = mp end
           tinsert(l[mp], next)
-          key,val,next = querytab(t, next)
+          key,val,next = T.querytab(t, next)
           assert(key)
         end
       end

@@ -68,7 +68,7 @@ end]], "global `insert'"))
 i = 0
 function y () i=i+1; y() end
 
-local stackmsg = "stack overflow; possible recursion loop"
+local stackmsg = "stack overflow"
 assert(doit('y()') == stackmsg)
 assert(doit('y()') == stackmsg)
 assert(doit('y()') == stackmsg)

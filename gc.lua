@@ -76,24 +76,27 @@ settagmethod(tag(nil), 'gc', oldtm)
 a = {}
 -- fill a with `collectable' indices
 for i=1,15 do a[{}] = i end
+b = {}
+for k,v in a do b[k]=v end
 -- remove all indices and collect them
-for n,_ in a do
+for n,_ in b do
   a[n] = nil
   assert(type(n) == 'table' and next(n) == nil)
   collectgarbage()
 end
+b = nil
 collectgarbage()
 for n,_ in a do error'cannot be here' end
 for i=1,15 do a[i] = i end
 for i=1,15 do assert(a[i] == i) end
 
-
--- test deep structures
-local a = {}
-for i = 1,200000 do
-  a = {next = a}
+if not _soft then
+  print("deep structures")
+  local a = {}
+  for i = 1,200000 do
+    a = {next = a}
+  end
+  collectgarbage()
 end
-collectgarbage()
-
 
 print('OK')

@@ -7,7 +7,7 @@ assert(tag(sin) == tag(read))
 assert(type(function () end) == 'function')
 assert(type(function () local a = %print end) == 'function')
 
-for i=1,400 do newtag() end
+for i=1,100 do newtag() end
 
 t1 = settag({5,6,"noite"}, newtag())
 tt = tag(t1)

@@ -1,3 +1,5 @@
+if _soft then return 10 end
+
 print "testando programas longos (>64k)"
 
 _WD = _WD or ""

@@ -42,16 +42,16 @@ local a
 local p = 4
 for i=2,31 do
   for j=-3,3 do
-    assert(dostring(format([[local a=%d;a=a+
-                                            %u;
+    assert(dostring(format([[local a=%s;a=a+
+                                            %s;
                              assert(a
-                                      ==2^%d)]], j, p-j, i)))
-    assert(dostring(format([[local a=%d;
-                             a=a-%u;
-                             assert(a==-2^%d)]], -j, p-j, i)))
-    assert(dostring(format([[local a,b=0,%d;
-                             a=b-%u;
-                             assert(a==-2^%d)]], -j, p-j, i)))
+                                      ==2^%s)]], j, p-j, i)))
+    assert(dostring(format([[local a=%s;
+                             a=a-%s;
+                             assert(a==-2^%s)]], -j, p-j, i)))
+    assert(dostring(format([[local a,b=0,%s;
+                             a=b-%s;
+                             assert(a==-2^%s)]], -j, p-j, i)))
   end
   p =2*p
 end

@@ -105,11 +105,15 @@ do   -- remove those 10000 new global variables
   end
 end
 
-for n,v in globals() do
-  if tag(v) ~= tag(print) and not strfind(n, "^[%u_]") then
-    setglobal(n, nil);
+do
+  local a = {}
+  for n,v in globals() do a[n]=v end
+  for n,v in a do
+    if tag(v) ~= tag(print) and not strfind(n, "^[%u_]") then
+      setglobal(n, nil);
+    end
+    collectgarbage()
   end
-  collectgarbage()
 end
 
 do

@@ -4,13 +4,17 @@ if T then
 -- testes de tamanhos
 
 function mp2 (n)   -- minimum power of 2 >= n
-  return 2^ceil(log(n)/log(2))
+  local mp = 2^ceil(log(n)/log(2))
+  assert(mp/2 < n and n <= mp)
+  return mp
 end
   
-function check (t, na, nh, p)
+function check (t, na, nh)
   local a, h = T.querytab(t)
-  if p then print(na, nh, a, h) end
-  assert(a == na and (nh == -1 or h == nh))
+  if a ~= na or h ~= nh then
+    print(na, nh, a, h)
+    assert(nil)
+  end
 end
 
 -- teste de tamanho de construtores
@@ -29,22 +33,26 @@ check({}, 0, 1)
 print'+'
 
 -- teste de tamanho com construcao dinamica
-for i = 4,100 do
+local lim = 100
+local a = {}; a[2] = 1; check(a, 2, 1)
+a = {}; a[0] = 1; check(a, 0, 2); a[2] = 1; check(a, 2, 2)
+a = {}; a[0] = 1; a[1] = 1; check(a, 1, 2)
+for i = 1,lim do
   local a = {}
   local p = mp2(i)
   for j=1,i do a[j] = 1 end
   check(a, p, 1)
 end
 
-local a = {}
+a = {}
 for i=1,16 do a[i] = i end
 check(a, 16, 1)
 for i=1,10 do a[i] = nil end
 for i=30,40 do a[i] = nil end   -- force a rehash
 check(a, 0, 8)
-a[1] = 1
+a[10] = 1
 for i=30,40 do a[i] = nil end   -- force a rehash
-check(a, 0, 16)
+check(a, 0, 8)
 for i=1,13 do a[i] = nil end
 for i=30,50 do a[i] = nil end   -- force a rehash
 check(a, 0, 4)
@@ -54,7 +62,7 @@ for i=1,2 do a[i] = 1 end
 check(a, 2, 1)
 
 -- reverse filling
-for i=10,200 do
+for i=1,lim do
   local a = {}
   for i=i,1,-1 do a[i] = i end   -- fill in reverse
   check(a, mp2(i), 1)

@@ -92,16 +92,16 @@ while i<10 do
 end
 
 i = 0
-Max = 0
+Max = -200
 Min = 200
 repeat
-  local t = random(10,20)
+  local t = random(-10,0)
   Max = max(Max, t)
   Min = min(Min, t)
   i=i+1
-  flag = (Max == 20 and Min == 10)
+  flag = (Max == 0 and Min == -10)
 until flag or i>10000
-assert(10 <= Min and Max<=20)
+assert(-10 <= Min and Max<=0)
 assert(flag);
 
 print('OK')

@@ -40,23 +40,27 @@ assert(B.g == 19)
 
 -- teste de closure com variavel de controle do for
 a = {}
-for i=1,2 do
+for i=1,10 do
   a[i] = {set = function(x) i=x end, get = function () return i end}
+  if i == 3 then break end
 end
+assert(a[4] == nil)
 a[1].set(10)
-assert(a[2].get() == 10)
+assert(a[2].get() == 2)
 a[2].set('a')
-assert(a[1].get() == 'a')
+assert(a[3].get() == 3)
+assert(a[2].get() == 'a')
 
 a = {}
 for i, k in {'a', 'b'} do
   a[i] = {set = function(x, y) i=x; k=y end,
           get = function () return i, k end}
+  if i == 2 then break end
 end
-local r,s = a[2].get()
-assert(r == nil and s == nil)
 a[1].set(10, 20)
-r,s = a[2].get()
+local r,s = a[2].get()
+assert(r == 2 and s == 'b')
+r,s = a[1].get()
 assert(r == 10 and s == 20)
 a[2].set('a', 'b')
 r,s = a[2].get()

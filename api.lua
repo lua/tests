@@ -144,7 +144,7 @@ collectgarbage()
 assert(type(testC("getglobal r5, a; getref r5, r5; pushreg r5")) == 'table')
 
 
--- colect in cl the 'val' of all collected tables
+-- colect in cl the `val' of all collected tables
 tt = newtag()
 cl = {n=0}
 function f(x)
@@ -352,6 +352,11 @@ print'+'
 
 
 -- testando tag methods
+testC([[getparam r1, 1; pushreg r1;
+       getparam r2, 2;
+       settagmethod r2, gc
+]], nil, tt)   -- reset from previous tests
+
 var = {var=12}; settag(var, tt);
 settagmethod(tt, "getglobal", function (n, v) return sin(v[n]) end)
 a,b,c,d = testC[[

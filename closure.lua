@@ -71,4 +71,18 @@ call(f, {4}, 'x');
 assert(b('get') == 'xuxu')
 b('set', 10); assert(b('get') == 14)
 
+
+local w
+-- teste de closure com varios niveis
+function f(x)
+  return function (y)
+    return function (z) return w+x+y+z end
+  end
+end
+
+y = f(10)
+w = 1.345
+assert(y(20)(30) == 60+w)
+
+
 print'OK'

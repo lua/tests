@@ -66,19 +66,18 @@ assert(a == 120 and b == 3)
 print('+')
 
 function err_on_n (n)
-  if n==0 then error(); assert(nil);
-  else err_on_n (n-1); assert(nil);
+  if n==0 then error(); exit(1);
+  else err_on_n (n-1); exit(1);
   end
 end
 
 do
-  local assert, dostring = assert, dostring
   function dummy (n)
     if n > 0 then
-      assert(dostring("err_on_n(" .. n .. ")") == nil)
+      assert(not pcall(nil, err_on_n, n))
       dummy(n-1)
     end
-end
+  end
 end
 
 dummy(10)

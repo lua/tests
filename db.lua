@@ -30,6 +30,7 @@ end
 
 -- testa truncagem de nomes de arquivos e strings
 a = "function f () end"
+local dostring = function (s, x) return loadstring(s, x)() end
 dostring(a)
 assert(getinfo(f).short_src == format('string "%s"', a))
 dostring(a..format("; %s\n=1", strrep('p', 400)))
@@ -228,7 +229,7 @@ setcallhook(function (e)
   dostring("XX = 12")  -- testa dostring dentro de hooks
   -- testa erros dentro de hook (chamando _ERRORMESSAGE)
   local olda = _ALERT; _ALERT = function (s) end;
-  call(dostring, {"a='joao'+1"}, 'x')
+  pcall(nil, loadstring("a='joao'+1"))
   _ALERT = olda
   setcallhook()  -- hook e' chamado uma unica vez
   setlinehook(function (l) 

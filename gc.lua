@@ -34,7 +34,7 @@ a = {}
 print('funcoes')
 function a:test ()
   while contCreate <= limit do
-    dostring(format("function temp(a) return 'a%d' end", contCreate))
+    loadstring(format("function temp(a) return 'a%d' end", contCreate))()
     assert(temp() == format('a%d', contCreate))
     contCreate = contCreate+1
   end
@@ -58,17 +58,13 @@ do
 end
 ]]
 do
-  local old = _ERRORMESSAGE
-  local a = {msg=nil}
-  _ERRORMESSAGE = function (s) %a.msg = s end
   local step = 1
   if _soft then step = 13 end
   for i=1, strlen(prog), step do
     for j=i, strlen(prog), step do
-      dostring(strsub(prog, i, j))
+      pcall(nil, loadstring(strsub(prog, i, j)))
     end
   end
-  _ERRORMESSAGE = old
 end
 
 print('strings longos')

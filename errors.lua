@@ -3,10 +3,10 @@ print("testando erros")
 local old = _ERRORMESSAGE
 
 function doit (s)
-  local msg = nil
-  call(dostring, {s}, '', function (s) msg = s end)
-  assert(%old == _ERRORMESSAGE and %old~=nil)
-  return msg;
+  local f, msg = loadstring(s)
+  if f == nil then return msg end
+  local cond, msg = pcall(nil, f)
+  return (not cond) and msg
 end
 
 
@@ -53,7 +53,7 @@ aaa = nil
 checkmessage("aaa.bbb:ddd(9)", "global `aaa'")
 checkmessage("local aaa={bbb=1}; aaa.bbb:ddd(9)", "field `bbb'")
 checkmessage("local aaa={bbb={}}; aaa.bbb:ddd(9)", "method `ddd'")
-assert(doit"local aaa={bbb={ddd=next}}; aaa.bbb:ddd(nil)" == nil)
+assert(not doit"local aaa={bbb={ddd=next}}; aaa.bbb:ddd(nil)")
 
 checkmessage("local aaa='a'; x=aaa+b", "local `aaa'")
 checkmessage("aaa={}; x=3/aaa", "global `aaa'")
@@ -93,7 +93,7 @@ print'+'
 
 function lineerror (s)
   local line
-  call(dostring, {s}, '', function (s) line = getinfo(2, "l").currentline end)
+  pcall(function (s) line = getinfo(2, "l").currentline end, loadstring(s))
   return line
 end
 
@@ -103,23 +103,33 @@ assert(lineerror"\n\n for k,v in \n 3 \n do \n print(k) \n end" == 4)
 
 lineerror = nil
 
-
-i = 0
-function y () i=i+1; y() end
+global C
+C = 0
+function y () C=C+1; y() end
 
 local stackmsg = "stack overflow"
 assert(doit('y()') == stackmsg)
 assert(doit('y()') == stackmsg)
 assert(doit('y()') == stackmsg)
+-- teste de linhas em erro
+C = 0
+pcall(function (s)
+  if s ~= stackmsg then io.stderr:write("exiting!!\n"); os.exit(1) end
+  local l = getinfo(2, "l").currentline
+  assert(getinfo(1, "l").currentline == l+11)
+  for i=1,C-1 do assert(getinfo(2+i, "l").currentline == l) end
+  assert(getinfo(2+C, "l").currentline == -1)  -- `call'
+  assert(getinfo(3+C, "l").currentline == l+8)  -- this file
+end, y)
 print('+')
 checkmessage(("syntax error"), "syntax error")
 
-doit('i = dostring("a=9+"); a=3')
+doit('i = loadstring("a=9+"); a=3')
 assert(a==3 and i == nil)
 print('+')
 
 do
-  local a,b = call(dostring, {"a='x'+1"}, 'x', error)
+  local a,b = pcall(error, function () a='x'+1 end)
   assert(a == nil and b == "error in error handling")
 end
 

@@ -81,7 +81,7 @@ for i=1,3 do
   b = nil
 end
 
-call(f, {4}, 'x');
+pcall(nil, f, 4);
 assert(b('get') == 'xuxu')
 b('set', 10); assert(b('get') == 14)
 
@@ -169,15 +169,16 @@ function foo ()
   assert(getinfo(1).currentline == getinfo(foo).linedefined + 1)
   assert(getinfo(2).currentline == getinfo(goo).linedefined)
   co.yield(3)
-  error('a')
+  error(foo)
 end
 
 function goo() foo() end
 x = co.create(goo)
 assert(x() == 3)
 local msg = {}
-call(x, {}, "x", function (_msg) tinsert(msg, _msg) end)
-assert(msg[1] == 'a' and msg.n == 2)
+local a,b = pcall(function (_msg) tinsert(msg, _msg); return msg end, x)
+assert(not a and b == msg)
+assert(msg[1] == foo and msg.n == 2)
 
 
 -- co-routines x for loop

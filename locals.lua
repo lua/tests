@@ -53,21 +53,21 @@ assert(type(f) == 'function')
 do
   local f = {}
   local _G = _G
-  for i=1,10 do f[i] = function (x) A=A+1; return A, _G.getenvtable(x) end end
+  for i=1,10 do f[i] = function (x) A=A+1; return A, _G.getfenv(x) end end
   A=10; assert(f[1]() == 11)
-  for i=1,10 do setenvtable(f[i], {A=i}) end
+  for i=1,10 do setfenv(f[i], {A=i}) end
   assert(f[3]() == 4 and A == 11)
   local a,b = f[8](1)
   assert(b.A == 9)
   a,b = f[8](0)
   assert(b.A == 11)   -- `real' global
-  local function f () setenvtable(2, {a='10'}) end
-  local function g () f(); _G.assert(_G.getenvtable(1).a == '10') end
-  g(); assert(getenvtable(g).a == '10')
-  getenvtable(g).__globals = false
-  assert(getenvtable(g) == false)
+  local function f () setfenv(2, {a='10'}) end
+  local function g () f(); _G.assert(_G.getfenv(1).a == '10') end
+  g(); assert(getfenv(g).a == '10')
+  getfenv(g).__globals = false
+  assert(getfenv(g) == false)
   -- cannot change a protected global table
-  assert(pcall(setenvtable, g, {}) == false)
+  assert(pcall(setfenv, g, {}) == false)
 end
 
 -- test for global table of loaded chunks
@@ -75,10 +75,10 @@ local function foo (s)
   return loadstring(s)
 end
 
-assert(getenvtable(foo("")) == _G)
+assert(getfenv(foo("")) == _G)
 local a = {loadstring = loadstring}
-setenvtable(foo, a)
-assert(getenvtable(foo("")) == a)
+setfenv(foo, a)
+assert(getfenv(foo("")) == a)
 
 
 -- testando limites para instrucoes especiais

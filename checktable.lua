@@ -28,7 +28,7 @@ function checktable (t)
         while next do
           assert(ff < next and next < hsize)
           if l[next] then assert(l[next] == mp) else l[next] = mp end
-          tinsert(l[mp], next)
+          table.insert(l[mp], next)
           key,val,next = T.querytab(t, next)
           assert(key)
         end
@@ -46,7 +46,7 @@ function mostra (t)
   print'------'
   for i=0,asize-1 do
     local _, v = T.querytab(t, i)
-    print(format("[%d] -", i), v)
+    print(string.format("[%d] -", i), v)
   end
   print'------'
   for i=0,hsize-1 do
@@ -68,11 +68,11 @@ function stat (t)
       maxlist[n] = maxlist[n]+1
     end
   end
-  print(format("hsize=%d  elements=%d  load=%.2f  med.len=%.2f (asize=%d)",
+  print(string.format("hsize=%d  elements=%d  load=%.2f  med.len=%.2f (asize=%d)",
           t.hsize, nelem, nelem/t.hsize, nelem/nlist, t.asize))
-  for i=1,getn(maxlist) do
+  for i=1,table.getn(maxlist) do
     n = maxlist[i] or 0
-    print(format("%5d %10d %.2f%%", i, n, n*100/nlist))
+    print(string.format("%5d %10d %.2f%%", i, n, n*100/nlist))
   end
 end
 

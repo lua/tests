@@ -87,12 +87,20 @@ a = 2
 RUN("lua _PROMPT=%s -i < %s > %s", prompt, prog, out)
 checkout(strrep(prompt, 3).."\n")
 
-prepfile[[ -- 
-function f(x) 
-  return x+1 
-  -- \\
+s = [[ -- 
+function f ( x ) 
+  local a = [[
+xuxu
+]]
+  local b = "\
+xuxu\n"
+  return x + 1 
+  --\\
 end
-print(f(10))]]
+assert( a == b )
+print( f( 10 ) ) ]]
+s = gsub(s, ' ', '\n\n')
+prepfile(s)
 RUN("lua _PROMPT= _PROMPT2= -i < %s > %s", prog, out)
 checkout("11\n\n")
   

@@ -84,17 +84,36 @@ print('+')
 
 -- testando multiplos retornos
 
-function f(t, i)
+function unpack (t, i)
   i = i or 1
-  local n = getn(t)
-  if (i <= n) then
-    return t[i], f(t, i+1)
+  if (i <= getn(t)) then
+    return t[i], unpack(t, i+1)
   end
 end
 
-a,b,c,d = f{1,2,3}
-assert(a==1 and b==2 and c==3 and d==nil)
+function pack (...) return arg end
 
+function equaltab (t1, t2)
+  assert(getn(t1) == getn(t2))
+  local i, n = 1, getn(t1)
+  while i<=n do
+    assert(t1[i] == t2[i])
+    i = i+1
+  end
+end
+
+function f() return 1,2,30,4 end
+function ret2 (a,b) return a,b end
+
+a,b,c,d = unpack{1,2,3}
+assert(a==1 and b==2 and c==3 and d==nil)
+a = {1,2,3,4,nil,10,'alo',nil,assert}
+equaltab(pack(unpack(a)), a)
+equaltab(pack(unpack(a), -1), {1,-1})
+a,b,c,d = ret2(f()), ret2(f())
+assert(a==1, b==1, c==2, d==30)
+a,b,c,d = unpack(pack(ret2(f()), ret2(f())))
+assert(a==1, b==1, c==2, d==30)
 
 print('OK')
 return deep

@@ -46,10 +46,13 @@ assert(rawgettable(t2, 'x') == t3[1])
 assert(t2.x == 10)
 print('+')
 
-function f(t, p1) return rawgettable(t, p1) end
+function f(t, ...) return t, arg end
 settagmethod(tt1, 'function', f)
 
-assert(t1(3) == 'noite')
+do
+  local a,b = t1(next({a=1}, nil))
+  assert(a==t1 and b.n==2 and b[1]=='a' and b[2]==1)
+end
 
 t2.x = 'alo'
 function f (s1, s2)

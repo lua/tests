@@ -3,7 +3,7 @@ prog = tmpname()
 
 function criaprog(s)
   assert(writeto(prog))
-  assert(write(gsub(s, " %$", "$")))
+  assert(write(gsub(s, " %$", "$"), ''))
   assert(writeto())
 end
 

@@ -3,8 +3,8 @@ print "testando LONGARGs"
 a = nil
 
 while a ~= 20 do
-a = 
-nil or if not a then (b={
+if not a then
+b = nil or {
   a10 = 5,
   a11 = 5.5,
   a12 = 6,
@@ -70007,7 +70007,7 @@ nil or if not a then (b={
   b50007 = 25003.5,
   b50008 = 25004,
   b50009 = 25004.5,
-}) else 20 end or 1
+}; a=b else a = 20 end
 end
 
 assert(b.a50008 == 25004 and b["a11"] == 5.5)
@@ -70016,8 +70016,10 @@ assert(b["b"..30024] == -4294967297)
 a = nil; b = nil
 print'+'
 
+function f(x) b=x end
+
 repeat
-a = if (b={
+a = f{
   "a10", 5,
   "a11", 5.5,
   "a12", 6,
@@ -120018,10 +120020,10 @@ a = if (b={
   "a50007", 25003.5,
   "a50008", 25004,
   "a50009", 25004.5,
-}) and 10 then 1 else 2 end
+} or 10
 until a and b
 
-assert(a==1)
+assert(a==10)
 assert(b[1] == "a10" and b[2] == 5 and b[getn(b)-1] == "a50009")
 
 
@@ -120029,7 +120031,7 @@ function xxxx (x) return %b[x] end
 
 assert(xxxx(3) == "a11")
 
-a = (b=nil)
+a = nil; b=nil
 xxxx = nil
 
 print"OK"

@@ -2,8 +2,8 @@ print('testando tags e tag methods')
 
 assert(tag(2) == tag(0) and tag{} == tag{})
 
-i = 0
-while (i=i+1)<=400 do newtag() end
+i = 1
+while i<=400 do newtag(); i=i+1 end
 
 t1 = settag({5,6,"noite"}, newtag())
 tt = tag(t1)

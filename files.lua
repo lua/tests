@@ -65,8 +65,8 @@ assert(readfrom())
 assert(remove(file))
 
 t = '0123456789'
-i=-1
-while (i=i+1)<12 do t = t..t end
+i=1
+while i<=12 do t = t..t; i=i+1 end
 l = strlen(t)
 assert(l == 10*2^12)
 

@@ -19,10 +19,11 @@ doit('i = dostring("a=9+"); a=3')
 assert(a==3 and i == nil)
 print('+')
 
-i = 0
-while (i=i+1)<10000 do
+i = 1
+while i<10000 do
   doit('a = ')
   doit('a = 4+nil')
+  i = i+1
 end
 
 print('OK')

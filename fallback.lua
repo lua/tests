@@ -57,10 +57,11 @@ end
 
 print('+')
 
-i = -1
+i = 0
 a = point{0,0}
-while (i=i+1) < 1000 do
+while i < 1000 do
   a = a+point{i/2, 0}
+  i = i+1
 end
 
 print('+')

@@ -315,7 +315,8 @@ n298 = 298.5, n299 = 299.5, j300 = 300} or 1
 until 1
 
 assert(a.n299 == 299.5)
-assert((xxx = 1) == 1 and xxx == 1)
+xxx = 1
+assert(xxx == 1)
 
 function a:findfield (f)
   local i,v = next(self, nil)

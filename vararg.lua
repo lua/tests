@@ -39,8 +39,8 @@ assert(t:f(1,4) == 3 and t:f(2) == 11)
 print('+')
 
 lim = 2400
-local i, a = 0, {}
-while (i=i+1) <= lim do a[i] = i+0.3 end
+local i, a = 1, {}
+while i <= lim do a[i] = i+0.3; i=i+1 end
 
 function f(...)
   assert(arg[1] == 1.3 and arg[lim] == lim+0.3 and not arg[lim+1])

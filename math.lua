@@ -84,10 +84,11 @@ until flag or i>10000
 assert(0 <= Min and Max<1)
 assert(flag);
 
-i=-1
-while (i=i+1)<10 do
+i=0
+while i<10 do
   local t = random(5)
   assert(1 <= t and t <= 5)
+  i = i+1
 end
 
 i = 0

@@ -6,7 +6,7 @@ local DIR="tmp/"
 
 local files = {"A.lua", "B.lua", "A.lc", "A", "L"}
 
-for _,n in nexti(files) do
+for _,n in ipairs(files) do
   io.output(DIR..n)
   io.write("NAME = '"..n.."'\n")
   io.close(io.output())
@@ -34,7 +34,7 @@ try('K', 'L')     -- default option
 
 
 
-for _,n in nexti(files) do
+for _,n in ipairs(files) do
   os.remove(DIR..n)
 end
 

@@ -2,7 +2,7 @@ print('testando meta-tabelas')
 
 X = 20; B = 30
 
-setglobals(1, setmetatable({}, {__index=_G}))
+setenvtable(1, setmetatable({}, {__index=_G}))
 
 collectgarbage()
 
@@ -286,12 +286,12 @@ assert(i == 3 and x[1] == 3 and x[3] == 5)
 
 
 assert(_G.X == 20)
-assert(_G == getglobals(0))
+assert(_G == getenvtable(0))
 
 print'+'
 
 local _g = _G
-setglobals(1, setmetatable({}, {__index=function (_,k) return _g[k] end}))
+setenvtable(1, setmetatable({}, {__index=function (_,k) return _g[k] end}))
 
 -- testando proxies
 assert(getmetatable(newproxy()) == nil)

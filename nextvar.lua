@@ -196,12 +196,12 @@ do   -- clear global table
 end
 
 local function foo ()
-  local getglobals, setglobals, assert, next =
-        getglobals, setglobals, assert, next
+  local getenvtable, setenvtable, assert, next =
+        getenvtable, setenvtable, assert, next
   local n = {gl1=3}
-  setglobals(foo, n)
-  assert(getglobals(foo) == getglobals(1))
-  assert(getglobals(foo) == n)
+  setenvtable(foo, n)
+  assert(getenvtable(foo) == getenvtable(1))
+  assert(getenvtable(foo) == n)
   assert(print == nil and gl1 == 3)
   gl1 = nil
   gl = 1

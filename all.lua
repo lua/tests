@@ -8,13 +8,11 @@ assert(setlocale"C")
 local showmem = function ()
   if totalmem then
     local a,b = totalmem()
-    print(format("\n\n ---- memoria total: %d,  blocos: %d\n\n", a, b))
+    print(format("\n ---- memoria total: %d,  blocos: %d\n", a, b))
   end
 end
 
 assert(dofile(_WD..'tracgc.lua'))
-
-
 showmem()
 assert(dofile(_WD..'gc.lua'))
 showmem()
@@ -58,7 +56,6 @@ showmem()
 assert(dofile(_WD..'gc.lua'))
 showmem()
 assert(dofile(_WD..'files.lua'))
-showmem()
 print("final OK !!!")
 showmem()
 
@@ -73,4 +70,3 @@ $end
 
 collectgarbage();showmem()
 
-showmem()

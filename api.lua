@@ -215,6 +215,8 @@ do
   local A = T.testC[[ pushnum 10; pushnum 20; pushcclosure 2; return 1]]
   t, b, c = A(X[[pushvalue $0; pushvalue $1; pushvalue $2; return 3]])
   assert(b == 10 and c == 20 and type(t) == 'table')
+  a, b = A(X[[tostring $3; tonumber $4; return 2]])
+  assert(a == nil and b == 0)
   a, b, c, d = A("pushnum 1; pushupvalues; pushnum 44; return 4")
   assert(a == 1 and b == 10 and c == 20 and d == 44)
   A(X[[pushnum 100; pushnum 200; replace $2; replace $1]])

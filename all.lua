@@ -2,7 +2,7 @@
 
 require "compat"
 
-
+math.randomseed(0)
 
 --[[
   example of a long [comment],

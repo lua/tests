@@ -140,7 +140,7 @@ assert(a*b == 200 and a+b == 30 and a-b == -10 and a/b == 0.5 and -b == -20)
 assert(a == '10' and b == '20')
 
 
-randomseed(date'%S')
+randomseed(0)
 
 local i = 0
 local Max = 0

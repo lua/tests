@@ -1,4 +1,4 @@
-print "testando closures"
+print "testando closures e co-rotinas"
 
 local A = 0
 function f(x)
@@ -83,6 +83,58 @@ end
 y = f(10)
 w = 1.345
 assert(y(20)(30) == 60+w)
+
+print'+'
+
+-- teste de co-rotinas
+
+function foo (a, ...)
+  for i=1,getn(arg) do
+    assert(yield(unpack(arg[i])) == nil)
+  end
+  return unpack(a)
+end
+
+local f = coroutine(foo, {1,2,3}, {}, {1}, {'a', 'b', 'c'})
+local a,b,c,d
+a,b,c,d = f()
+assert(a == nil)
+a,b,c,d = f()
+assert(a == 1 and b == nil)
+a,b,c,d = f()
+assert(a == 'a' and b == 'b' and c == 'c' and d == nil)
+a,b,c,d = f()
+assert(a == 1 and b == 2 and c == 3 and d == nil)
+
+
+-- sieve
+function gen (n)
+  return coroutine(function ()
+    for i=2,n do yield(i) end
+  end)
+end
+
+
+function filter (p, g)
+  return coroutine(function (g)
+    while 1 do
+      local n = g()
+      if n == nil then return end
+      if mod(n, p) ~= 0 then yield(n) end
+    end
+  end, g)
+end
+
+local x = gen(100)
+local a = {}
+while 1 do
+  local n = x()
+  if n == nil then break end
+  tinsert(a, n)
+  x = filter(n, x)
+end
+
+assert(a.n == 25 and a[a.n] == 97)
 
 
 print'OK'

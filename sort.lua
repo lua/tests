@@ -71,11 +71,11 @@ sort(a, function (x, y)
         end)
 
 
-tt = {lt = function (a,b) return a.val < b.val end}
+tt = {__lt = function (a,b) return a.val < b.val end}
 a = {}
 for i=1,10 do  a[i] = {val=random(100)}; metatable(a[i], tt); end
 sort(a)
-check(a, tt.lt)
+check(a, tt.__lt)
 check(a)
 
 print"OK"

@@ -2,7 +2,7 @@ print('testando meta-tabelas')
 
 X = 20; B = 30
 
-globals(metatable({_G = globals()}, {index=globals()}))
+globals(metatable({_G = globals()}, {__index=globals()}))
 
 X = X+10
 assert(X == 30 and _G.X == 20)
@@ -28,29 +28,29 @@ function f (t, i, e)
   return (p and p[i]+3), "dummy return"
 end
 
-t.index = f
+t.__index = f
 
 a.parent = {z=25, x=12, [4] = 24}
 assert(a[1] == 10 and a.z == 28 and a[4] == 27 and a.x == "10")
 
 
 function f(t, i, v) rawset(t, i, v-3) end
-t.settable = f
+t.__settable = f
 a[1] = 30; a.x = "101"; a[5] = 200
 assert(a[1] == 27 and a.x == 98 and a[5] == 197)
 
 
 local c = {}
-t.settable = c
+t.__settable = c
 a[1] = 10; a[2] = 20; a[3] = 90
 assert(c[1] == 10 and c[2] == 20 and c[3] == 90)
 
 
 do
   local a;
-  a = metatable({}, {index = metatable({},
-                     {index = metatable({},
-                     {index = function (_,n) return a[n-3]+4, "lixo" end})})})
+  a = metatable({}, {__index = metatable({},
+                     {__index = metatable({},
+                     {__index = function (_,n) return a[n-3]+4, "lixo" end})})})
   a[0] = 20
   for i=0,10 do
     assert(a[i*3] == 20 + i*4)
@@ -59,7 +59,7 @@ end
 
 
 function f (t, ...) return t, arg end
-t.call = f
+t.__call = f
 
 do
   local x,y = a(unpack{'a', 1})
@@ -73,12 +73,12 @@ local b = metatable({}, t)
 metatable(b,t)
 
 function f(...) cap = arg ; return arg[1] end
-t.add = f
-t.sub = f
-t.mul = f
-t.div = f
-t.unm = f
-t.pow = f
+t.__add = f
+t.__sub = f
+t.__mul = f
+t.__div = f
+t.__unm = f
+t.__pow = f
 
 assert(b+5 == b)
 assert(cap[1] == b and cap[2] == 5 and cap.n == 2)
@@ -97,7 +97,7 @@ assert(4^a == 4)
 assert(cap[1] == 4 and cap[2] == a and cap.n == 2)
 
 
-t.lt = function (a,b,c)
+t.__lt = function (a,b,c)
   assert(c == nil)
   if type(a) == 'table' then a = a.x end
   if type(b) == 'table' then b = b.x end
@@ -116,7 +116,7 @@ assert((Op(1)>=Op(1)) and not(Op(1)>=2) and (Op(2)>=Op(1)))
 assert((Op('a')>=Op('a')) and not('a'>=Op('b')) and (Op('b')>=Op('a')))
 
 
-t.concat = function (a,b,c)
+t.__concat = function (a,b,c)
   assert(c == nil)
   if type(a) == 'table' then a = a.val end
   if type(b) == 'table' then b = b.val end
@@ -143,9 +143,9 @@ assert(x.val == "0abcdefg")
 -- teste de multiplos niveis de calls
 local i
 local tt = {
-  call = function (t, ...)
+  __call = function (t, ...)
     i = i+1
-    if t.f then return call(t.f, arg)
+    if t.f then return t.f(unpack(arg))
     else return arg
     end
   end

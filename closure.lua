@@ -49,13 +49,34 @@ a[2].set('a')
 assert(a[1].get() == 'a')
 
 a = {}
-for i in {'a', 'b'} do
-  a[i] = {set = function(x) i=x end, get = function () return i end}
+for i, k in {'a', 'b'} do
+  a[i] = {set = function(x, y) i=x; k=y end,
+          get = function () return i, k end}
 end
-a[1].set(10)
-assert(a[2].get() == 10)
-a[2].set('a')
-assert(a[1].get() == 'a')
+local r,s = a[2].get()
+assert(r == nil and s == nil)
+a[1].set(10, 20)
+r,s = a[2].get()
+assert(r == 10 and s == 20)
+a[2].set('a', 'b')
+r,s = a[2].get()
+assert(r == "a" and s == "b")
+
+
+-- teste de closure com variavel de controle do for x break
+for i=1,3 do
+  f = function () return i end
+  break
+end
+assert(f() == 1)
+
+for k, v in {"a", "b"} do
+  f = function () return k, v end
+  break
+end
+assert(({f()})[1] == 1)
+assert(({f()})[2] == "a")
+
 
 -- teste de closure x break x return x erros
 
@@ -84,12 +105,6 @@ end
 pcall(f, 4);
 assert(b('get') == 'xuxu')
 b('set', 10); assert(b('get') == 14)
-
-for i=1,3 do
-  f = function () return i end
-  break
-end
-assert(f() == 1)
 
 
 local w

@@ -51,8 +51,10 @@ RUN("lua -l %s -l%s > %s", prog, otherprog, out)
 checkout("1\n2\n")
 
 local a = [[
-  assert(arg.n == 3 and arg[1] == 'a' and arg[2] == 'b' and arg[3] == 'c')
+  assert(table.getn(arg) == 3 and arg[1] == 'a' and
+         arg[2] == 'b' and arg[3] == 'c')
   assert(arg[-1] == '--' and arg[-2] == "-e " and arg[-3] == %s)
+  assert(arg[4] == nil and arg[-4] == nil)
 ]]
 a = format(a, progname)
 prepfile(a)

@@ -127,6 +127,11 @@ end
 
 print'+'
 
+assert(testC('p22 p33 q23', print, print) == 1)
+assert(testC('p22 p33 q23', 'alo', "alo") == 1)
+assert(testC('p22 p32 q23', {}) == 1)
+assert(testC('p22 p33 q23', {}, {}) == 0)
+assert(testC('p22 p33 q23', print, 34) == 0)
 
 t = testC
 f = testC("p12 o1 8 Ct2", 'p22 p33 o2 o3')

@@ -184,6 +184,7 @@ assert(f1['*a'] == 'def' and f2['*a'] == '345')
 _INPUT = f1; readfrom()
 _INPUT = f2; readfrom()
 
+assert(remove(file) and remove(otherfile))
 
 meses = { 'janeiro', 'fevereiro', 'março', 'abril',
 'maio', 'junho', 'julho', 'agosto',

@@ -210,5 +210,32 @@ rawset({}, "x", 1, 2)
 assert(sin(1,2) == sin(1))
 sort({10,9,8,4,19,23,0,0}, function (a,b) return a<b end, "extra arg")
 
+
+-- testa load generico
+x = "-- a comment\0\0\0\n  x = 10 + \n23; return '\0'"
+local i = 0
+function read1 ()
+  collectgarbage()
+  i=i+1
+  return string.sub(x, i, i)
+end
+
+a = assert(load(read1, "modname"))
+assert(a() == "\0" and x == 33)
+assert(debug.getinfo(a).source == "modname")
+
+x = string.dump(loadstring("x = 1; return x"))
+i = 0
+a = assert(load(read1))
+assert(a() == 1 and x == 1)
+
+x = "*a = 123"
+i = 0
+local a, b = load(read1)
+assert(not a and type(b) == "string" and i == 2)
+
+a, b = load(function () error("hhi") end)
+assert(not a and string.find(b, "hhi"))
+
 print('OK')
 return deep

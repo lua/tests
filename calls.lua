@@ -55,7 +55,7 @@ a = nil
 assert(a == 23 and (function (x) return x*2 end)(20) == 40)
 
 
-a = {}; lim = 20
+a = {}; lim = 2000
 for i=1, lim do a[i]=i end
 x = unpack(a)
 assert(x == 1)

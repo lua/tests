@@ -62,7 +62,7 @@ do
   if _soft then step = 13 end
   for i=1, strlen(prog), step do
     for j=i, strlen(prog), step do
-      pcall(nil, loadstring(strsub(prog, i, j)))
+      pcall(loadstring(strsub(prog, i, j)))
     end
   end
 end

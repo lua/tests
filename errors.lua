@@ -5,7 +5,7 @@ local old = _ERRORMESSAGE
 function doit (s)
   local f, msg = loadstring(s)
   if f == nil then return msg end
-  local cond, msg = pcall(nil, f)
+  local cond, msg = pcall(f)
   return (not cond) and msg
 end
 
@@ -38,12 +38,13 @@ assert(doit"assert(nil)")
 assert(doit"a=sin\n(3)")
 assert(doit("function a (... , ...) end"))
 assert(doit("function a (, ...) end"))
-checksyntax('%a()', "", "a", 1)
+--[[?? checksyntax('%a()', "", "a", 1)
 checksyntax([[
   local other, var = 1
   other = other or %var
 
 ]], "", "var", 2)
+]]
 
 checksyntax([[
   local a = {4
@@ -105,7 +106,7 @@ print'+'
 
 function lineerror (s)
   local line
-  pcall(function (s) line = getinfo(2, "l").currentline end, loadstring(s))
+  xpcall(function (s) line = getinfo(2, "l").currentline end, loadstring(s))
   return line
 end
 
@@ -126,7 +127,7 @@ assert(checkstackmessage(doit('y()')))
 assert(checkstackmessage(doit('y()')))
 -- teste de linhas em erro
 C = 0
-pcall(function (s)
+xpcall(function (s)
   if not checkstackmessage(s) then print(s)
     io.stderr:write("exiting!!\n"); os.exit(1)
   end
@@ -144,7 +145,7 @@ assert(a==3 and i == nil)
 print('+')
 
 do
-  local a,b = pcall(error, function () a='x'+1 end)
+  local a,b = xpcall(error, function () a='x'+1 end)
   assert(a == nil and b == "error in error handling")
 end
 

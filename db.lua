@@ -229,7 +229,7 @@ setcallhook(function (e)
   dostring("XX = 12")  -- testa dostring dentro de hooks
   -- testa erros dentro de hook (chamando _ERRORMESSAGE)
   local olda = _ALERT; _ALERT = function (s) end;
-  pcall(nil, loadstring("a='joao'+1"))
+  pcall(loadstring("a='joao'+1"))
   _ALERT = olda
   setcallhook()  -- hook e' chamado uma unica vez
   setlinehook(function (l) 

@@ -413,7 +413,7 @@ do   -- teste de erro durante coleta de lixo
   end
   _G.A = 0
   a = 0
-  pcall(function (s) a=a+1;collectgarbage() end, collectgarbage)
+  xpcall(function (s) a=a+1;collectgarbage() end, collectgarbage)
   assert(a == 10)  -- numero de erros
   assert(A == 10)  -- numero de coletas normais
 end
@@ -463,7 +463,7 @@ print('+')
 -------------------------------------------------------------------------
 collectgarbage()
 T.totalmem(T.totalmem()+5000)   -- seta limite `baixo' para memoria (+5k)
-assert(not pcall(nil, loadstring"local a={}; for i=1,100000 do a[i]=i end"))
+assert(not pcall(loadstring"local a={}; for i=1,100000 do a[i]=i end"))
 T.totalmem(32000000)  -- restaura limite alto (32M)
 
 
@@ -478,7 +478,7 @@ function testamem (s, f)
   while 1 do
     M = M+3   -- aumenta gradativamente a memoria
     T.totalmem(M)
-    a, b = pcall(nil, f)
+    a, b = pcall(f)
     if a and b then break end       -- para quando conseguir
     collectgarbage()
   end

@@ -74,7 +74,7 @@ end
 do
   function dummy (n)
     if n > 0 then
-      assert(not pcall(nil, err_on_n, n))
+      assert(not pcall(err_on_n, n))
       dummy(n-1)
     end
   end

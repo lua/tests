@@ -80,7 +80,7 @@ for i=1,3 do
   b = nil
 end
 
-pcall(nil, f, 4);
+pcall(f, 4);
 assert(b('get') == 'xuxu')
 b('set', 10); assert(b('get') == 14)
 
@@ -175,7 +175,7 @@ function goo() foo() end
 x = coroutine.create(goo)
 assert(x() == 3)
 local msg = {}
-local a,b = pcall(function (_msg) tinsert(msg, _msg); return msg end, x)
+local a,b = xpcall(function (_msg) tinsert(msg, _msg); return msg end, x)
 assert(not a and b == msg)
 assert(msg[1] == foo and msg.n == 2)
 

@@ -219,6 +219,23 @@ collectgarbage(0)
 assert(next(a) == nil)  -- finalized keys are removed in two cycles
 
 
+-- __gc x weak tables
+local u = newproxy(true)
+setmode(getmetatable(u), "v")
+getmetatable(u).__gc = function (o) os.exit(1) end  -- cannot happen
+collectgarbage()
+
+local u = newproxy(true)
+local m = getmetatable(u)
+m.x = {[{0}] = 1; [0] = {1}}; setmode(m.x, "kv");
+m.__gc = function (o)
+  assert(next(getmetatable(o).x) == nil)
+  m = 10
+end
+u, m = nil
+collectgarbage()
+assert(m==10)
+
 
 -- erro na coleta
 u = newproxy(true)

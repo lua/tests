@@ -7,6 +7,7 @@ local DIR="tmp/"
 local files = {["A.lua"] = "",
   ["B.lua"] = "assert(_REQUIREDNAME=='B');require 'A'",
   ["A.lc"] = "", ["A"] = "", ["L"] = "",
+  ["XXxX"] = "",
 }
 
 for n,c in pairs(files) do
@@ -20,7 +21,7 @@ end
 
 local oldpath = LUA_PATH
 
-LUA_PATH = string.gsub("D/?.lua;D/?.lc;D/?;D/L", "D/", DIR)
+LUA_PATH = string.gsub("D/?.lua;D/?.lc;D/?;D/??x?;D/L", "D/", DIR)
 
 local try = function (p, n, r)
   NAME = nil
@@ -47,6 +48,9 @@ AA = false
 try('K', 'L', false)     -- default option
 try('K', 'L', false)     -- default option (should reload it)
 assert(_REQUIREDNAME == nil)
+
+AA = "x"
+try("X", "XXxX", AA)
 
 
 for _,n in ipairs(files) do

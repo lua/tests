@@ -8,21 +8,25 @@ local function log2 (x) return math.log(x)/l2 end
 
 local function mp2 (n)   -- minimum power of 2 >= n
   local mp = 2^math.ceil(log2(n))
-  assert(mp/2 < n and n <= mp)
+  assert(n == 0 or (mp/2 < n and n <= mp))
   return mp
 end
 
-local function fb (x)   -- value of n represented as a `floating byte'
-  local n = x
-  local e = 1
-  while n >= 8 do
-    n = math.floor((n+1)/2)
-    e = 2*e
-  end
-  n = n*e
-  assert(n >= x and n <= x*1.25)
-  return n
+local function fb (n)
+  local r, nn = T.int2fb(n)
+  assert(r < 256)
+  return nn
 end
+
+-- test fb function
+local a = 1
+local lim = 2^30
+while a < lim do
+  local n = fb(a)
+  assert(a <= n and n <= a*1.125)
+  a = math.ceil(a*1.3)
+end
+
  
 local function check (t, na, nh)
   local a, h = T.querytab(t)
@@ -39,35 +43,45 @@ for i=1,lim do
   s = s..i..','
   local s = s
   for k=0,lim do 
-    check(loadstring(s..'}')(), fb(i), mp2(k+1))
+    check(loadstring(s..'}')(), fb(i), mp2(k))
     s = string.format('%sa%d=%d,', s, k, k)
   end
 end
+
+
+-- tests with unknown number of elements
+local a = {}
+for i=1,lim do a[i] = i end   -- build auxiliary table
+for k=0,lim do
+  local a = {unpack(a,1,k)}
+  check(a, k, 0)
+  a = {1,2,3,unpack(a,1,k)}
+  check(a, k+3, 0)
+end
+
 
 print'+'
 
 -- teste de tamanho com construcao dinamica
 local lim = 130
-local a = {}; a[2] = 1; check(a, 2, 1)
-a = {}; a[0] = 1; check(a, 0, 2); a[2] = 1; check(a, 2, 2)
-a = {}; a[0] = 1; a[1] = 1; check(a, 1, 2)
+local a = {}; a[2] = 1; check(a, 0, 1)
+a = {}; a[0] = 1; check(a, 0, 1); a[2] = 1; check(a, 0, 2)
+a = {}; a[0] = 1; a[1] = 1; check(a, 1, 1)
+a = {}
 for i = 1,lim do
-  local a = {}
-  local p = mp2(i)
-  for j=1,i do a[j] = 1 end
-  check(a, p, 1)
+  a[i] = 1
+  check(a, mp2(i), 0)
 end
 
-for i = 0,lim do
-  local a = {}
-  local p = mp2(i+1)
-  for j=1,i do a['a'..j] = 1 end
-  check(a, 0, p)
+a = {}
+for i = 1,lim do
+  a['a'..i] = 1
+  check(a, 0, mp2(i))
 end
 
 a = {}
 for i=1,16 do a[i] = i end
-check(a, 16, 1)
+check(a, 16, 0)
 for i=1,11 do a[i] = nil end
 for i=30,40 do a[i] = nil end   -- force a rehash (?)
 check(a, 0, 8)
@@ -82,17 +96,19 @@ check(a, 0, 4)
 for i=1,lim do
   local a = {}
   for i=i,1,-1 do a[i] = i end   -- fill in reverse
-  check(a, mp2(i), 1)
+  check(a, mp2(i), 0)
 end
 
 -- size tests for vararg
 lim = 35
 function foo (n, ...)
-  check(arg, n, 2)
+  local arg = {...}
+  check(arg, n, 0)
+  assert(select('#', ...) == n)
   arg[n+1] = true
-  check(arg, mp2(n+1), 2)
+  check(arg, mp2(n+1), 0)
   arg.x = true
-  check(arg, mp2(n+1), 4)
+  check(arg, mp2(n+1), 1)
 end
 local a = {}
 for i=1,lim do a[i] = true end
@@ -227,15 +243,43 @@ checknext{1,2,3,4,5,x=1,y=2,z=3}
 assert(table.getn{n=20} == 20)
 assert(table.getn{n=0} == 0)
 assert(table.getn{} == 0)
-a = {}; table.setn(a, 0); a[1] = 20; assert(table.getn(a) == 0 and a.n == nil)
+a = {}; assert(table.setn(a, 0) == a)
+a[1] = 20; assert(table.getn(a) == 0 and a.n == nil)
 table.setn(a, 13); assert(table.getn(a) == 13 and a.n == nil)
 a = {n=0}; table.setn(a, 0); a[1] = 20; assert(table.getn(a) == 0 and a.n == 0)
 table.setn(a, 13); assert(table.getn(a) == 13 and a.n == 0)
 assert(table.getn{1,2,3, n=1} == 1)
 assert(table.getn{[-1] = 2} == 0)
-assert(table.getn{1,2,3,nil,5} == 3)
+assert(table.getn{1,2,3,nil,nil} == 3)
+for i=0,40 do
+  local a = {}
+  for j=1,i do a[j]=j end
+  assert(table.getn(a) == i)
+end
+
+
+-- int overflow
+a = {}
+for i=1,50 do a[math.pow(2,i)] = true end
+assert(a[table.getn(a)])
 
 print("+")
+
+
+-- erasing values
+local t = {[{1}] = 1, [{2}] = 2, [string.rep("x ", 4)] = 3,
+           [100.3] = 4, [4] = 5}
+
+local n = 0
+for k, v in pairs( t ) do
+  n = n+1
+  assert(t[k] == v)
+  t[k] = nil
+  collectgarbage()
+  assert(t[k] == nil)
+end
+assert(n == 5)
+
 
 local function test (a)
   table.insert(a, 10); table.insert(a, 2, 20);

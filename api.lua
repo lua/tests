@@ -232,8 +232,6 @@ do
   assert(b == 10 and c == 20 and type(t) == 'table')
   a, b = A(X[[tostring $3; tonumber $4; return 2]])
   assert(a == nil and b == 0)
-  a, b, c, d = A("pushnum 1; pushupvalues; pushnum 44; return 4")
-  assert(a == 1 and b == 10 and c == 20 and d == 44)
   A(X[[pushnum 100; pushnum 200; replace $2; replace $1]])
   b, c = A(X[[pushvalue $1; pushvalue $2; return 2]])
   assert(b == 100 and c == 200)

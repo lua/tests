@@ -147,6 +147,7 @@ print'+'
 a = {}
 setcallhook(function (e)
   collectgarbage()   -- force GC during a hook
+  assert(({[-1]=1, [167]=1, [182]=1, [197]=1})[getinfo(2).currentline])
   if e == "call" then
     local f = getinfo(2, "f").func
     a[f] = 1

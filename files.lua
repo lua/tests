@@ -71,6 +71,8 @@ assert(read('*n') == 3450)
 assert(read(1) == '\n')
 assert(read(1) == nil)  -- end of file
 assert(read() == nil)  -- end of file
+assert(read('*n') == nil)  -- end of file
+assert(read('*w') == nil)  -- end of file
 assert(read('*a') == '')  -- end of file (OK for `*a')
 collectgarbage()
 print('+')

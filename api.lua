@@ -7,142 +7,256 @@ $else
 
   print('testando API com C')
 
--- push(1); push(2)
-a,b = testC("1 2")
+a,b = testC("pushnum 1; pushnum 2")
 assert(a == 1 and b == 2)
 
--- push(1); push(4); setglobal('a'); setglobal('b')
-testC("1 4 =a =b")
+testC[[
+	pushnum		1
+	pushnum		4
+	setglobal	a
+	setglobal	b
+]]
 assert(a == 4 and b == 1)
 
--- r1 = param(1); push(r1)
-assert(testC("p11 o1") == "p11 o1")
+com = "getparam r1 1; pushreg r1"
+assert(testC(com) == com)
 
--- r1 = createtable; push(r1); push(4); push(8); settable(): push(r1)
-a = testC"c1 o1 4 8 t o1"
+a = testC[[
+	createtable	r1
+	pushreg		r1
+	pushnum		4
+	pushnum		8
+	settable
+	pushreg		r1
+]]
 assert(a[4] == 8)
 
-function f(a,b,c,d)
+function f (a,b,c,d)
   assert(a==b and d==nil);
   if c == nil then
     -- push(3); push(3); push(1); f(); r1 = result(1); push(r1)
-    return testC("3 3 1 ff p11 o1")
+    return testC[[
+	pushnum		3
+	pushnum		3
+	pushnum		1
+	call		f
+	getresult	r1 1
+	pushreg		r1
+  ]]
   else return a
   end
 end
 
-a = 2
--- push(2); r1 = a; push(r1); f(); r1 = result(1);
--- push(r1); push(r1); f(); r1 = result(1); push(r1)
-assert(testC("2 g1a o1 ff p11 o1 o1 ff p11 o1") == 3)
+glob = 2
+assert(testC[[
+	pushnum		2
+	getglobal	r1, glob
+	pushreg		r1
+	call		f
+	getresult	r1, 1
+	pushreg		r1
+	pushreg		r1
+	call		f
+	getresult	r1, 1
+	pushreg		r1
+]] == 3)
 
 a = {x=45}
--- push('a'); r0 = a; push(r0); push('x'); r1=gettable(); push(r1);
-a,b = testC('sa g0a o0 sx i1 o1')
-assert(a == 'a' and b == 45)
+a,b = testC[[
+	pushstring	alo
+	getglobal	r0, a
+	pushreg		r0
+	pushstring	x
+	gettable	r1
+	pushreg		r1
+]]
+assert(a == 'alo' and b == 45)
 
--- push('a'); r0 = {}; push(r0), push(1), push(2), rawsettable;
--- push('a'); x = r0; r5 = x; push(r5), push(1), r3=gettable();
--- a = r3; x = r0; f()
-testC("sa c0 o0 1 2 T sa o0 =x G5x o5 1 i3 o3 =a ff")
+testC[[
+	pushstring	a
+	createtable	r0
+	pushreg		r0
+	pushnum		1
+	pushnum		2
+	rawsettable
+	pushstring	a
+	pushreg		r0
+	setglobal	x
+	getglobal	r5, x
+	pushreg		r5
+	pushnum		1
+	gettable	r3
+	pushreg		r3
+	setglobal	a
+	call		f
+]]		
 assert(a == 2 and x[1] == 2)
 
-s = sin
--- push(1); call(s); push(9); r1 = result(1); push(r1)
-a,b = testC('1 fs 9 p11 o1')
+a,b = testC('pushnum 1; call sin; pushnum 9; getresult r1, 1; pushreg r1')
 assert(a == 9 and b == sin(1))
-assert(testC('1 fs') == nil)
+assert(testC('pushnum 1; call sin') == nil)
 
 -- push(1); r3 = getglobal('x'); r1 = param(2); r5 = pop(); push(r1)
-a = call(testC, {"1 g3x p12 P5 o1", "testando"}, "pack")
+a = call(testC, {[[
+	pushnum		1
+	getglobal	r3, x
+	getparam	r1, 2
+	pop		r5
+	pushreg		r1
+]], "testando"}, "pack")
 assert(a.n == 1 and a[1] == "testando")
 
 -- teste de muitos locks
-A = {}
+Arr = {}
 Lim = 100
 i = 1
 while i<= Lim do  -- lock many objects
-  A[i] = testC("g1i o1 l1 o1")    -- A[i] = ref(i)
+  Arr[i] = testC("getglobal r1, i; pushreg r1; reflock r1; pushreg r1")
   i = i+1
 end
 
 i = 1
 while i<= Lim do  -- unlock half of them
-  testC("p12 u1", A[i])    -- unref(a[i])
+  testC("getparam r1, 2; unref r1", Arr[i])
   i = i+2
 end
 
 
 a = nil
--- r0 = a; push(r0); r2 = ref(1); r3 = getref(r2); push(r3); push(r2)
-a,b = testC"g0a o0 l2 r32 o3 o2"
+a,b = testC[[
+	getglobal	r0, a
+	pushreg		r0
+	reflock		r2
+	getref		r3, r2
+	pushreg		r3
+	pushreg		r2
+]]
 assert(not a and b == -1)      -- (-1 == LUA_REFNIL)
 
--- r0 = {}; push(r0); r1 = ref(1); push(r1)
-a = testC("c0 o0 l1 o1")
+a = testC("createtable r0, pushreg r0; reflock r1; pushreg r1")
 
 collectgarbage()
 
--- r5 = a; r5 = getref(r5); push(r5)
-assert(type(testC("g5a r55 o5")) == 'table')
+assert(type(testC("getglobal r5, a; getref r5, r5; pushreg r5")) == 'table')
 
 
 -- colect in cl the 'val' of all collected tables
 tt = newtag()
 cl = {n=0}
-function f(x)  cl.n=cl.n+1; cl[extra('u',x)] = 1 end
-extra('t', tt, f)
+function f(x)
+  local udval = testC('getparam r2, 2; udataval r1, r2; pushreg r1',x)
+  cl.n = cl.n+1
+  cl[udval] = 1
+end
+testC([[getparam r1, 2; pushreg r1;
+       getparam r2, 3;
+       settagmethod r2, gc
+]], f, tt)
 
 -- create 3 userdatas with tag `tt' and values 1, 2, and 3
-a = extra('U', 1, tt); b = extra('U', 2, tt); c = extra('U', 3, tt)
+a = testC('getparam r1, 2; getparam r2, 3; pushusertag r1, r2', 1, tt);
+b = testC('getparam r1, 2; getparam r2, 3; pushusertag r1, r2', 2, tt);
+c = testC('getparam r1, 2; getparam r2, 3; pushusertag r1, r2', 3, tt);
 
---reg[1] = a; lock[2] = b; lock[3] = c
--- r1 = ref(a,1); push(r1); r1 = ref(b,0); push(r1); r1 = ref(c,0); push(r1)
-d,e,f = testC('g1a o1 l1 o1 g1b o1 L1 o1 g1c o1 L1 o1')
+d,e,f = testC[[
+	getglobal	r1, a
+	pushreg		r1
+	reflock		r1
+	pushreg		r1
+	getglobal	r1, b
+	pushreg		r1
+	ref		r1
+	pushreg		r1
+	getglobal	r1, c
+	pushreg		r1
+	ref		r1
+	pushreg		r1
+]]
 -- return lock[d], lock[e], lock[f]
-t = call(testC, {'g1d r21 o2 g1e r21 o2 g1f r21 o2'}, "pack")
+t = call(testC, {[[
+	getglobal	r1, d
+	getref		r2, r1
+	pushreg		r2
+	getglobal	r1, e
+	getref		r2, r1
+	pushreg		r2
+	getglobal	r1, f
+	getref		r2, r1
+	pushreg		r2
+]]}, "pack")
 assert(t[1] == a and t[2] == b and t[3] == c)
 t=nil a=nil b=nil c=nil
 
 collectgarbage()
 
-assert(type(testC("p12 r51 o5", d)) == 'userdata')
-assert(tag(testC("p12 r51 o5", d)) == tt)
+x = testC("getparam r1, 2; getref r5, r1; pushreg r5", d)
+assert(type(x) == 'userdata' and tag(x) == tt)
 -- atempt to get "collected object"; must gives an error
-assert(not call(testC, {"p12 r51 o5", e}, "xp", nil))
+call(testC, {"getparam r1, 2; getref r5, r1; pushreg r5" , e},
+                "px", function (s) x=s end)
+assert(strfind(x, "NOOBJECT"))
 
 -- check that unlocked objects have been collected
 assert(cl.n == 2 and cl[2] and cl[3] and not cl[1])
 
 -- unref(d); unref(e); unref(f)
-testC("p12 u1 p13 u1 p14 u1", d, e, f)
+testC([[
+	getparam	r2, 2
+	getparam	r3, 3
+	getparam	r4, 4
+	unref		r2
+	unref		r3
+	unref		r4
+]], d, e, f)
 collectgarbage()
 assert(cl.n == 3 and cl[1])
 
 i = 2
 while i<= Lim do  -- unlock the other half
-  testC("p12 u1", A[i])    -- unref(a[i])
+  testC("getparam r1, 2; unref r1", Arr[i])    -- unref(Arr[i])
   i = i+2
 end
 
 print'+'
 
-assert(testC('p22 p33 q23', print, print) == 1)
-assert(testC('p22 p33 q23', 'alo', "alo") == 1)
-assert(testC('p22 p32 q23', {}) == 1)
-assert(testC('p22 p33 q23', {}, {}) == 0)
-assert(testC('p22 p33 q23', print, 34) == 0)
+assert(testC("getparam r2, 2; getparam r3, 3; equal r2, r3",
+              print, print) == 1)
+assert(testC("getparam r2, 2; getparam r3, 3; equal r2, r3",
+             'alo', "alo") == 1)
+assert(testC("getparam r2, 2; getparam r3, 2; equal r2, r3", {}) == 1)
+assert(testC("getparam r2, 2; getparam r3, 3; equal r2, r3",
+             {}, {}) == 0)
+assert(testC("getparam r2, 2; getparam r3, 3; equal r2, r3",
+             print, 34) == 0)
 
-t = testC
-f = testC("p12 o1 8 Ct2", 'p22 p33 o2 o3')
+f = testC("getparam r1, 2; pushreg r1; pushnum 8; closure testC, 2",
+          "getparam r2, 2; getparam r3, 3; pushreg r2; pushreg r3")
 a,b = f(4)
 assert(a == 8 and b == 4)
 
 
 -- testando lua_nextvar
 X = nil
-local a,b,c,d,e,f,g =
-  testC("g2X 9 N2 p51 P3 8 p72 N3 P4 p61 o3 o5 o4 o6 p92 o7 o9")
+local a,b,c,d,e,f,g = testC[[
+	getglobal	r2, X
+	pushnum		9
+	nextvar		r2
+	getresult	r5, 1
+	pop		r3
+	pushnum		8
+	getresult	r7, 2
+	nextvar		r3
+	pop		r4
+	getresult	r6, 1
+	pushreg		r3
+	pushreg		r5
+	pushreg		r4
+	pushreg		r6
+	getresult	r9, 2
+	pushreg		r7
+	pushreg		r9
+]]
+
 local x,y = nextvar(nil)
 assert(a==x and b==x and e==y)
 x,y = nextvar(x)
@@ -150,19 +264,40 @@ assert(c==x and d==x and f==y)
 assert(not g)
 
 foreachvar(function (n) X=n end)   -- get 'last' global var
-local a,b = testC("7 8 9 g2X N2 P3 o3 o2")
+local a,b = testC[[
+	pushnum		7
+	pushnum		8
+	pushnum		9
+	getglobal	r2, X
+	nextvar		r2
+	pop		r3
+	pushreg		r3
+	pushreg		r2
+]]
 assert(not a and b == X)
 
 -- testando lua_next
 X = {x="alo"}
-local a,b,c,d = testC("0 P1 g0X 8 n01 p51 p62 P1 9 n01 P1 o1 o5 o6")
+local a,b,c,d = testC[[
+	pushnum		0
+	pop		r1
+	rawgetglobal	r0, X
+	pushnum		8
+	next		r0, r1
+	getresult	r5, 1
+	getresult	r6, 2
+	pop		r1
+	pushnum		9
+	next		r0, r1
+	pop		r1
+	pushreg		r1
+	pushreg		r5
+	pushreg		r6
+]]
 assert(a==0 and b=='x' and c=='alo' and d == nil)
 
 
-X = 'OK'
-p = print
--- r0 = x; push(r0); call p
-testC('G0X o0 fp')
+testC('pushstring OK; call print')
 
 
 

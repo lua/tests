@@ -66,6 +66,20 @@ do
 end
 
 
+do  -- newindex
+  local foi
+  local a = {}
+  for i=1,10 do a[i] = 0; a['a'..i] = 0; end
+  metatable(a, {__newindex = function (t,k,v) foi=true; rawset(t,k,v) end})
+  foi = false; a[1]=0; assert(not foi)
+  foi = false; a['a1']=0; assert(not foi)
+  foi = false; a['a11']=0; assert(foi)
+  foi = false; a[11]=0; assert(foi)
+  foi = false; a[1]=nil; assert(not foi)
+  foi = false; a[1]=nil; assert(foi)
+end
+
+
 function f (t, ...) return t, arg end
 t.__call = f
 

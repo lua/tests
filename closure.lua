@@ -101,25 +101,35 @@ print'+'
 
 -- teste de co-rotinas
 
+local function eqtab (t1, t2)
+  assert(table.getn(t1) == table.getn(t2))
+  for i,v in ipairs(t1) do
+    assert(t2[i] == v)
+  end
+end
+
 function foo (a, ...)
   for i=1,arg.n do
-    assert(coroutine.yield(unpack(arg[i])) == nil)
+    _G.x = {coroutine.yield(unpack(arg[i]))}
   end
   return unpack(a)
 end
 
-local f = coroutine.create(foo, {1,2,3}, {}, {1}, {'a', 'b', 'c'})
+local f = coroutine.create(foo)
 assert(type(f) == "thread")
 local s,a,b,c,d
-s,a,b,c,d = coroutine.resume(f)
+s,a,b,c,d = coroutine.resume(f, {1,2,3}, {}, {1}, {'a', 'b', 'c'})
 assert(s and a == nil)
 s,a,b,c,d = coroutine.resume(f)
+eqtab(_G.x, {})
 assert(s and a == 1 and b == nil)
-s,a,b,c,d = coroutine.resume(f)
+s,a,b,c,d = coroutine.resume(f, 1, 2, 3)
+eqtab(_G.x, {1, 2, 3})
 assert(s and a == 'a' and b == 'b' and c == 'c' and d == nil)
-s,a,b,c,d = coroutine.resume(f)
+s,a,b,c,d = coroutine.resume(f, "xuxu")
+eqtab(_G.x, {"xuxu"})
 assert(s and a == 1 and b == 2 and c == 3 and d == nil)
-s, a = coroutine.resume(f)
+s, a = coroutine.resume(f, "xuxu")
 assert(not s and string.find(a, "dead"))
 
 
@@ -127,12 +137,12 @@ assert(not s and string.find(a, "dead"))
 local function foo (i) return coroutine.yield(i) end
 f = coroutine.wrap(function ()
   for i=1,10 do
-    assert(foo(i) == nil)
+    assert(foo(i) == _G.x)
   end
   return 'a'
 end)
-for i=1,10 do assert(f() == i) end
-assert(f() == 'a')
+for i=1,10 do _G.x = i; assert(f(i) == i) end
+_G.x = 'xuxu'; assert(f('xuxu') == 'a')
 
 -- recursive
 function pf (n, i)
@@ -140,10 +150,10 @@ function pf (n, i)
   pf(n*i, i+1)
 end
 
-f = coroutine.wrap(pf, 1, 1)
+f = coroutine.wrap(pf)
 local s=1
 for i=1,10 do
-  assert(f() == s)
+  assert(f(1, 1) == s)
   s = s*i
 end
 
@@ -156,13 +166,13 @@ end
 
 
 function filter (p, g)
-  return coroutine.wrap(function (g)
+  return coroutine.wrap(function ()
     while 1 do
       local n = g()
       if n == nil then return end
       if math.mod(n, p) ~= 0 then coroutine.yield(n) end
     end
-  end, g)
+  end)
 end
 
 local x = gen(100)
@@ -191,6 +201,14 @@ assert(x() == 3)
 local a,b = pcall(x)
 assert(not a and b == foo)
 
+x = coroutine.create(goo)
+a,b = coroutine.resume(x)
+assert(a and b == 3)
+a,b = coroutine.resume(x)
+assert(not a and b == foo)
+a,b = coroutine.resume(x)
+assert(not a and string.find(b, "dead"))
+
 
 -- co-routines x for loop
 function all (a, n, k)
@@ -204,7 +222,7 @@ function all (a, n, k)
 end
 
 local a = 0
-for t in coroutine.wrap(all, {}, 5, 4) do
+for t in coroutine.wrap(function () all({}, 5, 4) end) do
   a = a+1
 end
 assert(a == 5^4)

@@ -24,8 +24,9 @@ assert(seek(_OUTPUT, "end") == strlen("alo joao"))
 assert(seek(_OUTPUT, "set") == 0)
 
 assert(write('"álo"', "{a}\n", "second line\n", "third line \n"))
-assert(write('çfourth_line', "\n\n"))
-assert(writeto())
+assert(write('çfourth_line'))
+_OUTPUT = _STDOUT;
+collectgarbage()  -- file should be closed by GC
 assert(_INPUT == _STDIN and _OUTPUT == _STDOUT)
 print('+')
 
@@ -33,7 +34,7 @@ assert(rename(file, otherfile))
 assert(rename(file, otherfile) == nil)
 
 assert(appendto(otherfile))
-assert(write("another line with an integer: 3450\n"));
+assert(write("\n\nanother line with an integer: 3450\n"));
 assert(writeto())
 
 assert(rename(otherfile, file))
@@ -60,6 +61,7 @@ assert(read('.') == '\n')
 assert(read('.') == nil)
 assert(read() == nil)
 assert(read('.*') == '')
+collectgarbage()
 print('+')
 assert(readfrom())
 assert(remove(file))
@@ -74,6 +76,7 @@ writeto(file)
 write("alo\n")
 writeto()
 f = appendto(file)
+collectgarbage()
 
 assert(writeto(f))
 assert(write(' ' .. t .. ' '))
@@ -110,7 +113,7 @@ assert(writeto(otherfile))
 assert(write("outra coisa\n\0\1\3\0\0\0\0\255\0"))
 assert(writeto())
 
-filehandle = readfrom(file)
+filehandle = openfile(file, 'r')
 otherfilehandle = readfrom(otherfile)
 assert(filehandle and otherfilehandle and filehandle ~= otherfilehandle)
 assert(type(filehandle) == "userdata")
@@ -119,8 +122,7 @@ assert(read'*l' == "qualquer coisa")
 _INPUT = otherfilehandle
 assert(read() == "outra coisa")
 assert(read(filehandle, '*l') == "mais qualquer coisa")
-_INPUT = filehandle
-readfrom()  -- close filehandle
+closefile(filehandle);
 readfrom(otherfilehandle)
 assert(read('A?%z?[\1-\5]*%z') == "\0\1\3\0")
 assert(read('%S%U[^\n]\255%s') == "\0\0\0\255")
@@ -130,6 +132,7 @@ readfrom()  -- close otherfilehandle
 assert(remove(file))
 assert(remove(otherfile))
 assert(_INPUT == _STDIN)
+collectgarbage()
 
 assert(writeto(file))
 write[[
@@ -150,6 +153,7 @@ assert(h==[[
 and the rest of the file
 ]])
 assert(remove(file))
+collectgarbage()
 
 settagmethod(tag(_INPUT), 'gettable', read)
 settagmethod(tag(_OUTPUT), 'settable', function(f, _, a) write(f,a) end)

@@ -1,6 +1,6 @@
 print "testando operacoes W"
 
-require "checktable.lua"
+require "checktable"
 
 --[[ lots of empty lines (to force SETLINEW)
 

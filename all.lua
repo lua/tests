@@ -1,10 +1,12 @@
 #!../lua
 
+require "compat"
+
 global in nil
 
 global io, os, str, co, _G, dbg
 
-global wd, _WD, LUA_PATH
+global wd, _WD
 
 global print, gcinfo, assert, type, dofile, loadfile, _STDERR,
        collectgarbage, error, showmem, globals
@@ -27,8 +29,6 @@ global T
 local c = clock()
 
 _WD = wd or ""
-
-LUA_PATH = (LUA_PATH or os.getenv("LUA_PATH") or "./") .. ";" .. _WD
 
 assert(setlocale"C")
 

@@ -111,7 +111,7 @@ assert(eq(a[200][3], 200/3))
 assert(eq(a[1000][3], 1000/3, 0.001))
 print('+')
 
-require "checktable.lua"
+require "checktable"
 stat(a)
 
 a = nil

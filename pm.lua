@@ -3,7 +3,7 @@ print('testando pattern matching')
 global in {}
 
 global strfind, strsub, gsub, strlen, strupper, strrep
-global assert, print, dostring, call
+global assert, print, dostring, pcall
 global tremove, getn, str
 
 function f(s, p)
@@ -191,8 +191,8 @@ gsub("first second word", "%w+",
       function (w) %t.n=%t.n+1; %t[%t.n] = w end, 2)
 assert(t[1] == "first" and t[2] == "second" and t[3] == nil)
 
-assert(not call(gsub, {"alo", "(.", print}, "x", nil))
-assert(not call(gsub, {"alo", ".)", print}, "x", nil))
+assert(not pcall(nil, gsub, "alo", "(.", print))
+assert(not pcall(nil, gsub, "alo", ".)", print))
 
 -- big strings
 local a = strrep('a', 300000)

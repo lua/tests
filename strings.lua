@@ -67,7 +67,8 @@ assert(strlower("\0ABCc%$") == "\0abcc%$")
 assert(strrep('teste', 0) == '')
 assert(strrep('tés\00tê', 2) == 'tés\0têtés\000tê')
 assert(strrep('', 10) == '')
-assert(strlen(strrep('a', 2000)) == 2000)
+
+for i=0,30 do assert(strlen(strrep('a', i)) == i) end
 
 assert(type(tostring(nil)) == 'string')
 assert(type(tostring(12)) == 'string')

@@ -40,7 +40,7 @@ s = 0; n=0
 for a,b in b do s=s+b; n=n+1 end
 assert(s==13977183656.5  and n==70001)
 
-require "checktable.lua"
+require "checktable"
 stat(b)
 
 a = nil; b = nil
@@ -88,10 +88,10 @@ end,
 
 file = tmpname()
 assert(writeto(file))
-gsub(prog, "$([^$]+)", function (s)
+for s in str.gfind(prog, "$([^$]+)") do
   local n = tonumber(s)
   if not n then write(s) else F[n]() end
-end)
+end
 assert(writeto())
 result = assert(dofile(file))
 assert(remove(file))

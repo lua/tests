@@ -27,7 +27,7 @@ function checkout (s)
 end
 
 function auxrun (arg)
-  s = call(format, arg)
+  s = format(unpack(arg))
   s = gsub(s, "lua", progname)
   return execute(s)
 end
@@ -108,7 +108,7 @@ prepfile[[#comment in 1st line without \n at the end]]
 RUN("lua %s", prog)
 
 -- close Lua with an open file
-prepfile(str.format([[io.writeto(%q); io.write('alo')]], out))
+prepfile(str.format([[io.output(%q); io.write('alo')]], out))
 RUN("lua -c %s", prog)
 checkout('alo')
 

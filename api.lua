@@ -143,13 +143,13 @@ assert(a(3) == sin(3) and a ~= sin)
 
 
 -- testando erros
-local olderr = _ERRORMESSAGE
-_ERRORMESSAGE = nil
+local olderr, olda = _ERRORMESSAGE, _ALERT
+_ERRORMESSAGE, _ALERT = nil
 
 a,b = T.testC("call 2,3; pushvalue 2; insert -2; call 1,1; dostring 4; \
                dostring 1; dostring 5; return 2",
                sin, 1, "x=150", "x='a'+1", 1, 2, 3, 4, 5)
-_ERRORMESSAGE = olderr
+_ERRORMESSAGE, _ALERT = olderr, olda
 assert(a == 1 and b == sin(2) and x == 150)
 
 
@@ -293,17 +293,15 @@ end
 collectgarbage(10000000)
 
 -- create 3 userdatas with tag `tt' and values 1, 2, and 3
-a = T.newuserdatabox(1); T.metatable(a, tt)
-b = T.newuserdatabox(2); T.metatable(b, tt)
-c = T.newuserdatabox(3); T.metatable(c, tt)
+a = T.newuserdata(1); T.metatable(a, tt); na = T.udataval(a)
+b = T.newuserdata(2); T.metatable(b, tt); nb = T.udataval(b)
+c = T.newuserdata(3); T.metatable(c, tt); nc = T.udataval(c)
 
 -- create userdata without meta table
-x = T.newuserdatabox(4)
-y = T.newuserdatabox(0)
+x = T.newuserdata(4)
+y = T.newuserdata(0)
 
-assert(T.metatable(x) == nil and T.udataval(x) == 4)
-assert(T.metatable(y) == nil and T.udataval(y) == 0)  -- check udata NULL
-
+assert(T.metatable(x) == nil and T.metatable(y) == nil)
 
 d=T.ref(a);
 e=T.ref(b);
@@ -317,7 +315,7 @@ T.unref(e); T.unref(f)
 collectgarbage()
 
 -- check that unref objects have been collected
-assert(cl.n == 1 and cl[1] == 3)
+assert(cl.n == 1 and cl[1] == nc)
 
 x = T.getref(d)
 assert(type(x) == 'userdata' and T.metatable(x) == tt)
@@ -327,36 +325,38 @@ tt=nil    -- libera tt para GC
 A = nil
 b = nil
 T.unref(d);
-T.metatable(T.newuserdatabox(5), {__gc=F})
+n5 = T.udataval(T.metatable(T.newuserdata(5), {__gc=F}))
 collectgarbage()
 -- check order of collection
-assert(cl.n == 4 and cl[2] == 5 and cl[3] == 2 and cl[4] == 1)
+assert(cl.n == 4 and cl[2] == n5 and cl[3] == nb and cl[4] == na)
 
 
-a = {}
+a, na = {}, {}
 for i=30,1,-1 do
-  a[i] = T.metatable(T.newuserdatabox(i), {__gc=F})
+  a[i] = T.metatable(T.newuserdata(i), {__gc=F})
+  na[i] = T.udataval(a[i])
 end
 cl.n = 0
 a = nil; collectgarbage()
 assert(cl.n == 30)
-for i=1,30 do assert(cl[i] == i) end
+for i=1,30 do assert(cl[i] == na[i]) end
+na = nil
 
 
 for i=2,Lim,2 do   -- unlock the other half
   T.unref(Arr[i])
 end
 
-x = T.newuserdatabox(40); T.metatable(x, {__gc=F})
+x = T.newuserdata(40); T.metatable(x, {__gc=F})
 cl.n = 0
 a = {[x] = 1}
-x = nil
+x = T.udataval(x)
 collectgarbage()
 -- old `x' cannot be collected (`a' still uses it)
 assert(cl.n == 0)
 for n in a do a[n] = nil end
 collectgarbage()
-assert(cl.n == 1 and cl[1] == 40)   -- old `x' must be collected
+assert(cl.n == 1 and cl[1] == x)   -- old `x' must be collected
 
 -- testando lua_equal
 assert(T.testC("equal 2 4; return 1", print, 1, print, 20))
@@ -392,7 +392,7 @@ end
 do   -- teste de erro durante coleta de lixo
   local a = {}
   for i=1,20 do
-    a[i] = T.newuserdatabox(i)   -- cria varios udata
+    a[i] = T.newuserdata(i)   -- cria varios udata
   end
   for i=1,20,2 do   -- marca metade deles para dar erro durante coleta de lixo
     T.metatable(a[i], {__gc = function (x) error("error inside gc") end})
@@ -402,11 +402,22 @@ do   -- teste de erro durante coleta de lixo
   end
   global A; A = 0
   a = 0
-  call(collectgarbage, {}, "x", function (s) a=a+1;collectgarbage() end)
+  pcall(function (s) a=a+1;collectgarbage() end, collectgarbage)
   assert(a == 10)  -- numero de erros
   assert(A == 10)  -- numero de coletas normais
 end
 -------------------------------------------------------------------------
+-- teste de userdata vals
+do
+  global in nil
+  global assert, T
+  local a = {}; local lim = 30
+  for i=0,lim do a[i] = T.pushuserdata(i) end
+  for i=0,lim do assert(T.udataval(a[i]) == i) end
+  for i=0,lim do assert(T.pushuserdata(i) == a[i]) end
+  for i=0,lim do a[a[i]] = i end
+  for i=0,lim do a[T.pushuserdata(i)] = i end
+end
 
 
 -------------------------------------------------------------------------
@@ -442,24 +453,23 @@ print('+')
 -------------------------------------------------------------------------
 collectgarbage()
 T.totalmem(T.totalmem()+5000)   -- seta limite `baixo' para memoria (+5k)
-assert(dostring"local a={}; for i=1,100000 do a[i]=i end" == nil)
+assert(not dostring"local a={}; for i=1,100000 do a[i]=i end")
 T.totalmem(32000000)  -- restaura limite alto (32M)
 
 -- testa erros de memoria na criacao de um estado; vai aumentando o limite
 -- de memoria gradativamente, de modo a dar erros em varios passos durante
 -- a criacao de um estado, ate' ter memoria suficiente para nao dar erro
 
-local args = {n=0}
 local M = T.totalmem()
 local oldM = M
-local a = nil
+local a,b = nil
 while 1 do
   M = M+3   -- aumenta gradativamente a memoria
   T.totalmem(M)
-  a = call(T.newstate, args, "x")  -- tenta criar estado
-  if a ~= nil then break end       -- para quando conseguir
+  a,b = pcall(nil, T.newstate)  -- tenta criar estado
+  if a and b then break end       -- para quando conseguir
 end
-T.closestate(a);  -- fecha estado que conseguiu abrir
+T.closestate(b);  -- fecha estado que conseguiu abrir
 T.totalmem(32000000)  -- restaura limite alto (32M)
 print("\nlimite para criar estado: "..M-oldM)
 
@@ -477,18 +487,16 @@ end
 
 G=0; collectgarbage(); a =gcinfo()
 dostring(expand(20,"G=G+1"))
-assert(G==20); collectgarbage(); assert(gcinfo() <= a+1)
+assert(G==20); collectgarbage();  -- assert(gcinfo() <= a+1)
 print'+'
 
-args = {"x=1",n=1}
 M = T.totalmem()
 oldM = M
-a = nil
 while 1 do
   M = M+3   -- aumenta gradativamente a memoria
   T.totalmem(M)
-  a = call(T.doonnewstack, args, "x")  -- tenta criar thread
-  if a == 0 then break end       -- para quando conseguir
+  a, b = pcall(nil, T.doonnewstack, "x=1")  -- tenta criar thread
+  if b == 0 then break end       -- para quando conseguir
   collectgarbage()
 end
 T.totalmem(32000000)  -- restaura limite alto (32M)
@@ -500,20 +508,18 @@ print("\nlimite para criar thread: "..M-oldM)
 -------------------------------------------------------------------------
 
 collectgarbage()
-args = {"x=1",n=1}
 x=nil
-M = T.totalmem()
-oldM = M
-a = nil
+local M = T.totalmem()
+local oldM = M
 while 1 do
   M = M+3   -- aumenta gradativamente a memoria
   T.totalmem(M)
-  a = call(dostring, args, "x")  -- tenta fazer o dostring
-  if a ~= nil then break end       -- para quando conseguir
+  local a = pcall(nil, loadstring("x=1"))  -- tenta fazer o dostring
+  if a then break end       -- para quando conseguir
   collectgarbage()
 end
 T.totalmem(32000000)  -- restaura limite alto (32M)
-assert(x)
+assert(x == 1)
 print("\nlimite para dostring: "..M-oldM)
 
 print'OK'

@@ -165,4 +165,24 @@ local msg = {}
 call(x, {}, "x", function (_msg) tinsert(msg, _msg) end)
 assert(msg[1] == 'a' and msg.n == 2)
 
+
+-- co-routines x for loop
+function all (a, n, k)
+  if k == 0 then yield(a)
+  else
+    for i=1,n do
+      a[k] = i
+      all(a, n, k-1)
+    end
+  end
+end
+
+local a = 0
+for t in coroutine(all, {}, 5, 4) do
+  a = a+1
+end
+assert(a == 5^4)
+  
+  
+
 print'OK'

@@ -212,6 +212,7 @@ assert(a[f] and a[g] and a[assert] and a[getlocal] and not a[print])
  
 
 setcallhook(); setlinehook()
+assert(setcallhook() == nil and setlinehook() == nil)
 
 
 -- testando pegar argumentos de funcao (locais existentes no inicio da funcao)

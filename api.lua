@@ -231,6 +231,9 @@ for i=1,Lim do   -- lock many objects
   Arr[i] = T.ref({})
 end
 
+assert(T.ref(nil) == -1 and T.getref(-1) == nil)
+T.unref(-1); T.unref(-1)
+
 for i=1,Lim do   -- unlock all them
   T.unref(Arr[i])
 end
@@ -291,13 +294,33 @@ F = function (x)
 end
 tt.__gc = F
 
+-- teste se coleta de udata libera memoria na hora certa
 do
+  collectgarbage();
   collectgarbage();
   local x = gcinfo();
   local a = T.newuserdata(5001)
   assert(gcinfo() >= x+4) 
   a = nil
   collectgarbage();
+  assert(gcinfo() <= x+1)
+  -- udata sem finalizer
+  x = gcinfo()
+  collectgarbage(10000000)
+  for i=1,1000 do newproxy(false) end
+  assert(gcinfo() > x+10)
+  collectgarbage()
+  assert(gcinfo() <= x+1)
+  -- udata com finalizer
+  x = gcinfo()
+  collectgarbage(10000000)
+  a = newproxy(true)
+  getmetatable(a).__gc = function () end
+  for i=1,1000 do newproxy(a) end
+  assert(gcinfo() >= x+10)
+  collectgarbage()  -- essa coleta so' chama TM, sem liberar memoria
+  assert(gcinfo() >= x+10)
+  collectgarbage()
   assert(gcinfo() <= x+1)
 end
 
@@ -339,8 +362,9 @@ b = nil
 T.unref(d);
 n5 = T.udataval(T.metatable(T.newuserdata(5), {__gc=F}))
 collectgarbage()
+assert(cl.n == 4)
 -- check order of collection
-assert(cl.n == 4 and cl[2] == n5 and cl[3] == nb and cl[4] == na)
+assert(cl[2] == n5 and cl[3] == nb and cl[4] == na)
 
 
 a, na = {}, {}
@@ -518,19 +542,39 @@ end)
 
 -- teste de memoria x compilador
 
-testamem("dostring", function ()
+testamem("loadstring", function ()
   return loadstring("x=1")  -- tenta fazer o dostring
 end)
 
 
+-- teste de memoria x dofile
+_G.a = nil
+local t =tmpname()
+local f = assert(io.open(t, "w"))
+f:write[[
+  local t = {x=10, y=234}
+  for i=1,5 do t[i] = i; t[i..""] = i end
+  t = {"x", "u", "x", "u"}
+  a = string.rep("a", 10)
+  for _, v in ipairs(t) do a=a..v end
+  return true
+]]
+f:close()
+testamem("dofile", function ()
+  return loadfile(t)()
+end)
+assert(os.remove(t))
+assert(_G.a == "aaaaaaaaaaxuxu")
+
+
 -- testes mais genericos
 
-testamem("teste criacao de strings", function ()
+testamem("criacao de strings", function ()
   local a, b = gsub("alo alo", "(a)", function (x) return x..'b' end)
   return (a == 'ablo ablo')
 end)
 
-testamem("teste criacao de arquivos", function ()
+testamem("criacao de arquivos", function ()
   local t = tmpname()
   local f = assert(io.open(t, 'w'))
   assert (not io.open"nomenaoexistente")
@@ -538,17 +582,18 @@ testamem("teste criacao de arquivos", function ()
   return not loadfile'nomenaoexistente'
 end)
 
-testamem("teste criacao de tabelas", function ()
+testamem("criacao de tabelas", function ()
   local a, lim = {}, 10
   for i=1,lim do a[i] = i; a[i..'a'] = {} end
   return (type(a[lim..'a']) == 'table' and a[lim] == lim)
 end)
 
-testamem("teste criacao de closures", function ()
-  function close (a,b,c)
+local a = 1
+testamem("criacao de closures", function ()
+  function close (b,c)
    return function (x) return a+b+c+x end
   end
-  return (close(1,2,3)(4) == 10)
+  return (close(2,3)(4) == 10)
 end)
 
 print'OK'

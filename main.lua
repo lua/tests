@@ -108,7 +108,7 @@ prepfile[[#comment in 1st line without \n at the end]]
 RUN("lua %s", prog)
 
 -- close Lua with an open file
-prepfile(str.format([[io.output(%q); io.write('alo')]], out))
+prepfile(string.format([[io.output(%q); io.write('alo')]], out))
 RUN("lua -c %s", prog)
 checkout('alo')
 

@@ -449,7 +449,7 @@ a, b = T.doremote(L1, "return a+")
 assert(a == nil and b == 3)   -- 3 == syntax error
 
 T.loadlib(L1)
-a = T.doremote(L1, "strlibopen(); return str.sub('xuxu', 1, 2)")
+a = T.doremote(L1, "strlibopen(); return string.sub('xuxu', 1, 2)")
 assert(a == "xu")
 
 T.closestate(L1);

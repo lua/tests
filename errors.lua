@@ -119,7 +119,7 @@ C = 0
 function y () C=C+1; y() end
 
 function checkstackmessage (m)
-  return (str.find(m, "^.-:%d+: stack overflow$"))
+  return (string.find(m, "^.-:%d+: stack overflow$"))
 end
 assert(checkstackmessage(doit('y()')))
 assert(checkstackmessage(doit('y()')))

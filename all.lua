@@ -17,7 +17,7 @@ _WD = wd or ""
 assert(setlocale"C")
 
 local T,print,gcinfo,format,write,assert,type =
-      T,print,gcinfo,str.format,io.write,assert,type
+      T,print,gcinfo,string.format,io.write,assert,type
 
 local showmem = function ()
   if not %T then
@@ -63,7 +63,7 @@ assert(dofile(_WD..'locals.lua') == 5)
 assert(dofile(_WD..'constructs.lua'))
 assert(dofile(_WD..'code.lua'))
 do
-  local f = co.create(assert(loadfile(_WD..'big.lua')))
+  local f = coroutine.create(assert(loadfile(_WD..'big.lua')))
   assert(f() == 'b')
   assert(f() == 'a')
 end
@@ -107,7 +107,7 @@ local preserve = {
 local collectgarbage, showmem, print, format, clock =
       collectgarbage, showmem, print, format, os.clock
 
-dbg.setcallhook(function (a) %assert(%type(a) == 'string') end)
+debug.setcallhook(function (a) %assert(%type(a) == 'string') end)
 globals(preserve)
 collectgarbage()
 collectgarbage()

@@ -14,7 +14,7 @@ end
 
 local oldpath = LUA_PATH
 
-LUA_PATH = str.gsub("D/?.lua;D/?.lc;D/?;D/L", "D/", DIR)
+LUA_PATH = string.gsub("D/?.lua;D/?.lc;D/?;D/L", "D/", DIR)
 
 local try = function (p, n)
   NAME = nil

@@ -88,7 +88,7 @@ end,
 
 file = tmpname()
 assert(writeto(file))
-for s in str.gfind(prog, "$([^$]+)") do
+for s in string.gfind(prog, "$([^$]+)") do
   local n = tonumber(s)
   if not n then write(s) else F[n]() end
 end

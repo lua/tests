@@ -188,7 +188,8 @@ end
 
 do   -- clear global table
   local a = {}
-  local preserve = {io = 1, str = 1, dbg = 1, os = 1, co = 1, tab = 1, math = 1}
+  local preserve = {io = 1, string = 1, debug = 1, os = 1,
+                    coroutine = 1, table = 1, math = 1}
   for n,v in globals() do a[n]=v end
   for n,v in a do
     if not preserve[n] and type(v) ~= "function" and

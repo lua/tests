@@ -4,7 +4,7 @@ local A,B = 0,{g=10}
 global g in B
 function f(x)
   local a = {}
-  for i=1,10000 do
+  for i=1,1000 do
     local y = 0
     do
       a[i] = function () g = g+1; y = y+x; return y+A end

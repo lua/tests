@@ -397,9 +397,14 @@ do   -- teste de erro durante coleta de lixo
   for i=1,20,2 do   -- marca metade deles para dar erro durante coleta de lixo
     T.metatable(a[i], {__gc = function (x) error("error inside gc") end})
   end
+  for i=2,20,2 do   -- marca outra metade para contar e criar mais lixo
+    T.metatable(a[i], {__gc = function (x) dostring("A=A+1") end})
+  end
+  global A; A = 0
   a = 0
   call(collectgarbage, {}, "x", function (s) a=a+1;collectgarbage() end)
   assert(a == 10)  -- numero de erros
+  assert(A == 10)  -- numero de coletas normais
 end
 -------------------------------------------------------------------------
 

@@ -255,13 +255,12 @@ end
 
 
 -- cria udata para ser coletado quando fechar o estado
-
 do
   local newproxy,assert,type,print,getmetatable =
         newproxy,assert,type,print,getmetatable
   local u = newproxy(true)
   local tt = getmetatable(u)
-  ___Glob = u   -- evita que udata seja coletado antes da coleta final
+  ___Glob = {u}   -- evita que udata seja coletado antes da coleta final
   tt.__gc = function (o)
     assert(getmetatable(o) == tt)
     -- cria objetos durante coleta de lixo
@@ -270,6 +269,14 @@ do
     newproxy(o)  -- cria outro com mesma metatable
     print(">>> fechando estado " .. "<<<\n")
   end
+end
+
+-- create several udata to raise errors when collected while closing state
+do
+  local u = newproxy(true)
+  getmetatable(u).__gc = function (o) return o + 1 end
+  table.insert(___Glob, u)  -- preserve udata until the end
+  for i = 1,10 do table.insert(___Glob, newproxy(u)) end
 end
 
 print('OK')

@@ -351,7 +351,7 @@ assert(_G.f() == 12)
 
 
 if not T then
-  print('\a\n >>> testC nao ativo: pulando testes de yield/hook <<<\n\a')
+  (Message or print)('\a\n >>> testC nao ativo: pulando testes de yield/hook <<<\n\a')
 else
 
   local turn

@@ -1,6 +1,6 @@
 
 if T==nil then
-  print('\a\n >>> testC nao ativo: pulando testes da API <<<\n\a')
+  (Message or print)('\a\n >>> testC nao ativo: pulando testes da API <<<\n\a')
   return
 end
 

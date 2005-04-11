@@ -170,7 +170,7 @@ local p = ""   -- On Mac OS X, redefine this to "_"
 assert(loadlib == package.loadlib)   -- only for compatibility
 local f, err, when = package.loadlib(wd.."libs/lib1.so", p.."luaopen_lib1")
 if not f then
-  print('\a\n >>> cannot load dynamic library <<<\n\a')
+  (Message or print)('\a\n >>> cannot load dynamic library <<<\n\a')
   print(err, when)
 else
   f()   -- open library

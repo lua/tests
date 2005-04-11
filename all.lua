@@ -10,6 +10,13 @@ math.randomseed(0)
 ]]
 
 
+local msgs = {}
+function Message (m)
+  print(m)
+  msgs[*msgs+1] = string.sub(m, 3, -3)
+end
+
+
 local c = os.clock()
 
 _WD = wd or ""
@@ -93,9 +100,12 @@ dofile(_WD..'math.lua')
 dofile(_WD..'sort.lua')
 assert(dofile(_WD..'verybig.lua') == 10); collectgarbage()
 dofile(_WD..'files.lua')
+
+for i=1,*msgs do
+  print(msgs[i])
+end
+
 print("final OK !!!")
-
-
 print('limpando tudo!!!!')
 
 debug.sethook(function (a) assert(type(a) == 'string') end, "cr")

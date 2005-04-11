@@ -1,6 +1,6 @@
 
 if T==nil then
-  print('\a\n >>> tests.c nao ativo: pulando testes de opcodes <<<\n\a')
+  (Message or print)('\a\n >>> testC nao ativo: pulando testes de opcodes <<<\n\a')
   return
 end
 print "testando geracao de codigo/otimizacoes"

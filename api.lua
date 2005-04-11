@@ -549,7 +549,7 @@ T.loadlib(L1)
 T.doremote(L1, "a = {}")
 T.testC(L1, [[pushstring a; gettable G; pushstring x; pushnum 1;
              settable -3]])
-print(T.doremote(L1, "return a.x"))
+assert(T.doremote(L1, "return a.x") == "1")
 
 T.closestate(L1)
 

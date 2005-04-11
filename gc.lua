@@ -108,9 +108,8 @@ local function dosteps (siz)
   return i
 end
 
-assert(dosteps(0) > 15)
-assert(dosteps(2) < 10)
-assert(dosteps(6) < 5)
+assert(dosteps(0) > 10)
+assert(dosteps(6) < dosteps(2))
 assert(dosteps(10000) == 1)
 assert(collectgarbage("step", 1000000) == 1)
 assert(collectgarbage("step", 1000000) == 1)

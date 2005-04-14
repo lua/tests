@@ -626,9 +626,9 @@ end)
 
 
 local testprog = [[
-local function foo () return t end
-local t = {"x", "u", "x", "u"}
-a = "aaaaaaaaaa"
+local function foo () return end
+local t = {"x"}
+a = "aaa"
 for _, v in ipairs(t) do a=a..v end
 return true
 ]]
@@ -644,7 +644,7 @@ testamem("dofile", function ()
   return a and a()
 end)
 assert(os.remove(t))
-assert(_G.a == "aaaaaaaaaaxuxu")
+assert(_G.a == "aaax")
 
 
 -- testes mais genericos

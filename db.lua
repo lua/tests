@@ -356,12 +356,13 @@ print"+"
 
 
 -- testing traceback
+
 assert(debug.traceback(print) == print)
---++assert(debug.traceback(print, 4) == print)
---++assert(string.find(debug.traceback("hi", 4), "^hi\n"))
+assert(debug.traceback(print, 4) == print)
+assert(string.find(debug.traceback("hi", 4), "^hi\n"))
 assert(string.find(debug.traceback("hi"), "^hi\n"))
 assert(not string.find(debug.traceback("hi"), "`traceback'"))
---++assert(string.find(debug.traceback("hi", 0), "`traceback'"))
+assert(string.find(debug.traceback("hi", 0), "`traceback'"))
 assert(string.find(debug.traceback(), "^stack traceback:\n"))
 
 -- testing debugging of coroutines
@@ -377,12 +378,22 @@ local function checktraceback (co, p)
 end
 
 
-local co = coroutine.create(function (x)
-             local a = 1
-             coroutine.yield(debug.getinfo(1, "l"))
-             coroutine.yield(debug.getinfo(1, "l").currentline)
-             return a
-           end)
+local function f (n)
+  if n > 0 then return f(n-1)
+  else coroutine.yield() end
+end
+
+local co = coroutine.create(f)
+coroutine.resume(co, 3)
+checktraceback(co, {"yield", "db.lua", "tail", "tail", "tail"})
+
+
+co = coroutine.create(function (x)
+       local a = 1
+       coroutine.yield(debug.getinfo(1, "l"))
+       coroutine.yield(debug.getinfo(1, "l").currentline)
+       return a
+     end)
 
 local tr = {}
 local foo = function (e, l) table.insert(tr, l) end
@@ -426,7 +437,7 @@ while coroutine.status(co) == "suspended" do
   table.insert(t, 2, "`f'")   -- one more recursive call to `f'
 end
 t[1] = "`error'"
---++checktraceback(co, t)
+checktraceback(co, t)
 
 
 -- test acessing line numbers of a coroutine from a resume inside

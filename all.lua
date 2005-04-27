@@ -3,11 +3,11 @@
 math.randomseed(0)
 
 
---[[
+--[=[
   example of a long [comment],
   [[spanning several [lines]]]
 
-]]
+]=]
 
 
 local msgs = {}

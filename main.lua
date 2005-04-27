@@ -110,7 +110,7 @@ a = 2
 RUN([[lua "-e_PROMPT='%s'" -i < %s > %s]], prompt, prog, out)
 checkout(string.rep(prompt, 3).."\n")
 
-s = [[ -- 
+s = [=[ -- 
 function f ( x ) 
   local a = [[
 xuxu
@@ -123,7 +123,7 @@ xuxu\n"
 end
 =( f( 10 ) )
 assert( a == b )
-=f( 11 )  ]]
+=f( 11 )  ]=]
 s = string.gsub(s, ' ', '\n\n')
 prepfile(s)
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)

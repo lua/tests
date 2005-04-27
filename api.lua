@@ -603,10 +603,10 @@ T.closestate(b);  -- fecha estado que conseguiu abrir
 -- teste de threads
 
 function expand (n,s)
-  if n==0 then return ""
-  else return string.format("T.doonnewstack([[ %s;\n collectgarbage(); %s]])\n",
-                                            s, expand(n-1,s))
-  end
+  if n==0 then return "" end
+  local e = string.rep("=", n)
+  return string.format("T.doonnewstack([%s[ %s;\n collectgarbage(); %s]%s])\n",
+                              e, s, expand(n-1,s), e)
 end
 
 G=0; collectgarbage(); a =gcinfo()

@@ -34,7 +34,7 @@ end
 
 function auxrun (...)
   s = string.format(...)
-  s = string.gsub(s, "lua", progname)
+  s = string.gsub(s, "lua", progname, 1)
   return os.execute(s)
 end
 

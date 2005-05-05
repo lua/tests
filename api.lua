@@ -443,7 +443,7 @@ x = T.udataval(x)
 collectgarbage()
 -- old `x' cannot be collected (`a' still uses it)
 assert(table.getn(cl) == 0)
-for n in a do a[n] = nil end
+for n in pairs(a) do a[n] = nil end
 collectgarbage()
 assert(table.getn(cl) == 1 and cl[1] == x)   -- old `x' must be collected
 

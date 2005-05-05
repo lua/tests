@@ -222,7 +222,7 @@ do   -- clear global table
   local preserve = {io = 1, string = 1, debug = 1, os = 1,
                     coroutine = 1, table = 1, math = 1}
   for n,v in pairs(_G) do a[n]=v end
-  for n,v in a do
+  for n,v in pairs(a) do
     if not preserve[n] and type(v) ~= "function" and
        not string.find(n, "^[%u_]") then
      _G[n] = nil
@@ -251,7 +251,7 @@ local function checknext (a)
   local b = {}
   table.foreach(a, function (k,v) b[k] = v end)
   for k,v in pairs(b) do assert(a[k] == v) end
-  for k,v in a do assert(b[k] == v) end
+  for k,v in pairs(a) do assert(b[k] == v) end
   b = {}
   do local k,v = next(a); while k do b[k] = v; k,v = next(a,k) end end
   for k,v in pairs(b) do assert(a[k] == v) end
@@ -344,7 +344,7 @@ assert(next(a,nil) == 1000 and next(a,1000) == nil)
 assert(next({}) == nil)
 assert(next({}, nil) == nil)
 
-for a,b in {} do error"not here" end
+for a,b in pairs{} do error"not here" end
 for i=1,0 do error'not here' end
 for i=0,1,-1 do error'not here' end
 a = nil; for i=1,1 do assert(not a); a=1 end; assert(a)

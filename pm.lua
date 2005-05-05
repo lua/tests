@@ -226,7 +226,7 @@ for i,j in string.gfind("13 14 10 = 11, 15= 16, 22=23", "(%d+)%s*=%s*(%d+)") do
   t[i] = j
 end
 a = 0
-for k,v in t do assert(k+1 == v+0); a=a+1 end
+for k,v in pairs(t) do assert(k+1 == v+0); a=a+1 end
 assert(a == 3)
 
 

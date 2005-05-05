@@ -52,7 +52,7 @@ assert(a[3].get() == 3)
 assert(a[2].get() == 'a')
 
 a = {}
-for i, k in {'a', 'b'} do
+for i, k in pairs{'a', 'b'} do
   a[i] = {set = function(x, y) i=x; k=y end,
           get = function () return i, k end}
   if i == 2 then break end
@@ -74,7 +74,7 @@ for i=1,3 do
 end
 assert(f() == 1)
 
-for k, v in {"a", "b"} do
+for k, v in pairs{"a", "b"} do
   f = function () return k, v end
   break
 end

@@ -180,7 +180,7 @@ test()  -- retest comparisons, now using both `lt' and `le'
 
 local function Set(x)
   local y = {}
-  for _,k in x do y[k] = 1 end
+  for _,k in pairs(x) do y[k] = 1 end
   return setmetatable(y, t)
 end
 
@@ -322,6 +322,38 @@ assert(getmetatable(k) == getmetatable(u))
 a = {}
 rawset(a, "x", 1, 2, 3)
 assert(a.x == 1 and rawget(a, "x", 3) == 1)
+
+print '+'
+
+-- testing metatables for basic types
+mt = {}
+debug.setmetatable(10, mt)
+assert(getmetatable(-2) == mt)
+mt.__index = function (a,b) return a+b end
+assert((10)[3] == 13)
+assert((10)["3"] == 13)
+debug.setmetatable(23, nil)
+assert(getmetatable(-2) == nil)
+
+debug.setmetatable(true, mt)
+assert(getmetatable(false) == mt)
+mt.__index = function (a,b) return a or b end
+assert((true)[false] == true)
+assert((false)[false] == false)
+debug.setmetatable(false, nil)
+assert(getmetatable(true) == nil)
+
+debug.setmetatable(nil, mt)
+assert(getmetatable(nil) == mt)
+mt.__add = function (a,b) return (a or 0) + (b or 0) end
+assert(10 + nil == 10)
+assert(nil + 23 == 23)
+assert(nil + nil == 0)
+debug.setmetatable(nil, nil)
+assert(getmetatable(nil) == nil)
+
+debug.setmetatable(nil, {})
+
 
 print 'OK'
 

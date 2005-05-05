@@ -37,7 +37,7 @@ assert(b:xxx(10, 12) == 22)   -- pushself with non-constant index
 b.xxx = nil
 
 s = 0; n=0
-for a,b in b do s=s+b; n=n+1 end
+for a,b in pairs(b) do s=s+b; n=n+1 end
 assert(s==13977183656.5  and n==70001)
 
 require "checktable"

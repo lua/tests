@@ -138,7 +138,7 @@ test([[for i=1,3 do
 end
 ]], {1,2,1,2,1,2,1,3})
 
-test([[for i,v in {'a','b'} do
+test([[for i,v in pairs{'a','b'} do
   a=i..v
 end
 ]], {1,2,1,2,1,3})

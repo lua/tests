@@ -114,7 +114,7 @@ if querytab then
 
   local t = querytab(a)
 
-  for k,_ in a do a[k] = nil end
+  for k,_ in pairs(a) do a[k] = nil end
   collectgarbage()   -- restore GC and collect dead fiels in `a'
   for i=0,t-1 do
     local k = querytab(a, i)

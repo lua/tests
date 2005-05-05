@@ -133,16 +133,16 @@ a = {}
 -- fill a with `collectable' indices
 for i=1,lim do a[{}] = i end
 b = {}
-for k,v in a do b[k]=v end
+for k,v in pairs(a) do b[k]=v end
 -- remove all indices and collect them
-for n in b do
+for n in pairs(b) do
   a[n] = nil
   assert(type(n) == 'table' and next(n) == nil)
   collectgarbage()
 end
 b = nil
 collectgarbage()
-for n in a do error'cannot be here' end
+for n in pairs(a) do error'cannot be here' end
 for i=1,lim do a[i] = i end
 for i=1,lim do assert(a[i] == i) end
 
@@ -157,7 +157,7 @@ for i=1,lim do a[i] = i end
 for i=1,lim do local s=string.rep('@', i); a[s] = s..'#' end
 collectgarbage()
 local i = 0
-for k,v in a do assert(k==v or k..'#'==v); i=i+1 end
+for k,v in pairs(a) do assert(k==v or k..'#'==v); i=i+1 end
 assert(i == 3*lim)
 
 a = {}; setmetatable(a, {__mode = 'v'});
@@ -173,7 +173,7 @@ for i=1,lim do local t={}; a[t]=t end
 for i=1,lim do a[i+lim]=i..'x' end
 collectgarbage()
 local i = 0
-for k,v in a do assert(k==v or k-lim..'x' == v); i=i+1 end
+for k,v in pairs(a) do assert(k==v or k-lim..'x' == v); i=i+1 end
 assert(i == 2*lim)
 
 a = {}; setmetatable(a, {__mode = 'vk'});
@@ -188,7 +188,7 @@ for i=1,lim do local t={}; a[t]=t end
 collectgarbage()
 assert(next(a) ~= nil)
 local i = 0
-for k,v in a do
+for k,v in pairs(a) do
   assert((k == 1 and v == x) or
          (k == 2 and v == y) or
          (k == 3 and v == z) or k==v);

@@ -24,9 +24,14 @@ end
 do
   local a = debug.getinfo(print)
   assert(a.what == "C" and a.short_src == "[C]")
-  local b = debug.getinfo(test, "Sf")
+  local b = debug.getinfo(test, "SfL")
   assert(b.name == nil and b.what == "Lua" and b.linedefined == 11 and
+         b.lastlinedefined == b.linedefined + 10 and
          b.func == test and not string.find(b.short_src, "%["))
+  assert(b.activelines[b.linedefined + 1] and
+         b.activelines[b.lastlinedefined])
+  assert(not b.activelines[b.linedefined] and
+         not b.activelines[b.lastlinedefined + 1])
 end
 
 
@@ -400,8 +405,14 @@ local foo = function (e, l) table.insert(tr, l) end
 debug.sethook(co, foo, "l")
 
 local _, l = coroutine.resume(co, 10)
-local x = debug.getinfo(co, 1, "l")
-assert(x.currentline == l.currentline)
+local x = debug.getinfo(co, 1, "lfLS")
+assert(x.currentline == l.currentline and x.activelines[x.currentline])
+assert(type(x.func) == "function")
+for i=x.linedefined + 1, x.lastlinedefined do
+  assert(x.activelines[i])
+  x.activelines[i] = nil
+end
+assert(next(x.activelines) == nil)   -- no `extra' elements
 assert(debug.getinfo(co, 2) == nil)
 local a,b = debug.getlocal(co, 1, 1)
 assert(a == "x" and b == 10)

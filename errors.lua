@@ -17,7 +17,7 @@ end
 function checksyntax (prog, extra, token, line)
   local msg = doit(prog)
   token = string.gsub(token, "(%p)", "%%%1")
-  local pt = string.format([[^%%[string ".*"%%]:%d: .- near `%s'$]],
+  local pt = string.format([[^%%[string ".*"%%]:%d: .- near '%s'$]],
                            line, token)
   assert(string.find(msg, pt))
   assert(string.find(msg, msg, 1, true))
@@ -50,32 +50,32 @@ assert(doit("function a (, ...) end"))
 checksyntax([[
   local a = {4
 
-]], "`}' expected (to close `{' at line 1)", "<eof>", 3)
+]], "'}' expected (to close '{' at line 1)", "<eof>", 3)
 
 
 -- testes para mensagens de erro mais explicativas
 
-checkmessage("a=1; bbbb=2; a=math.sin(3)+bbbb(3)", "global `bbbb'")
+checkmessage("a=1; bbbb=2; a=math.sin(3)+bbbb(3)", "global 'bbbb'")
 checkmessage("a=1; local a,bbbb=2,3; a = math.sin(1) and bbbb(3)",
-       "local `bbbb'")
-checkmessage("a={}; do local a=1 end a:bbbb(3)", "method `bbbb'")
-checkmessage("local a={}; a.bbbb(3)", "field `bbbb'")
-assert(not string.find(doit"a={13}; local bbbb=1; a[bbbb](3)", "`bbbb'"))
+       "local 'bbbb'")
+checkmessage("a={}; do local a=1 end a:bbbb(3)", "method 'bbbb'")
+checkmessage("local a={}; a.bbbb(3)", "field 'bbbb'")
+assert(not string.find(doit"a={13}; local bbbb=1; a[bbbb](3)", "'bbbb'"))
 checkmessage("a={13}; local bbbb=1; a[bbbb](3)", "number")
 
 aaa = nil
-checkmessage("aaa.bbb:ddd(9)", "global `aaa'")
-checkmessage("local aaa={bbb=1}; aaa.bbb:ddd(9)", "field `bbb'")
-checkmessage("local aaa={bbb={}}; aaa.bbb:ddd(9)", "method `ddd'")
-checkmessage("local a,b,c; (function () a = b+1 end)()", "upvalue `b'")
+checkmessage("aaa.bbb:ddd(9)", "global 'aaa'")
+checkmessage("local aaa={bbb=1}; aaa.bbb:ddd(9)", "field 'bbb'")
+checkmessage("local aaa={bbb={}}; aaa.bbb:ddd(9)", "method 'ddd'")
+checkmessage("local a,b,c; (function () a = b+1 end)()", "upvalue 'b'")
 assert(not doit"local aaa={bbb={ddd=next}}; aaa.bbb:ddd(nil)")
 
-checkmessage("local aaa='a'; x=aaa+b", "local `aaa'")
-checkmessage("aaa={}; x=3/aaa", "global `aaa'")
-checkmessage("aaa='2'; b=nil;x=aaa*b", "global `b'")
-checkmessage("aaa={}; x=-aaa", "global `aaa'")
-assert(not string.find(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "`aaa'"))
-assert(not string.find(doit"aaa={}; (aaa or aaa)()", "`aaa'"))
+checkmessage("local aaa='a'; x=aaa+b", "local 'aaa'")
+checkmessage("aaa={}; x=3/aaa", "global 'aaa'")
+checkmessage("aaa='2'; b=nil;x=aaa*b", "global 'b'")
+checkmessage("aaa={}; x=-aaa", "global 'aaa'")
+assert(not string.find(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "'aaa'"))
+assert(not string.find(doit"aaa={}; (aaa or aaa)()", "'aaa'"))
 
 checkmessage([[aaa=9
 repeat until 3==3
@@ -86,12 +86,12 @@ local a,b = 1, {
   {1,2,3,4,5} or 3+3<=3+3,
   3+1>3+1,
   {d = x and aaa[x or y]}}
-]], "global `aaa'")
+]], "global 'aaa'")
 
 checkmessage([[
 local x,y = {},1
 if math.sin(1) == 0 then return 3 end    -- return
-x.a()]], "field `a'")
+x.a()]], "field 'a'")
 
 checkmessage([[
 prefix = nil
@@ -99,11 +99,11 @@ while 1 do
   local a
   if nil then break end
   insert(prefix, w)
-end]], "global `insert'")
+end]], "global 'insert'")
 
 checkmessage([[  -- tail call
   return math.sin("a")
-]], "`sin'")
+]], "'sin'")
 
 print'+'
 

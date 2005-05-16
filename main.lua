@@ -27,7 +27,7 @@ function checkout (s)
   local t = io.read("*a")
   io.input():close()
   assert(os.remove(out))
-  if s ~= t then print(string.format("`%s' - `%s'\n", s, t)) end
+  if s ~= t then print(string.format("'%s' - '%s'\n", s, t)) end
   assert(s == t)
   return t
 end

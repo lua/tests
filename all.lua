@@ -101,8 +101,12 @@ dofile(_WD..'sort.lua')
 assert(dofile(_WD..'verybig.lua') == 10); collectgarbage()
 dofile(_WD..'files.lua')
 
-for i=1,*msgs do
-  print(msgs[i])
+if *msgs > 0 then
+  print("\ntests not performed:")
+  for i=1,*msgs do
+    print(msgs[i])
+  end
+  print()
 end
 
 print("final OK !!!")

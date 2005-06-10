@@ -24,7 +24,7 @@ function checktable (t)
       elseif mp ~= i then
         l[i] = mp
       else  -- list head
-        l[mp] = {mp; n=1}   -- first element
+        l[mp] = {mp}   -- first element
         while next do
           assert(ff <= next and next < hsize)
           if l[next] then assert(l[next] == mp) else l[next] = mp end
@@ -60,7 +60,7 @@ function stat (t)
   local maxlist = {}
   for i=0,t.hsize-1 do
     if type(t[i]) == 'table' then
-      local n = t[i].n
+      local n = table.getn(t[i])
       nlist = nlist+1
       nelem = nelem + n
       if not maxlist[n] then maxlist[n] = 0 end

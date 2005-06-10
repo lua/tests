@@ -10,6 +10,7 @@ function f(a, ...)
 end
 
 function c12 (...)
+  assert(arg == nil)
   local x = {...}; x.n = table.getn(x)
   local res = (x.n==2 and x[1] == 1 and x[2] == 2)
   if res then res = 55 end

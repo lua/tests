@@ -51,9 +51,9 @@ assert(string.len("") == 0)
 assert(string.len("\0\0\0") == 3)
 assert(string.len("1234567890") == 10)
 
-assert(*"" == 0)
-assert(*"\0\0\0" == 3)
-assert(*"1234567890" == 10)
+assert(#"" == 0)
+assert(#"\0\0\0" == 3)
+assert(#"1234567890" == 10)
 
 assert(string.byte("a") == 97)
 assert(string.byte("á") > 127)
@@ -95,7 +95,7 @@ assert(''..12 == '12' and type(12 .. '') == 'string')
 assert(string.find(tostring{}, 'table:'))
 assert(string.find(tostring(print), 'function:'))
 assert(tostring(1234567890123) == '1234567890123')
-assert(*tostring('\0') == 1)
+assert(#tostring('\0') == 1)
 print('+')
 
 x = '"ílo"\n\\'
@@ -109,7 +109,7 @@ assert(string.format("%s\0 is not \0%s", 'not be', 'be') == 'not be\0 is not \0b
 assert(string.format("%%%d %010d", 10, 23) == "%10 0000000023")
 assert(tonumber(string.format("%f", 10.3)) == 10.3)
 x = string.format('"%-50s"', 'a')
-assert(*x == 52)
+assert(#x == 52)
 assert(string.sub(x, 1, 4) == '"a  ')
 
 assert(string.format("-%.20s.20s", string.rep("%", 2000)) == "-"..string.rep("%", 20)..".20s")

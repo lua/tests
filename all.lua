@@ -13,7 +13,7 @@ math.randomseed(0)
 local msgs = {}
 function Message (m)
   print(m)
-  msgs[*msgs+1] = string.sub(m, 3, -3)
+  msgs[#msgs+1] = string.sub(m, 3, -3)
 end
 
 
@@ -101,9 +101,9 @@ dofile(_WD..'sort.lua')
 assert(dofile(_WD..'verybig.lua') == 10); collectgarbage()
 dofile(_WD..'files.lua')
 
-if *msgs > 0 then
+if #msgs > 0 then
   print("\ntests not performed:")
-  for i=1,*msgs do
+  for i=1,#msgs do
     print(msgs[i])
   end
   print()

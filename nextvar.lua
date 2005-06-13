@@ -8,7 +8,7 @@ for i=1,100 do a[i.."+"] = nil end
 -- fill hash part with numeric indices testing size operator
 for i=1,100 do
   a[i] = true
-  assert(*a == i)
+  assert(#a == i)
 end
 
 
@@ -56,7 +56,7 @@ for i=1,lim do
   local s = s
   for k=0,lim do 
     local t = loadstring(s..'}')()
-    assert(*t == i)
+    assert(#t == i)
     check(t, fb(i), mp2(k))
     s = string.format('%sa%d=%d,', s, k, k)
   end
@@ -68,11 +68,11 @@ local a = {}
 for i=1,lim do a[i] = i end   -- build auxiliary table
 for k=0,lim do
   local a = {unpack(a,1,k)}
-  assert(*a == k)
+  assert(#a == k)
   check(a, k, 0)
   a = {1,2,3,unpack(a,1,k)}
   check(a, k+3, 0)
-  assert(*a == k + 3)
+  assert(#a == k + 3)
 end
 
 
@@ -86,14 +86,14 @@ a = {}; a[0] = 1; a[1] = 1; check(a, 1, 1)
 a = {}
 for i = 1,lim do
   a[i] = 1
-  assert(*a == i)
+  assert(#a == i)
   check(a, mp2(i), 0)
 end
 
 a = {}
 for i = 1,lim do
   a['a'..i] = 1
-  assert(*a == 0)
+  assert(#a == 0)
   check(a, 0, mp2(i))
 end
 
@@ -135,11 +135,11 @@ end
 
 
 -- test size operation on empty tables
-assert(*{} == 0)
-assert(*{nil} == 0)
-assert(*{nil, nil} == 0)
-assert(*{nil, nil, nil} == 0)
-assert(*{nil, nil, nil, nil} == 0)
+assert(#{} == 0)
+assert(#{nil} == 0)
+assert(#{nil, nil} == 0)
+assert(#{nil, nil, nil} == 0)
+assert(#{nil, nil, nil, nil} == 0)
 print'+'
 
 

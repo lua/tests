@@ -223,20 +223,20 @@ collectgarbage()
 do
   local f = assert(io.open(file, "w"))
   local fr = assert(io.open(file, "r"))
-  f:setvbuf("full")
+  assert(f:setvbuf("full", 2000))
   f:write("x")
   assert(fr:read("*all") == "")  -- full buffer; output not written yet
   f:close()
   fr:seek("set")
   assert(fr:read("*all") == "x")   -- `close' flushes it
   f = assert(io.open(file), "w")
-  f:setvbuf("no")
+  assert(f:setvbuf("no"))
   f:write("x")
   fr:seek("set")
   assert(fr:read("*all") == "x")  -- no buffer; output is ready
   f:close()
   f = assert(io.open(file, "a"))
-  f:setvbuf("line")
+  assert(f:setvbuf("line"))
   f:write("x")
   fr:seek("set", 1)
   assert(fr:read("*all") == "")   -- line buffer; no output without `\n'
@@ -265,6 +265,13 @@ io.close(io.input())
 assert(os.remove(file))
 x = nil; y = nil
 
+x, y = pcall(io.popen, "ls")
+if x then
+  assert(y:read("*a"))
+  assert(y:close())
+else
+  (Message or print)('\a\n >>> popen not available<<<\n\a')
+end
 
 print'+'
 

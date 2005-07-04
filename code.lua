@@ -6,6 +6,14 @@ end
 print "testando geracao de codigo/otimizacoes"
 
 
+-- this code gave an error for the code checker
+do
+  local function f (a)
+  for k,v,w in a do end
+  end
+end
+
+
 function check (f, ...)
   local c = T.listcode(f)
   for i=1, arg.n do

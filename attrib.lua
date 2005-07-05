@@ -129,6 +129,27 @@ assert(P1._G == _G and P1.xuxu._G == _G)
 removefiles(files)
 
 
+local i = 1
+package.preload["AX.B.C"] = function (...)
+  module(...)
+  assert(... == "AX.B.C" and i == 3)
+end
+
+package.preload["AX.B"] = function (...)
+  module(...)
+  assert(... == "AX.B" and i == 2)
+  i = i + 1
+end
+
+package.preload["AX"] = function (...)
+  module(...)
+  assert(... == "AX" and i == 1)
+  i = i + 1
+end
+
+x = require"AX.B.C"
+assert(x == AX.B.C and i == 3)
+
 package.path = ""
 assert(not pcall(require, "file_does_not_exist"))
 package.path = "??\0?"

@@ -112,7 +112,7 @@ print'+'
 
 function lineerror (s)
   local err,msg = pcall(loadstring(s))
-  local _, _, line = string.find(msg, ":(%d+):")
+  local line = string.match(msg, ":(%d+):")
   return line and line+0
 end
 
@@ -150,9 +150,9 @@ local function g()
 end
 local _, stackmsg = xpcall(g, debug.traceback)
 local stack = {}
-for line in string.gfind(stackmsg, "[^\n]*") do
-  local _, _, curr = string.find(line, ":(%d+):")
-  if curr then table.insert(stack, curr+0) end
+for line in string.gmatch(stackmsg, "[^\n]*") do
+  local curr = string.match(line, ":(%d+):")
+  if curr then table.insert(stack, tonumber(curr)) end
 end
 local i=1
 while stack[i] ~= l1 do

@@ -375,7 +375,7 @@ assert(string.find(debug.traceback(), "^stack traceback:\n"))
 local function checktraceback (co, p)
   local tb = debug.traceback(co)
   local i = 0
-  for l in string.gfind(tb, "[^\n]+\n?") do
+  for l in string.gmatch(tb, "[^\n]+\n?") do
     assert(i == 0 or string.find(l, p[i]))
     i = i+1
   end

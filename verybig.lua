@@ -88,7 +88,7 @@ end,
 
 file = os.tmpname()
 io.output(file)
-for s in string.gfind(prog, "$([^$]+)") do
+for s in string.gmatch(prog, "$([^$]+)") do
   local n = tonumber(s)
   if not n then io.write(s) else F[n]() end
 end

@@ -5,6 +5,14 @@ function f(s, p)
   if i then return string.sub(s, i, e) end
 end
 
+function f1(s, p)
+  p = string.gsub(p, "%%([0-9])", function (s) return "%" .. (s+1) end)
+  p = string.gsub(p, "^(^?)", "%1()", 1)
+  p = string.gsub(p, "($?)$", "()%1", 1)
+  local t = {string.match(s, p)}
+  return string.sub(s, t[1], t[#t] - 1)
+end
+
 a,b = string.find('', '')    -- empty patterns are tricky
 assert(a == 1 and b == 0);
 a,b = string.find('alo', '')
@@ -61,11 +69,10 @@ assert(f("0alo alo", "%x*") == "0a")
 assert(f("alo alo", "%C+") == "alo alo")
 print('+')
 
-assert(f('alo alx 123 b\0o b\0o', '(..*) %1') == "b\0o b\0o")
-assert(f('axz123= 4= 4 34', '(.+)=(.*)=%2 %1') == '3= 4= 4 3')
-_,_,a = string.find('=======', '^(=*)=%1$')
-assert(a == '===')
-assert(f('==========', '^([=]*)=%1$') == nil)
+assert(f1('alo alx 123 b\0o b\0o', '(..*) %1') == "b\0o b\0o")
+assert(f1('axz123= 4= 4 34', '(.+)=(.*)=%2 %1') == '3= 4= 4 3')
+assert(f1('=======', '^(=*)=%1$') == '=======')
+assert(string.match('==========', '^([=]*)=%1$') == nil)
 
   local abc = "\0\1\2\3\4\5\6\7\8\9\10\11\12\13\14\15\16\17\18\19\20\21" ..
   "\22\23\24\25\26\27\28\29\30\31\32\33\34\35\36\37\38\39\40\41" ..
@@ -103,19 +110,14 @@ assert(strset('%Z') == strset('[\1-\255]'))
 assert(strset('.') == strset('[\1-\255%z]'))
 print('+');
 
-function f(s, p)
-  local _, __, c = string.find(s, p);
-  return c;
-end
-
-assert(f("alo xyzK", "(%w+)K") == "xyz")
-assert(f("254 K", "(%d*)K") == "")
-assert(f("alo ", "(%w*)$") == "")
-assert(f("alo ", "(%w+)$") == nil)
+assert(string.match("alo xyzK", "(%w+)K") == "xyz")
+assert(string.match("254 K", "(%d*)K") == "")
+assert(string.match("alo ", "(%w*)$") == "")
+assert(string.match("alo ", "(%w+)$") == nil)
 assert(string.find("(álo)", "%(á") == 1)
-local _, _, a, b, c, d, e = string.find("âlo alo", "^(((.).).* (%w*))$")
+local a, b, c, d, e = string.match("âlo alo", "^(((.).).* (%w*))$")
 assert(a == 'âlo alo' and b == 'âl' and c == 'â' and d == 'alo' and e == nil)
-_, _, a, b, c, d  = string.find('0123456789', '(.+(.?)())')
+a, b, c, d  = string.match('0123456789', '(.+(.?)())')
 assert(a == '0123456789' and b == '' and c == 11 and d == nil)
 print('+')
 
@@ -191,9 +193,9 @@ assert(not pcall(string.gsub, "alo", ".)", print))
 
 -- big strings
 local a = string.rep('a', 300000)
-assert(string.find(a, '^a*(.?)$'))
-assert(not string.find(a, '^a*(.?)b$'))
-assert(string.find(a, '^a-(.?)$'))
+assert(string.find(a, '^a*.?$'))
+assert(not string.find(a, '^a*.?b$'))
+assert(string.find(a, '^a-.?$'))
 
 -- deep nest of gsubs
 function rev (s)
@@ -204,25 +206,26 @@ local x = string.rep('012345', 10)
 assert(rev(rev(x)) == x)
 
 
--- tests for gfind
+-- tests for gmatch
+assert(string.gfind == string.gmatch)
 local a = 0
-for i in string.gfind('abcde', '()') do assert(i == a+1); a=i end
+for i in string.gmatch('abcde', '()') do assert(i == a+1); a=i end
 assert(a==6)
 
 t = {n=0}
-for w in string.gfind("first second word", "%w+") do
+for w in string.gmatch("first second word", "%w+") do
       t.n=t.n+1; t[t.n] = w
 end
 assert(t[1] == "first" and t[2] == "second" and t[3] == "word")
 
 t = {3, 6, 9}
-for i in string.gfind ("xuxx uu ppar r", "()(.)%2") do
+for i in string.gmatch ("xuxx uu ppar r", "()(.)%2") do
   assert(i == table.remove(t, 1))
 end
 assert(table.getn(t) == 0)
 
 t = {}
-for i,j in string.gfind("13 14 10 = 11, 15= 16, 22=23", "(%d+)%s*=%s*(%d+)") do
+for i,j in string.gmatch("13 14 10 = 11, 15= 16, 22=23", "(%d+)%s*=%s*(%d+)") do
   t[i] = j
 end
 a = 0
@@ -239,11 +242,13 @@ assert(string.gsub("01abc45 de3x", "%f[%D]%w", ".") == "01.bc45 de3.")
 assert(string.gsub("function", "%f[\1-\255]%w", ".") == ".unction")
 assert(string.gsub("function", "%f[^\1-\255]", ".") == "function.")
 
-local i, e, k = string.find(" alo aalo allo", "%f[%S](.-%f[%s].-%f[%S])")
-assert(i == 2 and e == 5 and k == 'alo ')
+local i, e = string.find(" alo aalo allo", "%f[%S].-%f[%s].-%f[%S]")
+assert(i == 2 and e == 5)
+local k = string.match(" alo aalo allo", "%f[%S](.-%f[%s].-%f[%S])")
+assert(k == 'alo ')
 
 local a = {1, 5, 9, 14, 17,}
-for k in string.gfind("alo alo th02 is 1hat", "()%f[%w%d]") do
+for k in string.gmatch("alo alo th02 is 1hat", "()%f[%w%d]") do
   assert(table.remove(a, 1) == k)
 end
 assert(table.getn(a) == 0)

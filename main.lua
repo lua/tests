@@ -75,7 +75,7 @@ checkout("")
 
 -- test many arguments
 prepfile[[print(({...})[30])]]
-RUN("lua %s %s > %s", prog, string.rep(" a", 30), out)
+RUN("lua -w %s %s > %s", prog, string.rep(" a", 30), out)
 checkout("a\n")
 
 RUN([[lua "-eprint(1)" -ea=3 -e "print(a)" > %s]], out)

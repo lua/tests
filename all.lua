@@ -9,6 +9,8 @@ math.randomseed(0)
 
 ]=]
 
+print("current path:\n  " .. string.gsub(package.path, ";", "\n  "))
+
 
 local msgs = {}
 function Message (m)

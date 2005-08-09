@@ -88,12 +88,6 @@ AA = "x"
 try("X", "XXxX", AA)
 
 
--- testing loadfile with path
-assert(loadfile("X", package.path))
-assert(not loadfile("non-existent file", "/?;/dev/usr/?;;"))
-assert(not loadfile("non-existent file", "?????????"))
-
-
 removefiles(files)
 
 
@@ -128,27 +122,6 @@ assert(P1._G == _G and P1.xuxu._G == _G)
 
 removefiles(files)
 
-
-local i = 1
-package.preload["AX.B.C"] = function (...)
-  module(...)
-  assert(... == "AX.B.C" and i == 3)
-end
-
-package.preload["AX.B"] = function (...)
-  module(...)
-  assert(... == "AX.B" and i == 2)
-  i = i + 1
-end
-
-package.preload["AX"] = function (...)
-  module(...)
-  assert(... == "AX" and i == 1)
-  i = i + 1
-end
-
-x = require"AX.B.C"
-assert(x == AX.B.C and i == 3)
 
 package.path = ""
 assert(not pcall(require, "file_does_not_exist"))
@@ -188,7 +161,7 @@ assert(not pcall(module, "math.sin"))
 
 local p = ""   -- On Mac OS X, redefine this to "_"
 
-assert(loadlib == package.loadlib)   -- only for compatibility
+-- assert(loadlib == package.loadlib)   -- only for compatibility
 local f, err, when = package.loadlib(wd.."libs/lib1.so", p.."luaopen_lib1")
 if not f then
   (Message or print)('\a\n >>> cannot load dynamic library <<<\n\a')
@@ -205,6 +178,10 @@ else
   package.cpath = wd.."libs/?.so"
   require"lib2"
   assert(lib2.id("x") == "x")
+  f = require"lib1.sub"
+  assert(f == lib1.sub and next(lib1.sub) == nil)
+  f = require":lib2"
+  assert(f.id("x") == "x")
 end
 f, err, when = package.loadlib("donotexist", p.."xuxu")
 assert(not f and type(err) == "string" and (when == "open" or when == "absent"))

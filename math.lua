@@ -115,7 +115,7 @@ assert(8388609 + -8388609 == 0)
 assert(8388608 + -8388608 == 0)
 assert(8388607 + -8388607 == 0)
 
-if _soft then return end
+if rawget(_G, "_soft") then return end
 
 f = io.tmpfile()
 assert(f)

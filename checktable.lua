@@ -1,5 +1,5 @@
 
-assert(stat == nil)  -- module not loaded before
+assert(rawget(_G, "stat") == nil)  -- module not loaded before
 
 if T == nil then
   stat = function () print"`querytab' nao ativo" end
@@ -70,7 +70,7 @@ function stat (t)
   print(string.format("hsize=%d  elements=%d  load=%.2f  med.len=%.2f (asize=%d)",
           t.hsize, nelem, nelem/t.hsize, nelem/nlist, t.asize))
   for i=1,table.getn(maxlist) do
-    n = maxlist[i] or 0
+    local n = maxlist[i] or 0
     print(string.format("%5d %10d %.2f%%", i, n, n*100/nlist))
   end
 end

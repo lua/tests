@@ -33,7 +33,7 @@ function checkout (s)
 end
 
 function auxrun (...)
-  s = string.format(...)
+  local s = string.format(...)
   s = string.gsub(s, "lua", progname, 1)
   return os.execute(s)
 end
@@ -75,7 +75,7 @@ checkout("")
 
 -- test many arguments
 prepfile[[print(({...})[30])]]
-RUN("lua -w %s %s > %s", prog, string.rep(" a", 30), out)
+RUN("lua %s %s > %s", prog, string.rep(" a", 30), out)
 checkout("a\n")
 
 RUN([[lua "-eprint(1)" -ea=3 -e "print(a)" > %s]], out)

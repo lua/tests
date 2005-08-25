@@ -54,7 +54,7 @@ a.b.c:f2('k', 12); assert(a.b.c.k == 12)
 
 print('+')
 
-
+t = nil   -- 'declare' t
 function f(a,b,c) local d = 'a'; t={a,b,c,d} end
 
 f(  -- mudar de linha assim tem que poder

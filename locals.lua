@@ -42,7 +42,7 @@ function f (a)
 end
 
 local b=10
-local a; repeat local b; a,b=1,2; assert(a+1==b); until a+b==11
+local a; repeat local b; a,b=1,2; assert(a+1==b); until a+b==3
 
 
 assert(x == 1)
@@ -106,7 +106,7 @@ end
 print'+'
 
 
-if querytab then
+if rawget(_G, "querytab") then
   -- testando remocao de elementos mortos dos indices de tabelas
   collectgarbage("stop")   -- stop GC
   local a = {[{}] = 4, [3] = 0, alo = 1, 

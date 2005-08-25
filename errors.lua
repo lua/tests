@@ -1,7 +1,5 @@
 print("testando erros")
 
-local old = _ERRORMESSAGE
-
 function doit (s)
   local f, msg = loadstring(s)
   if f == nil then return msg end
@@ -70,7 +68,7 @@ checkmessage("local aaa={bbb={}}; aaa.bbb:ddd(9)", "method 'ddd'")
 checkmessage("local a,b,c; (function () a = b+1 end)()", "upvalue 'b'")
 assert(not doit"local aaa={bbb={ddd=next}}; aaa.bbb:ddd(nil)")
 
-checkmessage("local aaa='a'; x=aaa+b", "local 'aaa'")
+checkmessage("b=1; local aaa='a'; x=aaa+b", "local 'aaa'")
 checkmessage("aaa={}; x=3/aaa", "global 'aaa'")
 checkmessage("aaa='2'; b=nil;x=aaa*b", "global 'b'")
 checkmessage("aaa={}; x=-aaa", "global 'aaa'")
@@ -95,10 +93,11 @@ x.a()]], "field 'a'")
 
 checkmessage([[
 prefix = nil
+insert = nil
 while 1 do  
   local a
   if nil then break end
-  insert(prefix, w)
+  insert(prefix, a)
 end]], "global 'insert'")
 
 checkmessage([[  -- tail call
@@ -195,7 +194,7 @@ assert(a==3 and I == nil)
 print('+')
 
 lim = 1000
-if _soft then lim = 100 end
+if rawget(_G, "_soft") then lim = 100 end
 for i=1,lim do
   doit('a = ')
   doit('a = 4+nil')

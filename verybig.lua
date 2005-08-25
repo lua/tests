@@ -1,4 +1,4 @@
-if _soft then return 10 end
+if rawget(_G, "_soft") then return 10 end
 
 print "testando programas longos (>64k)"
 

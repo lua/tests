@@ -125,7 +125,7 @@ assert(count({}) == 1)
 assert(count(print) == 2)
 assert(count(function () end) == 1)
 assert(count(nil) == 1)
-assert(count(_INPUT) == 1)
+assert(count(io.stdin) == 1)
 assert(count(nil, 15) == 100)
 
 -- testando lua_to...
@@ -677,6 +677,7 @@ testamem("criacao de tabelas", function ()
 end)
 
 local a = 1
+close = nil
 testamem("criacao de closures", function ()
   function close (b,c)
    return function (x) return a+b+c+x end

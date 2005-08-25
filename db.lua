@@ -154,7 +154,7 @@ test([[for i=1,4 do a=1 end]], {1,1,1,1,1})
 
 print'+'
 
-a = {}
+a = {}; L = nil
 local glob = 1
 local oldglob = glob
 debug.sethook(function (e,l)

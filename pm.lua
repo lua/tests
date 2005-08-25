@@ -142,7 +142,7 @@ assert(string.gsub("um (dois) tres (quatro)", "(%(%w+%))", string.upper) ==
             "um (DOIS) tres (QUATRO)")
 
 do
-  local function setglobal (n,v) _G[n] = v end
+  local function setglobal (n,v) rawset(_G, n, v) end
   string.gsub("a=roberto,roberto=a", "(%w+)=(%w%w*)", setglobal)
   assert(_G.a=="roberto" and _G.roberto=="a")
 end

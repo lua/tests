@@ -129,6 +129,16 @@ y = f(10)
 w = 1.345
 assert(y(20)(30) == 60+w)
 
+-- testing closures x repeat-until
+
+local a = {}
+local i = 1
+repeat
+  local x = i
+  a[i] = function () i = x+1; return x end
+until i > 10 or a[i]() ~= x
+assert(i == 11 and a[1]() == 1 and a[3]() == 3 and i == 4)
+
 print'+'
 
 
@@ -176,6 +186,7 @@ local function eqtab (t1, t2)
   end
 end
 
+_G.x = nil   -- declare x
 function foo (a, ...)
   assert(coroutine.running() == f)
   assert(coroutine.status(f) == "running")

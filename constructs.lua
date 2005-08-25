@@ -31,10 +31,6 @@ assert(1234567890 == tonumber('1234567890') and 1234567890+1 == 1234567891)
 repeat until 1; repeat until true;
 while false do end; while nil do end;
 
--- old constructor-syntax compatibility test
-x = {}; x={;}; x={x=1;}; x={;x=1}; x={1}; x={1;}; x={;1}; x={1;x=1}; x={x=1;1}
-x={x=1,;}; x={;x=1,}; x={1,}; x={1,;}; x={;1,}; x={1,;x=1,}; x={x=1,;1,}
-
 do  -- test old bug (first name could not be an `upvalue')
  local a; function f(x) x={a=1}; x={x=1}; x={G=1} end
 end
@@ -44,7 +40,7 @@ function f (i)
   if i > 0 then return i, f(i-1); end;
 end
 
-x = {f(3), f(5), f(10),;};
+x = {f(3), f(5), f(10);};
 assert(x[1] == 3 and x[2] == 5 and x[3] == 10 and x[4] == 9 and x[12] == 1);
 x = {f'alo', f'xixi', nil};
 assert(x[1] == 'alo' and x[2] == 'xixi' and x[3] == nil);
@@ -232,8 +228,9 @@ repeat
       if %s then NX = b  else NX = a end
       while %s do WX1 = a; break end
       while %s do WX2 = a; break end
-  ]], s1, s, s1, s, s1, s)
-  loadstring(s)()
+      repeat if (%s) then break end; assert(b)  until not(%s)
+  ]], s1, s, s1, s, s1, s, s1, s, s)
+  assert(loadstring(s))()
   assert(X and not NX and not WX1 == K and not WX2 == K)
   if math.mod(i,4000) == 0 then print('+') end
   i = i+1

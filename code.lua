@@ -55,16 +55,19 @@ check (function (a,b,c) return a end, 'RETURN')
 
 -- infinite loops
 check(function () while true do local a = -1 end end,
-'JMP', 'LOADK', 'JMP', 'RETURN')
+'LOADK', 'JMP', 'RETURN')
 
 check(function () while 1 do local a = -1 end end,
-'JMP', 'LOADK', 'JMP', 'RETURN')
+'LOADK', 'JMP', 'RETURN')
 
 check(function () repeat local x = 1 until false end,
 'LOADK', 'JMP', 'RETURN')
 
 check(function () repeat local x = 1 until nil end,
 'LOADK', 'JMP', 'RETURN')
+
+check(function () repeat local x = 1 until true end,
+'LOADK', 'RETURN')
 
 
 -- not

@@ -44,6 +44,7 @@ local files = {
   ["C.lua"] = "require'C'; package.loaded[...] = 25"
 }
 
+AA = nil
 local extras = [[
 NAME = '%s'
 REQUIRED = ...
@@ -82,7 +83,7 @@ assert(require("A") == AA)
 AA = false
 try('K', 'L', false)     -- default option
 try('K', 'L', false)     -- default option (should reload it)
-assert(_REQUIREDNAME == nil)
+assert(rawget(_G, "_REQUIREDNAME") == nil)
 
 AA = "x"
 try("X", "XXxX", AA)
@@ -178,10 +179,15 @@ else
   package.cpath = wd.."libs/?.so"
   require"lib2"
   assert(lib2.id("x") == "x")
-  f = require"lib1.sub"
-  assert(f == lib1.sub and next(lib1.sub) == nil)
+  local fs = require"lib1.sub"
+  assert(fs == lib1.sub and next(lib1.sub) == nil)
+  module("lib2")
   f = require":lib2"
-  assert(f.id("x") == "x")
+  assert(f.id("x") == "x" and _M == f and _NAME == "lib2")
+  module("lib1.sub")
+  assert(_M == fs)
+  setfenv(1, _G)
+ 
 end
 f, err, when = package.loadlib("donotexist", p.."xuxu")
 assert(not f and type(err) == "string" and (when == "open" or when == "absent"))

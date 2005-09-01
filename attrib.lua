@@ -41,7 +41,7 @@ local files = {
   ["A"] = "",
   ["L"] = "",
   ["XXxX"] = "",
-  ["C.lua"] = "require'C'; package.loaded[...] = 25"
+  ["C.lua"] = "package.loaded[...] = 25; require'C'"
 }
 
 AA = nil
@@ -101,7 +101,7 @@ files = {
   ["P1/xuxu.lua"] = "AA = 20",
 }
 
-createfiles(files, "module(...)\n", "")
+createfiles(files, "module(..., package.seeall)\n", "")
 AA = 0
 
 local m = assert(require"P1")
@@ -133,10 +133,18 @@ package.path = oldpath
 
 assert(not pcall(require, "file_does_not_exist2"))
 
+local function import(...)
+  local f = {...}
+  return function (m)
+    for i=1, #f do m[f[i]] = _G[f[i]] end
+  end
+end
+
+local assert, module, package = assert, module, package
 X = nil; x = 0; assert(_G.x == 0)   -- `x' must be a global variable
 module"X"; x = 1; assert(_M.x == 1)
 module"X.a.b.c"; x = 2; assert(_M.x == 2)
-module"X.a.b"; x = 3
+module("X.a.b", package.seeall); x = 3
 assert(X._NAME == "X" and X.a.b.c._NAME == "X.a.b.c" and X.a.b._NAME == "X.a.b")
 assert(X._M == X and X.a.b.c._M == X.a.b.c and X.a.b._M == X.a.b)
 assert(X.x == 1 and X.a.b.c.x == 2 and X.a.b.x == 3)
@@ -144,11 +152,12 @@ assert(X._PACKAGE == "" and X.a.b.c._PACKAGE == "X.a.b." and
        X.a.b._PACKAGE == "X.a.")
 assert(_PACKAGE.."c" == "X.a.c")
 assert(X.a._NAME == nil and X.a._M == nil)
-module"X.a"; x = 4
+module("X.a", import("X")) ; x = 4
 assert(X.a._NAME == "X.a" and X.a.x == 4 and X.a._M == X.a)
-module"X.a.b"; assert(x == 3); x = 5
+module("X.a.b", package.seeall); assert(x == 3); x = 5
 assert(_NAME == "X.a.b" and X.a.b.x == 5)
-assert(X._G == _G and X.a._G == _G and X.a.b._G == _G and X.a.b.c._G == _G)
+
+assert(X._G == nil and X.a._G == nil and X.a.b._G == _G and X.a.b.c._G == nil)
 
 setfenv(1, _G)
 assert(x == 0)
@@ -181,10 +190,10 @@ else
   assert(lib2.id("x") == "x")
   local fs = require"lib1.sub"
   assert(fs == lib1.sub and next(lib1.sub) == nil)
-  module("lib2")
+  module("lib2", package.seeall)
   f = require":lib2"
   assert(f.id("x") == "x" and _M == f and _NAME == "lib2")
-  module("lib1.sub")
+  module("lib1.sub", package.seeall)
   assert(_M == fs)
   setfenv(1, _G)
  
@@ -270,6 +279,9 @@ assert(not nil == true)
 assert(not not nil == false)
 assert(not not 1 == true)
 assert(not not a == true)
+assert(not not (6 or nil) == true)
+assert(not not (nil and 56) == false)
+assert(not not (nil and true) == false)
 print('+')
 
 a = {}

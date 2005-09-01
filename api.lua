@@ -703,28 +703,6 @@ assert(T.gsub("", "alo", "//") == "")
 assert(T.gsub("...", ".", "/.") == "/././.")
 assert(T.gsub("...", "...", "") == "")
 
-local t = {}
-assert(T.setfield("b.c000.d", t, 10) == nil)
-local a, b = T.getfield("b.c000.d", t)
-assert(b == nil and a == 10)
-local a, b = T.getfield("b.c000", t)
-assert(b == nil and a == t.b.c000)
-local a, b = T.getfield("", t)
-assert(b == nil and a == nil)
-local a, b = T.getfield("x.y", t)
-assert(b == "y" and a == t.x)
-local a, b = T.getfield(".", t)
-assert(b == "")
-local a, b = T.getfield("b.c000.d.e", t)
-assert(b == "e" and a == t.b.c000.d)
-assert(T.setfield("b.c1", t, 20) == nil)
-assert(t.b.c1 == 20 and t.b.c000.d == 10)
-assert(T.setfield("b.c000.d.e", t, 20) == "e")
-assert(t.b.c1 == 20 and t.b.c000.d == 10)
-assert(T.setfield("b.c000.d 01.e.f", t, 30) == nil)
-assert(t.b.c1 == 20 and t.b.c000.d == 10 and t.b.c000["d 01"].e.f == 30)
-assert(T.setfield("b3", t, 40) == nil)
-assert(t.b3 == 40)
 
 print'OK'
 

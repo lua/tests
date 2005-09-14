@@ -191,7 +191,7 @@ else
   local fs = require"lib1.sub"
   assert(fs == lib1.sub and next(lib1.sub) == nil)
   module("lib2", package.seeall)
-  f = require":lib2"
+  f = require"-lib2"
   assert(f.id("x") == "x" and _M == f and _NAME == "lib2")
   module("lib1.sub", package.seeall)
   assert(_M == fs)

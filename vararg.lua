@@ -115,7 +115,12 @@ a = {select(3, unpack{10,20,30,40})}
 assert(table.getn(a) == 2 and a[1] == 30 and a[2] == 40)
 a = {select(1)}
 assert(next(a) == nil)
-a = {select(0)}
-assert(next(a) == nil)
+a = {select(-1, 3, 5, 7)}
+assert(a[1] == 7 and a[2] == nil)
+a = {select(-2, 3, 5, 7)}
+assert(a[1] == 5 and a[2] == 7 and a[3] == nil)
+pcall(select, 10000)
+pcall(select, -10000)
 
 print('OK')
+

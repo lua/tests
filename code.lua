@@ -46,7 +46,7 @@ check(function ()
   local a,b,c
   local d; local e;
   a = nil; d=nil
-end, 'LOADNIL')
+end, 'RETURN')
 
 
 -- single return
@@ -63,12 +63,16 @@ check(function () while 1 do local a = -1 end end,
 check(function () repeat local x = 1 until false end,
 'LOADK', 'JMP', 'RETURN')
 
-check(function () repeat local x = 1 until nil end,
-'LOADK', 'JMP', 'RETURN')
+check(function () repeat local x until nil end,
+'LOADNIL', 'JMP', 'RETURN')
 
 check(function () repeat local x = 1 until true end,
 'LOADK', 'RETURN')
 
+
+-- concat optimization
+check(function (a,b,c,d) return a..b..c..d end,
+  'MOVE', 'MOVE', 'MOVE', 'MOVE', 'CONCAT', 'RETURN')
 
 -- not
 check(function () return not not nil end, 'LOADBOOL', 'RETURN')
@@ -82,7 +86,6 @@ check(function ()
   a = b*2
   c[4], a[b] = -((a + d/-20.5 - a[b]) ^ a.x), b
 end,
-  'LOADNIL',
   'MUL',
   'DIV', 'ADD', 'GETTABLE', 'SUB', 'GETTABLE', 'POW',
     'UNM', 'SETTABLE', 'SETTABLE', 'RETURN')
@@ -99,8 +102,13 @@ check(function ()
   b = 5+4
   a[true] = false
 end,
-  'LOADNIL', 'SETTABLE', 'SETTABLE', 'SETTABLE', 'SUB', 'DIV', 'ADD',
+  'SETTABLE', 'SETTABLE', 'SETTABLE', 'SUB', 'DIV', 'LOADK',
   'SETTABLE', 'RETURN')
+
+local function f () return -((2^8 + -(-1)) % 8)/2 * 4 - 3 end
+
+check(f, 'LOADK', 'RETURN')
+assert(f() == -5)
 
 check(function ()
   local a,b,c
@@ -108,7 +116,7 @@ check(function ()
   b[a], a = c, b
   a, b = c, a
   a = a
-end, 'LOADNIL',
+end, 
   'MOVE', 'MOVE', 'SETTABLE',
   'MOVE', 'MOVE', 'MOVE', 'SETTABLE',
   'MOVE', 'MOVE', 'MOVE',

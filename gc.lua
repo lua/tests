@@ -103,7 +103,7 @@ local function dosteps (siz)
   local i = 0
   repeat
     i = i+1
-  until collectgarbage("step", siz) == 1
+  until collectgarbage("step", siz)
   assert(gcinfo() < x)
   return i
 end
@@ -111,8 +111,8 @@ end
 assert(dosteps(0) > 10)
 assert(dosteps(6) < dosteps(2))
 assert(dosteps(10000) == 1)
-assert(collectgarbage("step", 1000000) == 1)
-assert(collectgarbage("step", 1000000) == 1)
+assert(collectgarbage("step", 1000000) == true)
+assert(collectgarbage("step", 1000000))
 
 
 do

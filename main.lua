@@ -66,7 +66,7 @@ prepfile(a)
 RUN('lua "-e " -- %s a b c', prog)
 
 prepfile"assert(arg==nil)"
-prepfile("assert(arg==nil)", otherprog)
+prepfile("assert(arg)", otherprog)
 RUN("lua -l%s - < %s", prog, otherprog)
 
 prepfile""

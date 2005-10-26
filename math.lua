@@ -4,7 +4,7 @@ do
   local a,b,c = "2", " 3e0 ", " 10  "
   assert(a+b == 5 and -b == -3 and b+"2" == 5 and "10"-c == 0)
   assert(type(a) == 'string' and type(b) == 'string' and type(c) == 'string')
-  assert(a == "2" and b == " 3e0 " and c == " 10  ")
+  assert(a == "2" and b == " 3e0 " and c == " 10  " and -c == -"  10 ")
 end
 
 

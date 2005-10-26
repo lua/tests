@@ -532,9 +532,11 @@ assert(a == nil and b == 3 and type(c) == "string")   -- 3 == syntax error
 
 T.loadlib(L1)
 a, b = T.doremote(L1, [[
-  a = baselibopen(); assert(a == _G)
-  a = strlibopen(); assert(type(a.sub) == "function")
+  a = strlibopen()
+  a = packageopen()
+  a = baselibopen(); assert(a == _G and require("_G") == a)
   a = iolibopen(); assert(type(a.read) == "function")
+  assert(require("io") == a)
   a = tablibopen(); assert(type(a.insert) == "function")
   a = dblibopen(); assert(type(a.getlocal) == "function")
   a = mathlibopen(); assert(type(a.sin) == "function")

@@ -283,5 +283,10 @@ x("set")
 assert(x() == 24)
 
 
+-- test for bug in parameter adjustment
+assert((function () return nil end)(4) == nil)
+assert((function () local a; return a end)(4) == nil)
+assert((function (a) return a end)() == nil)
+
 print('OK')
 return deep

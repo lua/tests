@@ -74,20 +74,13 @@ assert(f1('axz123= 4= 4 34', '(.+)=(.*)=%2 %1') == '3= 4= 4 3')
 assert(f1('=======', '^(=*)=%1$') == '=======')
 assert(string.match('==========', '^([=]*)=%1$') == nil)
 
-  local abc = "\0\1\2\3\4\5\6\7\8\9\10\11\12\13\14\15\16\17\18\19\20\21" ..
-  "\22\23\24\25\26\27\28\29\30\31\32\33\34\35\36\37\38\39\40\41" ..
-  "\42\43\44\45\46\47\48\49\50\51\52\53\54\55\56\57\58\59\60\61" ..
-  "\62\63\64\65\66\67\68\69\70\71\72\73\74\75\76\77\78\79\80\81" ..
-  "\82\83\84\85\86\87\88\89\90\91\92\93\94\95\96\97\98\99\100\101" ..
-  "\102\103\104\105\106\107\108\109\110\111\112\113\114\115\116\117\118" ..
-  "\119\120\121\122\123\124\125\126\127\128\129\130\131\132\133\134\135" ..
-  "\136\137\138\139\140\141\142\143\144\145\146\147\148\149\150\151\152" ..
-  "\153\154\155\156\157\158\159\160\161\162\163\164\165\166\167\168\169\170" ..
-  "\171\172\173\174\175\176\177\178\179\180\181\182\183\184\185\186\187\188" ..
-  "\189\190\191\192\193\194\195\196\197\198\199\200\201\202\203\204\205\206" ..
-  "\207\208\209\210\211\212\213\214\215\216\217\218\219\220\221\222\223\224" ..
-  "\225\226\227\228\229\230\231\232\233\234\235\236\237\238\239\240\241\242" ..
-  "\243\244\245\246\247\248\249\250\251\252\253\254\255";
+local function range (i, j)
+  if i <= j then
+    return i, range(i+1, j)
+  end
+end
+
+local abc = string.char(range(0, 255));
 
 assert(string.len(abc) == 256)
 
@@ -133,6 +126,8 @@ assert(a == 'a@b@ηd' and b == 2)
 assert(string.gsub('alo alo', '()[al]', '%1') == '12o 56o')
 assert(string.gsub("abc=xyz", "(%w*)(%p)(%w+)", "%3%2%1-%0") ==
               "xyz=abc-abc=xyz")
+assert(string.gsub("abc", "%w", "%1%0") == "aabbcc")
+assert(string.gsub("abc", "%w+", "%0%1") == "abcabc")
 assert(string.gsub('αιν', '$', '\0σϊ') == 'αιν\0σϊ')
 assert(string.gsub('', '^', 'r') == 'r')
 assert(string.gsub('', '$', 'r') == 'r')
@@ -151,7 +146,7 @@ function f(a,b) return string.gsub(a,'.',b) end
 assert(string.gsub("trocar tudo em |teste|b| ι |beleza|al|", "|([^|]*)|([^|]*)|", f) ==
             "trocar tudo em bbbbb ι alalalalalal")
 
-local function dostring (s) return loadstring(s)() end
+local function dostring (s) return loadstring(s)() or "" end
 assert(string.gsub("alo $a=1$ novamente $return a$", "$([^$]*)%$", dostring) ==
             "alo  novamente 1")
 
@@ -160,11 +155,12 @@ x = string.gsub("$x=string.gsub('alo', '.', string.upper)$ assim vai para $retur
 assert(x == ' assim vai para ALO')
 
 t = {}
-string.gsub('a alo jose  joao', '()(%w+)()', function (a,w,b)
-  assert(string.len(w) == b-a);
-  t[a] = b-a;
-end)
-assert(t[1] == 1 and t[3] == 3 and t[7] == 4 and t[13] == 4)
+s = 'a alo jose  joao'
+r = string.gsub(s, '()(%w+)()', function (a,w,b)
+      assert(string.len(w) == b-a);
+      t[a] = b-a;
+    end)
+assert(s == r and t[1] == 1 and t[3] == 3 and t[7] == 4 and t[13] == 4)
 
 
 function isbalanced (s)
@@ -185,12 +181,16 @@ string.gsub("first second word", "%w%w*", function (w) t.n=t.n+1; t[t.n] = w end
 assert(t[1] == "first" and t[2] == "second" and t[3] == "word" and t.n == 3)
 
 t = {n=0}
-string.gsub("first second word", "%w+",
-      function (w) t.n=t.n+1; t[t.n] = w end, 2)
+assert(string.gsub("first second word", "%w+",
+         function (w) t.n=t.n+1; t[t.n] = w end, 2) == "first second word")
 assert(t[1] == "first" and t[2] == "second" and t[3] == nil)
 
 assert(not pcall(string.gsub, "alo", "(.", print))
 assert(not pcall(string.gsub, "alo", ".)", print))
+assert(not pcall(string.gsub, "alo", "(.", {}))
+assert(not pcall(string.gsub, "alo", "(.)", "%2"))
+assert(not pcall(string.gsub, "alo", "(%1)", "a"))
+assert(not pcall(string.gsub, "alo", "(%0)", "a"))
 
 -- big strings
 local a = string.rep('a', 300000)
@@ -205,6 +205,18 @@ end
 
 local x = string.rep('012345', 10)
 assert(rev(rev(x)) == x)
+
+
+-- gsub with tables
+assert(string.gsub("alo alo", ".", {}) == "alo alo")
+assert(string.gsub("alo alo", "(.)", {a="AA", l=""}) == "AAo AAo")
+assert(string.gsub("alo alo", "(.).", {a="AA", l="K"}) == "AAo AAo")
+assert(string.gsub("alo alo", "((.)(.?))", {al="AA", o=false}) == "AAo AAo")
+
+assert(string.gsub("alo alo", "().", {2,5,6}) == "256 alo")
+
+t = {}; setmetatable(t, {__index = function (t,s) return string.upper(s) end})
+assert(string.gsub("a alo b hi", "%w%w+", t) == "a ALO b HI")
 
 
 -- tests for gmatch

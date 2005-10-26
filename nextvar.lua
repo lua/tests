@@ -274,6 +274,13 @@ for i=0,40 do
 end
 
 
+assert(table.maxn{} == 0)
+assert(table.maxn{["1000"] = true} == 0)
+assert(table.maxn{["1000"] = true, [24.5] = 3} == 24.5)
+assert(table.maxn{[1000] = true} == 1000)
+assert(table.maxn{[10] = true, [100*math.pi] = print} == 100*math.pi)
+
+
 -- int overflow
 a = {}
 for i=0,50 do a[math.pow(2,i)] = true end

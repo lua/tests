@@ -220,6 +220,27 @@ g()
 
 
 assert(a[f] and a[g] and a[assert] and a[debug.getlocal] and not a[print])
+
+
+-- tests for manipulating non-registered locals (C and Lua temporaries)
+
+local n, v = debug.getlocal(0, 1)
+assert(v == 0 and n == "(*temporary)")
+local n, v = debug.getlocal(0, 2)
+assert(v == 2 and n == "(*temporary)")
+assert(not debug.getlocal(0, 3))
+assert(not debug.getlocal(0, 0))
+
+function f()
+  assert(select(2, debug.getlocal(2,3)) == 1)
+  assert(not debug.getlocal(2,4))
+  debug.setlocal(2, 3, 10)
+  return 20
+end
+
+function g(a,b) return (a+1) + f() end
+
+assert(g(0,0) == 30)
  
 
 debug.sethook(nil);
@@ -469,6 +490,9 @@ local co = coroutine.wrap(f)
 co(10)
 pcall(co)
 pcall(co)
+
+
+assert(type(debug.getregistry()) == "table")
 
 
 print"OK"

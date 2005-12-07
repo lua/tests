@@ -154,4 +154,18 @@ for s in coroutine.wrap(function () gen("", len) end) do
   assert(s == loadstring("return [====[\n"..s.."]====]")())
 end
 
+
+-- testing decimal point locale
+if os.setlocale("pt_BR") then
+  assert(tonumber("3,4") == 3.4)
+  assert(assert(loadstring("return 3.4"))() == 3.4)
+  assert(assert(loadstring("return .4,3"))() == .4)
+  assert(assert(loadstring("return 4."))() == 4.)
+  assert(os.setlocale("C"))
+else
+  (Message or print)(
+   '\a\n >>> pt_BR locale not available: skipping decimal point tests <<<\n\a')
+end
+
+
 print('OK')

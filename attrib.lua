@@ -131,7 +131,14 @@ assert(not pcall(require, "file_does_not_exist1"))
 
 package.path = oldpath
 
-assert(not pcall(require, "file_does_not_exist2"))
+-- check 'require' error message
+local fname = "file_does_not_exist2"
+local m, err = pcall(require, fname)
+for t in string.gmatch(package.path..";"..package.cpath, "[^;]+") do
+  t = string.gsub(t, "?", fname)
+  assert(string.find(err, t, 1, true))
+end
+
 
 local function import(...)
   local f = {...}

@@ -1,11 +1,11 @@
-print('testando analizador léxico')
+print('testing scanner')
 
 local function dostring (x) return assert(loadstring(x))() end
 
 dostring("x = 'a\0a'")
 assert(x == 'a\0a' and string.len(x) == 3)
 
--- sequencias de escapes
+-- escape sequences
 assert('\n\"\'\\' == [[
 
 "'\]])
@@ -19,7 +19,7 @@ assert('\0\0\0alo' == '\0' .. '\0\0' .. 'alo')
 
 assert(010 .. 020 .. -030 == "1020-30")
 
--- grandes variaveis
+-- long variable names
 
 var = string.rep('a', 15000)
 prog = string.format("%s = 5", var)
@@ -51,7 +51,7 @@ print('+')
 a1 = [==[temp = [[um valor qualquer]]; ]==]
 assert(loadstring(a1))()
 assert(temp == 'um valor qualquer')
--- grandes strings --
+-- long strings --
 b = "001234567890123456789012345678901234567891234567890123456789012345678901234567890012345678901234567890123456789012345678912345678901234567890123456789012345678900123456789012345678901234567890123456789123456789012345678901234567890123456789001234567890123456789012345678901234567891234567890123456789012345678901234567890012345678901234567890123456789012345678912345678901234567890123456789012345678900123456789012345678901234567890123456789123456789012345678901234567890123456789001234567890123456789012345678901234567891234567890123456789012345678901234567890012345678901234567890123456789012345678912345678901234567890123456789012345678900123456789012345678901234567890123456789123456789012345678901234567890123456789001234567890123456789012345678901234567891234567890123456789012345678901234567890012345678901234567890123456789012345678912345678901234567890123456789012345678900123456789012345678901234567890123456789123456789012345678901234567890123456789"
 assert(string.len(b) == 960)
 print('+')
@@ -95,7 +95,7 @@ a = nil
 b = nil
 
 
--- testando terminador de linhas
+-- testing line ends
 prog = [[
 a = 1        -- a comment
 b = 2
@@ -117,7 +117,7 @@ for _, n in pairs{"\n", "\r", "\n\r", "\r\n"} do
 end
 
 
--- testando comentarios e strings com delimitador variavel
+-- testing comments and strings with long brackets
 a = [==[]=]==]
 assert(a == "]=")
 
@@ -156,11 +156,14 @@ end
 
 
 -- testing decimal point locale
-if os.setlocale("pt_BR") then
-  assert(tonumber("3,4") == 3.4)
+if os.setlocale("pt_BR") or os.setlocale("ptb") then
+  assert(tonumber("3,4") == 3.4 and tonumber"3.4" == nil)
   assert(assert(loadstring("return 3.4"))() == 3.4)
   assert(assert(loadstring("return .4,3"))() == .4)
   assert(assert(loadstring("return 4."))() == 4.)
+  assert(assert(loadstring("return 4.+.5"))() == 4.5)
+  local a,b = loadstring("return 4.5.")
+  assert(string.find(b, "'4%.5%.'"))
   assert(os.setlocale("C"))
 else
   (Message or print)(

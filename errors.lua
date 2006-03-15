@@ -104,6 +104,10 @@ checkmessage([[  -- tail call
   return math.sin("a")
 ]], "'sin'")
 
+checkmessage([[collectgarbage("nooption")]], "invalid option")
+
+checkmessage([[x = print .. "a"]], "concatenate")
+
 print'+'
 
 

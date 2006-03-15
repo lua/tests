@@ -345,32 +345,32 @@ tt.__gc = F
 do
   collectgarbage();
   collectgarbage();
-  local x = gcinfo();
+  local x = collectgarbage("count");
   local a = T.newuserdata(5001)
   assert(T.testC("objsize 2; return 1", a) == 5001)
-  assert(gcinfo() >= x+4) 
+  assert(collectgarbage("count") >= x+4) 
   a = nil
   collectgarbage();
-  assert(gcinfo() <= x+1)
+  assert(collectgarbage("count") <= x+1)
   -- udata sem finalizer
-  x = gcinfo()
+  x = collectgarbage("count")
   collectgarbage("stop")
   for i=1,1000 do newproxy(false) end
-  assert(gcinfo() > x+10)
+  assert(collectgarbage("count") > x+10)
   collectgarbage()
-  assert(gcinfo() <= x+1)
+  assert(collectgarbage("count") <= x+1)
   -- udata com finalizer
-  x = gcinfo()
+  x = collectgarbage("count")
   collectgarbage()
   collectgarbage("stop")
   a = newproxy(true)
   getmetatable(a).__gc = function () end
   for i=1,1000 do newproxy(a) end
-  assert(gcinfo() >= x+10)
+  assert(collectgarbage("count") >= x+10)
   collectgarbage()  -- essa coleta so' chama TM, sem liberar memoria
-  assert(gcinfo() >= x+10)
+  assert(collectgarbage("count") >= x+10)
   collectgarbage()
-  assert(gcinfo() <= x+1)
+  assert(collectgarbage("count") <= x+1)
 end
 
 
@@ -508,6 +508,7 @@ do
   for i=0,lim do assert(T.pushuserdata(i) == a[i]) end
   for i=0,lim do a[a[i]] = i end
   for i=0,lim do a[T.pushuserdata(i)] = i end
+  assert(type(tostring(a[1])) == "string")
 end
 
 
@@ -611,7 +612,7 @@ function expand (n,s)
                               e, s, expand(n-1,s), e)
 end
 
-G=0; collectgarbage(); a =gcinfo()
+G=0; collectgarbage(); a =collectgarbage("count")
 loadstring(expand(20,"G=G+1"))()
 assert(G==20); collectgarbage();  -- assert(gcinfo() <= a+1)
 

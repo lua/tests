@@ -32,6 +32,9 @@ assert(string.find('', '\0') == nil)
 assert(string.find('alo123alo', '12') == 4)
 assert(string.find('alo123alo', '^12') == nil)
 
+assert(f('aloALO', '%l*') == 'alo')
+assert(f('aLo_ALO', '%a*') == 'aLo')
+
 assert(f('aaab', 'a*') == 'aaa');
 assert(f('aaa', '^.*$') == 'aaa');
 assert(f('aaa', 'b*') == '');

@@ -96,10 +96,13 @@ assert(string.find(tostring{}, 'table:'))
 assert(string.find(tostring(print), 'function:'))
 assert(tostring(1234567890123) == '1234567890123')
 assert(#tostring('\0') == 1)
+assert(tostring(true) == "true")
+assert(tostring(false) == "false")
 print('+')
 
 x = '"ílo"\n\\'
 assert(string.format('%q%s', x, x) == '"\\"ílo\\"\\\n\\\\""ílo"\n\\')
+assert(string.format('%q', "\0") == [["\000"]])
 assert(string.format("\0%c\0%c%x\0", string.byte("á"), string.byte("b"), 140) ==
               "\0á\0b8c\0")
 assert(string.format('') == "")

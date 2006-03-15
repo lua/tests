@@ -199,6 +199,7 @@ end
 
 f = coroutine.create(foo)
 assert(type(f) == "thread" and coroutine.status(f) == "suspended")
+assert(string.find(tostring(f), "thread"))
 local s,a,b,c,d
 s,a,b,c,d = coroutine.resume(f, {1,2,3}, {}, {1}, {'a', 'b', 'c'})
 assert(s and a == nil and coroutine.status(f) == "suspended")

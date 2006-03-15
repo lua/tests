@@ -5,6 +5,7 @@ do
   assert(a+b == 5 and -b == -3 and b+"2" == 5 and "10"-c == 0)
   assert(type(a) == 'string' and type(b) == 'string' and type(c) == 'string')
   assert(a == "2" and b == " 3e0 " and c == " 10  " and -c == -"  10 ")
+  assert(c%a == 0 and a^b == 8)
 end
 
 
@@ -90,6 +91,7 @@ local function testbit(a, n)
 end
 
 assert(eq(math.sin(-9.8)^2 + math.cos(-9.8)^2, 1))
+assert(eq(math.tan(math.pi/4), 1))
 assert(eq(math.sin(math.pi/2), 1) and eq(math.cos(math.pi/2), 0))
 assert(eq(math.atan(1), math.pi/4) and eq(math.acos(0), math.pi/2) and
        eq(math.asin(1), math.pi/2))
@@ -103,6 +105,8 @@ assert(eq(math.sqrt(10)^2, 10))
 assert(eq(math.log10(2), math.log(2)/math.log(10)))
 assert(eq(math.exp(0), 1))
 assert(eq(math.sin(10), math.sin(10%(2*math.pi))))
+local v,e = math.frexp(math.pi)
+assert(eq(math.ldexp(v,e), math.pi))
 
 assert(eq(math.tanh(3.5), math.sinh(3.5)/math.cosh(3.5)))
 

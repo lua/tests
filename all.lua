@@ -2,6 +2,9 @@
 
 math.randomseed(0)
 
+collectgarbage("setstepmul", 180)
+collectgarbage("setpause", 190)
+
 
 --[=[
   example of a long [comment],

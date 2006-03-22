@@ -108,6 +108,8 @@ checkmessage([[collectgarbage("nooption")]], "invalid option")
 
 checkmessage([[x = print .. "a"]], "concatenate")
 
+checkmessage("getmetatable(io.stdin).__gc()", "no value")
+
 print'+'
 
 

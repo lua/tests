@@ -1,4 +1,4 @@
-print "testando closures e co-rotinas"
+print "testing closures and coroutines"
 
 local A,B = 0,{g=10}
 function f(x)
@@ -38,7 +38,7 @@ assert(a[8]() == 10+A)
 assert(getmetatable(x).__mode == 'kv')
 assert(B.g == 19)
 
--- teste de closure com variavel de controle do for
+-- testing closures with 'for' control variable
 a = {}
 for i=1,10 do
   a[i] = {set = function(x) i=x end, get = function () return i end}
@@ -67,7 +67,7 @@ r,s = a[2].get()
 assert(r == "a" and s == "b")
 
 
--- teste de closure com variavel de controle do for x break
+-- testing closures with 'for' control variable x break
 for i=1,3 do
   f = function () return i end
   break
@@ -82,7 +82,7 @@ assert(({f()})[1] == 1)
 assert(({f()})[2] == "a")
 
 
--- teste de closure x break x return x erros
+-- testing closure x break x return x errors
 
 local b
 function f(x)
@@ -118,7 +118,7 @@ b('set', 10); assert(b('get') == 14)
 
 
 local w
--- teste de closure com varios niveis
+-- testing multi-level closure
 function f(x)
   return function (y)
     return function (z) return w+x+y+z end
@@ -152,7 +152,7 @@ end
 t()
 
 
--- teste de co-rotinas
+-- coroutine tests
 
 local f
 
@@ -363,7 +363,7 @@ assert(_G.f() == 12)
 
 
 if not T then
-  (Message or print)('\a\n >>> testC nao ativo: pulando testes de yield/hook <<<\n\a')
+  (Message or print)('\a\n >>> testC not active: skipping yield/hook tests <<<\n\a')
 else
 
   local turn

@@ -1,4 +1,4 @@
-print('testando tables, next e fors')
+print('testing tables, next, and for')
 
 local a = {}
 
@@ -13,7 +13,7 @@ end
 
 
 if T then
--- testes de tamanhos
+-- testing table sizes
 
 local l2 = math.log(2)
 local function log2 (x) return math.log(x)/l2 end
@@ -48,7 +48,7 @@ local function check (t, na, nh)
   end
 end
 
--- teste de tamanho de construtores
+-- testing constructor sizes
 local lim = 40
 local s = 'return {'
 for i=1,lim do
@@ -78,7 +78,7 @@ end
 
 print'+'
 
--- teste de tamanho com construcao dinamica
+-- testing tables dynamically built
 local lim = 130
 local a = {}; a[2] = 1; check(a, 0, 1)
 a = {}; a[0] = 1; check(a, 0, 1); a[2] = 1; check(a, 0, 2)
@@ -374,7 +374,7 @@ a = 0; for i="10","1","-2" do a=a+1 end; assert(a==5)
 collectgarbage()
 
 
--- teste de for generico
+-- testing generic 'for'
 
 local function f (n, p)
   local t = {}; for i=1,p do t[i] = i*10 end

@@ -1,6 +1,6 @@
 if rawget(_G, "_soft") then return 10 end
 
-print "testando programas longos (>64k)"
+print "testing large programs (>64k)"
 
 -- template to create a very big test file
 prog = [[$

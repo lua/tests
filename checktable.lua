@@ -2,7 +2,7 @@
 assert(rawget(_G, "stat") == nil)  -- module not loaded before
 
 if T == nil then
-  stat = function () print"`querytab' nao ativo" end
+  stat = function () print"`querytab' not active" end
   return
 end
 

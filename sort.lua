@@ -1,4 +1,4 @@
-print"verificando sort"
+print"testing sort"
 
 
 function check (a, f)
@@ -44,7 +44,7 @@ print(string.format("Invert-sorting other %d elements in %.2f sec., with %i comp
 check(a, function(x,y) return y<x end)
 
 
-table.sort{}  -- array vazio
+table.sort{}  -- empty array
 
 for i=1,limit do a[i] = false end
 x = os.clock();

@@ -1,4 +1,4 @@
-print('testando variaveis locais e uns extras')
+print('testing local variables plus some extra stuff')
 
 do
   local i = 10
@@ -51,7 +51,7 @@ f(2)
 assert(type(f) == 'function')
 
 
--- testando globais ;-)
+-- testing globals ;-)
 do
   local f = {}
   local _G = _G
@@ -83,7 +83,7 @@ assert(getfenv(foo("")) == a)
 setfenv(0, _G)
 
 
--- testando limites para instrucoes especiais
+-- testing limits for special instructions
 
 local a
 local p = 4
@@ -107,7 +107,7 @@ print'+'
 
 
 if rawget(_G, "querytab") then
-  -- testando remocao de elementos mortos dos indices de tabelas
+  -- testing clearing of dead elements from tables
   collectgarbage("stop")   -- stop GC
   local a = {[{}] = 4, [3] = 0, alo = 1, 
              a1234567890123456789012345678901234567890 = 10}

@@ -1,4 +1,4 @@
-print('testando pattern matching')
+print('testing pattern matching')
 
 function f(s, p)
   local i,e = string.find(s, p)

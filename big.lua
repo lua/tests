@@ -12,7 +12,6 @@ assert(not a and string.find(b, "overflow"))
 print('+')
 
 
-print "testando operacoes W"
 require "checktable"
 
 --[[ lots of empty lines (to force SETLINEW)
@@ -365,13 +364,13 @@ a = nil
 b = nil
 a1 = nil
 
-print("tabela com indices tabela:")
+print("tables with table indices:")
 i = 1; a={}
 while i <= 1023 do a[{}] = i; i=i+1 end
 stat(a)
 a = nil
 
-print("tabela com indices funcao:")
+print("tables with function indices:")
 a={}
 for i=1,511 do local x; a[function () return x end] = i end
 stat(a)

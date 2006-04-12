@@ -1,4 +1,4 @@
-print('testando coleta de lixo')
+print('testing garbage collection')
 
 collectgarbage()
 
@@ -10,7 +10,7 @@ limit = 5000
 
 contCreate = 0
 
-print('tabelas')
+print('tables')
 while contCreate <= limit do
   local a = {}; a = nil
   contCreate = contCreate+1
@@ -32,7 +32,7 @@ contCreate = 0
 
 a = {}
 
-print('funcoes')
+print('functions')
 function a:test ()
   while contCreate <= limit do
     loadstring(string.format("function temp(a) return 'a%d' end", contCreate))()
@@ -43,11 +43,11 @@ end
 
 a:test()
 
--- coleta de funcao sem locais, globais, etc.
+-- collection of functions without locals, globals, etc.
 do local f = function () end end
 
 
-print("funcoes com erros")
+print("functions with errors")
 prog = [[
 do
   a = 10;
@@ -68,7 +68,7 @@ do
   end
 end
 
-print('strings longos')
+print('long strings')
 x = "01234567890123456789012345678901234567890123456789012345678901234567890123456789"
 assert(string.len(x)==80)
 s = ''
@@ -200,7 +200,7 @@ collectgarbage()
 assert(next(a) == string.rep('$', 11))
 
 
--- teste de userdata
+-- testing userdata
 collectgarbage("stop")   -- stop collection
 local u = newproxy(true)
 local s = 0
@@ -248,7 +248,7 @@ collectgarbage()
 assert(m==10)
 
 
--- erro na coleta
+-- errors during collection
 u = newproxy(true)
 getmetatable(u).__gc = function () error "!!!" end
 u = nil
@@ -284,20 +284,20 @@ end
 
 
 
--- cria udata para ser coletado quando fechar o estado
+-- create a userdata to be collected when state is closed
 do
   local newproxy,assert,type,print,getmetatable =
         newproxy,assert,type,print,getmetatable
   local u = newproxy(true)
   local tt = getmetatable(u)
-  ___Glob = {u}   -- evita que udata seja coletado antes da coleta final
+  ___Glob = {u}   -- avoid udata being collected before program end
   tt.__gc = function (o)
     assert(getmetatable(o) == tt)
-    -- cria objetos durante coleta de lixo
+    -- create new objects during GC
     local a = 'xuxu'..(10+3)..'joao', {}
-    ___Glob = o  -- ressucita objeto!
-    newproxy(o)  -- cria outro com mesma metatable
-    print(">>> fechando estado " .. "<<<\n")
+    ___Glob = o  -- ressurect object!
+    newproxy(o)  -- creates a new one with same metatable
+    print(">>> closing state " .. "<<<\n")
   end
 end
 

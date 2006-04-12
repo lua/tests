@@ -1,6 +1,6 @@
 
 if T==nil then
-  (Message or print)('\a\n >>> testC nao ativo: pulando testes da API <<<\n\a')
+  (Message or print)('\a\n >>> testC not active: skipping API tests <<<\n\a')
   return
 end
 
@@ -15,9 +15,9 @@ end
 function pack(...) return arg end
 
 
-print('testando API com C')
+print('testing C API')
 
--- testando alinhamento
+-- testing allignment
 a = T.d2s(12458954321123)
 assert(string.len(a) == 8)   -- sizeof(double)
 assert(T.s2d(a) == 12458954321123)
@@ -69,7 +69,7 @@ tcheck(t, {n=7,2,3,4,5,10,40,90})
 t = pack(T.testC("concat 5; gettop; return .", "alo", 2, 3, "joao", 12))
 tcheck(t, {n=1,"alo23joao12"})
 
--- testando MULTRET
+-- testing MULTRET
 t = pack(T.testC("rawcall 2,-1; gettop; return .",
      function (a,b) return 1,2,3,4,a,b end, "alo", "joao"))
 tcheck(t, {n=6,1,2,3,4,"alo", "joao"})
@@ -82,7 +82,7 @@ do  -- test returning more results than fit in the caller stack
 end
 
 
--- testando lessthan
+-- testing lessthan
 assert(T.testC("lessthan 2 5, return 1", 3, 2, 2, 4, 2, 2))
 assert(T.testC("lessthan 5 2, return 1", 4, 2, 2, 3, 2, 2))
 assert(not T.testC("lessthan 2 -3, return 1", "4", "2", "2", "3", "2", "2"))
@@ -98,7 +98,7 @@ a,b = T.testC("lessthan 5 -6, return 2", a1, 2, 2, a3, 2, 20)
 assert(a == 20 and b == false)
 
 
--- testando lua_is
+-- testing lua_is
 
 function count (x, n)
   n = n or 2
@@ -128,7 +128,7 @@ assert(count(nil) == 1)
 assert(count(io.stdin) == 1)
 assert(count(nil, 15) == 100)
 
--- testando lua_to...
+-- testing lua_to...
 
 function to (s, x, n)
   n = n or 2
@@ -153,7 +153,7 @@ a = to("tocfunction", math.deg)
 assert(a(3) == math.deg(3) and a ~= math.deg)
 
 
--- testando erros
+-- testing errors
 
 a = T.testC([[
   loadstring 2; call 0,1;
@@ -172,7 +172,7 @@ check3(":1:", T.testC("loadstring 2; gettop; return .", "x="))
 check3("cannot read", T.testC("loadfile 2; gettop; return .", "."))
 check3("cannot open xxxx", T.testC("loadfile 2; gettop; return .", "xxxx"))
 
--- testando acesso a tabelas
+-- testing table access
 
 a = {x=0, y=12}
 x, y = T.testC("gettable 2; pushvalue 4; gettable 2; return 2",
@@ -202,7 +202,7 @@ assert(y == 'xuxu')
 T.testC("settable 2", b, 19)
 assert(a[b] == 19)
 
--- testando next
+-- testing next
 a = {}
 t = pack(T.testC("next; gettop; return .", a, nil))
 tcheck(t, {n=1,a})
@@ -214,7 +214,7 @@ tcheck(t, {n=1,a})
 
 
 
--- testando upvalues
+-- testing upvalues
 
 do
   local A = T.testC[[ pushnum 10; pushnum 20; pushcclosure 2; return 1]]
@@ -239,7 +239,7 @@ T.upvalue(f, 2, "xuxu")
 assert(T.upvalue(f, 2) == "xuxu")
 
 
--- testando environments
+-- testing environments
 
 assert(T.testC"pushvalue G; return 1" == _G)
 assert(T.testC"pushvalue E; return 1" == _G)
@@ -265,7 +265,7 @@ assert(debug.getfenv(b) == a)
 
 
 
--- testando locks (refs)
+-- testing locks (refs)
 
 -- reuse of references
 local i = T.ref{}
@@ -341,7 +341,7 @@ F = function (x)
 end
 tt.__gc = F
 
--- teste se coleta de udata libera memoria na hora certa
+-- test whether udate collection frees memory in the right time
 do
   collectgarbage();
   collectgarbage();
@@ -352,14 +352,14 @@ do
   a = nil
   collectgarbage();
   assert(collectgarbage("count") <= x+1)
-  -- udata sem finalizer
+  -- udata without finalizer
   x = collectgarbage("count")
   collectgarbage("stop")
   for i=1,1000 do newproxy(false) end
   assert(collectgarbage("count") > x+10)
   collectgarbage()
   assert(collectgarbage("count") <= x+1)
-  -- udata com finalizer
+  -- udata with finalizer
   x = collectgarbage("count")
   collectgarbage()
   collectgarbage("stop")
@@ -367,9 +367,9 @@ do
   getmetatable(a).__gc = function () end
   for i=1,1000 do newproxy(a) end
   assert(collectgarbage("count") >= x+10)
-  collectgarbage()  -- essa coleta so' chama TM, sem liberar memoria
+  collectgarbage()  -- this collection only calls TM, without freeing memory
   assert(collectgarbage("count") >= x+10)
-  collectgarbage()
+  collectgarbage()  -- now frees memory
   assert(collectgarbage("count") <= x+1)
 end
 
@@ -404,8 +404,8 @@ assert(table.getn(cl) == 1 and cl[1] == nc)
 x = T.getref(d)
 assert(type(x) == 'userdata' and debug.getmetatable(x) == tt)
 x =nil
-tt.b = b  -- cria ciclo
-tt=nil    -- libera tt para GC
+tt.b = b  -- create cycle
+tt=nil    -- frees tt for GC
 A = nil
 b = nil
 T.unref(d);
@@ -447,7 +447,7 @@ for n in pairs(a) do a[n] = nil end
 collectgarbage()
 assert(table.getn(cl) == 1 and cl[1] == x)   -- old `x' must be collected
 
--- testando lua_equal
+-- testing lua_equal
 assert(T.testC("equal 2 4; return 1", print, 1, print, 20))
 assert(T.testC("equal 3 2; return 1", 'alo', "alo"))
 assert(T.testC("equal 2 3; return 1", nil, nil))
@@ -455,7 +455,7 @@ assert(not T.testC("equal 2 3; return 1", {}, {}))
 assert(not T.testC("equal 2 3; return 1"))
 assert(not T.testC("equal 2 3; return 1", 3))
 
--- testando lua_equal com fallbacks
+-- testing lua_equal with fallbacks
 do
   local map = {}
   local t = {__eq = function (a,b) return map[a] == map[b] end}
@@ -478,15 +478,15 @@ print'+'
 
 
 -------------------------------------------------------------------------
-do   -- teste de erro durante coleta de lixo
+do   -- testing errors during GC
   local a = {}
   for i=1,20 do
-    a[i] = T.newuserdata(i)   -- cria varios udata
+    a[i] = T.newuserdata(i)   -- creates several udata
   end
-  for i=1,20,2 do   -- marca metade deles para dar erro durante coleta de lixo
+  for i=1,20,2 do   -- mark half of them to raise error during GC
     debug.setmetatable(a[i], {__gc = function (x) error("error inside gc") end})
   end
-  for i=2,20,2 do   -- marca outra metade para contar e criar mais lixo
+  for i=2,20,2 do   -- mark the other half to count and to create more garbage
     debug.setmetatable(a[i], {__gc = function (x) loadstring("A=A+1")() end})
   end
   _G.A = 0
@@ -496,11 +496,11 @@ do   -- teste de erro durante coleta de lixo
     break   -- stop if no more errors
   end
   end
-  assert(a == 10)  -- numero de erros
-  assert(A == 10)  -- numero de coletas normais
+  assert(a == 10)  -- number of errors
+  assert(A == 10)  -- number of normal collections
 end
 -------------------------------------------------------------------------
--- teste de userdata vals
+-- test for userdata vals
 do
   local a = {}; local lim = 30
   for i=0,lim do a[i] = T.pushuserdata(i) end
@@ -513,7 +513,7 @@ end
 
 
 -------------------------------------------------------------------------
--- testando multiplos estados
+-- testing multiple states
 T.closestate(T.newstate());
 L1 = T.newstate()
 assert(L1)
@@ -561,19 +561,19 @@ L1 = nil
 print('+')
 
 -------------------------------------------------------------------------
--- testa limites de memoria
+-- testing memory limits
 -------------------------------------------------------------------------
 collectgarbage()
-T.totalmem(T.totalmem()+5000)   -- seta limite `baixo' para memoria (+5k)
+T.totalmem(T.totalmem()+5000)   -- set low memory limit (+5k)
 assert(not pcall(loadstring"local a={}; for i=1,100000 do a[i]=i end"))
-T.totalmem(1000000000)  -- restaura limite alto
+T.totalmem(1000000000)          -- restore high limit
 
 
 local function stack(x) if x>0 then stack(x-1) end end
 
--- testa erros de memoria; vai aumentando o limite de memoria
--- gradativamente, de modo a dar erros em varios passos durante
--- determinada atividade, ate' ter memoria suficiente para nao dar erro
+-- test memory errors; increase memory limit in small steps, so that
+-- we get memory errors in different parts of a given task, up to there
+-- is enough memory to complete the task without errors
 function testamem (s, f)
   collectgarbage()
   stack(10)    -- ensure minimum stack size
@@ -581,29 +581,29 @@ function testamem (s, f)
   local oldM = M
   local a,b = nil
   while 1 do
-    M = M+3   -- aumenta gradativamente a memoria
+    M = M+3   -- increase memory limit in small steps
     T.totalmem(M)
     a, b = pcall(f)
-    if a and b then break end       -- para quando conseguir
+    if a and b then break end       -- stop when no more errors
     collectgarbage()
     if not a and not string.find(b, "memory") then   -- `real' error?
-      T.totalmem(1000000000)  -- restaura limite alto
+      T.totalmem(1000000000)  -- restore high limit
       error(b, 0)
     end
   end
-  T.totalmem(1000000000)  -- restaura limite alto
-  print("\nlimite para " .. s .. ": " .. M-oldM)
+  T.totalmem(1000000000)  -- restore high limit
+  print("\nlimit for " .. s .. ": " .. M-oldM)
   return b
 end
 
 
--- testa erros de memoria na criacao de um estado
+-- testing memory errors when creating a new state
 
-b = testamem("criar estado", T.newstate)
-T.closestate(b);  -- fecha estado que conseguiu abrir
+b = testamem("state creation", T.newstate)
+T.closestate(b);  -- close new state
 
 
--- teste de threads
+-- testing threads
 
 function expand (n,s)
   if n==0 then return "" end
@@ -616,15 +616,15 @@ G=0; collectgarbage(); a =collectgarbage("count")
 loadstring(expand(20,"G=G+1"))()
 assert(G==20); collectgarbage();  -- assert(gcinfo() <= a+1)
 
-testamem("criar thread", function ()
-  return T.doonnewstack("x=1") == 0  -- tenta criar thread
+testamem("thread creation", function ()
+  return T.doonnewstack("x=1") == 0  -- try to create thread
 end)
 
 
--- teste de memoria x compilador
+-- testing memory x compiler
 
 testamem("loadstring", function ()
-  return loadstring("x=1")  -- tenta fazer o dostring
+  return loadstring("x=1")  -- try to do a loadstring
 end)
 
 
@@ -636,7 +636,7 @@ for _, v in ipairs(t) do a=a..v end
 return true
 ]]
 
--- teste de memoria x dofile
+-- testing memory x dofile
 _G.a = nil
 local t =os.tmpname()
 local f = assert(io.open(t, "w"))
@@ -650,9 +650,9 @@ assert(os.remove(t))
 assert(_G.a == "aaax")
 
 
--- testes mais genericos
+-- other generic tests
 
-testamem("criacao de strings", function ()
+testamem("string creation", function ()
   local a, b = string.gsub("alo alo", "(a)", function (x) return x..'b' end)
   return (a == 'ablo ablo')
 end)
@@ -665,7 +665,7 @@ testamem("dump/undump", function ()
 end)
 
 local t = os.tmpname()
-testamem("criacao de arquivos", function ()
+testamem("file creation", function ()
   local f = assert(io.open(t, 'w'))
   assert (not io.open"nomenaoexistente")
   io.close(f);
@@ -673,7 +673,7 @@ testamem("criacao de arquivos", function ()
 end)
 assert(os.remove(t))
 
-testamem("criacao de tabelas", function ()
+testamem("table creation", function ()
   local a, lim = {}, 10
   for i=1,lim do a[i] = i; a[i..'a'] = {} end
   return (type(a[lim..'a']) == 'table' and a[lim] == lim)
@@ -681,14 +681,14 @@ end)
 
 local a = 1
 close = nil
-testamem("criacao de closures", function ()
+testamem("closure creation", function ()
   function close (b,c)
    return function (x) return a+b+c+x end
   end
   return (close(2,3)(4) == 10)
 end)
 
-testamem("corotinas", function ()
+testamem("coroutines", function ()
   local a = coroutine.wrap(function ()
               coroutine.yield(string.rep("a", 10))
               return {}

@@ -1,6 +1,6 @@
-print("testando funcoes e chamadas")
+print("testing functions and calls")
 
--- aproveita para testar funcao type tambem ;-)
+-- get the opportunity to test 'type' too ;)
 
 assert(type(1<2) == 'boolean')
 assert(type(true) == 'boolean' and type(false) == 'boolean')
@@ -13,7 +13,7 @@ function f (x) return a:x (x) end
 assert(type(f) == 'function')
 
 
--- testa recursao de funcoes locais
+-- testing local-function recursion
 fact = false
 do
   local res = 1
@@ -26,7 +26,7 @@ do
 end
 assert(fact == false)
 
--- testa declaracoes
+-- testing declarations
 a = {i = 10}
 self = 20
 function a:x (x) return x+self.i end
@@ -57,10 +57,10 @@ print('+')
 t = nil   -- 'declare' t
 function f(a,b,c) local d = 'a'; t={a,b,c,d} end
 
-f(  -- mudar de linha assim tem que poder
+f(      -- this line change must be valid
   1,2)
 assert(t[1] == 1 and t[2] == 2 and t[3] == nil and t[4] == 'a')
-f(1,2,   -- idem
+f(1,2,   -- this one too
       3,4)
 assert(t[1] == 1 and t[2] == 2 and t[3] == 3 and t[4] == 'a')
 
@@ -99,7 +99,7 @@ end
 deep(10)
 deep(200)
 
--- testa tail call
+-- testing tail call
 function deep (n) if n>0 then return deep(n-1) else return 101 end end
 assert(deep(30000) == 101)
 a = {}
@@ -138,9 +138,9 @@ a,x = unpack({1,2}, 1, 1)
 assert(a==1 and x==nil)
 
 
--- testando closures
+-- testing closures
 
--- operador de ponto fixo
+-- fixed-point operator
 Y = function (le)
       local function a (f)
         return le(function (x) return f(f)(x) end)
@@ -149,7 +149,7 @@ Y = function (le)
     end
 
 
--- fatorial sem recursao
+-- non-recursive factorial
 
 F = function (f)
       return function (n)
@@ -175,7 +175,7 @@ assert(f(9, 16) == 10+11+12+13+10+9+16+10)
 Y, F, f = nil
 print('+')
 
--- testando multiplos retornos
+-- testing multiple returns
 
 function unlpack (t, i)
   i = i or 1
@@ -216,7 +216,7 @@ a = ret2{ unlpack{1,2,3}, unlpack{3,2,1}, unlpack{"a", "b"}}
 assert(a[1] == 1 and a[2] == 3 and a[3] == "a" and a[4] == "b")
 
 
--- testa chamadas com parametros "incorretos"
+-- testing calls with 'incorrect' arguments
 rawget({}, "x", 1)
 rawset({}, "x", 1, 2)
 assert(math.sin(1,2) == math.sin(1))

@@ -1,4 +1,4 @@
-print("testando reais e bib. matematica")
+print("testing numbers and math lib")
 
 do
   local a,b,c = "2", " 3e0 ", " 10  "
@@ -6,6 +6,8 @@ do
   assert(type(a) == 'string' and type(b) == 'string' and type(c) == 'string')
   assert(a == "2" and b == " 3e0 " and c == " 10  " and -c == -"  10 ")
   assert(c%a == 0 and a^b == 8)
+  a = 0
+  assert(a == -a and 0 == -0)
 end
 
 
@@ -70,7 +72,7 @@ assert(0.123456 > 0.123455)
 
 assert(tonumber('+1.23E30') == 1.23*10^30)
 
--- testando operadores de ordem
+-- testing order operators
 assert(not(1<1) and (1<2) and not(2<1))
 assert(not('a'<'a') and ('a'<'b') and not('b'<'a'))
 assert((1<=1) and (1<=2) and not(2<=1))
@@ -113,7 +115,7 @@ assert(eq(math.tanh(3.5), math.sinh(3.5)/math.cosh(3.5)))
 assert(tonumber(' 1.3e-2 ') == 1.3e-2)
 assert(tonumber(' -1.00000000000001 ') == -1.00000000000001)
 
--- testando limites de constantes
+-- testing constant limits
 -- 2^23 = 8388608
 assert(8388609 + -8388609 == 0)
 assert(8388608 + -8388608 == 0)
@@ -142,7 +144,7 @@ assert(eq(a[200][3], 200/3))
 assert(eq(a[1000][3], 1000/3, 0.001))
 print('+')
 
-do   -- testando NaN
+do   -- testing NaN
   local NaN = 10e500 - 10e400
   assert(NaN ~= NaN)
   assert(not (NaN < NaN))
@@ -164,7 +166,7 @@ stat(a)
 
 a = nil
 
--- testando conversoes implicitas
+-- testing implicit convertions
 
 local a,b = '10', '20'
 assert(a*b == 200 and a+b == 30 and a-b == -10 and a/b == 0.5 and -b == -20)

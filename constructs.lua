@@ -1,6 +1,6 @@
-print "testando sintaxe"
+print "testing syntax"
 
--- testando prioridades
+-- testing priorities
 
 assert(2^3^2 == 2^(3^2));
 assert(2^3*4 == (2^3)*4);
@@ -27,7 +27,7 @@ assert((x>y) and x or y == 2);
 assert(1234567890 == tonumber('1234567890') and 1234567890+1 == 1234567891)
 
 
--- loops bobos
+-- silly loops
 repeat until 1; repeat until true;
 while false do end; while nil do end;
 

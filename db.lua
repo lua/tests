@@ -1,8 +1,8 @@
--- testes da biblioteca de depuracao
+-- testing debug library
 
 local function dostring(s) return assert(loadstring(s))() end
 
-print"testando biblioteca de depuração e informacoes de debug"
+print"testing debug library and debug information"
 
 do
 local a=1
@@ -35,7 +35,7 @@ do
 end
 
 
--- testa truncagem de nomes de arquivos e strings
+-- test file and string names truncation
 a = "function f () end"
 local function dostring (s, x) return loadstring(s, x)() end
 dostring(a)
@@ -247,23 +247,23 @@ debug.sethook(nil);
 assert(debug.gethook() == nil)
 
 
--- testando pegar argumentos de funcao (locais existentes no inicio da funcao)
+-- testing access to function arguments
 
 X = nil
 a = {}
 function a:f (a, b, ...) local c = 13 end
 debug.sethook(function (e)
   assert(e == "call")
-  dostring("XX = 12")  -- testa dostring dentro de hooks
-  -- testa erros dentro de hook (chamando _ERRORMESSAGE)
+  dostring("XX = 12")  -- test dostring inside hooks
+  -- testing errors inside hooks
   assert(not pcall(loadstring("a='joao'+1")))
   debug.sethook(function (e, l) 
     assert(debug.getinfo(2, "l").currentline == l)
     local f,m,c = debug.gethook()
     assert(e == "line")
     assert(m == 'l' and c == 0)
-    debug.sethook(nil)  -- hook e' chamado uma unica vez
-    assert(not X)  -- verifica fato acima
+    debug.sethook(nil)  -- hook is called only once
+    assert(not X)       -- check that
     X = {}; local i = 1
     local x,y
     while 1 do
@@ -281,7 +281,7 @@ assert(XX == 12)
 assert(debug.gethook() == nil)
 
 
--- testando acesso a upvalues
+-- testing upvalue access
 local function getupvalues (f)
   local t = {}
   local i = 1
@@ -312,7 +312,7 @@ assert(debug.getupvalue(io.read, 1) == nil)
 assert(debug.setupvalue(io.read, 1, 10) == nil)  
 
 
--- testando count hooks
+-- testing count hooks
 local a=0
 debug.sethook(function (e) a=a+1 end, "", 1)
 a=0; for i=1,1000 do end; assert(1000 < a and a < 1012)

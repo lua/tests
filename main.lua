@@ -1,6 +1,6 @@
-# teste de comentario especial na 1a linha
+# testing special comment on first line
 
-print ("testando opcoes de lua.c")
+print ("testing lua.c options")
 
 assert(os.execute() ~= 0)   -- machine has a system command
 

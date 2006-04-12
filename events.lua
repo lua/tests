@@ -1,4 +1,4 @@
-print('testando meta-tabelas')
+print('testing metatables')
 
 X = 20; B = 30
 
@@ -270,13 +270,13 @@ assert(c == d and c < d and not(d <= c))
 
 
 
--- teste de multiplos niveis de calls
+-- test for several levels of calls
 local i
 local tt = {
   __call = function (t, ...)
     i = i+1
-    if t.f then return t.f(unpack(arg))
-    else return arg
+    if t.f then return t.f(...)
+    else return {...}
     end
   end
 }
@@ -298,7 +298,7 @@ print'+'
 local _g = _G
 setfenv(1, setmetatable({}, {__index=function (_,k) return _g[k] end}))
 
--- testando proxies
+-- testing proxies
 assert(getmetatable(newproxy()) == nil)
 assert(getmetatable(newproxy(false)) == nil)
 

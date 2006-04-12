@@ -1,4 +1,4 @@
-print("testando erros")
+print("testing errors")
 
 function doit (s)
   local f, msg = loadstring(s)
@@ -29,7 +29,7 @@ assert(doit("error('hi', 0)") == 'hi')
 assert(doit("error()") == nil)
 
 
--- testa erros comuns e/ou que voavam no passado
+-- test common errors/errors that crashed in the past
 assert(doit("unpack({}, 1, n=2^30)"))
 assert(doit("a=math.sin()"))
 assert(not doit("tostring(1)") and doit("tostring()"))
@@ -51,7 +51,7 @@ checksyntax([[
 ]], "'}' expected (to close '{' at line 1)", "<eof>", 3)
 
 
--- testes para mensagens de erro mais explicativas
+-- tests for better error messages
 
 checkmessage("a=1; bbbb=2; a=math.sin(3)+bbbb(3)", "global 'bbbb'")
 checkmessage("a=1; local a,bbbb=2,3; a = math.sin(1) and bbbb(3)",
@@ -113,7 +113,7 @@ checkmessage("getmetatable(io.stdin).__gc()", "no value")
 print'+'
 
 
--- teste de linha do erro
+-- testing line error
 
 function lineerror (s)
   local err,msg = pcall(loadstring(s))
@@ -207,7 +207,7 @@ for i=1,lim do
 end
 
 
--- teste de limites de sintaxe
+-- testing syntax limits
 local function testrep (init, rep)
   local s = "local a; "..init .. string.rep(rep, 400)
   local a,b = loadstring(s)
@@ -224,7 +224,7 @@ testrep("a=", "a..")
 testrep("a=", "a^")
 
 
--- testes de outros limites
+-- testing other limits
 -- upvalues
 local  s = "function foo ()\n  local "
 for j = 1,70 do
@@ -237,7 +237,7 @@ end
 local a,b = loadstring(s)
 assert(string.find(b, "line 3"))
 
--- variaveis locais
+-- local variables
 s = "\nfunction foo ()\n  local "
 for j = 1,300 do
   s = s.."a"..j..", " 

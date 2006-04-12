@@ -1,4 +1,4 @@
-print('testando vararg')
+print('testing vararg')
 
 _G.arg = nil
 

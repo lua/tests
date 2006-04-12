@@ -16,7 +16,7 @@ assert(type(package.loaded) == "table")
 assert(type(package.preload) == "table")
 
 
-local DIR="testes/libs/"
+local DIR = "libs/"
 
 local function createfiles (files, preextras, posextras)
   for n,c in pairs(files) do
@@ -179,7 +179,7 @@ assert(not pcall(module, "math.sin"))
 local p = ""   -- On Mac OS X, redefine this to "_"
 
 -- assert(loadlib == package.loadlib)   -- only for compatibility
-local f, err, when = package.loadlib(wd.."libs/lib1.so", p.."luaopen_lib1")
+local f, err, when = package.loadlib("libs/lib1.so", p.."luaopen_lib1")
 if not f then
   (Message or print)('\a\n >>> cannot load dynamic library <<<\n\a')
   print(err, when)
@@ -188,11 +188,11 @@ else
   assert(require("lib1") == lib1)
   collectgarbage()
   assert(lib1.id("x") == "x")
-  f = assert(package.loadlib(wd.."libs/lib1.so", p.."anotherfunc"))
+  f = assert(package.loadlib("libs/lib1.so", p.."anotherfunc"))
   assert(f(10, 20) == "1020\n")
-  f, err, when = package.loadlib(wd.."libs/lib1.so", p.."xuxu")
+  f, err, when = package.loadlib("libs/lib1.so", p.."xuxu")
   assert(not f and type(err) == "string" and when == "init")
-  package.cpath = wd.."libs/?.so"
+  package.cpath = "libs/?.so"
   require"lib2"
   assert(lib2.id("x") == "x")
   local fs = require"lib1.sub"
@@ -233,7 +233,7 @@ end  --]
 
 print('+')
 
-print("testando atribuicoes, operadores logicos e construtores")
+print("testing assignments, logical operators, and constructors")
 
 local res, res2 = 27
 
@@ -289,6 +289,8 @@ assert(not not a == true)
 assert(not not (6 or nil) == true)
 assert(not not (nil and 56) == false)
 assert(not not (nil and true) == false)
+
+assert({} ~= {})
 print('+')
 
 a = {}

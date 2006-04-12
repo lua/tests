@@ -1,4 +1,4 @@
-print('testando strings e strlib')
+print('testing strings and string library')
 
 assert('alo' < 'alo1')
 assert('' < 'a')

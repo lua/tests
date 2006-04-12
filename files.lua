@@ -1,5 +1,5 @@
 
-print('testando i/o')
+print('testing i/o')
 
 assert(io.input(io.stdin) == io.stdin)
 assert(io.output(io.stdout) == io.stdout)
@@ -157,7 +157,7 @@ print('+')
 
 local x1 = "string\n\n\\com \"\"''coisas [[estranhas]] ]]'"
 io.output(file)
-assert(io.write(string.format("x2 = %q\n-- comentário sem EOL no final", x1)))
+assert(io.write(string.format("x2 = %q\n-- comment without ending EOS", x1)))
 io.close()
 assert(loadfile(file))()
 assert(x1 == x2)
@@ -219,7 +219,7 @@ and the rest of the file
 assert(os.remove(file))
 collectgarbage()
 
--- teste de buffer
+-- testing buffers
 do
   local f = assert(io.open(file, "w"))
   local fr = assert(io.open(file, "r"))
@@ -247,7 +247,7 @@ do
 end
 
 
--- teste de arquivos grandes (> BUFSIZ)
+-- testing large files (> BUFSIZ)
 io.output(file)
 for i=1,5001 do io.write('0123456789123') end
 io.write('\n12346')
@@ -311,22 +311,14 @@ local t1 = os.time{year=2000, month=10, day=1, hour=23, min=12, sec=17}
 local t2 = os.time{year=2000, month=10, day=1, hour=23, min=10, sec=19}
 assert(os.difftime(t1,t2) == 60*2-2)
 
-local meses = { 'janeiro', 'fevereiro', 'março', 'abril',
-'maio', 'junho', 'julho', 'agosto',
-'setembro', 'outubro', 'novembro', 'dezembro' }
-
-local dias = {'domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta',
-              'sábado'}
 io.output(io.stdout)
 local d = os.date('%d')
-local m = tonumber(os.date('%m'))
+local m = os.date('%m')
 local a = os.date('%Y')
 local ds = os.date('%w') + 1
 local h = os.date('%H')
 local min = os.date('%M')
 local s = os.date('%S')
-io.write(string.format('%s\n', os.date()))
-io.write(string.format('teste feito no dia %2.2d de %s de %4d (%s)',
-          d, meses[m], a, dias[ds]))
-io.write(string.format(', as %2.2dh%2.2dm%2.2ds\n', h, min, s))
+io.write(string.format('test done on %2.2d/%2.2d/%d', d, m, a))
+io.write(string.format(', at %2.2d:%2.2d:%2.2d\n', h, min, s))
 io.write(string.format('%s\n', _VERSION))

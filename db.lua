@@ -422,8 +422,8 @@ co = coroutine.create(function (x)
      end)
 
 local tr = {}
-local foo = function (e, l) table.insert(tr, l) end
-debug.sethook(co, foo, "l")
+local foo = function (e, l) if l then table.insert(tr, l) end end
+debug.sethook(co, foo, "lcr")
 
 local _, l = coroutine.resume(co, 10)
 local x = debug.getinfo(co, 1, "lfLS")

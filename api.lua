@@ -679,6 +679,11 @@ testamem("table creation", function ()
   return (type(a[lim..'a']) == 'table' and a[lim] == lim)
 end)
 
+testamem("constructors", function ()
+  local a = {10, 20, 30, 40, 50; a=1, b=2, c=3, d=4, e=5}
+  return (type(a) == 'table' and a.e == 5)
+end)
+
 local a = 1
 close = nil
 testamem("closure creation", function ()

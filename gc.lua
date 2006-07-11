@@ -283,6 +283,14 @@ while thread_id < 1000 do
 end
 
 
+if T then
+  print("emergency collections")
+  collectgarbage()
+  collectgarbage()
+  T.totalmem(T.totalmem() + 200)
+  for i=1,200 do local a = {} end
+  T.totalmem(1000000000)
+end
 
 -- create a userdata to be collected when state is closed
 do

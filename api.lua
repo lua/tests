@@ -584,14 +584,13 @@ function testamem (s, f)
     M = M+3   -- increase memory limit in small steps
     T.totalmem(M)
     a, b = pcall(f)
+    T.totalmem(1000000000)  -- restore high limit
     if a and b then break end       -- stop when no more errors
     collectgarbage()
     if not a and not string.find(b, "memory") then   -- `real' error?
-      T.totalmem(1000000000)  -- restore high limit
-      error(b, 0)
+      error(b, 0)   -- propagate it
     end
   end
-  T.totalmem(1000000000)  -- restore high limit
   print("\nlimit for " .. s .. ": " .. M-oldM)
   return b
 end

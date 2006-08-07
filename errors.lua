@@ -110,6 +110,13 @@ checkmessage([[x = print .. "a"]], "concatenate")
 
 checkmessage("getmetatable(io.stdin).__gc()", "no value")
 
+checkmessage([[
+local Var
+local function main()
+  NoSuchName (function() Var=0 end)
+end
+main()
+]], "global 'NoSuchName'")
 print'+'
 
 

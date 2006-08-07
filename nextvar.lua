@@ -15,8 +15,7 @@ end
 if T then
 -- testing table sizes
 
-local l2 = math.log(2)
-local function log2 (x) return math.log(x)/l2 end
+local function log2 (x) return math.log(x, 2) end
 
 local function mp2 (n)   -- minimum power of 2 >= n
   local mp = 2^math.ceil(log2(n))

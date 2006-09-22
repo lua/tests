@@ -48,6 +48,13 @@ check(function ()
   a = nil; d=nil
 end, 'RETURN')
 
+check(function ()
+  local a = 1
+  local a,b,c
+  local d; local e;
+  a = nil; d=nil
+end, 'LOADK', 'LOADNIL', 'RETURN')
+
 
 -- single return
 check (function (a,b,c) return a end, 'RETURN')

@@ -14,8 +14,9 @@ end
 
 function checksyntax (prog, extra, token, line)
   local msg = doit(prog)
+  if not string.find(token, "^<%a") then token = "'"..token.."'" end
   token = string.gsub(token, "(%p)", "%%%1")
-  local pt = string.format([[^%%[string ".*"%%]:%d: .- near '%s'$]],
+  local pt = string.format([[^%%[string ".*"%%]:%d: .- near %s$]],
                            line, token)
   assert(string.find(msg, pt))
   assert(string.find(msg, msg, 1, true))
@@ -120,6 +121,21 @@ main()
 print'+'
 
 
+-- tests for errors in coroutines
+
+function f (n)
+  local c = coroutine.create(f)
+  local a,b = coroutine.resume(c)
+  return b
+end
+assert(string.find(f(), "C stack overflow"))
+
+checkmessage("coroutine.yield()", "yield across")
+
+f = coroutine.wrap(function () return pcall(coroutine.yield) end)
+assert(string.find(select(2, f()), "yield across"))
+
+
 -- testing line error
 
 function lineerror (s)
@@ -157,10 +173,10 @@ assert(checkstackmessage(doit('y()')))
 -- teste de linhas em erro
 C = 0
 local l1
-local function g()
-  l1 = debug.getinfo(1, "l").currentline; y()
+local function g(x)
+  l1 = debug.getinfo(x, "l").currentline; y()
 end
-local _, stackmsg = xpcall(g, debug.traceback)
+local _, stackmsg = xpcall(g, debug.traceback, 1)
 local stack = {}
 for line in string.gmatch(stackmsg, "[^\n]*") do
   local curr = string.match(line, ":(%d+):")
@@ -192,6 +208,12 @@ f(3)
 function f() error{msg='x'} end
 res, msg = xpcall(f, function (r) return {msg=r.msg..'y'} end)
 assert(msg.msg == 'xy')
+
+-- xpcall with arguments
+a, b, c = xpcall(string.find, error, "alo", "al")
+assert(a and b == 1 and c == 2)
+a, b, c = xpcall(string.find, function (x) return {} end, true, "al")
+assert(not a and type(b) == "table" and c == nil)
 
 print('+')
 checksyntax("syntax error", "", "error", 1)

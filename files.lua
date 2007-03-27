@@ -275,6 +275,17 @@ end
 
 print'+'
 
+
+assert(os.date("") == "")
+assert(os.date("!") == "")
+local x = string.rep("a", 10000)
+assert(os.date(x) == x)
+local t = os.time()
+T = os.date("*t", t)
+assert(os.date(string.rep("%d", 1000), t) ==
+       string.rep(os.date("%d", t), 1000))
+assert(os.date(string.rep("%", 201)) == string.rep("%", 101))
+
 local t = os.time()
 T = os.date("*t", t)
 loadstring(os.date([[assert(T.year==%Y and T.month==%m and T.day==%d and

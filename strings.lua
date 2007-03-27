@@ -103,6 +103,9 @@ print('+')
 x = '"ílo"\n\\'
 assert(string.format('%q%s', x, x) == '"\\"ílo\\"\\\n\\\\""ílo"\n\\')
 assert(string.format('%q', "\0") == [["\000"]])
+assert(loadstring(string.format('return %q', x))() == x)
+x = "\0\1\0023\5\0009"
+assert(loadstring(string.format('return %q', x))() == x)
 assert(string.format("\0%c\0%c%x\0", string.byte("á"), string.byte("b"), 140) ==
               "\0á\0b8c\0")
 assert(string.format('') == "")

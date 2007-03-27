@@ -1,5 +1,17 @@
 print('testing local variables plus some extra stuff')
 
+
+-- bug in 5.1:
+
+local function f(x) x = nil; return x end
+assert(f(10) == nil)
+
+local function f() local x; return x end
+assert(f(10) == nil)
+
+local function f(x) x = nil; local y; return x, y end
+assert(f(10) == nil and select(2, f(20)) == nil)
+
 do
   local i = 10
   do local i = 100; assert(i==100) end

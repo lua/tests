@@ -45,6 +45,7 @@ assert(doit"assert(nil)")
 assert(doit"a=math.sin\n(3)")
 assert(doit("function a (... , ...) end"))
 assert(doit("function a (, ...) end"))
+assert(doit"setfenv(nil, {})")
 
 checksyntax([[
   local a = {4

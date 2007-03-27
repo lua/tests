@@ -46,7 +46,7 @@ check(function ()
   local a,b,c
   local d; local e;
   a = nil; d=nil
-end, 'RETURN')
+end, 'LOADNIL', 'RETURN')
 
 check(function ()
   local a = 1
@@ -93,6 +93,7 @@ check(function ()
   a = b*2
   c[4], a[b] = -((a + d/-20.5 - a[b]) ^ a.x), b
 end,
+  'LOADNIL',
   'MUL',
   'DIV', 'ADD', 'GETTABLE', 'SUB', 'GETTABLE', 'POW',
     'UNM', 'SETTABLE', 'SETTABLE', 'RETURN')
@@ -109,6 +110,7 @@ check(function ()
   b = 5+4
   a[true] = false
 end,
+  'LOADNIL',
   'SETTABLE', 'SETTABLE', 'SETTABLE', 'SUB', 'DIV', 'LOADK',
   'SETTABLE', 'RETURN')
 
@@ -124,6 +126,7 @@ check(function ()
   a, b = c, a
   a = a
 end, 
+  'LOADNIL',
   'MOVE', 'MOVE', 'SETTABLE',
   'MOVE', 'MOVE', 'MOVE', 'SETTABLE',
   'MOVE', 'MOVE', 'MOVE',

@@ -11,7 +11,7 @@ out = os.tmpname()
 do
   local i = 0
   while arg[i] do i=i-1 end
-  progname = '"'..arg[i+1]..'"'
+  progname = arg[i+1]
 end
 print(progname)
 
@@ -46,7 +46,7 @@ end
 
 function auxrun (...)
   local s = string.format(...)
-  s = string.gsub(s, "lua", progname, 1)
+  s = string.gsub(s, "lua", '"'..progname..'"', 1)
   return os.execute(s)
 end
 
@@ -68,7 +68,7 @@ checkout("1\n2\n2\n")
 local a = [[
   assert(table.getn(arg) == 3 and arg[1] == 'a' and
          arg[2] == 'b' and arg[3] == 'c')
-  assert(arg[-1] == '--' and arg[-2] == "-e " and arg[-3] == %s)
+  assert(arg[-1] == '--' and arg[-2] == "-e " and arg[-3] == '%s')
   assert(arg[4] == nil and arg[-4] == nil)
   local a, b, c = ...
   assert(... == 'a' and a == 'a' and b == 'b' and c == 'c')
@@ -122,6 +122,36 @@ a = 2
 RUN([[lua "-e_PROMPT='%s'" -i < %s > %s]], prompt, prog, out)
 local t = getoutput()
 assert(string.find(t, prompt .. ".*" .. prompt .. ".*" .. prompt))
+
+-- test for error objects
+prepfile[[
+m = {x=0}
+setmetatable(m, {__tostring = function(x)
+  return debug.getinfo(4).currentline + x.x
+end})
+error(m)
+]]
+NoRun([[lua %s 2> %s]], prog, out)
+checkout(progname..": 5\n")
+
+-- test for error objects (without traceback function)
+prepfile[[
+debug.traceback = 5
+m = {x=0}
+setmetatable(m, {__tostring = function(x) return "hi" end})
+error(m)
+]]
+NoRun([[lua %s 2> %s]], prog, out)
+checkout(progname..": hi\n")
+
+-- test for errors without handler
+prepfile[[
+debug = 5
+error"hi"
+]]
+NoRun([[lua %s 2> %s]], prog, out)
+checkout(string.format("%s: %s:%d: %s\n", progname, prog, 2, "hi"))
+
 
 s = [=[ -- 
 function f ( x ) 

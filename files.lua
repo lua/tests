@@ -4,8 +4,14 @@ print('testing i/o')
 assert(io.input(io.stdin) == io.stdin)
 assert(io.output(io.stdout) == io.stdout)
 
+-- cannot close standard files
+assert(not io.close(io.stdin) and
+       not io.stdout:close() and
+       not io.stderr:close())
+
 
 assert(type(io.input()) == "userdata" and io.type(io.output()) == "file")
+assert(type(io.stdin) == "userdata" and io.type(io.stderr) == "file")
 assert(io.type(8) == nil)
 local a = {}; setmetatable(a, {})
 assert(io.type(a) == nil)

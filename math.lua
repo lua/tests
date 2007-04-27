@@ -10,6 +10,12 @@ do
   assert(a == -a and 0 == -0)
 end
 
+do
+  local x = -1
+  local mz = 0/x
+  t = {[0] = 10, 20, 30, 40, 50}
+  assert(t[mz] == t[0])
+end
 
 do
   local a,b = math.modf(3.5)

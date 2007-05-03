@@ -290,13 +290,16 @@ local t = os.time()
 T = os.date("*t", t)
 assert(os.date(string.rep("%d", 1000), t) ==
        string.rep(os.date("%d", t), 1000))
-assert(os.date(string.rep("%", 201)) == string.rep("%", 101))
+assert(os.date(string.rep("%", 200)) == string.rep("%", 100))
 
 local t = os.time()
 T = os.date("*t", t)
 loadstring(os.date([[assert(T.year==%Y and T.month==%m and T.day==%d and
   T.hour==%H and T.min==%M and T.sec==%S and
   T.wday==%w+1 and T.yday==%j and type(T.isdst) == 'boolean')]], t))()
+
+assert(not pcall(os.date, "%9"))   -- invalid conversion specifier
+assert(not pcall(os.date, "%"))   -- invalid conversion specifier
 
 assert(os.time(T) == t)
 

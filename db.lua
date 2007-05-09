@@ -495,5 +495,27 @@ pcall(co)
 assert(type(debug.getregistry()) == "table")
 
 
+-- test tagmethod information
+local a = {}
+local function f (t)
+  local info = debug.getinfo(1);
+  assert(info.namewhat == "metamethod")
+  a.op = info.name
+  return info.name
+end
+setmetatable(a, {
+  __index = f; __add = f; __div = f; __mod = f; __concat = f; __pow = f;
+  __eq = f; __le = f; __lt = f;
+})
+
+local b = setmetatable({}, getmetatable(a))
+
+assert(a[3] == "__index" and a^3 == "__pow" and a..a == "__concat")
+assert(a/3 == "__div" and 3%a == "__mod")
+assert (a==b and a.op == "__eq")
+assert (a>=b and a.op == "__le")
+assert (a>b and a.op == "__lt")
+
+
 print"OK"
 

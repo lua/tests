@@ -114,10 +114,17 @@ end,
   'SETTABLE', 'SETTABLE', 'SETTABLE', 'SUB', 'DIV', 'LOADK',
   'SETTABLE', 'RETURN')
 
+-- constant folding
 local function f () return -((2^8 + -(-1)) % 8)/2 * 4 - 3 end
 
 check(f, 'LOADK', 'RETURN')
 assert(f() == -5)
+
+
+-- bug in constant folding for 5.1
+check(function () return -nil end,
+  'LOADNIL', 'UNM', 'RETURN')
+
 
 check(function ()
   local a,b,c

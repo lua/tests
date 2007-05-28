@@ -62,6 +62,7 @@ checkmessage("a={}; do local a=1 end a:bbbb(3)", "method 'bbbb'")
 checkmessage("local a={}; a.bbbb(3)", "field 'bbbb'")
 assert(not string.find(doit"a={13}; local bbbb=1; a[bbbb](3)", "'bbbb'"))
 checkmessage("a={13}; local bbbb=1; a[bbbb](3)", "number")
+checkmessage("a=(1)..{}", "a table value")
 
 aaa = nil
 checkmessage("aaa.bbb:ddd(9)", "global 'aaa'")

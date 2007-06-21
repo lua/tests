@@ -254,7 +254,7 @@ function filter (p, g)
     while 1 do
       local n = g()
       if n == nil then return end
-      if math.mod(n, p) ~= 0 then coroutine.yield(n) end
+      if math.fmod(n, p) ~= 0 then coroutine.yield(n) end
     end
   end)
 end

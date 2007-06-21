@@ -202,7 +202,7 @@ function ID(x) return x end
 
 function f(t, i)
   local b = t.n
-  local res = math.mod(math.floor(i/c), b)+1
+  local res = math.fmod(math.floor(i/c), b)+1
   c = c*b
   return t[res]
 end
@@ -233,7 +233,7 @@ repeat
   ]], s1, s, s1, s, s1, s, s1, s, s)
   assert(loadstring(s))()
   assert(X and not NX and not WX1 == K and not WX2 == K)
-  if math.mod(i,4000) == 0 then print('+') end
+  if math.fmod(i,4000) == 0 then print('+') end
   i = i+1
 until i==c
 

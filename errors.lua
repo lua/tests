@@ -254,6 +254,10 @@ testrep("", "function foo () ")
 testrep("a=", "a..")
 testrep("a=", "a^")
 
+local s = ("a,"):rep(200).."a=nil"
+local a,b = loadstring(s)
+assert(not a and string.find(b, "variable names"))
+
 
 -- testing other limits
 -- upvalues

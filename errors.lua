@@ -14,7 +14,8 @@ end
 
 function checksyntax (prog, extra, token, line)
   local msg = doit(prog)
-  if not string.find(token, "^<%a") then token = "'"..token.."'" end
+  if not string.find(token, "^<%a") and not string.find(token, "^char%(")
+    then token = "'"..token.."'" end
   token = string.gsub(token, "(%p)", "%%%1")
   local pt = string.format([[^%%[string ".*"%%]:%d: .- near %s$]],
                            line, token)
@@ -224,7 +225,7 @@ checksyntax("[[a]]", "", "[[a]]", 1)
 checksyntax("'aa'", "", "'aa'", 1)
 
 -- test 255 as first char in a chunk
-checksyntax("\255a = 1", "", "\255", 1)
+checksyntax("\255a = 1", "", "char(255)", 1)
 
 doit('I = loadstring("a=9+"); a=3')
 assert(a==3 and I == nil)

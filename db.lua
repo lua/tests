@@ -393,8 +393,8 @@ assert(string.find(debug.traceback(), "^stack traceback:\n"))
 
 -- testing debugging of coroutines
 
-local function checktraceback (co, p)
-  local tb = debug.traceback(co)
+local function checktraceback (co, p, level)
+  local tb = debug.traceback(co, nil, level)
   local i = 0
   for l in string.gmatch(tb, "[^\n]+\n?") do
     assert(i == 0 or string.find(l, p[i]))
@@ -412,6 +412,10 @@ end
 local co = coroutine.create(f)
 coroutine.resume(co, 3)
 checktraceback(co, {"yield", "db.lua", "tail", "tail", "tail"})
+checktraceback(co, {"db.lua", "tail", "tail", "tail"}, 1)
+checktraceback(co, {"tail", "tail", "tail"}, 2)
+checktraceback(co, {"tail"}, 4)
+checktraceback(co, {}, 40)
 
 
 co = coroutine.create(function (x)

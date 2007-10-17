@@ -392,4 +392,32 @@ for n,a,b,c,d in f(5,3) do
 end
 assert(x == 5)
 
+
+-- testing __pairs metamethod
+a = {}
+local function foo (e,i)
+  assert(e == a)
+  if i <= 10 then return i+1, i+2 end
+end
+
+setmetatable(a, {__pairs = function (x) return foo, x, 0 end})
+
+local i = 0
+for k,v in pairs(a) do
+  i = i + 1
+  assert(k == i and v == k+1)
+end
+
+a = {n=10}
+setmetatable(a, {__len = function (x) return x.n end,
+                 __pairs = function (x) return function (e,i)
+                             if i < #e then return i+1 end
+                           end, x, 0 end})
+i = 0
+for k,v in pairs(a) do
+  i = i + 1
+  assert(k == i and v == nil)
+end
+assert(i == a.n)
+
 print"OK"

@@ -134,24 +134,6 @@ error(m)
 NoRun([[lua %s 2> %s]], prog, out)
 checkout(progname..": 5\n")
 
--- test for error objects (without traceback function)
-prepfile[[
-debug.traceback = 5
-m = {x=0}
-setmetatable(m, {__tostring = function(x) return "hi" end})
-error(m)
-]]
-NoRun([[lua %s 2> %s]], prog, out)
-checkout(progname..": hi\n")
-
--- test for errors without handler
-prepfile[[
-debug = 5
-error"hi"
-]]
-NoRun([[lua %s 2> %s]], prog, out)
-checkout(string.format("%s: %s:%d: %s\n", progname, prog, 2, "hi"))
-
 
 s = [=[ -- 
 function f ( x ) 

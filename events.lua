@@ -110,6 +110,7 @@ t.__div = f("div")
 t.__mod = f("mod")
 t.__unm = f("unm")
 t.__pow = f("pow")
+t.__len = f("len")
 
 assert(b+5 == b)
 assert(cap[0] == "add" and cap[1] == b and cap[2] == 5 and cap[3]==nil)
@@ -140,6 +141,18 @@ assert(4^a == 4)
 assert(cap[0] == "pow" and cap[1] == 4 and cap[2] == a and cap[3]==nil)
 assert('4'^a == '4')
 assert(cap[0] == "pow" and cap[1] == '4' and cap[2] == a and cap[3]==nil)
+assert(#a == a)
+assert(cap[0] == "len"and cap[1] == a)
+
+do
+  assert(getmetatable("").__len == nil)
+  getmetatable("").__len = function (s) return -s:len() end
+  assert(#"hi" == -2)
+  assert(#"" == 0)
+  assert(#"xuxu" == -4)
+  getmetatable("").__len = nil
+  assert(#"xuxu" == 4)
+end
 
 
 t = {}

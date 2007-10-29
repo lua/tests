@@ -201,6 +201,10 @@ assert(string.find(a, '^a*.?$'))
 assert(not string.find(a, '^a*.?b$'))
 assert(string.find(a, '^a-.?$'))
 
+-- bug in 5.1.2
+a = string.rep('a', 10000) .. string.rep('b', 10000)
+assert(not pcall(string.gsub, a, 'b'))
+
 -- deep nest of gsubs
 function rev (s)
   return string.gsub(s, "(.)(.+)", function (c,s1) return rev(s1)..c end)

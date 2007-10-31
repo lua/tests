@@ -70,10 +70,16 @@ dofile('main.lua')
 
 do
   local u = newproxy(true)
-  local newproxy, stderr = newproxy, io.stderr
+  local eph = setmetatable({}, {__mode = "k"})   -- create an ephemeron table
+  eph[u] = function () return u end
+  local next, newproxy, stderr = next, newproxy, io.stderr
   getmetatable(u).__gc = function (o)
     stderr:write'.'
-    newproxy(o)
+    assert(eph[o]() == o and next(eph) == o and next(eph, o) == nil)
+    local n = newproxy(o)
+    eph[n] = function () return n end
+    o = nil
+    local a,b,c,d,e = nil    -- erase 'o' from the stack
   end
 end
 

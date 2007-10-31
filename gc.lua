@@ -7,6 +7,16 @@ _G["while"] = 234
 limit = 5000
 
 
+local function GC1 ()
+  local u = newproxy(true)
+  local finish = false
+  getmetatable(u).__gc = function () finish = true end
+  u = nil
+  repeat local a = {} until finish
+end
+
+local function GC()  GC1(); GC1() end
+
 
 contCreate = 0
 
@@ -152,13 +162,12 @@ a = {}; setmetatable(a, {__mode = 'k'});
 -- fill a with some `collectable' indices
 for i=1,lim do a[{}] = i end
 -- and some non-collectable ones
-for i=1,lim do local t={}; a[t]=t end
 for i=1,lim do a[i] = i end
 for i=1,lim do local s=string.rep('@', i); a[s] = s..'#' end
 collectgarbage()
 local i = 0
 for k,v in pairs(a) do assert(k==v or k..'#'==v); i=i+1 end
-assert(i == 3*lim)
+assert(i == 2*lim)
 
 a = {}; setmetatable(a, {__mode = 'v'});
 a[1] = string.rep('b', 21)
@@ -198,6 +207,40 @@ assert(i == 4)
 x,y,z=nil
 collectgarbage()
 assert(next(a) == string.rep('$', 11))
+
+
+-- ephemerons
+local mt = {__mode = 'k'}
+a = {}; setmetatable(a, mt)
+x = nil
+for i = 1, 100 do local n = {}; a[n] = {k = {x}}; x = n end
+GC()
+local n = x
+local i = 0
+while n do n = a[n].k[1]; i = i + 1 end
+assert(i == 100)
+x = nil
+GC()
+assert(next(a) == nil)
+
+local K = {}
+a[K] = {}
+for i=1,10 do a[K][i] = {}; a[a[K][i]] = setmetatable({}, mt) end
+x = nil
+local k = 1
+for j = 1,100 do
+  local n = {}; local nk = k%10 + 1
+  a[a[K][nk]][n] = {x, k = k}; x = n; k = nk
+end
+GC()
+local n = x
+local i = 0
+while n do local t = a[a[K][k]][n]; n = t[1]; k = t.k; i = i + 1 end
+assert(i == 100)
+K = nil
+GC()
+assert(next(a) == nil)
+
 
 
 -- testing userdata

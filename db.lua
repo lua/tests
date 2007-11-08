@@ -53,7 +53,7 @@ assert(string.find(debug.getinfo(f).short_src, "^%.%.%.p*t$"))
 dostring(a, "=xuxu")
 assert(debug.getinfo(f).short_src == "xuxu")
 dostring(a, string.format("=%s", string.rep('x', 500)))
-assert(string.find(debug.getinfo(f).short_src, "^x*"))
+assert(string.find(debug.getinfo(f).short_src, "^x*$"))
 dostring(a, "=")
 assert(debug.getinfo(f).short_src == "")
 a = nil; f = nil;
@@ -182,7 +182,7 @@ function f(a,b)
   assert(debug.setlocal(2, 4, "maçã") == "B")
   x = debug.getinfo(2)
   assert(x.func == g and x.what == "Lua" and x.name == 'g' and
-         x.nups == 0 and string.find(x.source, "^@.*db%.lua"))
+         x.nups == 0 and string.find(x.source, "^@.*db%.lua$"))
   glob = glob+1
   assert(debug.getinfo(1, "l").currentline == L+1)
   assert(debug.getinfo(1, "l").currentline == L+2)

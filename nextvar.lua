@@ -339,6 +339,14 @@ assert(table.remove(a, 1) == 'd')
 assert(table.remove(a, 1) == 'a')
 assert(table.remove(a, 1) == 'b')
 assert(table.getn(a) == 0 and a.n == nil)
+
+a = {10,20,30,40}
+assert(table.remove(a, #a + 1) == nil and table.remove(a, 0) == nil)
+assert(a[#a] == 40)
+assert(table.remove(a, #a) == 40)
+assert(a[#a] == 30)
+assert(table.remove(a, 2) == 20)
+assert(a[#a] == 30 and #a == 2)
 print("+")
 
 a = {}

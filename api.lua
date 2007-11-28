@@ -258,6 +258,11 @@ assert(debug.getfenv(u) == a)
 debug.setfenv(T.testC, _G)
 assert(T.testC"pushvalue E; return 1" == _G)
 
+-- bug in 5.1.2
+assert(not pcall(debug.setfenv, 3, {}))
+assert(not pcall(debug.setfenv, nil, {}))
+assert(not pcall(debug.setfenv, T.pushuserdata(1), {}))
+
 local b = newproxy()
 assert(debug.getfenv(b) == _G)
 assert(debug.setfenv(b, a))

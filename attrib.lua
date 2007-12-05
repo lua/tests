@@ -16,6 +16,26 @@ assert(type(package.loaded) == "table")
 assert(type(package.preload) == "table")
 
 
+-- testing erroneous cases
+do
+  local max = 2000
+  local oldpath = package.path
+  local t = {}
+  for i = 1,max do t[i] = string.rep("?", i%10 + 1) end
+  t[#t + 1] = ";"    -- empty template
+  package.path = table.concat(t, ";")
+  local s, err = pcall(require, "xuxu")
+  assert(not s and
+         string.find(err, string.rep("xuxu", 10)) and
+         #string.gsub(err, "[^\n]", "") >= max)
+  package.path = string.rep("?", max)
+  local s, err = pcall(require, "xuxu")
+  assert(not s and string.find(err, string.rep('xuxu', max)))
+  package.path = oldpath
+end
+
+print('+')
+
 local DIR = "libs/"
 
 local function createfiles (files, preextras, posextras)
@@ -230,6 +250,7 @@ end
 
 
 end  --]
+
 
 print('+')
 

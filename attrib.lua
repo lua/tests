@@ -16,21 +16,26 @@ assert(type(package.loaded) == "table")
 assert(type(package.preload) == "table")
 
 
--- testing erroneous cases
 do
   local max = 2000
-  local oldpath = package.path
   local t = {}
   for i = 1,max do t[i] = string.rep("?", i%10 + 1) end
   t[#t + 1] = ";"    -- empty template
-  package.path = table.concat(t, ";")
-  local s, err = pcall(require, "xuxu")
+  local path = table.concat(t, ";")
+  local s, err = package.searchpath("xuxu", path)
   assert(not s and
          string.find(err, string.rep("xuxu", 10)) and
          #string.gsub(err, "[^\n]", "") >= max)
-  package.path = string.rep("?", max)
-  local s, err = pcall(require, "xuxu")
+  local path = string.rep("?", max)
+  local s, err = package.searchpath("xuxu", path)
   assert(not s and string.find(err, string.rep('xuxu', max)))
+end
+
+do
+  local oldpath = package.path
+  package.path = {}
+  local s, err = pcall(require, "xuxu")
+  assert(not s and string.find(err, "package.path"))
   package.path = oldpath
 end
 
@@ -85,6 +90,7 @@ local try = function (p, n, r)
   assert(rr == r)
 end
 
+assert(package.searchpath("C", package.path) == DIR .. "C.lua")
 assert(require"C" == 25)
 assert(require"C" == 25)
 AA = nil
@@ -99,6 +105,7 @@ package.loaded.A = nil
 os.remove(DIR..'A.lua')
 AA = {}
 try('A', 'A.lc', AA)  -- now must find second option
+assert(package.searchpath("A", package.path) == DIR .. "A.lc")
 assert(require("A") == AA)
 AA = false
 try('K', 'L', false)     -- default option

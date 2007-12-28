@@ -22,11 +22,23 @@ local prepfile = function (s, p)
   assert(io.close())
 end
 
-function checkout (s)
+function getoutput ()
   io.input(out)
   local t = io.read("*a")
   io.input():close()
   assert(os.remove(out))
+  return t
+end
+
+function checkprogout (s)
+  local t = getoutput()
+  for line in string.gmatch(s, ".-\n") do
+    assert(string.find(t, line, 1, true))
+  end
+end
+
+function checkout (s)
+  local t = getoutput()
   if s ~= t then print(string.format("'%s' - '%s'\n", s, t)) end
   assert(s == t)
   return t
@@ -96,19 +108,20 @@ a
 print(a)
 = a]]
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
-checkout("6\n10\n10\n\n")
+checkprogout("6\n10\n10\n\n")
 
 prepfile("a = [[b\nc\nd\ne]]\n=a")
 print(prog)
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
-checkout("b\nc\nd\ne\n\n")
+checkprogout("b\nc\nd\ne\n\n")
 
 prompt = "alo"
 prepfile[[ --
 a = 2
 ]]
 RUN([[lua "-e_PROMPT='%s'" -i < %s > %s]], prompt, prog, out)
-checkout(string.rep(prompt, 3).."\n")
+local t = getoutput()
+assert(string.find(t, prompt .. ".*" .. prompt .. ".*" .. prompt))
 
 s = [=[ -- 
 function f ( x ) 
@@ -127,7 +140,7 @@ assert( a == b )
 s = string.gsub(s, ' ', '\n\n')
 prepfile(s)
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
-checkout("11\n1\t2\n\n")
+checkprogout("11\n1\t2\n\n")
   
 prepfile[[#comment in 1st line without \n at the end]]
 RUN("lua %s", prog)

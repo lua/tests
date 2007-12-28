@@ -12,6 +12,21 @@ assert(not a and string.find(b, "overflow"))
 print('+')
 
 
+print "testing large constructors"
+a = {}
+a[1] = "x={1"
+for i = 2, 2^20 do
+  a[i] = 1
+end
+a[#a + 1] = "}"
+s = table.concat(a, ","); a = nil
+assert(loadstring(s))(); s = nil
+assert(#x == 2^20)
+x = nil
+print('+')
+
+
+
 require "checktable"
 
 --[[ lots of empty lines (to force SETLINEW)

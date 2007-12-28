@@ -309,6 +309,8 @@ local function test (a)
   table.insert(a, 1, -1); table.insert(a, 40);
   table.insert(a, table.getn(a)+1, 50)
   table.insert(a, 2, -2)
+  table.remove(a,7)
+  assert(a[6] == 50)
   assert(table.remove(a,1) == -1)
   assert(table.remove(a,1) == -2)
   assert(table.remove(a,1) == 10)

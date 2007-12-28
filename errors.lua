@@ -44,6 +44,12 @@ assert(doit"assert(nil)")
 assert(doit"a=math.sin\n(3)")
 assert(doit("function a (... , ...) end"))
 assert(doit("function a (, ...) end"))
+assert(doit("string.format('%')"))
+assert(doit([[
+local x = string.rep('a', 10000) .. string.rep('b', 10000)
+print(#string.gsub(x, 'b'))
+]]))
+
 
 checksyntax([[
   local a = {4
@@ -72,8 +78,18 @@ checkmessage("b=1; local aaa='a'; x=aaa+b", "local 'aaa'")
 checkmessage("aaa={}; x=3/aaa", "global 'aaa'")
 checkmessage("aaa='2'; b=nil;x=aaa*b", "global 'b'")
 checkmessage("aaa={}; x=-aaa", "global 'aaa'")
+checkmessage("a = nil; a = (1) .. a", "global 'a'")
 assert(not string.find(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "'aaa'"))
 assert(not string.find(doit"aaa={}; (aaa or aaa)()", "'aaa'"))
+
+checkmessage([[
+local Var
+local function main()
+  NoSuchName (function() Var=0 end)
+end
+main()
+]], "global 'NoSuchName'")
+
 
 checkmessage([[aaa=9
 repeat until 3==3

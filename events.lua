@@ -228,6 +228,10 @@ assert(Set{1,3,5} ~= Set{3,5,1,6})
 t[Set{1,3,5}] = 1
 assert(t[Set{1,3,5}] == nil)   -- `__eq' is not valid for table accesses
 
+t.__concat = function (a,b) assert(type(a) == 'number' and
+                                   type(b) == 'table'); return a end
+c = {}; setmetatable(c, t)
+assert(4 .. c == 4)
 
 t.__concat = function (a,b,c)
   assert(c == nil)

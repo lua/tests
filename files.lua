@@ -276,6 +276,7 @@ end
 print'+'
 
 local t = os.time()
+assert(os.date('') == '')
 T = os.date("*t", t)
 loadstring(os.date([[assert(T.year==%Y and T.month==%m and T.day==%d and
   T.hour==%H and T.min==%M and T.sec==%S and

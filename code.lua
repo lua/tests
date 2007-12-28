@@ -1,3 +1,10 @@
+-- old bug: the assignment of nil to the parameter was optimized away
+function f (a)
+  a=nil
+  return a
+end
+
+assert(f("test") == nil)
 
 if T==nil then
   (Message or print)('\a\n >>> testC not active: skipping opcode tests <<<\n\a')
@@ -12,6 +19,7 @@ do
   for k,v,w in a do end
   end
 end
+
 
 
 function check (f, ...)

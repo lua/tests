@@ -82,6 +82,8 @@ setfenv(0, a)  -- change global environment
 assert(getfenv(foo("")) == a)
 setfenv(0, _G)
 
+assert(not pcall(setfenv, nil, {}))
+
 
 -- testing limits for special instructions
 

@@ -54,7 +54,7 @@ check(function ()
   local a,b,c
   local d; local e;
   a = nil; d=nil
-end, 'RETURN')
+end, 'LOADNIL', 'LOADNIL', 'RETURN')
 
 
 -- single return
@@ -130,6 +130,9 @@ end,
   'MOVE', 'MOVE', 'MOVE',
   -- no code for a = a
   'RETURN')
+
+-- bug in constant folding for 5.1
+check(function () return -nil end, 'UNM', 'RETURN')
 
 
 -- x == nil , x ~= nil

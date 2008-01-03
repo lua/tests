@@ -348,6 +348,24 @@ assert(a == true and b == 10)
 assert(coroutine.resume(co, co) == false)
 assert(coroutine.resume(co, co) == false)
 
+
+-- attempt to resume 'normal' coroutine
+co1 = coroutine.create(function () return co2() end)
+co2 = coroutine.wrap(function ()
+        assert(coroutine.status(co1) == 'normal')
+        assert(not coroutine.resume(co1))
+        coroutine.yield(3)
+      end)
+
+a,b = coroutine.resume(co1)
+assert(a and b == 3)
+assert(coroutine.status(co1) == 'dead')
+
+-- infinite recursion of coroutines
+a = function(a) coroutine.wrap(a)(a) end
+assert(not pcall(a, a))
+
+
 -- access to locals of erroneous coroutines
 local x = coroutine.create (function ()
             local a = 10

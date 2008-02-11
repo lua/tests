@@ -437,4 +437,19 @@ assert(select(2, coroutine.resume(co)) == a)
 assert(select(2, coroutine.resume(co)) == a.a)
 
 
+-- bug (stack overflow)
+local j = 100
+local lim = 8000    -- (C stack limit)
+while j < 1000000 do
+  co = coroutine.create(function()
+         t = {}
+         for i = 1, j do t[i] = i end
+         return unpack(t)
+       end)
+  local r = coroutine.resume(co)
+  assert(r and j < lim or not r and j >= lim)
+  j = j*2
+end
+
+
 print'OK'

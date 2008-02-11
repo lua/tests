@@ -30,7 +30,7 @@ a,b,c = T.testC("pushbool 1; pushbool 2; pushbool 0; return 3")
 assert(a == b and a == true and c == false)
 a,b,c = T.testC"pushbool 0; pushbool 10; pushnil;\
                       tobool -3; tobool -3; tobool -3; return 3"
-assert(a==0 and b==1 and c==0)
+assert(a==false and b==true and c==false)
 
 
 a,b,c = T.testC("gettop; return 2", 10, 20, 30, 40)
@@ -100,6 +100,8 @@ assert(a == 20 and b == false)
 
 -- testing lua_is
 
+function B(x) return x and 1 or 0 end
+
 function count (x, n)
   n = n or 2
   local prog = [[
@@ -115,7 +117,7 @@ function count (x, n)
   ]]
   prog = string.format(prog, n, n, n, n, n, n, n, n)
   local a,b,c,d,e,f,g,h = T.testC(prog, x)
-  return a+b+c+d+e+f+g+(100*h)
+  return B(a)+B(b)+B(c)+B(d)+B(e)+B(f)+B(g)+(100*B(h))
 end
 
 assert(count(3) == 2)
@@ -152,6 +154,29 @@ assert(to("tonumber", 1, 20) == 0)
 a = to("tocfunction", math.deg)
 assert(a(3) == math.deg(3) and a ~= math.deg)
 
+
+-- testing deep C stack
+local prog = {"checkstack 30000", "newtable"}
+for i = 1,12000 do
+  prog[#prog + 1] = "pushnum " .. i
+  prog[#prog + 1] = "pushnum " .. i * 10
+end
+
+prog[#prog + 1] = "pushvalue G"
+prog[#prog + 1] = "insert " .. -(2*12000 + 2)
+
+for i = 1,12000 do
+  prog[#prog + 1] = "settable " .. -(2*(12000 - i + 1) + 1)
+end
+
+prog[#prog + 1] = "return 2"
+
+prog = table.concat(prog, ";")
+local g, t = T.testC(prog)
+assert(g == _G)
+for i = 1,12000 do assert(t[i] == i*10); t[i] = nil end
+assert(next(t) == nil)
+prog, g, t = nil
 
 -- testing errors
 
@@ -237,6 +262,21 @@ assert(T.upvalue(f, 1) == 10 and
        T.upvalue(f, 3) == nil)
 T.upvalue(f, 2, "xuxu")
 assert(T.upvalue(f, 2) == "xuxu")
+
+
+-- large closures
+do
+  local A = "checkstack 300" ..
+            string.rep("pushnum 10;", 255) ..
+            "pushcclosure 255; return 1"
+  A = T.testC(A)
+  for i=1,255 do
+    assert(A(("pushvalue U%d; return 1"):format(i)) == 10)
+  end
+  assert(A("isnull U256; return 1"))
+  assert(not A("isnil U256; return 1"))
+end
+  
 
 
 -- testing environments

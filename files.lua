@@ -116,6 +116,7 @@ assert(io.read('*n') == 3450)
 assert(io.read(1) == '\n')
 assert(io.read(0) == nil)  -- end of file
 assert(io.read(1) == nil)  -- end of file
+assert(io.read(30000) == nil)  -- end of file
 assert(({io.read(1)})[2] == nil)
 assert(io.read() == nil)  -- end of file
 assert(({io.read()})[2] == nil)

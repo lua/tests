@@ -133,8 +133,12 @@ local a = {}; for i=1,3000 do a[i] = "xuxu" end
 assert(table.concat(a, "123").."123" == string.rep("xuxu123", 3000))
 assert(table.concat(a, "b", 20, 20) == "xuxu")
 assert(table.concat(a, "", 20, 21) == "xuxuxuxu")
-assert(table.concat(a, "", 22, 21) == "")
+assert(table.concat(a, "x", 22, 21) == "")
 assert(table.concat(a, "3", 2999) == "xuxu3xuxu")
+assert(table.concat({}, "x", 2^31-1, 2^31-2) == "")
+assert(table.concat({}, "x", -2^31+1, -2^31) == "")
+assert(table.concat({}, "x", 2^31-1, -2^31) == "")
+assert(table.concat({[2^31-1] = "alo"}, "x", 2^31-1, 2^31-1) == "alo")
 
 a = {"a","b","c"}
 assert(table.concat(a, ",", 1, 0) == "")

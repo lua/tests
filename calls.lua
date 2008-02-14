@@ -114,6 +114,7 @@ a = nil
 assert(a == 23 and (function (x) return x*2 end)(20) == 40)
 
 
+-- testing unpack
 local x,y,z,a
 a = {}; lim = 2000
 for i=1, lim do a[i]=i end
@@ -136,6 +137,18 @@ a,x = unpack{1}
 assert(a==1 and x==nil)
 a,x = unpack({1,2}, 1, 1)
 assert(a==1 and x==nil)
+
+assert(not pcall(unpack, {}, 0, 2^31-1))
+assert(not pcall(unpack, {}, 1, 2^31-1))
+assert(not pcall(unpack, {}, -(2^31), 2^31-1))
+assert(not pcall(unpack, {}, -(2^31 - 1), 2^31-1))
+assert(pcall(unpack, {}, 2^31-1, 0))
+assert(pcall(unpack, {}, 2^31-1, 1))
+pcall(unpack, {}, 1, 2^31)
+a, b = unpack({[2^31-1] = 20}, 2^31-1, 2^31-1)
+assert(a == 20 and b == nil)
+a, b = unpack({[2^31-1] = 20}, 2^31-2, 2^31-1)
+assert(a == nil and b == 20)
 
 
 -- testing closures

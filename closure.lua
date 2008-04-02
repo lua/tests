@@ -156,7 +156,10 @@ t()
 
 local f
 
-assert(coroutine.running() == nil)
+local main, ismain = coroutine.running()
+assert(type(main) == "thread" and ismain)
+assert(not coroutine.resume(main))
+assert(not pcall(coroutine.yield))
 
 
 -- tests for global environment
@@ -188,7 +191,8 @@ end
 
 _G.x = nil   -- declare x
 function foo (a, ...)
-  assert(coroutine.running() == f)
+  local x, y = coroutine.running()
+  assert(x == f and y == false)
   assert(coroutine.status(f) == "running")
   local arg = {...}
   for i=1,table.getn(arg) do
@@ -451,5 +455,7 @@ while j < 1000000 do
   j = j*2
 end
 
+
+assert(coroutine.running() == main)
 
 print'OK'

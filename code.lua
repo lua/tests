@@ -1,3 +1,36 @@
+print "testing code-consistency checker"
+
+do
+-- the following tests all get bugs in 5.1.3
+
+-- SETLIST - RETURN ending a function
+local a1 = string.dump(function()return;end)
+local a = a1:gsub(string.char(30,37,122,128), string.char(34,0,0), 1)
+assert(a1 ~= a)
+assert(not loadstring(a))
+
+-- LOADBOOL - SETLIST - CLOSURE (LOADBOOL jumps over SETLIST, going to
+-- a non instruction)
+a1 = string.dump(function(...)a,b,c,d=...;a=1;end)
+a = a1:gsub("e%z\128\2.....",'\2@\128\0"\0\128\0$')
+assert(a1 ~= a)
+assert(not loadstring(a))
+
+-- lua_assert instead of check
+a1 = string.dump(function(a,b,c)end)
+a = a1:gsub("%z\3%z\3","\0\255\1\3",1)
+assert(a1 ~= a)
+assert(not loadstring(a))
+
+-- precheck assumes code size >= 1 (when checking OP_RETURN at the end)
+a = string.dump(function()end)
+a = a:gsub("....\30%z\128%z.*",("\0"):rep(64),1)
+assert(not loadstring(a))
+
+end
+
+
+print"+"
 
 if T==nil then
   (Message or print)('\a\n >>> testC not active: skipping opcode tests <<<\n\a')

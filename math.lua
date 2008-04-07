@@ -153,15 +153,23 @@ assert(eq(a[200][3], 200/3))
 assert(eq(a[1000][3], 1000/3, 0.001))
 print('+')
 
-do   -- testing NaN
+a = nil
+
+do   -- testing -0 and NaN
+  local mz, z = -0, 0
+  assert(mz == z)
+  assert(1/mz < 0 and 0 < 1/z)
+  local a = {[mz] = 1}
+  assert(a[z] == 1 and a[mz] == 1)
   local NaN = 10e500 - 10e400
   assert(NaN ~= NaN)
   assert(not (NaN < NaN))
   assert(not (NaN <= NaN))
   assert(not (NaN > NaN))
   assert(not (NaN >= NaN))
-  assert(not (0 < NaN))
-  assert(not (NaN < 0))
+  assert(not (0 < NaN) and not (NaN < 0))
+  local NaN1 = 0/0
+  assert(NaN ~= NaN1 and not (NaN <= NaN1) and not (NaN1 <= NaN))
   local a = {}
   assert(not pcall(function () a[NaN] = 1 end))
   assert(a[NaN] == nil)
@@ -169,11 +177,6 @@ do   -- testing NaN
   assert(not pcall(function () a[NaN] = 1 end))
   assert(a[NaN] == nil)
 end
-
-require "checktable"
-stat(a)
-
-a = nil
 
 -- testing implicit convertions
 

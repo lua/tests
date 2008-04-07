@@ -27,6 +27,44 @@ a = string.dump(function()end)
 a = a:gsub("....\30%z\128%z.*",("\0"):rep(64),1)
 assert(not loadstring(a))
 
+
+-- code validator rejected (maliciously crafted) correct code
+z={}
+for i=1,27290 do z[i]='1,' end
+z = 'if 1+1==2 then local a={' .. table.concat(z) .. '} end'
+func = loadstring(z)
+assert(loadstring(string.dump(func)))
+
+-- invalid boolean values
+maybe = string.dump(function() return ({[true]=true})[true] end)
+maybe = maybe:gsub('\1\1','\1\2')
+maybe = loadstring(maybe)()
+assert(type(maybe) == "boolean" and maybe == true)
+
+-- code too deep in precompiled chunk
+local init = '\27\76\117\97\81\0\1\4\4\4\8\0\7\0\0\0\61\115\116' ..
+             '\100\105\110\0\1\0\0\0\1\0\0\0\0\0\0\2\2\0\0\0\36' ..
+             '\0\0\0\30\0\128\0\0\0\0\0\1\0\0\0\0\0\0\0\1\0\0\0' ..
+             '\1\0\0\0\0\0\0\2'
+local mid = '\1\0\0\0\30\0\128\0\0\0\0\0\0\0\0\0\1\0\0\0\1\0\0\0\0'
+local fin = '\0\0\0\0\0\0\0\2\0\0\0\1\0\0\0\1\0\0\0\1\0\0\0\2\0' ..
+            '\0\0\97\0\1\0\0\0\1\0\0\0\0\0\0\0'
+local lch = '\2\0\0\0\36\0\0\0\30\0\128\0\0\0\0\0\1\0\0\0\0\0\0' ..
+            '\0\1\0\0\0\1\0\0\0\0\0\0\2'
+local rch = '\0\0\0\0\0\0\0\2\0\0\0\1\0\0\0\1\0\0\0\1\0\0\0\2\0' ..
+            '\0\0\97\0\1\0\0\0\1'
+for i=1,10 do lch,rch = lch..lch,rch..rch end
+assert(not loadstring(init .. lch .. mid .. rch .. fin))
+
+
+-- incomplete dumps
+local prog = string.dump(function () local a = 10; a=a+3.4; return a end)
+for i = 1, #prog - 1 do
+  assert(not loadstring(prog:sub(1,i)))
+end
+assert(loadstring(prog:sub(1,#prog))() == 13.4)
+
+
 end
 
 

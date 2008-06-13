@@ -170,6 +170,15 @@ prepfile(string.format([[io.output(%q); io.write('alo')]], out))
 RUN("lua %s", prog)
 checkout('alo')
 
+
+-- testing os.exit
+prepfile("os.exit()")
+RUN("lua %s", prog)
+prepfile("os.exit(0)")
+RUN("lua %s", prog)
+prepfile("os.exit(1)")
+NoRun("lua %s", prog)
+
 assert(os.remove(prog))
 assert(os.remove(otherprog))
 assert(not os.remove(out))

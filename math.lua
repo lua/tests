@@ -10,6 +10,8 @@ do
   assert(a == -a and 0 == -0)
 end
 
+assert(0x10 == 16 and 0xfff == 2^12 - 1 and 0XFB == 251)
+
 do
   local x = -1
   local mz = 0/x

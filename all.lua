@@ -58,6 +58,7 @@ end
 --
 -- redefine dofile to run files through dump/undump
 --
+local olddofile = dofile
 dofile = function (n)
   showmem()
   local f = assert(loadfile(n))
@@ -87,8 +88,8 @@ local f = assert(loadfile('gc.lua'))
 f()
 dofile('db.lua')
 assert(dofile('calls.lua') == deep and deep)
-dofile('strings.lua')
-dofile('literals.lua')
+olddofile('strings.lua')
+olddofile('literals.lua')
 assert(dofile('attrib.lua') == 27)
 assert(dofile('locals.lua') == 5)
 dofile('constructs.lua')

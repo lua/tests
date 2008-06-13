@@ -1,7 +1,10 @@
 
 print('testing i/o')
 
+assert(type(os.getenv"PATH") == "string")
+
 assert(io.input(io.stdin) == io.stdin)
+assert(not pcall(io.input, "non-existent-file"))
 assert(io.output(io.stdout) == io.stdout)
 
 -- cannot close standard files
@@ -85,6 +88,7 @@ assert(io.type(f) == "file")
 io.output(file)
 assert(io.output():read() == nil)
 for l in f:lines() do io.write(l, "\n") end
+assert(tostring(f):sub(1, 5) == "file ")
 assert(f:close()); io.close()
 assert(not pcall(io.close, f))   -- error trying to close again
 assert(tostring(f) == "file (closed)")
@@ -303,6 +307,7 @@ assert(not pcall(os.date, "%9"))   -- invalid conversion specifier
 assert(not pcall(os.date, "%"))   -- invalid conversion specifier
 
 assert(os.time(T) == t)
+assert(not pcall(os.time, {hour = 12}))
 
 T = os.date("!*t", t)
 loadstring(os.date([[!assert(T.year==%Y and T.month==%m and T.day==%d and
@@ -328,9 +333,9 @@ t = os.time()
 t1 = os.time(os.date("*t"))
 assert(os.difftime(t1,t) <= 2)
 
-local t1 = os.time{year=2000, month=10, day=1, hour=23, min=12, sec=17}
+local t1 = os.time{year=2000, month=10, day=1, hour=23, min=12}
 local t2 = os.time{year=2000, month=10, day=1, hour=23, min=10, sec=19}
-assert(os.difftime(t1,t2) == 60*2-2)
+assert(os.difftime(t1,t2) == 60*2-19)
 
 io.output(io.stdout)
 local d = os.date('%d')
@@ -343,3 +348,11 @@ local s = os.date('%S')
 io.write(string.format('test done on %2.2d/%2.2d/%d', d, m, a))
 io.write(string.format(', at %2.2d:%2.2d:%2.2d\n', h, min, s))
 io.write(string.format('%s\n', _VERSION))
+
+f = io.tmpfile()
+assert(io.type(f) == "file")
+f:write("alo")
+f:seek("set")
+assert(f:read"*a" == "alo")
+
+

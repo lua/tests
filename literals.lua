@@ -178,5 +178,10 @@ local s = "a string with \r and \n and \r\n and \n\r"
 local c = string.format("return %q", s)
 assert(assert(loadstring(c))() == s)
 
+-- testing errors
+assert(not loadstring"a = 'non-ending string")
+assert(not loadstring"a = 'non-ending string\n'")
+assert(not loadstring"a = '\\345'")
+assert(not loadstring"a = [=x]")
 
 print('OK')

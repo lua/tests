@@ -430,6 +430,9 @@ c = T.newuserdata(0); debug.setmetatable(c, tt); nc = T.udataval(c)
 x = T.newuserdata(4)
 y = T.newuserdata(0)
 
+assert(not pcall(io.input, a))
+assert(not pcall(io.input, x))
+
 assert(debug.getmetatable(x) == nil and debug.getmetatable(y) == nil)
 
 d=T.ref(a);
@@ -754,6 +757,49 @@ assert(T.gsub("alo.alo.uhuh.", "alo", "//") == "//.//.uhuh.")
 assert(T.gsub("", "alo", "//") == "")
 assert(T.gsub("...", ".", "/.") == "/././.")
 assert(T.gsub("...", "...", "") == "")
+
+
+-- testing luaL_newmetatable
+local mt_xuxu, res, top = T.testC("newmetatable xuxu; gettop; return 3")
+assert(type(mt_xuxu) == "table" and res and top == 3)
+local d, res, top = T.testC("newmetatable xuxu; gettop; return 3")
+assert(mt_xuxu == d and not res and top == 3)
+d, res, top = T.testC("newmetatable xuxu1; gettop; return 3")
+assert(mt_xuxu ~= d and res and top == 3)
+
+x = T.newuserdata(0);
+y = T.newuserdata(0);
+T.testC("pushstring xuxu; gettable R; setmetatable 2", x)
+assert(getmetatable(x) == mt_xuxu)
+
+-- testing luaL_testudata
+-- correct metatable
+local res1, res2, top = T.testC([[testudata -1 xuxu
+   	 			  testudata 2 xuxu
+				  gettop
+				  return 3]], x)
+assert(res1 and res2 and top == 4)
+
+-- wrong metatable
+res1, res2, top = T.testC([[testudata -1 xuxu1
+			    testudata 2 xuxu1
+			    gettop
+			    return 3]], x)
+assert(not res1 and not res2 and top == 4)
+
+-- non-existent type
+res1, res2, top = T.testC([[testudata -1 xuxu2
+			    testudata 2 xuxu2
+			    gettop
+			    return 3]], x)
+assert(not res1 and not res2 and top == 4)
+
+-- userdata has no metatable
+res1, res2, top = T.testC([[testudata -1 xuxu
+			    testudata 2 xuxu
+			    gettop
+			    return 3]], y)
+assert(not res1 and not res2 and top == 4)
 
 
 print'OK'

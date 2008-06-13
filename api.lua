@@ -752,11 +752,17 @@ end)
 print'+'
 
 -- testing some auxlib functions
-assert(T.gsub("alo.alo.uhuh.", ".", "//") == "alo//alo//uhuh//")
-assert(T.gsub("alo.alo.uhuh.", "alo", "//") == "//.//.uhuh.")
-assert(T.gsub("", "alo", "//") == "")
-assert(T.gsub("...", ".", "/.") == "/././.")
-assert(T.gsub("...", "...", "") == "")
+local function gsub (a, b, c)
+  a, b = T.testC("gsub 2 3 4; gettop; return 2", a, b, c)
+  assert(b == 5)
+  return a
+end
+
+assert(gsub("alo.alo.uhuh.", ".", "//") == "alo//alo//uhuh//")
+assert(gsub("alo.alo.uhuh.", "alo", "//") == "//.//.uhuh.")
+assert(gsub("", "alo", "//") == "")
+assert(gsub("...", ".", "/.") == "/././.")
+assert(gsub("...", "...", "") == "")
 
 
 -- testing luaL_newmetatable

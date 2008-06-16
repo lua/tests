@@ -339,6 +339,9 @@ end
 for i=1,10 do u[i] = i end
 for i=1,10 do assert(u[i] == i) end
 
+getmetatable(u).__len = function () return 10 end
+assert(#u == 10)
+
 local k = newproxy(u)
 assert(getmetatable(k) == getmetatable(u))
 
@@ -378,6 +381,11 @@ assert(getmetatable(nil) == nil)
 
 debug.setmetatable(nil, {})
 
+
+-- loops in delegation
+a = {}; setmetatable(a, a); a.__index = a; a.__newindex = a
+assert(not pcall(function (a,b) return a[b] end, a, 10))
+assert(not pcall(function (a,b,c) a[b] = c end, a, 10, true))
 
 print 'OK'
 

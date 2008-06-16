@@ -253,10 +253,17 @@ a = assert(load(read1(x), "modname"))
 assert(a() == "\0" and _G.x == 33)
 assert(debug.getinfo(a).source == "modname")
 
+a = assert(load(function () return nil end))
+a()  -- empty chunk
+
+assert(not load(function () return true end))
+
 x = string.dump(loadstring("x = 1; return x"))
 i = 0
 a = assert(load(read1(x)))
 assert(a() == 1 and _G.x == 1)
+
+assert(not pcall(string.dump, print))  -- no dump of C functions
 
 i = 0
 local a, b = load(read1("*a = 123"))

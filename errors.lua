@@ -123,6 +123,11 @@ main()
 ]], "global 'NoSuchName'")
 print'+'
 
+a = {}; setmetatable(a, {__index = string})
+checkmessage("a:sub()", "bad self")
+checkmessage("string.sub('a', {})", "#2")
+checkmessage("('a'):sub{}", "#1")
+
 
 -- tests for errors in coroutines
 

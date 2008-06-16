@@ -526,5 +526,10 @@ assert (a>=b and a.op == "__le")
 assert (a>b and a.op == "__lt")
 
 
+b = function () end;  a = {}
+debug.setfenv(b, a)
+assert(debug.getfenv(b) == a)
+assert(debug.getfenv(nil) == nil)
+
 print"OK"
 

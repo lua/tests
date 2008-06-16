@@ -611,6 +611,7 @@ print('+')
 -------------------------------------------------------------------------
 -- testing memory limits
 -------------------------------------------------------------------------
+assert(not pcall(T.newuserdata, 2^32-4))
 collectgarbage()
 T.totalmem(T.totalmem()+5000)   -- set low memory limit (+5k)
 assert(not pcall(loadstring"local a={}; for i=1,100000 do a[i]=i end"))

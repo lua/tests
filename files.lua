@@ -73,6 +73,7 @@ assert(io.write("\n\n\t\t  3450\n"));
 io.close()
 
 -- test line generators
+assert(not pcall(io.lines, "non-existent-file"))
 assert(os.rename(otherfile, file))
 io.output(otherfile)
 local f = io.lines(file)

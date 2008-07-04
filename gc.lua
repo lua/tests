@@ -1,5 +1,24 @@
 print('testing garbage collection')
 
+-- test weird parameters
+do
+  -- save original parameters
+  local a = collectgarbage("setpause", 200)
+  local b = collectgarbage("setstepmul", 200)
+  for _, p in ipairs{0, 2, 10, 90, 100, 500, 5000, 30000} do
+    for _, m in ipairs{0, 2, 10, 90, 100, 500, 5000, 30000} do
+      collectgarbage("setpause", p)
+      collectgarbage("setstepmul", m)
+      collectgarbage("step", 0)
+      collectgarbage("step", 10000)
+    end
+  end
+  -- restore original parameters
+  collectgarbage("setpause", a)
+  collectgarbage("setstepmul", b)
+end
+
+
 collectgarbage()
 
 _G["while"] = 234

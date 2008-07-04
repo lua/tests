@@ -242,6 +242,33 @@ GC()
 assert(next(a) == nil)
 
 
+-- testing errors during GC
+do
+collectgarbage("stop")   -- stop collection
+local u = newproxy(true)
+local s = {}; setmetatable(s, {__mode = 'k'})
+getmetatable(u).__gc = function (o)
+  local i = s[o]
+  s[i] = true
+  assert(not s[i - 1])   -- check proper finalization order
+  if i == 8 then error("here") end   -- error during GC
+end
+
+for i = 6, 10 do local n = newproxy(u); s[n] = i end
+
+assert(not pcall(collectgarbage))
+for i = 8, 10 do assert(s[i]) end
+
+for i = 1, 5 do local n = newproxy(u); s[n] = i end
+
+collectgarbage()
+for i = 1, 10 do assert(s[i]) end
+
+getmetatable(u).__gc = false
+
+end
+print '+'
+
 
 -- testing userdata
 collectgarbage("stop")   -- stop collection

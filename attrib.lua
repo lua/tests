@@ -174,6 +174,9 @@ local function import(...)
   end
 end
 
+-- cannot change environment of a C function
+assert(not pcall(module, 'XUXU'))
+
 local assert, module, package = assert, module, package
 X = nil; x = 0; assert(_G.x == 0)   -- `x' must be a global variable
 module"X"; x = 1; assert(_M.x == 1)

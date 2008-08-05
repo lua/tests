@@ -372,6 +372,17 @@ while thread_id < 1000 do
     thread_id = thread_id + 1
 end
 
+do
+  local x = gcinfo()
+  collectgarbage()
+  collectgarbage"stop"
+  repeat
+    for i=1,100 do local a = {} end
+    collectgarbage("step", 1)   -- steps should not unblock the collector
+  until gcinfo() > 1000
+  collectgarbage"restart"
+end
+
 
 if T then
   print("emergency collections")

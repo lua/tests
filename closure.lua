@@ -387,6 +387,7 @@ assert(_G.f() == 12)
 if not T then
   (Message or print)('\a\n >>> testC not active: skipping yield/hook tests <<<\n\a')
 else
+  print "testing yields inside hooks"
 
   local turn
   
@@ -410,8 +411,8 @@ else
   end)
 
   while A==0 or B==0 do
-    if A==0 then turn = "A"; T.resume(x) end
-    if B==0 then turn = "B"; T.resume(y) end
+    if A==0 then turn = "A"; assert(T.resume(x)) end
+    if B==0 then turn = "B"; assert(T.resume(y)) end
   end
 
   assert(B/A == 11)

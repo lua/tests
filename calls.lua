@@ -154,7 +154,7 @@ assert(a == nil and b == 20)
 -- testing closures
 
 -- fixed-point operator
-Y = function (le)
+Z = function (le)
       local function a (f)
         return le(function (x) return f(f)(x) end)
       end
@@ -171,9 +171,9 @@ F = function (f)
              end
     end
 
-fat = Y(F)
+fat = Z(F)
 
-assert(fat(0) == 1 and fat(4) == 24 and Y(F)(5)==5*Y(F)(4))
+assert(fat(0) == 1 and fat(4) == 24 and Z(F)(5)==5*Z(F)(4))
 
 local function g (z)
   local function f (a,b,c,d)
@@ -185,7 +185,7 @@ end
 f = g(10)
 assert(f(9, 16) == 10+11+12+13+10+9+16+10)
 
-Y, F, f = nil
+Z, F, f = nil
 print('+')
 
 -- testing multiple returns

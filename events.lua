@@ -144,16 +144,6 @@ assert(cap[0] == "pow" and cap[1] == '4' and cap[2] == a and cap[3]==nil)
 assert(#a == a)
 assert(cap[0] == "len"and cap[1] == a)
 
-do
-  assert(getmetatable("").__len == nil)
-  getmetatable("").__len = function (s) return -s:len() end
-  assert(#"hi" == -2)
-  assert(#"" == 0)
-  assert(#"xuxu" == -4)
-  getmetatable("").__len = nil
-  assert(#"xuxu" == 4)
-end
-
 
 t = {}
 t.__lt = function (a,b,c)

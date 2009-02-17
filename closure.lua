@@ -459,4 +459,86 @@ end
 
 assert(coroutine.running() == main)
 
+print"+"
+
+
+print"testing yields inside metamethods"
+
+local mt = {
+  __eq = function(a,b) coroutine.yield(nil, "eq"); return a.x == b.x end,
+  __lt = function(a,b) coroutine.yield(nil, "lt"); return a.x < b.x end,
+  __le = function(a,b) coroutine.yield(nil, "le"); return a - b <= 0 end,
+  __add = function(a,b) coroutine.yield(nil, "add"); return a.x + b.x end,
+  __sub = function(a,b) coroutine.yield(nil, "sub"); return a.x - b.x end,
+  __concat = function(a,b)
+               coroutine.yield(nil, "concat");
+               a = type(a) == "table" and a.x or a
+               b = type(b) == "table" and b.x or b
+               return a .. b
+             end,
+  __index = function (t,k) coroutine.yield(nil, "idx"); return t.k[k] end,
+  __newindex = function (t,k,v) coroutine.yield(nil, "nidx"); t.k[k] = v end,
+}
+
+
+local function new (x)
+  return setmetatable({x = x, k = {}}, mt)
+end
+
+
+local a = new(10)
+local b = new(12)
+local c = new"hello"
+
+local function run (f, t)
+  local i = 1
+  local c = coroutine.wrap(f)
+  while true do
+    local res, stat = c()
+    if res then assert(t[i] == nil); return res, t end
+    assert(stat == t[i])
+    i = i + 1
+  end
+end
+
+
+assert(run(function () if (a>=b) then return '>=' else return '<' end end,
+       {"le", "sub"}) == "<")
+-- '<=' using '<'
+mt.__le = nil
+assert(run(function () if (a<=b) then return '<=' else return '>' end end,
+       {"lt"}) == "<=")
+assert(run(function () if (a==b) then return '==' else return '~=' end end,
+       {"eq"}) == "~=")
+
+-- assert(run(function () return a..b end, {"concat"}) == "1012")
+
+assert(run(function() return a .. b .. c .. a end,
+       {"concat", "concat", "concat"}) == "1012hello10")
+
+assert(run(function() return "a" .. "b" .. a .. "c" .. c .. b .. "x" end,
+       {"concat", "concat", "concat"}) == "ab10chello12x")
+
+assert(run(function ()
+             a.BB = print
+             return a.BB
+           end, {"nidx", "idx"}) == print)
+
+
+print"+"
+
+print"testing yields inside 'for' iterators"
+
+local f = function (s, i)
+      if i%2 == 0 then coroutine.yield(nil, "for") end
+      if i < s then return i + 1 end
+    end
+
+assert(run(function ()
+             local s = 0
+             for i in f, 4, 0 do s = s + i end
+             return s
+           end, {"for", "for", "for"}) == 10)
+
+
 print'OK'

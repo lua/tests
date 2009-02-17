@@ -531,7 +531,7 @@ do   -- testing errors during GC
   for i=1,20 do
     a[i] = T.newuserdata(i)   -- creates several udata
   end
-  for i=1,20,2 do   -- mark half of them to raise error during GC
+  for i=1,20,2 do   -- mark half of them to raise errors during GC
     debug.setmetatable(a[i], {__gc = function (x) error("error inside gc") end})
   end
   for i=2,20,2 do   -- mark the other half to count and to create more garbage
@@ -539,12 +539,7 @@ do   -- testing errors during GC
   end
   _G.A = 0
   a = 0
-  while 1 do
-  if xpcall(collectgarbage, function (s) a=a+1 end) then
-    break   -- stop if no more errors
-  end
-  end
-  assert(a == 10)  -- number of errors
+  collectgarbage()
   assert(A == 10)  -- number of normal collections
 end
 -------------------------------------------------------------------------

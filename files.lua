@@ -280,7 +280,8 @@ x = nil; y = nil
 x, y = pcall(io.popen, "ls")
 if x then
   assert(y:read("*a"))
-  assert(y:close())
+  assert(y:close() == 0)
+  assert(not io.open("no program with this name"))
 else
   (Message or print)('\a\n >>> popen not available<<<\n\a')
 end

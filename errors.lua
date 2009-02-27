@@ -128,6 +128,9 @@ checkmessage("a:sub()", "bad self")
 checkmessage("string.sub('a', {})", "#2")
 checkmessage("('a'):sub{}", "#1")
 
+checkmessage("table.sort({1,2,3}, table.sort)", "'table.sort'")
+-- next message may be 'unpack' or '_G.unpack'
+checkmessage("string.gsub('s', 's', unpack)", "unpack'")
 
 -- tests for errors in coroutines
 

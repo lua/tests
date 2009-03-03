@@ -70,14 +70,14 @@ t = pack(T.testC("concat 5; gettop; return .", "alo", 2, 3, "joao", 12))
 tcheck(t, {n=1,"alo23joao12"})
 
 -- testing MULTRET
-t = pack(T.testC("rawcall 2,-1; gettop; return .",
+t = pack(T.testC("call 2,-1; gettop; return .",
      function (a,b) return 1,2,3,4,a,b end, "alo", "joao"))
 tcheck(t, {n=6,1,2,3,4,"alo", "joao"})
 
 do  -- test returning more results than fit in the caller stack
   local a = {}
   for i=1,1000 do a[i] = true end; a[999] = 10
-  local b = T.testC([[call 1 -1; pop 1; tostring -1; return 1]], unpack, a)
+  local b = T.testC([[pcall 1 -1; pop 1; tostring -1; return 1]], unpack, a)
   assert(b == "10")
 end
 
@@ -181,9 +181,9 @@ prog, g, t = nil
 -- testing errors
 
 a = T.testC([[
-  loadstring 2; call 0,1;
-  pushvalue 3; insert -2; call 1, 1;
-  call 0, 0;
+  loadstring 2; pcall 0,1;
+  pushvalue 3; insert -2; pcall 1, 1;
+  pcall 0, 0;
   return 1
 ]], "x=150", function (a) assert(a==nil); return 3 end)
 
@@ -196,6 +196,18 @@ end
 check3(":1:", T.testC("loadstring 2; gettop; return .", "x="))
 check3("cannot read", T.testC("loadfile 2; gettop; return .", "."))
 check3("cannot open xxxx", T.testC("loadfile 2; gettop; return .", "xxxx"))
+
+-- test errors in non protected threads
+function checkerrnopro (code, msg)
+  L = coroutine.create(function () end)
+  local stt, err = pcall(T.testC, code)
+  assert(not stt and string.find(err, msg))
+end
+
+checkerrnopro("pushnum 3; call 0 0", "attempt to call")
+function f () f() end
+checkerrnopro("pushstring f; gettable G; call 0 0;", "stack overflow")
+
 
 -- testing table access
 

@@ -75,8 +75,6 @@ for k=0,lim do
 end
 
 
-print'+'
-
 -- testing tables dynamically built
 local lim = 130
 local a = {}; a[2] = 1; check(a, 0, 1)
@@ -196,6 +194,7 @@ _G["ret" .. "urn"] = nil
 assert(nofind==find("return"))
 _G["xxx"] = 1
 assert(xxx==find("xxx"))
+
 print('+')
 
 a = {}
@@ -244,7 +243,41 @@ local function foo ()
 end
 foo()
 
-print'+'
+
+-- testing yields inside foreach
+
+local t = {'a', 'b', 'c', 'd'}
+
+local co = coroutine.create(function ()
+      return table.foreach(t, function (k,v)
+               return coroutine.yield(k,v)
+             end)
+     end)
+
+for i = 1, #t - 2 do
+  local st, k, v = coroutine.resume(co)
+  assert(k == i and v == t[k])
+end
+
+local st, v = coroutine.resume(co, t)
+assert(v == t)
+assert(not coroutine.resume(co))
+
+
+local co = coroutine.create(function ()
+             table.foreach(t, coroutine.yield)
+             return 10
+           end)
+
+for i = 1, #t do
+  local st, k, v = coroutine.resume(co)
+  assert(k == i and v == t[k])
+end
+
+assert(select(2, coroutine.resume(co)) == 10)
+
+
+-- 
 
 local function checknext (a)
   local b = {}
@@ -285,7 +318,7 @@ a = {}
 for i=0,50 do a[math.pow(2,i)] = true end
 assert(a[table.getn(a)])
 
-print("+")
+print('+')
 
 
 -- erasing values
@@ -347,7 +380,7 @@ assert(table.remove(a, #a) == 40)
 assert(a[#a] == 30)
 assert(table.remove(a, 2) == 20)
 assert(a[#a] == 30 and #a == 2)
-print("+")
+print('+')
 
 a = {}
 for i=1,1000 do

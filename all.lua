@@ -15,14 +15,16 @@ collectgarbage("setpause", 190)
 print("current path:\n  " .. string.gsub(package.path, ";", "\n  "))
 
 
+local c = os.clock()
+
+
+do
+
 local msgs = {}
 function Message (m)
   print(m)
   msgs[#msgs+1] = string.sub(m, 3, -3)
 end
-
-
-local c = os.clock()
 
 assert(os.setlocale"C")
 
@@ -120,20 +122,26 @@ if #msgs > 0 then
 end
 
 print("final OK !!!")
-print('cleaning all!!!!')
 
 debug.sethook(function (a) assert(type(a) == 'string') end, "cr")
 
+-- to survive outside block
+_G.showmem = showmem
+
+end
+
 local _G, collectgarbage, showmem, print, format, clock =
-      _G, collectgarbage, showmem, print, format, os.clock
+      _G, collectgarbage, showmem, print, string.format, os.clock
 
-local a={}
-for n in pairs(_G) do a[n] = 1 end
-a.tostring = nil
-a.___Glob = nil
-for n in pairs(a) do _G[n] = nil end
+-- erase (almost) all globals
+print('cleaning all!!!!')
+for n in pairs(_G) do
+  if not ({___Glob = 1, tostring = 1})[n] then
+    _G[n] = nil
+  end
+end
 
-a = nil
+
 collectgarbage()
 collectgarbage()
 collectgarbage()

@@ -275,6 +275,18 @@ end
 assert(table.getn(a) == 25 and a[table.getn(a)] == 97)
 
 
+-- yielding across C boundaries
+
+co = coroutine.wrap(function()
+       assert(not pcall(table.sort,{1,2,3}, coroutine.yield))
+       coroutine.yield(20)
+       return 30
+     end)
+
+assert(co() == 20)
+assert(co() == 30)
+
+
 -- errors in coroutines
 function foo ()
   assert(debug.getinfo(1).currentline == debug.getinfo(foo).linedefined + 1)

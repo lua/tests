@@ -240,8 +240,8 @@ table.sort({10,9,8,4,19,23,0,0}, function (a,b) return a<b end, "extra arg")
 x = "-- a comment\0\0\0\n  x = 10 + \n23; \
      local a = function () x = 'hi' end; \
      return '\0'"
-local i = 0
 function read1 (x)
+  local i = 0
   return function ()
     collectgarbage()
     i=i+1
@@ -249,9 +249,16 @@ function read1 (x)
   end
 end
 
-a = assert(load(read1(x), "modname"))
+function cannotload (msg, a,b)
+  assert(not a and string.find(b, msg))
+end
+
+a = assert(load(read1(x), "modname", "t"))
 assert(a() == "\0" and _G.x == 33)
 assert(debug.getinfo(a).source == "modname")
+-- cannot read text in binary mode
+cannotload("attempt to load", load(read1(x), "modname", "b"))
+cannotload("attempt to load", load(x, "modname", "b"))
 
 a = assert(load(function () return nil end))
 a()  -- empty chunk
@@ -259,18 +266,16 @@ a()  -- empty chunk
 assert(not load(function () return true end))
 
 x = string.dump(loadstring("x = 1; return x"))
-i = 0
-a = assert(load(read1(x)))
+a = assert(load(read1(x), nil, "b"))
 assert(a() == 1 and _G.x == 1)
+cannotload("attempt to load", load(read1(x), nil, "t"))
+cannotload("attempt to load", load(x, nil, "t"))
 
 assert(not pcall(string.dump, print))  -- no dump of C functions
 
-i = 0
-local a, b = load(read1("*a = 123"))
-assert(not a and type(b) == "string" and i == 2)
-
-a, b = load(function () error("hhi") end)
-assert(not a and string.find(b, "hhi"))
+cannotload("unexpected symbol", load(read1("*a = 123")))
+cannotload("unexpected symbol", load("*a = 123"))
+cannotload("hhi", load(function () error("hhi") end))
 
 -- test generic load with nested functions
 x = [[

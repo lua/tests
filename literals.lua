@@ -21,6 +21,15 @@ assert('\0\0\0alo' == '\0' .. '\0\0' .. 'alo')
 
 assert(010 .. 020 .. -030 == "1020-30")
 
+-- valid characters in variable names
+for i = 0, 255 do
+  local s = string.char(i)
+  assert(not string.find(s, "[a-zA-Z_]") == not loadstring(s .. "=1"))
+  assert(not string.find(s, "[a-zA-Z_0-9]") ==
+         not loadstring("a" .. s .. "1 = 1"))
+end
+
+
 -- long variable names
 
 var = string.rep('a', 15000)

@@ -399,4 +399,20 @@ assert(run(function ()
            end, {"for", "for", "for"}) == 10)
 
 
+-- yields inside foreachi (testing context preservation)
+function f (a,b)
+  coroutine.yield(a, new(a) + b)
+end
+
+t = {new(10),new(20),new(30)}
+
+co = coroutine.wrap(function() table.foreachi(t, f) end)
+
+for i = 1,#t do
+  local k,v,x = co()
+  assert(k == nil and v == "add")
+  local k,v,x = co()
+  assert(k == i and v == t[i].x + i and x == nil)
+end
+
 print'OK'

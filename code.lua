@@ -9,13 +9,6 @@ local a = a1:gsub(string.char(30,37,122,128), string.char(34,0,0), 1)
 assert(a1 ~= a)
 assert(not loadstring(a))
 
--- LOADBOOL - SETLIST - CLOSURE (LOADBOOL jumps over SETLIST, going to
--- a non instruction)
-a1 = string.dump(function(...)a,b,c,d=...;a=1;end)
-a = a1:gsub("e%z\128\2.....",'\2@\128\0"\0\128\0$')
-assert(a1 ~= a)
-assert(not loadstring(a))
-
 -- lua_assert instead of check
 a1 = string.dump(function(a,b,c)end)
 a = a1:gsub("%z\3%z\3","\0\255\1\3",1)
@@ -86,12 +79,13 @@ end
 
 
 function check (f, ...)
+  local arg = {...}
   local c = T.listcode(f)
-  for i=1, arg.n do
+  for i=1, #arg do
     -- print(arg[i], c[i])
     assert(string.find(c[i], '- '..arg[i]..' *%d'))
   end
-  assert(c[arg.n+2] == nil)
+  assert(c[#arg+2] == nil)
 end
 
 

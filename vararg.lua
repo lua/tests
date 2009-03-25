@@ -3,8 +3,7 @@ print('testing vararg')
 _G.arg = nil
 
 function f(a, ...)
-  assert(type(arg) == 'table')
-  assert(type(arg.n) == 'number')
+  local arg = {n = select('#', ...), ...}
   for i=1,arg.n do assert(a[i]==arg[i]) end
   return arg.n
 end
@@ -17,7 +16,7 @@ function c12 (...)
   return res, 2
 end
 
-function vararg (...) return arg end
+function vararg (...) return {n = select('#', ...), ...} end
 
 local call = function (f, args) return f(unpack(args, 1, args.n)) end
 
@@ -42,7 +41,7 @@ a = call(print, {'+'})
 assert(a == nil)
 
 local t = {1, 10}
-function t:f (...) return self[arg[1]]+arg.n end
+function t:f (...) local arg = {...}; return self[...]+#arg end
 assert(t:f(1,4) == 3 and t:f(2) == 11)
 print('+')
 

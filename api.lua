@@ -12,7 +12,7 @@ function tcheck (t1, t2)
   for i=1,table.getn(t1) do assert(t1[i] == t2[i]) end
 end
 
-function pack(...) return arg end
+function pack(...) return {n = select('#', ...); ...} end
 
 
 print('testing C API')
@@ -190,7 +190,8 @@ a = T.testC([[
 assert(type(a) == 'string' and x == 150)
 
 function check3(p, ...)
-  assert(arg.n == 3)
+  local arg = {...}
+  assert(#arg == 3)
   assert(string.find(arg[3], p))
 end
 check3(":1:", T.testC("loadstring 2; gettop; return .", "x="))

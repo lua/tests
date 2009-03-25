@@ -209,6 +209,7 @@ assert(debug.getinfo(1, "l").currentline == L+11)  -- check count of lines
 
 
 function g(...)
+  local arg = {...}
   do local a,b,c; a=math.sin(40); end
   local feijao
   local AAAA,B = "xuxu", "mamão"
@@ -256,7 +257,7 @@ assert(debug.gethook() == nil)
 
 X = nil
 a = {}
-function a:f (a, b, ...) local c = 13 end
+function a:f (a, b, ...) local arg = {...}; local c = 13 end
 debug.sethook(function (e)
   assert(e == "call")
   dostring("XX = 12")  -- test dostring inside hooks
@@ -281,7 +282,7 @@ debug.sethook(function (e)
 end, "c")
 
 a:f(1,2,3,4,5)
-assert(X.self == a and X.a == 1   and X.b == 2 and X.arg.n == 3 and X.c == nil)
+assert(X.self == a and X.a == 1   and X.b == 2 and X.c == nil)
 assert(XX == 12)
 assert(debug.gethook() == nil)
 

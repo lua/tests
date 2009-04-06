@@ -208,12 +208,12 @@ assert(not pcall(module, "math.sin"))
 
 local p = ""   -- On Mac OS X, redefine this to "_"
 
--- assert(loadlib == package.loadlib)   -- only for compatibility
-local f, err, when = package.loadlib("libs/lib1.so", p.."luaopen_lib1")
-if not f then
+local st, err, when = package.loadlib("libs/lib1.so", "*")
+if not st then
   (Message or print)('\a\n >>> cannot load dynamic library <<<\n\a')
   print(err, when)
 else
+  local f = assert(package.loadlib("libs/lib1.so", p.."luaopen_lib1"))
   f()   -- open library
   assert(require("lib1") == lib1)
   collectgarbage()
@@ -222,6 +222,8 @@ else
   assert(f(10, 20) == "1020\n")
   f, err, when = package.loadlib("libs/lib1.so", p.."xuxu")
   assert(not f and type(err) == "string" and when == "init")
+  -- symbols from 'lib1' must be visible to other libraries
+  assert(package.loadlib("libs/lib11.so", p.."luaopen_lib11"))
   package.cpath = "libs/?.so"
   require"lib2"
   assert(lib2.id("x") == "x")

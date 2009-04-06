@@ -63,6 +63,7 @@ end
 local olddofile = dofile
 dofile = function (n)
   showmem()
+  print("\n***** FILE '"..n.."'*****")
   local f = assert(loadfile(n))
   local b = string.dump(f)
   f = assert(loadstring(b))

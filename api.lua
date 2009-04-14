@@ -25,6 +25,10 @@ assert(T.s2d(a) == 12458954321123)
 a,b,c = T.testC("pushnum 1; pushnum 2; pushnum 3; return 2")
 assert(a == 2 and b == 3 and not c)
 
+f = T.makeCfunc("pushnum 1; pushnum 2; pushnum 3; return 2")
+a,b,c = f()
+assert(a == 2 and b == 3 and not c)
+
 -- test that all trues are equal
 a,b,c = T.testC("pushbool 1; pushbool 2; pushbool 0; return 3")
 assert(a == b and a == true and c == false)
@@ -344,10 +348,11 @@ for i=1,Lim do   -- unlock all them
 end
 
 function printlocks ()
-  local n = T.testC("gettable R; return 1", "n")
+  local f = T.makeCfunc("gettable R; return 1")
+  local n = f("n")
   print("n", n)
   for i=0,n do
-    print(i, T.testC("gettable R; return 1", i))
+    print(i, f(i))
   end
 end
 

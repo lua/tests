@@ -133,6 +133,35 @@ assert(co() == 20)
 assert(co() == 30)
 
 
+local f = function (s, i) return coroutine.yield(i) end
+
+local f1 = coroutine.wrap(function ()
+             return xpcall(pcall, function (...) return ... end,
+               function ()
+                 local s = 0
+                 for i in f, nil, 1 do pcall(function () s = s + i end) end
+                 error({s})
+               end)
+           end)
+
+f1()
+for i = 1, 10 do assert(f1(i) == i) end
+local r1, r2, v = f1(nil)
+assert(r1 and not r2 and v[1] ==  (10 + 1)*10/2)
+
+
+function f (a, b) a = coroutine.yield(a);  error{a + b} end
+function g(x) return x[1]*2 end
+
+co = coroutine.wrap(function ()
+       coroutine.yield(xpcall(f, g, 10, 20))
+     end)
+
+assert(co() == 10)
+r, msg = co(100)
+assert(not r and msg == 240)
+
+
 -- errors in coroutines
 function foo ()
   assert(debug.getinfo(1).currentline == debug.getinfo(foo).linedefined + 1)

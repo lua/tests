@@ -21,6 +21,27 @@ assert('\0\0\0alo' == '\0' .. '\0\0' .. 'alo')
 
 assert(010 .. 020 .. -030 == "1020-30")
 
+-- hexadecimal escapes
+assert("\x00\x05\x10\x1f\x3C\xFF\xe8" == "\0\5\16\31\60\255\232")
+
+-- Error in escape sequences
+local function lexerror (s, err)
+  local st, msg = loadstring('return '..s)
+  assert(not st and string.find(msg, "near '"..err.."'", 1, true))
+end
+lexerror([["abc\x"]], [[\x"]])
+lexerror([["\x]], [[\x]])
+lexerror([["\x5"]], [[\x5"]])
+lexerror([["\x5]], [[\x5]])
+lexerror([["\xr"]], [[\xr]])
+lexerror([["\x.]], [[\x.]])
+lexerror([["\x8%"]], [[\x8%]])
+lexerror([["\xAG]], [[\xAG]])
+
+lexerror([["\999"]], [[\999]])
+lexerror([["xyz\300"]], [[\300]])
+
+
 -- valid characters in variable names
 for i = 0, 255 do
   local s = string.char(i)

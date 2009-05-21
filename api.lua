@@ -557,7 +557,17 @@ do   -- testing errors during GC
   end
   _G.A = 0
   a = 0
-  collectgarbage()
+  while 1 do
+    local stat, msg = pcall(collectgarbage)
+    if stat then
+      break   -- stop when no more errors
+    else
+      a = a + 1
+      assert(string.find(msg, "__gc"))
+    end
+  end
+  assert(a == 10)  -- number of errors
+
   assert(A == 10)  -- number of normal collections
 end
 -------------------------------------------------------------------------

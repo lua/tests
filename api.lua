@@ -102,6 +102,20 @@ a,b = T.testC("lessthan 5 -6, return 2", a1, 2, 2, a3, 2, 20)
 assert(a == 20 and b == false)
 
 
+-- testing __concat
+
+a = setmetatable({x="u"}, {__concat = function (a,b) return a.x..'.'..b.x end})
+x,y = T.testC([[
+  pushnum 5
+  pushvalue 2;
+  pushvalue 2;
+  concat 2;
+  pushvalue -2;
+  return 2;
+]], a, a)
+assert(x == a..a and y == 5)
+
+
 -- testing lua_is
 
 function B(x) return x and 1 or 0 end

@@ -250,6 +250,7 @@ assert(c..d == 'cd')
 assert(0 .."a".."b"..c..d.."e".."f"..(5+3).."g" == "0abcdef8g")
 
 A = false
+assert((c..d..c..d).val == 'cdcd')
 x = c..d
 assert(getmetatable(x) == t and x.val == 'cd')
 x = 0 .."a".."b"..c..d.."e".."f".."g"

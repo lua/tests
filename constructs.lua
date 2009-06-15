@@ -14,6 +14,10 @@ assert(not(2+1 > 3*1) and "a".."b" > "a");
 assert(not ((true or false) and nil))
 assert(      true or false  and nil)
 
+-- old bug
+assert((((1 or false) and true) or false) == true)
+assert((((nil and true) or false) and true) == false)
+
 local a,b = 1,nil;
 assert(-(1 or 2) == -1 and (1 and 2)+(-1.25 or -4) == 0.75);
 x = ((b or a)+1 == 2 and (10 or a)+1 == 11); assert(x);

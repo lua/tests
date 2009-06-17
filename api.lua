@@ -86,20 +86,58 @@ do  -- test returning more results than fit in the caller stack
 end
 
 
--- testing lessthan
-assert(T.testC("lessthan 2 5, return 1", 3, 2, 2, 4, 2, 2))
-assert(T.testC("lessthan 5 2, return 1", 4, 2, 2, 3, 2, 2))
-assert(not T.testC("lessthan 2 -3, return 1", "4", "2", "2", "3", "2", "2"))
-assert(not T.testC("lessthan -3 2, return 1", "3", "2", "2", "4", "2", "2"))
+-- testing arith
+assert(T.testC("pushnum 10; pushnum 20; arith /; return 1") == 0.5)
+assert(T.testC("pushnum 10; pushnum 20; arith -; return 1") == -10)
+assert(T.testC("pushstring 10; pushstring -20; arith *; return 1") == -200)
+assert(T.testC("pushstring 10; pushstring 3; arith ^; return 1") == 1000)
+a,b,c = T.testC([[pushnum 1;
+                  pushstring 10; pushstring 3; arith _;
+                  pushstring 5; return 3]])
+assert(a == 1 and b == -10 and c == "5")
+mt = {__add = function (a,b) return setmetatable({a[1] + b[1]}, mt) end,
+      __mod = function (a,b) return setmetatable({a[1] % b[1]}, mt) end,
+      __unm = function (a) return setmetatable({a[1]* 2}, mt) end}
+a,b,c = setmetatable({4}, mt),
+        setmetatable({8}, mt),
+        setmetatable({-3}, mt)
+x,y,z = T.testC("arith +; return 2", 10, a, b)
+assert(x == 10 and y[1] == 12 and z == nil)
+assert(T.testC("arith %; return 1", a, c)[1] == 4%-3)
+assert(T.testC("arith _; arith +; arith %; return 1", b, a, c, b)[1] ==
+               8 % (4 + (-3)*2))
+
+
+-- testing compare
+-- EQ = 0; LT = 1; LE = 2
+
+-- testing lessthan and lessequal
+assert(T.testC("compare 2 5 1, return 1", 3, 2, 2, 4, 2, 2))
+assert(T.testC("compare 2 5 2, return 1", 3, 2, 2, 4, 2, 2))
+assert(not T.testC("compare 3 4 1, return 1", 3, 2, 2, 4, 2, 2))
+assert(T.testC("compare 3 4 2, return 1", 3, 2, 2, 4, 2, 2))
+assert(T.testC("compare 5 2 1, return 1", 4, 2, 2, 3, 2, 2))
+assert(not T.testC("compare 2 -3 1, return 1", "4", "2", "2", "3", "2", "2"))
+assert(not T.testC("compare -3 2 1, return 1", "3", "2", "2", "4", "2", "2"))
+
+-- non-valid indices produce false
+assert(not T.testC("compare 1 4 1, return 1"))
+assert(not T.testC("compare 9 1 2, return 1"))
+assert(not T.testC("compare 9 9 0, return 1"))
 
 local b = {__lt = function (a,b) return a[1] < b[1] end}
 local a1,a3,a4 = setmetatable({1}, b),
                  setmetatable({3}, b),
                  setmetatable({4}, b)
-assert(T.testC("lessthan 2 5, return 1", a3, 2, 2, a4, 2, 2))
-assert(T.testC("lessthan 5 -6, return 1", a4, 2, 2, a3, 2, 2))
-a,b = T.testC("lessthan 5 -6, return 2", a1, 2, 2, a3, 2, 20)
+assert(T.testC("compare 2 5 1, return 1", a3, 2, 2, a4, 2, 2))
+assert(T.testC("compare 2 5 2, return 1", a3, 2, 2, a4, 2, 2))
+assert(T.testC("compare 5 -6 1, return 1", a4, 2, 2, a3, 2, 2))
+a,b = T.testC("compare 5 -6 1, return 2", a1, 2, 2, a3, 2, 20)
 assert(a == 20 and b == false)
+a,b = T.testC("compare 5 -6 2, return 2", a1, 2, 2, a3, 2, 20)
+assert(a == 20 and b == false)
+a,b = T.testC("compare 5 -6 2, return 2", a1, 2, 2, a1, 2, 20)
+assert(a == 20 and b == true)
 
 
 -- testing __concat
@@ -528,12 +566,12 @@ collectgarbage()
 assert(table.getn(cl) == 1 and cl[1] == x)   -- old `x' must be collected
 
 -- testing lua_equal
-assert(T.testC("equal 2 4; return 1", print, 1, print, 20))
-assert(T.testC("equal 3 2; return 1", 'alo', "alo"))
-assert(T.testC("equal 2 3; return 1", nil, nil))
-assert(not T.testC("equal 2 3; return 1", {}, {}))
-assert(not T.testC("equal 2 3; return 1"))
-assert(not T.testC("equal 2 3; return 1", 3))
+assert(T.testC("compare 2 4 0; return 1", print, 1, print, 20))
+assert(T.testC("compare 3 2 0; return 1", 'alo', "alo"))
+assert(T.testC("compare 2 3 0; return 1", nil, nil))
+assert(not T.testC("compare 2 3 0; return 1", {}, {}))
+assert(not T.testC("compare 2 3 0; return 1"))
+assert(not T.testC("compare 2 3 0; return 1", 3))
 
 -- testing lua_equal with fallbacks
 do
@@ -547,8 +585,8 @@ do
   end
   assert(f(10) == f(10))
   assert(f(10) ~= f(11))
-  assert(T.testC("equal 2 3; return 1", f(10), f(10)))
-  assert(not T.testC("equal 2 3; return 1", f(10), f(20)))
+  assert(T.testC("compare 2 3 0; return 1", f(10), f(10)))
+  assert(not T.testC("compare 2 3 0; return 1", f(10), f(20)))
   t.__eq = nil
   assert(f(10) ~= f(10))
 end

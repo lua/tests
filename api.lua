@@ -89,6 +89,10 @@ end
 -- testing arith
 assert(T.testC("pushnum 10; pushnum 20; arith /; return 1") == 0.5)
 assert(T.testC("pushnum 10; pushnum 20; arith -; return 1") == -10)
+assert(T.testC("pushnum 10; pushnum -20; arith *; return 1") == -200)
+assert(T.testC("pushnum 10; pushnum 3; arith ^; return 1") == 1000)
+assert(T.testC("pushnum 10; pushstring 20; arith /; return 1") == 0.5)
+assert(T.testC("pushstring 10; pushnum 20; arith -; return 1") == -10)
 assert(T.testC("pushstring 10; pushstring -20; arith *; return 1") == -200)
 assert(T.testC("pushstring 10; pushstring 3; arith ^; return 1") == 1000)
 a,b,c = T.testC([[pushnum 1;

@@ -131,6 +131,16 @@ assert(string.format('"-%20s.20s"', string.rep("%", 2000)) ==
 -- longest number that can be formated
 assert(string.len(string.format('%99.99f', -1e308)) >= 100)
 
+--border cases for format (assumes no long long)
+assert(string.format("%8x", -1) == "ffffffff")
+assert(string.format("%d", -1) == "-1")
+assert(string.format("%8x", 0xffffffff) == "ffffffff")
+assert(string.format("%d", 0xffffffff) == "-1")
+assert(string.format("%8x", 0x7fffffff) == "7fffffff")
+assert(string.format("%d", 0x7fffffff) == tostring(2^31 - 1))
+assert(string.format("%u", 0x80000003) == tostring(0x80000003))
+assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
+
 assert(loadstring("return 1\n--comentário sem EOL no final")() == 1)
 
 

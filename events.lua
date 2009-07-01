@@ -378,6 +378,19 @@ a = {}; setmetatable(a, a); a.__index = a; a.__newindex = a
 assert(not pcall(function (a,b) return a[b] end, a, 10))
 assert(not pcall(function (a,b,c) a[b] = c end, a, 10, true))
 
+-- bug in 5.1
+T, K, V = nil
+grandparent = {}
+grandparent.__newindex = function(t,k,v) T=t; K=k; V=v end
+
+parent = {}
+parent.__newindex = parent
+setmetatable(parent, grandparent)
+
+child = setmetatable({}, parent)
+child.foo = 10      --> CRASH (on some machines)
+assert(T == parent and K == "foo" and V == 10)
+
 print 'OK'
 
 return 12

@@ -218,7 +218,7 @@ for i=1,10000 do _G[i] = nil end
 do   -- clear global table
   local a = {}
   local preserve = {io = 1, string = 1, debug = 1, os = 1,
-                    coroutine = 1, table = 1, math = 1}
+                    coroutine = 1, table = 1, math = 1, bit = 1}
   for n,v in pairs(_G) do a[n]=v end
   for n,v in pairs(a) do
     if not preserve[n] and type(v) ~= "function" and

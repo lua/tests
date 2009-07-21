@@ -216,6 +216,23 @@ local function f (x)
 end
 f(3)
 
+local function loop (x,y,z) return 1 + loop(x, y, z) end
+
+local res, msg = xpcall(loop, function (m)
+  assert(string.find(m, "stack overflow"))
+  local res, msg = pcall(loop)
+  assert(string.find(msg, "error handling"))
+  assert(math.sin(0) == 0)
+  return 15
+end)
+assert(msg == 15)
+
+res, msg = pcall(function ()
+  for i = 999900, 1000000, 1 do unpack({}, 1, i) end
+end)
+assert(string.find(msg, "too many results"))
+
+
 -- non string messages
 function f() error{msg='x'} end
 res, msg = xpcall(f, function (r) return {msg=r.msg..'y'} end)

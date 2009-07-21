@@ -331,16 +331,15 @@ assert(select(2, coroutine.resume(co)) == a.a)
 
 -- bug (stack overflow)
 local j = 2^9
-local lim = 2^15    -- (C stack limit)
-while j < 1000000 do
+local lim = 1000000    -- (C stack limit; assume 32-bit machine)
+for _, j in ipairs{lim - 10, lim - 5, lim - 1, lim, lim + 1} do
   co = coroutine.create(function()
          t = {}
          for i = 1, j do t[i] = i end
          return unpack(t)
        end)
-  local r = coroutine.resume(co)
-  assert(r and j < lim or not r and j >= lim)
-  j = j*2
+  local r, msg = coroutine.resume(co)
+  assert(not r)
 end
 
 

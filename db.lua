@@ -495,6 +495,7 @@ pcall(co)
 assert(type(debug.getregistry()) == "table")
 
 assert(not pcall(debug.setfenv, 3, {}))
+assert(not pcall(debug.getfenv))
 
 print"OK"
 

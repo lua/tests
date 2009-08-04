@@ -114,6 +114,9 @@ x = nil
 
 assert(_G["while"] == 234)
 
+local k,b = collectgarbage("count")
+assert(k*1024 == math.floor(k)*1024 + b)
+
 
 local bytes = gcinfo()
 while 1 do

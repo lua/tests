@@ -163,6 +163,9 @@ do   -- testing -0 and NaN
   assert(1/mz < 0 and 0 < 1/z)
   local a = {[mz] = 1}
   assert(a[z] == 1 and a[mz] == 1)
+  mz, z = -1/1e1000, 1/1e1000
+  assert(mz == z)
+  assert(1/mz < 0 and 0 < 1/z)
   local NaN = 10e500 - 10e400
   assert(NaN ~= NaN)
   assert(not (NaN < NaN))
@@ -178,6 +181,11 @@ do   -- testing -0 and NaN
   a[1] = 1
   assert(not pcall(function () a[NaN] = 1 end))
   assert(a[NaN] == nil)
+  -- string with same binary representation as 0.0 (may create problems
+  -- for constant manipulation in the pre-compiler)
+  local a1, a2, a3, a4, a5 = 0, 0, "\0\0\0\0\0\0\0\0", 0, "\0\0\0\0\0\0\0\0"
+  assert(a1 == a2 and a2 == a4 and a1 ~= a3)
+  assert(a3 == a5)
 end
 
 -- testing implicit convertions

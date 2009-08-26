@@ -443,4 +443,53 @@ for i = 1,#t do
   assert(k == i and v == t[i].x + i and x == nil)
 end
 
+
+-- tests for coroutine API
+if T==nil then
+  (Message or print)('\a\n >>> testC not active: skipping coroutine API tests <<<\n\a')
+  return
+end
+
+print('testing coroutine API')
+
+local function apico (...)
+  local x = {...}
+  return coroutine.wrap(function ()
+    return T.testC(unpack(x))
+  end)
+end
+
+local a = {apico(
+[[
+  pushstring errorcode
+  pcallk 1 0 2;
+  invalid command (should not arrive here)
+]],
+[[getctx; gettop; return .]],
+"stackmark",
+error
+)()}
+assert(#a == 6 and
+       a[3] == "stackmark" and
+       a[4] == "errorcode" and
+       a[5] == 2 and    -- LUA_ERRRUN
+       a[6] == 2)       -- 'ctx' to pcallk
+
+local co = apico(
+  "pushvalue 2; pushnum 10; pcallk 1 2 3; invalid command;",
+  coroutine.yield,
+  "getctx; pushvalue 2; pushstring a; pcallk 1 0 4; invalid command",
+  "getctx; gettop; return .")
+
+assert(co() == 10)
+assert(co(20, 30) == 'a')
+a = {co()}
+assert(#a == 10 and
+       a[2] == coroutine.yield and
+       a[5] == 20 and a[6] == 30 and
+       a[7] == 1 and a[8] == 3 and    -- LUA_YIELD and 'ctx'
+       a[9] == 1 and a[10] == 4)      -- LUA_YIELD and 'ctx'
+assert(not pcall(co))   -- coroutine is dead now
+
+
 print'OK'

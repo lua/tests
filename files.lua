@@ -28,6 +28,9 @@ assert(not a and type(b) == "string" and type(c) == "number")
 local file = os.tmpname()
 local otherfile = os.tmpname()
 
+assert(not pcall(io.open, file, "rw"))    -- invalid mode
+assert(not pcall(io.open, file, ""))
+
 assert(os.setlocale('C', 'all'))
 
 io.input(io.stdin); io.output(io.stdout);
@@ -307,6 +310,13 @@ loadstring(os.date([[assert(T.year==%Y and T.month==%m and T.day==%d and
 
 assert(not pcall(os.date, "%9"))   -- invalid conversion specifier
 assert(not pcall(os.date, "%"))   -- invalid conversion specifier
+assert(not pcall(os.date, "%O"))   -- invalid conversion specifier
+assert(not pcall(os.date, "%E"))   -- invalid conversion specifier
+assert(not pcall(os.date, "%Ea"))   -- invalid conversion specifier
+
+-- assume POSIX
+assert(type(os.date("%Ex")) == 'string')
+assert(type(os.date("%Oy")) == 'string')
 
 assert(os.time(T) == t)
 assert(not pcall(os.time, {hour = 12}))

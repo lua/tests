@@ -28,8 +28,15 @@ assert(not a and type(b) == "string" and type(c) == "number")
 local file = os.tmpname()
 local otherfile = os.tmpname()
 
-assert(not pcall(io.open, file, "rw"))    -- invalid mode
-assert(not pcall(io.open, file, ""))
+assert(not pcall(io.open, file, "rw"))     -- invalid mode
+assert(not pcall(io.open, file, "rb+"))    -- invalid mode
+assert(not pcall(io.open, file, "r+bk"))   -- invalid mode
+assert(not pcall(io.open, file, ""))       -- invalid mode
+assert(not pcall(io.open, file, "+"))      -- invalid mode
+assert(not pcall(io.open, file, "b"))      -- invalid mode
+assert(io.open(file, "r+b")):close()
+assert(io.open(file, "r+")):close()
+assert(io.open(file, "rb")):close()
 
 assert(os.setlocale('C', 'all'))
 
@@ -71,7 +78,7 @@ end
 assert(os.rename(file, otherfile))
 assert(os.rename(file, otherfile) == nil)
 
-io.output(io.open(otherfile, "a"))
+io.output(io.open(otherfile, "ab"))
 assert(io.write("\n\n\t\t  3450\n"));
 io.close()
 
@@ -147,7 +154,7 @@ io.output(file)
 io.write("alo\n")
 io.close()
 assert(not pcall(io.write))
-local f = io.open(file, "a")
+local f = io.open(file, "a+b")
 io.output(f)
 collectgarbage()
 
@@ -189,7 +196,7 @@ io.output(assert(io.open(otherfile, 'wb')))
 assert(io.write("outra coisa\0\1\3\0\0\0\0\255\0"))
 io.close()
 
-local filehandle = assert(io.open(file, 'r'))
+local filehandle = assert(io.open(file, 'r+b'))
 local otherfilehandle = assert(io.open(otherfile, 'rb'))
 assert(filehandle ~= otherfilehandle)
 assert(type(filehandle) == "userdata")

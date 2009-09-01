@@ -49,8 +49,7 @@ io.output(file)
 assert(io.output() ~= io.stdout)
 
 assert(io.output():seek() == 0)
-assert(io.write("alo alo"))
-assert(io.output():seek() == string.len("alo alo"))
+assert(io.write("alo alo"):seek() == string.len("alo alo"))
 assert(io.output():seek("cur", -3) == string.len("alo alo")-3)
 assert(io.write("joao"))
 assert(io.output():seek("end") == string.len("alo joao"))
@@ -151,7 +150,7 @@ for i=1,12 do t = t..t; end
 assert(string.len(t) == 10*2^12)
 
 io.output(file)
-io.write("alo\n")
+io.write("alo"):write("\n")
 io.close()
 assert(not pcall(io.write))
 local f = io.open(file, "a+b")
@@ -192,9 +191,9 @@ io.output(file)
 assert(io.write("qualquer coisa\n"))
 assert(io.write("mais qualquer coisa"))
 io.close()
-io.output(assert(io.open(otherfile, 'wb')))
-assert(io.write("outra coisa\0\1\3\0\0\0\0\255\0"))
-io.close()
+assert(io.output(assert(io.open(otherfile, 'wb')))
+       :write("outra coisa\0\1\3\0\0\0\0\255\0")
+       :close())
 
 local filehandle = assert(io.open(file, 'r+b'))
 local otherfilehandle = assert(io.open(otherfile, 'rb'))
@@ -220,14 +219,14 @@ assert(os.remove(otherfile))
 collectgarbage()
 
 io.output(file)
-io.write[[
+  :write[[
  123.4	-56e-2  not a number
 second line
 third line
 
 and the rest of the file
 ]]
-io.close()
+  :close()
 io.input(file)
 local _,a,b,c,d,e,h,__ = io.read(1, '*n', '*n', '*l', '*l', '*l', '*a', 10)
 assert(io.close(io.input()))
@@ -262,8 +261,7 @@ do
   f:write("x")
   fr:seek("set", 1)
   assert(fr:read("*all") == "")   -- line buffer; no output without `\n'
-  f:write("a\n")
-  fr:seek("set", 1)
+  f:write("a\n"):seek("set", 1)
   assert(fr:read("*all") == "xa\n")  -- now we have a whole line
   f:close(); fr:close()
 end
@@ -272,8 +270,7 @@ end
 -- testing large files (> BUFSIZ)
 io.output(file)
 for i=1,5001 do io.write('0123456789123') end
-io.write('\n12346')
-io.close()
+io.write('\n12346'):close()
 io.input(file)
 local x = io.read('*a')
 io.input():seek('set', 0)

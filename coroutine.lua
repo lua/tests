@@ -472,7 +472,7 @@ error
 assert(#a == 6 and
        a[3] == "stackmark" and
        a[4] == "errorcode" and
-       a[5] == 2 and    -- LUA_ERRRUN
+       a[5] == "ERRRUN" and
        a[6] == 2)       -- 'ctx' to pcallk
 
 local co = apico(
@@ -487,9 +487,113 @@ a = {co()}
 assert(#a == 10 and
        a[2] == coroutine.yield and
        a[5] == 20 and a[6] == 30 and
-       a[7] == 1 and a[8] == 3 and    -- LUA_YIELD and 'ctx'
-       a[9] == 1 and a[10] == 4)      -- LUA_YIELD and 'ctx'
+       a[7] == "YIELD" and a[8] == 3 and
+       a[9] == "YIELD" and a[10] == 4)
 assert(not pcall(co))   -- coroutine is dead now
+
+
+f = T.makeCfunc("pushnum 3; pushnum 5; yield 1;")
+co = coroutine.wrap(function ()
+  f(); f(); return 10
+end)
+assert(co(23,16) == 5)
+assert(co(23,16) == 5)
+assert(co(23,16) == 10)
+
+
+-- testing chain of suspendable C calls
+
+local count = 3   -- number of levels
+
+f = T.makeCfunc([[
+  remove 1;             # remove argument
+  pushvalue U3;         # get selection function
+  call 0 1;             # call it  (result is 'f' or 'yield')
+  pushstring hello      # single argument for selected function
+  pushupvalueindex 2;   # index of continuation program
+  callk 1 -1 .;		# call selected function
+  errorerror		# should never arrive here
+]],
+[[
+  # continuation program
+  pushnum 34	# return value
+  gettop
+  return .     # return all results
+]],
+function ()     -- selection function
+  count = count - 1
+  if count == 0 then return coroutine.yield
+  else return f
+  end
+end
+)
+
+co = coroutine.wrap(function () return f(nil) end)
+assert(co() == "hello")   -- argument to 'yield'
+a = {co()}
+-- three '34's (one from each pending C call)
+assert(#a == 3 and a[1] == a[2] and a[2] == a[3] and a[3] == 34)
+
+
+-- testing yields with continuations
+
+co = coroutine.wrap(function (...) return
+       T.testC([[
+          getctx
+          yieldk 3 2
+          nonexec error
+       ]],
+       [[  # continuation
+         getctx
+         yieldk 2 3 
+       ]],
+       [[  # continuation
+         getctx
+         yieldk 2 4 
+       ]],
+       [[  # continuation
+          pushvalue 6; pushnum 10; pushnum 20;
+          pcall 2 0     # call should throw an error and execution continues
+          pop 1		# remove error message
+          pushvalue 6
+          getctx
+          pcallk 2 2 5  # call should throw an error and jump to continuation
+          cannot be here!
+       ]],
+       [[  # continuation
+         gettop
+         return .
+       ]],
+       function (a,b)  x=a; y=b; error("errmsg") end,
+       ...
+)
+end)
+
+local a = {co(3,4,6)}; assert(a[1] == 6 and a[2] == "OK" and a[3] == 0)
+a = {co()}; assert(a[1] == "YIELD" and a[2] == 2)
+a = {co()}; assert(a[1] == "YIELD" and a[2] == 3)
+a = {co(7,8)};
+-- original arguments
+assert(type(a[1]) == 'string' and type(a[2]) == 'string' and
+     type(a[3]) == 'string' and type(a[4]) == 'string' and
+     type(a[5]) == 'string' and type(a[6]) == 'function')
+-- arguments left from fist resume
+assert(a[7] == 3 and a[8] == 4)
+-- arguments to last resume
+assert(a[9] == 7 and a[10] == 8)
+-- error message and nothing more
+assert(a[11]:find("errmsg") and #a == 11)
+-- check arguments to pcallk
+assert(x == "YIELD" and y == 4)
+
+assert(not pcall(co))   -- coroutine should be dead
+
+-- testing ctx
+
+a,b = T.testC(
+       [[ pushstring print; pcallk 0 0 12    # error
+          getctx; return 2 ]])
+assert(a == "OK" and b == 0)   -- no ctx outside continuations
 
 
 print'OK'

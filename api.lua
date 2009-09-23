@@ -732,6 +732,15 @@ T.closestate(b);  -- close new state
 
 -- testing threads
 
+-- get main thread from registry (at index LUA_RIDX_MAINTHREAD == 1)
+mt = T.testC("rawgeti R 1; return 1")
+assert(type(mt) == "thread" and coroutine.running() == mt)
+
+-- get cpcall from registry (at index LUA_RIDX_CPCALL == 2)
+f = T.testC("rawgeti R 2; return 1")
+assert(type(f) == "function")
+f = nil
+
 function expand (n,s)
   if n==0 then return "" end
   local e = string.rep("=", n)

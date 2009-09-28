@@ -60,10 +60,11 @@ end
 --
 -- redefine dofile to run files through dump/undump
 --
+local function report (n) print("\n***** FILE '"..n.."'*****") end
 local olddofile = dofile
 dofile = function (n)
   showmem()
-  print("\n***** FILE '"..n.."'*****")
+  report(n)
   local f = assert(loadfile(n))
   local b = string.dump(f)
   f = assert(loadstring(b))
@@ -98,6 +99,7 @@ assert(dofile('locals.lua') == 5)
 dofile('constructs.lua')
 dofile('code.lua')
 do
+  report('big.lua')
   local f = coroutine.wrap(assert(loadfile('big.lua')))
   assert(f() == 'b')
   assert(f() == 'a')

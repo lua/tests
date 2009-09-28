@@ -288,16 +288,27 @@ assert(not a and string.find(b, "variable names"))
 
 -- testing other limits
 -- upvalues
-local  s = "function foo ()\n  local "
-for j = 1,70 do
+local lim = 127
+local  s = "local function fooA ()\n  local "
+for j = 1,lim do
   s = s.."a"..j..", "
 end
-s = s.."b\n"
-for j = 1,70 do
-  s = s.."function foo"..j.." ()\n a"..j.."=3\n"
+s = s.."b,c\n"
+s = s.."local function fooB ()\n  local "
+for j = 1,lim do
+  s = s.."b"..j..", "
 end
+s = s.."b\n"
+s = s.."function fooC () return b+c"
+local c = 1+2
+for j = 1,lim do
+  s = s.."+a"..j.."+b"..j
+  c = c + 2
+end
+s = s.."\nend  end end"
 local a,b = loadstring(s)
-assert(string.find(b, "line 3"))
+assert(c > 255 and string.find(b, "too many upvalues") and
+       string.find(b, "line 5"))
 
 -- local variables
 s = "\nfunction foo ()\n  local "

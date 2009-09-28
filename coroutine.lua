@@ -397,7 +397,7 @@ assert(run(function () if (a<=b) then return '<=' else return '>' end end,
 assert(run(function () if (a==b) then return '==' else return '~=' end end,
        {"eq"}) == "~=")
 
--- assert(run(function () return a..b end, {"concat"}) == "1012")
+assert(run(function () return a..b end, {"concat"}) == "1012")
 
 assert(run(function() return a .. b .. c .. a end,
        {"concat", "concat", "concat"}) == "1012hello10")
@@ -410,6 +410,12 @@ assert(run(function ()
              return a.BB
            end, {"nidx", "idx"}) == print)
 
+-- getglobal & setglobal
+f = function () AAA = BBB + 1; return AAA end
+g = new(10); g.k.BBB = 10;
+setfenv(f, g)
+assert(run(f, {"idx", "nidx", "idx"}) == 11)
+assert(g.k.AAA == 11)
 
 print"+"
 

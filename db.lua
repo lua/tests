@@ -143,6 +143,12 @@ test([[while math.sin(1) do
 end
 a=1]], {1,2,4,7})
 
+test([[in {a=3,_G=_G} do
+  _G.assert(a == 3)
+end
+a=a
+]], {1,2,4})
+
 test([[for i=1,3 do
   a=i
 end

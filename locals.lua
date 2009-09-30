@@ -1,4 +1,4 @@
-print('testing local variables plus some extra stuff')
+print('testing local variables and environments')
 
 
 -- bug in 5.1:
@@ -134,6 +134,56 @@ if rawget(_G, "querytab") then
   end
 end
 
+
+-- testing lexical environments
+
+in (function (...) return ... end)(_G, dummy) do
+
+in {assert=assert} do assert(true) end
+mt = {_G = _G}
+local foo,x
+in mt do
+  function foo (x)
+    A = x
+    in _G do A = 1000 end
+    return function (x) return A .. x end
+  end
+end
+assert(debug.getfenv(foo) == mt)
+x = foo('hi'); assert(mt.A == 'hi' and A == 1000)
+assert(x('*') == mt.A .. '*')
+
+in {assert=assert, A=10} do
+  in {assert=assert, A=20} do
+    assert(A==20);x=A
+  end
+  assert(A==10 and x==20)
+end
+assert(x==20)
+
+-- in as a block (local scope)
+A = 20
+in _G do local A = 15; assert(A==15) end
+assert(A == 20)
+
+
+-- in versus break
+A = 0
+for i = 1,20 do
+  A = A + 1
+  in nil do break end
+  error("not here")
+end
+assert(A == 1)
+
+-- closure in non-table environment
+local f = function () in 34 do return function () end end end
+local s,msg = pcall(f)
+assert(not s and msg:find"not a table")
+
 print('OK')
 
 return 5,f
+
+end
+

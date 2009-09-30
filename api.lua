@@ -598,6 +598,40 @@ end
 print'+'
 
 
+-- test cpcall from registry (at index LUA_RIDX_CPCALL == 2)
+assert(T.testC([[
+    rawgeti R 2;	# get cpcall function
+    func2udata 2;	# push sin function
+    pushnum 3;		# arg
+    call 2 1;
+    return 1
+]], math.sin) == math.sin(3))
+
+function cpcall (c, x)
+  return T.testC([[
+    rawgeti R 2;	# get cpcall function
+    func2udata 2;	# push testC function
+    pushvalue 3;	# 1o arg to test C (code)
+    pushvalue 4;	# 2o arg to test C (arbitrary data)
+    call 3 1		# call cpcall
+    return 1
+  ]], T.testC, c, x)
+end
+
+_G.x = "hello"
+
+assert(cpcall("getfield E x; return 1") == "hello")
+
+-- replace environment from 'cpcall'
+local env = {x=13}
+assert(cpcall("pushvalue 2; replace E; getfield E x; return 1", env)
+       == 13)
+assert(debug.getfenv(T.testC"rawgeti R 2; return 1") == env)
+
+-- cpcall always restore environment back to original
+assert(cpcall("getfield E x; return 1") == "hello")
+assert(debug.getfenv(T.testC"rawgeti R 2; return 1") == _G)
+
 
 -------------------------------------------------------------------------
 do   -- testing errors during GC
@@ -736,10 +770,7 @@ T.closestate(b);  -- close new state
 mt = T.testC("rawgeti R 1; return 1")
 assert(type(mt) == "thread" and coroutine.running() == mt)
 
--- get cpcall from registry (at index LUA_RIDX_CPCALL == 2)
-f = T.testC("rawgeti R 2; return 1")
-assert(type(f) == "function")
-f = nil
+
 
 function expand (n,s)
   if n==0 then return "" end

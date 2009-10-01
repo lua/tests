@@ -730,20 +730,16 @@ T.totalmem(T.totalmem()+5000)   -- set low memory limit (+5k)
 assert(not pcall(loadstring"local a={}; for i=1,100000 do a[i]=i end"))
 T.totalmem(1000000000)          -- restore high limit
 
-
-local function stack(x) if x>0 then stack(x-1) end end
-
 -- test memory errors; increase memory limit in small steps, so that
 -- we get memory errors in different parts of a given task, up to there
 -- is enough memory to complete the task without errors
 function testamem (s, f)
-  collectgarbage()
-  stack(10)    -- ensure minimum stack size
+  collectgarbage(); collectgarbage()
   local M = T.totalmem()
   local oldM = M
   local a,b = nil
   while 1 do
-    M = M+3   -- increase memory limit in small steps
+    M = M+7   -- increase memory limit in small steps
     T.totalmem(M)
     a, b = pcall(f)
     T.totalmem(1000000000)  -- restore high limit

@@ -64,6 +64,20 @@ tcheck(t, {n=3,2,3,5})
 t = pack(T.testC("remove 3; gettop; return .", 2, 3, 4, 5))
 tcheck(t, {n=3,2,4,5})
 
+t = pack(T.testC("copy 3 4; gettop; return .", 2, 3, 4, 5))
+tcheck(t, {n=4,2,3,3,5})
+
+t = pack(T.testC("copy -3 -1; gettop; return .", 2, 3, 4, 5))
+tcheck(t, {n=4,2,3,4,3})
+
+a, b, c = T.testC("copy G 1; copy E 2; gettop; return .", nil)
+assert(a == _G and b == debug.getfenv(T.testC) and c == nil)
+
+a = {}
+T.testC("copy 2 E", a); assert(debug.getfenv(T.testC) == a)
+T.testC("copy G E"); assert(debug.getfenv(T.testC) == _G)
+
+
 t = pack(T.testC("insert 3; pushvalue 3; remove 3; pushvalue 2; remove 2; \
                   insert 2; pushvalue 1; remove 1; insert 1; \
       insert -2; pushvalue -2; remove -3; gettop; return .",

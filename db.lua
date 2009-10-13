@@ -23,6 +23,8 @@ end
 
 do
   assert(not pcall(debug.getinfo, print, "X"))   -- invalid option
+  assert(debug.getinfo(1000) == nil)   -- out of range level
+  assert(debug.getinfo(-1) == nil)     -- out of range level
   local a = debug.getinfo(print)
   assert(a.what == "C" and a.short_src == "[C]")
   a = debug.getinfo(print, "L")
@@ -165,6 +167,21 @@ test([[for i=1,4 do a=1 end]], {1,1,1,1,1})
 
 print'+'
 
+-- invalid levels in [gs]etlocal
+assert(not pcall(debug.getlocal, 20, 1))
+assert(not pcall(debug.setlocal, -1, 1, 10))
+
+
+-- getlocal on tail calls
+local function foo (n)
+  if n > 0 then return foo(n - 1)
+  else assert(debug.getlocal(3,1) == nil)
+  end
+end
+
+foo(10)
+
+
 a = {}; L = nil
 local glob = 1
 local oldglob = glob
@@ -183,6 +200,7 @@ debug.sethook(function (e,l)
   else assert(e == "return")
   end
 end, "crl")
+
 
 function f(a,b)
   collectgarbage()
@@ -392,6 +410,25 @@ foo(lim)
 
 print"+"
 
+
+-- testing local function information
+co = loadstring[[
+  local A = function ()
+    return x
+  end
+  return
+]]
+
+local a = 0
+-- 'A' should be visible to debugger only after its complete definition
+debug.sethook(function (e, l)
+  if l == 3 then a = a + 1; assert(debug.getlocal(2, 1) == "(*temporary)")
+  elseif l == 4 then a = a + 1; assert(debug.getlocal(2, 1) == "A")
+  end
+end, "l")
+co()  -- run local function definition
+debug.sethook()  -- turn off hook
+assert(a == 2)   -- ensure all two lines where hooked
 
 -- testing traceback
 

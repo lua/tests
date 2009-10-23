@@ -90,9 +90,6 @@ assert(getfenv(foo("")) == _G)
 local a = {loadstring = loadstring} 
 setfenv(foo, a)
 assert(getfenv(foo("")) == _G)
-setfenv(0, a)  -- change global environment
-assert(getfenv(foo("")) == a)
-setfenv(0, _G)
 
 
 -- testing limits for special instructions

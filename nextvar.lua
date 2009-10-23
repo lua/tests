@@ -434,13 +434,23 @@ end
 assert(x == 5)
 
 
+-- testing ipairs
+a = {}
+do
+  local x,y,z = ipairs(a)
+  assert(type(x) == 'function' and y == a and z == 0)
+end
+a = {nil, 1, nil, 3, nil, 5, 9, 23}
+local I = 0
+for i, v in ipairs(a) do I = I + 1; assert(i == I and a[i] == v) end
+assert(I == #a)
+
+
 -- testing __pairs metamethod
 a = {}
 do
   local x,y,z = pairs(a)
   assert(type(x) == 'function' and y == a and z == nil)
-  local x,y,z = ipairs(a)
-  assert(type(x) == 'function' and y == a and z == 0)
 end
 
 local function foo (e,i)

@@ -2,6 +2,8 @@ print('testing garbage collection')
 
 collectgarbage()
 
+assert(collectgarbage("isrunning"))
+
 
 -- test weird parameters
 do
@@ -130,6 +132,7 @@ end
 local function dosteps (siz)
   collectgarbage()
   collectgarbage"stop"
+  assert(not collectgarbage("isrunning"))
   local a = {}
   for i=1,100 do a[i] = {{}}; local b = {} end
   local x = gcinfo()
@@ -146,16 +149,19 @@ assert(dosteps(6) < dosteps(2))
 assert(dosteps(10000) == 1)
 assert(collectgarbage("step", 1000000) == true)
 assert(collectgarbage("step", 1000000))
+assert(not collectgarbage("isrunning"))
 
 
 do
   local x = gcinfo()
   collectgarbage()
   collectgarbage"stop"
+  assert(not collectgarbage("isrunning"))
   repeat
     local a = {}
   until gcinfo() > 1000
   collectgarbage"restart"
+  assert(collectgarbage("isrunning"))
   repeat
     local a = {}
   until gcinfo() < 1000

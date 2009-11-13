@@ -253,14 +253,14 @@ function cannotload (msg, a,b)
   assert(not a and string.find(b, msg))
 end
 
-a = assert(load(read1(x), "modname", "t"))
+a = assert(loadin(_G, read1(x), "modname", "t"))
 assert(a() == "\0" and _G.x == 33)
 assert(debug.getinfo(a).source == "modname")
 -- cannot read text in binary mode
-cannotload("attempt to load", load(read1(x), "modname", "b"))
+cannotload("attempt to load", loadin({}, read1(x), "modname", "b"))
 cannotload("attempt to load", load(x, "modname", "b"))
 
-a = assert(load(function () return nil end))
+a = assert(loadin({}, function () return nil end))
 a()  -- empty chunk
 
 assert(not load(function () return true end))
@@ -276,6 +276,7 @@ assert(not pcall(string.dump, print))  -- no dump of C functions
 cannotload("unexpected symbol", load(read1("*a = 123")))
 cannotload("unexpected symbol", load("*a = 123"))
 cannotload("hhi", load(function () error("hhi") end))
+cannotload("hhi", loadin({}, function () error("hhi") end))
 
 -- test generic load with nested functions
 x = [[

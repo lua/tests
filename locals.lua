@@ -34,7 +34,7 @@ x = 1
 
 a = nil
 loadstring('local a = {}')()
-assert(type(a) ~= 'table')
+assert(a == nil)
 
 function f (a)
   local _1, _2, _3, _4, _5
@@ -81,15 +81,14 @@ do
   g(); assert(getfenv(g).a == '10')
 end
 
--- test for global table of loaded chunks
-local function foo (s)
-  return loadstring(s)
-end
 
-assert(getfenv(foo("")) == _G)
-local a = {loadstring = loadstring} 
-setfenv(foo, a)
-assert(getfenv(foo("")) == _G)
+-- test for global table of loaded chunks
+assert(debug.getfenv(load("a = 3")) == _G)
+local a = {}; local f = loadin(a, "a = 3")
+assert(debug.getfenv(f) == a)
+assert(a.a == nil)
+f()
+assert(a.a == 3)
 
 
 -- testing limits for special instructions

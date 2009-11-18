@@ -384,7 +384,7 @@ assert(run(function ()
 -- getglobal & setglobal
 f = function () AAA = BBB + 1; return AAA end
 g = new(10); g.k.BBB = 10;
-setfenv(f, g)
+debug.setfenv(f, g)
 assert(run(f, {"idx", "nidx", "idx"}) == 11)
 assert(g.k.AAA == 11)
 

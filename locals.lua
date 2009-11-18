@@ -63,24 +63,6 @@ f(2)
 assert(type(f) == 'function')
 
 
--- testing globals ;-)
-do
-  local f = {}
-  local _G = _G
-  for i=1,10 do f[i] = function (x) A=A+1; return A, _G.getfenv(x) end end
-  A=10; assert(f[1]() == 11)
-  for i=1,10 do assert(setfenv(f[i], {A=i}) == f[i]) end
-  assert(f[3]() == 4 and A == 11)
-  local a,b = f[8](1)
-  assert(b.A == 9)
-  a,b = f[8](0)
-  assert(b.A == 11)   -- `real' global
-  local g
-  local function f () assert(setfenv(2, {a='10'}) == g) end
-  g = function () f(); _G.assert(_G.getfenv(1).a == '10') end
-  g(); assert(getfenv(g).a == '10')
-end
-
 
 -- test for global table of loaded chunks
 assert(debug.getfenv(load("a = 3")) == _G)

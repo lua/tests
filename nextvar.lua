@@ -229,20 +229,6 @@ do   -- clear global table
   end
 end
 
-local function foo ()
-  local getfenv, setfenv, assert, next =
-        getfenv, setfenv, assert, next
-  local n = {gl1=3}
-  setfenv(foo, n)
-  assert(getfenv(foo) == getfenv(1))
-  assert(getfenv(foo) == n)
-  assert(print == nil and gl1 == 3)
-  gl1 = nil
-  gl = 1
-  assert(n.gl == 1 and next(n, 'gl') == nil)
-end
-foo()
-
 
 -- testing yields inside foreach
 

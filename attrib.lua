@@ -181,25 +181,29 @@ assert(not pcall(module, 'XUXU'))
 
 local assert, module, package = assert, module, package
 X = nil; x = 0; assert(_G.x == 0)   -- `x' must be a global variable
-module"X"; x = 1; assert(_M.x == 1)
-module"X.a.b.c"; x = 2; assert(_M.x == 2)
-module("X.a.b", package.seeall); x = 3
-assert(X._NAME == "X" and X.a.b.c._NAME == "X.a.b.c" and X.a.b._NAME == "X.a.b")
-assert(X._M == X and X.a.b.c._M == X.a.b.c and X.a.b._M == X.a.b)
-assert(X.x == 1 and X.a.b.c.x == 2 and X.a.b.x == 3)
-assert(X._PACKAGE == "" and X.a.b.c._PACKAGE == "X.a.b." and
-       X.a.b._PACKAGE == "X.a.")
-assert(_PACKAGE.."c" == "X.a.c")
-assert(X.a._NAME == nil and X.a._M == nil)
-module("X.a", import("X")) ; x = 4
-assert(X.a._NAME == "X.a" and X.a.x == 4 and X.a._M == X.a)
-module("X.a.b", package.seeall); assert(x == 3); x = 5
-assert(_NAME == "X.a.b" and X.a.b.x == 5)
+in module"X" do x = 1; assert(_M.x == 1) end
+in module"X.a.b.c" do x = 2; assert(_M.x == 2) end
+in module("X.a.b", package.seeall) do 
+  x = 3
+  assert(X._NAME == "X" and X.a.b.c._NAME == "X.a.b.c" and X.a.b._NAME == "X.a.b")
+  assert(X._M == X and X.a.b.c._M == X.a.b.c and X.a.b._M == X.a.b)
+  assert(X.x == 1 and X.a.b.c.x == 2 and X.a.b.x == 3)
+  assert(X._PACKAGE == "" and X.a.b.c._PACKAGE == "X.a.b." and
+         X.a.b._PACKAGE == "X.a.")
+  assert(_PACKAGE.."c" == "X.a.c")
+  assert(X.a._NAME == nil and X.a._M == nil)
+end
+in module("X.a", import("X")) do x = 4
+  assert(X.a._NAME == "X.a" and X.a.x == 4 and X.a._M == X.a)
+end
+in module("X.a.b", package.seeall) do
+  assert(x == 3); x = 5
+  assert(_NAME == "X.a.b" and X.a.b.x == 5)
+  assert(X._G == nil and X.a._G == nil and X.a.b._G == _G and X.a.b.c._G == nil)
+end
 
-assert(X._G == nil and X.a._G == nil and X.a.b._G == _G and X.a.b.c._G == nil)
-
-setfenv(1, _G)
-assert(x == 0)
+in _G do  --[
+ assert(x == 0)
 
 assert(not pcall(module, "x"))
 assert(not pcall(module, "math.sin"))
@@ -231,12 +235,11 @@ else
   assert(lib2.id("x") == "x")
   local fs = require"lib1.sub"
   assert(fs == lib1.sub and next(lib1.sub) == nil)
-  module("lib2", package.seeall)
-  f = require"-lib2"
-  assert(f.id("x") == "x" and _M == f and _NAME == "lib2")
-  module("lib1.sub", package.seeall)
-  assert(_M == fs)
-  setfenv(1, _G)
+  in module("lib2", package.seeall) do
+    f = require"-lib2"
+    assert(f.id("x") == "x" and _M == f and _NAME == "lib2")
+    in module("lib1.sub", package.seeall) do assert(_M == fs) end
+  end
  
 end
 f, err, when = package.loadlib("donotexist", p.."xuxu")
@@ -261,7 +264,7 @@ do
   assert(type(package.path) == "string")
 end
 
-
+end  --]
 
 end  --]
 
@@ -269,6 +272,8 @@ end  --]
 print('+')
 
 print("testing assignments, logical operators, and constructors")
+
+in _G do --[
 
 local res, res2 = 27
 
@@ -294,7 +299,6 @@ do
   a,b,c = 0,5,f(0)
   assert(a==0 and b==5 and c==nil)
 end
-
 
 a, b, c, d = 1 and nil, 1 or nil, (1 and (nil or 1)), 6
 assert(not a and b and c and d==6)
@@ -374,3 +378,5 @@ end
 print('OK')
 
 return res
+
+end  --]

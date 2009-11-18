@@ -8,13 +8,13 @@ prog[#prog + 1] = "X = y\n"
 prog[#prog + 1] = string.format("assert(X[%d] == %d)", lim - 1, lim - 2)
 prog[#prog + 1] = "return 0"
 prog = table.concat(prog, ";")
-local f = assert(loadstring(prog))
 
-X = nil
+local env = {string = string, assert = assert}
+local f = assert(loadin(env, prog))
+
 f()
-assert(X[lim] == lim - 1 and X[lim + 1] == lim)
-local env = {}
-setfenv(f, env)
+assert(env.X[lim] == lim - 1 and env.X[lim + 1] == lim)
+for k in pairs(env) do env[k] = nil end
 
 -- yields during extended opcodes ([GS]ETGLOBAL + EXTRAARG)
 setmetatable(env, {

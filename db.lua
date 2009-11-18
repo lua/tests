@@ -363,15 +363,11 @@ local function f (x)
   if x then
     assert(debug.getinfo(1, "S").what == "Lua")
     local tail = debug.getinfo(2)
-    assert(not pcall(getfenv, 3))
     assert(tail.what == "tail" and tail.short_src == "(tail call)" and
            tail.linedefined == -1 and tail.func == nil)
     assert(debug.getinfo(3, "f").func == g1)
-    assert(getfenv(3))
     assert(debug.getinfo(4, "S").what == "tail")
-    assert(not pcall(getfenv, 5))
     assert(debug.getinfo(5, "S").what == "main")
-    assert(getfenv(5))
     print"+"
     end
 end

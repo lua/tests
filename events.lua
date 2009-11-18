@@ -2,7 +2,7 @@ print('testing metatables')
 
 X = 20; B = 30
 
-setfenv(1, setmetatable({}, {__index=_G}))
+in setmetatable({}, {__index=_G}) do  --[
 
 collectgarbage()
 
@@ -306,12 +306,11 @@ assert(i == 3 and x[1] == 3 and x[3] == 5)
 
 
 assert(_G.X == 20)
-assert(_G == getfenv(0))
 
 print'+'
 
 local _g = _G
-setfenv(1, setmetatable({}, {__index=function (_,k) return _g[k] end}))
+in setmetatable({}, {__index=function (_,k) return _g[k] end}) do  --[
 
 -- testing proxies
 assert(getmetatable(newproxy()) == nil)
@@ -394,3 +393,7 @@ assert(T == parent and K == "foo" and V == 10)
 print 'OK'
 
 return 12
+
+end  --]
+
+end  --]

@@ -26,6 +26,7 @@ a,b,c = io.open('/a/b/c/d', 'w')
 assert(not a and type(b) == "string" and type(c) == "number")
 
 local file = os.tmpname()
+assert(io.open(file, "w")):close()   -- make sure file exists
 local otherfile = os.tmpname()
 
 assert(not pcall(io.open, file, "rw"))     -- invalid mode

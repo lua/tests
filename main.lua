@@ -172,11 +172,11 @@ checkout('alo')
 
 
 -- testing os.exit
-prepfile("os.exit()")
+prepfile("os.exit(nil, true)")
 RUN("lua %s", prog)
-prepfile("os.exit(0)")
+prepfile("os.exit(0, true)")
 RUN("lua %s", prog)
-prepfile("os.exit(1)")
+prepfile("os.exit(1, true)")
 NoRun("lua %s", prog)
 
 assert(os.remove(prog))

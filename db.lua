@@ -172,16 +172,6 @@ assert(not pcall(debug.getlocal, 20, 1))
 assert(not pcall(debug.setlocal, -1, 1, 10))
 
 
--- getlocal on tail calls
-local function foo (n)
-  if n > 0 then return foo(n - 1)
-  else assert(debug.getlocal(3,1) == nil)
-  end
-end
-
-foo(10)
-
-
 a = {}; L = nil
 local glob = 1
 local oldglob = glob
@@ -362,12 +352,10 @@ debug.sethook()
 local function f (x)
   if x then
     assert(debug.getinfo(1, "S").what == "Lua")
+    assert(debug.getinfo(1, "t").istailcall == true)
     local tail = debug.getinfo(2)
-    assert(tail.what == "tail" and tail.short_src == "(tail call)" and
-           tail.linedefined == -1 and tail.func == nil)
-    assert(debug.getinfo(3, "f").func == g1)
-    assert(debug.getinfo(4, "S").what == "tail")
-    assert(debug.getinfo(5, "S").what == "main")
+    assert(tail.func == g1 and tail.istailcall == true)
+    assert(debug.getinfo(3, "S").what == "main")
     print"+"
     end
 end
@@ -385,18 +373,31 @@ debug.sethook(function (e) table.insert(b, e) end, "cr")
 h(false)
 debug.sethook()
 local res = {"return",   -- first return (from sethook)
-  "call", "call", "call", "call",
-  "return", "tail return", "return", "tail return",
+  "call", "tail call", "call", "tail call",
+  "return", "return",
   "call",    -- last call (to sethook)
 }
 for _, k in ipairs(res) do assert(k == table.remove(b, 1)) end
 
+b = 0
+debug.sethook(function (e)
+                if e == "tail call" then
+                  b = b + 1
+                  assert(debug.getinfo(2, "t").istailcall == true)
+                else
+                  assert(debug.getinfo(2, "t").istailcall == false)
+                end
+              end, "c")
+h(false)
+debug.sethook()
+assert(b == 2)   -- two tail calls
 
 lim = 30000
 local function foo (x)
   if x==0 then
-    assert(debug.getinfo(lim+2).what == "main")
-    for i=2,lim do assert(debug.getinfo(i, "S").what == "tail") end
+    assert(debug.getinfo(2).what == "main")
+    local info = debug.getinfo(1)
+    assert(info.istailcall == true and info.func == foo)
   else return foo(x-1)
   end
 end
@@ -450,16 +451,16 @@ end
 
 
 local function f (n)
-  if n > 0 then return f(n-1)
+  if n > 0 then f(n-1)
   else coroutine.yield() end
 end
 
 local co = coroutine.create(f)
 coroutine.resume(co, 3)
-checktraceback(co, {"yield", "db.lua", "tail", "tail", "tail"})
-checktraceback(co, {"db.lua", "tail", "tail", "tail"}, 1)
-checktraceback(co, {"tail", "tail", "tail"}, 2)
-checktraceback(co, {"tail"}, 4)
+checktraceback(co, {"yield", "db.lua", "db.lua", "db.lua", "db.lua"})
+checktraceback(co, {"db.lua", "db.lua", "db.lua", "db.lua"}, 1)
+checktraceback(co, {"db.lua", "db.lua", "db.lua"}, 2)
+checktraceback(co, {"db.lua"}, 4)
 checktraceback(co, {}, 40)
 
 

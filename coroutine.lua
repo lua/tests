@@ -478,6 +478,23 @@ assert(co(23,16) == 5)
 assert(co(23,16) == 10)
 
 
+-- testing coroutines with C bodies
+f = T.makeCfunc([[
+        pushnum 102
+	yieldk	1 U2
+	return 2
+]],
+[[
+	pushnum 23   # continuation
+	gettop
+	return .
+]])
+
+x = coroutine.wrap(f)
+assert(x() == 102)
+assert(x() == 23)
+
+
 -- testing chain of suspendable C calls
 
 local count = 3   -- number of levels

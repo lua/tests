@@ -227,7 +227,6 @@ assert(string.gsub("a alo b hi", "%w%w+", t) == "a ALO b HI")
 
 
 -- tests for gmatch
-assert(string.gfind == string.gmatch)
 local a = 0
 for i in string.gmatch('abcde', '()') do assert(i == a+1); a=i end
 assert(a==6)

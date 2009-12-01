@@ -271,12 +271,12 @@ else
   local A,B,a,b = 0,0,0,0
 
   local x = coroutine.create(function ()
-    T.setyhook("", 2)
+    T.sethook("yield 0", "", 2)
     A = fact("A", 10)
   end)
 
   local y = coroutine.create(function ()
-    T.setyhook("", 3)
+    T.sethook("yield 0", "", 3)
     B = fact("B", 11)
   end)
 

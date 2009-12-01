@@ -281,7 +281,7 @@ end
 
 checkerrnopro("pushnum 3; call 0 0", "attempt to call")
 function f () f() end
-checkerrnopro("pushstring f; gettable G; call 0 0;", "stack overflow")
+checkerrnopro("pushstring 'f'; gettable G; call 0 0;", "stack overflow")
 
 
 -- testing table access
@@ -646,6 +646,28 @@ assert(debug.getfenv(T.testC"rawgeti R 2; return 1") == env)
 assert(cpcall("getfield E x; return 1") == "hello")
 assert(debug.getfenv(T.testC"rawgeti R 2; return 1") == _G)
 
+-- testing changing hooks during hooks
+_G.t = {}
+T.sethook([[
+  # set a line hook after 3 count hooks
+  sethook 4 0 '
+    getfield G t;
+    pushvalue -3; append -2
+    pushvalue -2; append -2
+  ']], "c", 3)
+local a = 1   -- counting
+a = 1   -- counting
+a = 1   -- count hook (set line hook)
+a = 1   -- line hook
+a = 1   -- line hook
+debug.sethook()
+t = _G.t
+assert(t[1] == "line")
+line = t[2]
+assert(t[3] == "line" and t[4] == line + 1)
+assert(t[5] == "line" and t[6] == line + 2)
+assert(t[7] == nil)
+
 
 -------------------------------------------------------------------------
 do   -- testing errors during GC
@@ -725,7 +747,7 @@ T.closestate(L1);
 L1 = T.newstate()
 T.loadlib(L1)
 T.doremote(L1, "a = {}")
-T.testC(L1, [[pushstring a; gettable G; pushstring x; pushnum 1;
+T.testC(L1, [[pushstring "a"; gettable G; pushstring "x"; pushnum 1;
              settable -3]])
 assert(T.doremote(L1, "return a.x") == "1")
 

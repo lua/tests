@@ -161,17 +161,13 @@ function unlpack (t, i)
 end
 
 function equaltab (t1, t2)
-  assert(table.getn(t1) == table.getn(t2))
-  for i,v1 in ipairs(t1) do
-    assert(v1 == t2[i])
+  assert(#t1 == #t2)
+  for i = 1, #t1 do
+    assert(t1[i] == t2[i])
   end
 end
 
-local function pack (...)
-  local x = {...}
-  x.n = select('#', ...)
-  return x
-end
+local pack = table.pack
 
 function f() return 1,2,30,4 end
 function ret2 (a,b) return a,b end

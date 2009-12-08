@@ -782,7 +782,8 @@ function testamem (s, f)
     T.totalmem(1000000000)  -- restore high limit
     if a and b then break end       -- stop when no more errors
     collectgarbage()
-    if not a and not string.find(b, "memory") then   -- `real' error?
+    if not a and not    -- `real' error?
+      (string.find(b, "memory") or string.find(b, "overflow")) then
       error(b, 0)   -- propagate it
     end
   end

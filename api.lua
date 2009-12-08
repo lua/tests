@@ -5,14 +5,13 @@ if T==nil then
 end
 
 
+local pack = table.pack
+
 
 function tcheck (t1, t2)
-  table.remove(t1, 1)  -- remove code
-  assert(table.getn(t1) == table.getn(t2))
-  for i=1,table.getn(t1) do assert(t1[i] == t2[i]) end
+  assert(t1.n == (t2.n or #t2) + 1)
+  for i = 2, t1.n do assert(t1[i] == t2[i - 1]) end
 end
-
-function pack(...) return {n = select('#', ...); ...} end
 
 
 print('testing C API')
@@ -219,8 +218,10 @@ assert(to("objsize", {}) == 0)
 assert(to("objsize", "alo\0\0a") == 6)
 assert(to("objsize", T.newuserdata(0)) == 0)
 assert(to("objsize", T.newuserdata(101)) == 101)
-assert(to("objsize", 12) == 0)
-assert(to("objsize", 12, 3) == 0)
+local t = setmetatable({x = 20}, {__len = function (t) return t.x end})
+assert(to("objsize", t) == 20)
+t.x = "234"
+assert(to("objsize", t) == 234)
 assert(to("tonumber", {}) == 0)
 assert(to("tonumber", "12") == 12)
 assert(to("tonumber", "s2") == 0)
@@ -714,7 +715,7 @@ end
 T.closestate(T.newstate());
 L1 = T.newstate()
 assert(L1)
-assert(pack(T.doremote(L1, "function f () return 'alo', 3 end; f()")).n == 0)
+assert(#pack(T.doremote(L1, "function f () return 'alo', 3 end; f()")) == 0)
 
 a, b = T.doremote(L1, "return f()")
 assert(a == 'alo' and b == '3')

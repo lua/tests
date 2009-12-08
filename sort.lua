@@ -1,3 +1,62 @@
+print "testing (parts of) table library"
+
+print "testing unpack"
+
+local x,y,z,a
+a = {}; lim = 2000
+for i=1, lim do a[i]=i end
+assert(select(lim, unpack(a)) == lim and select('#', unpack(a)) == lim)
+x = unpack(a)
+assert(x == 1)
+x = {unpack(a)}
+assert(table.getn(x) == lim and x[1] == 1 and x[lim] == lim)
+x = {unpack(a, lim-2)}
+assert(table.getn(x) == 3 and x[1] == lim-2 and x[3] == lim)
+x = {unpack(a, 10, 6)}
+assert(next(x) == nil)   -- no elements
+x = {unpack(a, 11, 10)}
+assert(next(x) == nil)   -- no elements
+x,y = unpack(a, 10, 10)
+assert(x == 10 and y == nil)
+x,y,z = unpack(a, 10, 11)
+assert(x == 10 and y == 11 and z == nil)
+a,x = unpack{1}
+assert(a==1 and x==nil)
+a,x = unpack({1,2}, 1, 1)
+assert(a==1 and x==nil)
+
+assert(not pcall(unpack, {}, 0, 2^31-1))
+assert(not pcall(unpack, {}, 1, 2^31-1))
+assert(not pcall(unpack, {}, -(2^31), 2^31-1))
+assert(not pcall(unpack, {}, -(2^31 - 1), 2^31-1))
+assert(pcall(unpack, {}, 2^31-1, 0))
+assert(pcall(unpack, {}, 2^31-1, 1))
+pcall(unpack, {}, 1, 2^31)
+a, b = unpack({[2^31-1] = 20}, 2^31-1, 2^31-1)
+assert(a == 20 and b == nil)
+a, b = unpack({[2^31-1] = 20}, 2^31-2, 2^31-1)
+assert(a == nil and b == 20)
+
+print "testing pack"
+
+a = table.pack()
+assert(a[1] == nil and a.n == 0)
+
+a = table.pack(table)
+assert(a[1] == table and a.n == 1)
+
+a = table.pack(nil, nil, nil, nil)
+assert(a[1] == nil and a.n == 4)
+
+t = setmetatable({20}, {__len = function (x) return t[1] end})
+x = table.pack(unpack(t))
+assert(x[1] == 20 and x[2] == nil and x.n == 20)
+t[1] = "834"
+x = table.pack(unpack(t))
+assert(x[1] == "834" and x[2] == nil and x.n == 834)
+x = nil
+
+
 print"testing sort"
 
 
@@ -91,12 +150,12 @@ print(string.format("Sorting %d equal elements in %.2f sec.", limit, os.clock()-
 check(a, function(x,y) return nil end)
 for i,v in pairs(a) do assert(not v or i=='n' and v==limit) end
 
-a = {"álo", "\0first :-)", "alo", "then this one", "45", "and a new"}
-table.sort(a)
-check(a)
+A = {"álo", "\0first :-)", "alo", "then this one", "45", "and a new"}
+table.sort(A)
+check(A)
 
-table.sort(a, function (x, y)
-          loadstring(string.format("a[%q] = ''", x))()
+table.sort(A, function (x, y)
+          loadstring(string.format("A[%q] = ''", x))()
           collectgarbage()
           return x<y
         end)

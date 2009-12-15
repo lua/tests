@@ -715,6 +715,18 @@ end
 T.closestate(T.newstate());
 L1 = T.newstate()
 assert(L1)
+
+assert(T.doremote(L1, "X='a'; return 'a'") == 'a')
+
+-- testing access to base-level environment
+a, b = T.testC(L1, [[
+  getfield G X  
+  getfield E X     # should use global table as environment
+  return 2
+]])
+assert(a == 'a' and b == 'a')
+assert(T.testC(L1, "gettop; return 1") + 0 == 2)
+
 assert(#pack(T.doremote(L1, "function f () return 'alo', 3 end; f()")) == 0)
 
 a, b = T.doremote(L1, "return f()")
@@ -744,6 +756,7 @@ a, b = T.doremote(L1, [[
 assert(a == "ok")
 
 T.closestate(L1);
+
 
 L1 = T.newstate()
 T.loadlib(L1)

@@ -28,8 +28,8 @@ end
 
 assert(os.setlocale"C")
 
-local T,print,gcinfo,format,write,assert,type =
-      T,print,gcinfo,string.format,io.write,assert,type
+local T,print,gcinfo,format,write,assert,type,unpack =
+      T,print,gcinfo,string.format,io.write,assert,type,unpack
 
 local function formatmem (m)
   if m < 1024 then return m
@@ -48,11 +48,15 @@ local showmem = function ()
     print(format("    ---- total memory: %s ----\n", formatmem(gcinfo())))
   else
     T.checkmemory()
+    local t = {T.totalmem()}
     local a,b,c = T.totalmem()
     local d,e = gcinfo()
     print(format(
   "\n    ---- total memory: %s (%dK), max use: %s,  blocks: %d\n",
-                        formatmem(a),  d,      formatmem(c),           b))
+                        formatmem(t[1]), d, formatmem(t[2]), t[3]))
+    print(format("\t(strings:  %d, tables: %d, functions: %d, "..
+                 "\n\tudata: %d, threads: %d)", unpack(t, 4)))
+          
   end
 end
 

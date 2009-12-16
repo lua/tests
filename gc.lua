@@ -400,6 +400,13 @@ if T then
   T.totalmem(T.totalmem() + 200)
   for i=1,200 do local a = {} end
   T.totalmem(1000000000)
+  collectgarbage()
+  local t = select(5, T.totalmem())
+  local a = {{}, {}, {}}   -- create 4 new tables
+  assert(select(5, T.totalmem()) == t + 4)
+  t = select(6, T.totalmem())
+  a = function () end   -- create 1 new closure
+  assert(select(6, T.totalmem()) == t + 1)
 end
 
 -- create a userdata to be collected when state is closed

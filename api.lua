@@ -156,6 +156,33 @@ assert(a == 20 and b == false)
 a,b = T.testC("compare 5 -6 2, return 2", a1, 2, 2, a1, 2, 20)
 assert(a == 20 and b == true)
 
+-- testing length
+local t = setmetatable({x = 20}, {__len = function (t) return t.x end})
+a,b,c = T.testC([[
+   len 2;
+   Llen 2;
+   objsize 2;
+   return 3
+]], t)
+assert(a == 20 and b == 20 and c == 0)
+
+t.x = "234"; t[1] = 20
+a,b,c = T.testC([[
+   len 2;
+   Llen 2;
+   objsize 2;
+   return 3
+]], t)
+assert(a == "234" and b == 234 and c == 1)
+
+t.x = print; t[1] = 20
+a,c = T.testC([[
+   len 2;
+   objsize 2;
+   return 2
+]], t)
+assert(a == print and c == 1)
+
 
 -- testing __concat
 
@@ -218,10 +245,6 @@ assert(to("objsize", {}) == 0)
 assert(to("objsize", "alo\0\0a") == 6)
 assert(to("objsize", T.newuserdata(0)) == 0)
 assert(to("objsize", T.newuserdata(101)) == 101)
-local t = setmetatable({x = 20}, {__len = function (t) return t.x end})
-assert(to("objsize", t) == 20)
-t.x = "234"
-assert(to("objsize", t) == 234)
 assert(to("tonumber", {}) == 0)
 assert(to("tonumber", "12") == 12)
 assert(to("tonumber", "s2") == 0)

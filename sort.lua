@@ -48,14 +48,6 @@ assert(a[1] == table and a.n == 1)
 a = table.pack(nil, nil, nil, nil)
 assert(a[1] == nil and a.n == 4)
 
-t = setmetatable({20}, {__len = function (x) return t[1] end})
-x = table.pack(unpack(t))
-assert(x[1] == 20 and x[2] == nil and x.n == 20)
-t[1] = "834"
-x = table.pack(unpack(t))
-assert(x[1] == "834" and x[2] == nil and x.n == 834)
-x = nil
-
 
 print"testing sort"
 

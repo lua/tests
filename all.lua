@@ -132,6 +132,8 @@ end
 
 print("final OK !!!")
 
+require "debug"
+
 debug.sethook(function (a) assert(type(a) == 'string') end, "cr")
 
 -- to survive outside block

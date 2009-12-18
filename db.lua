@@ -1,5 +1,7 @@
 -- testing debug library
 
+require "debug"
+
 local function dostring(s) return assert(loadstring(s))() end
 
 print"testing debug library and debug information"
@@ -30,7 +32,7 @@ do
   a = debug.getinfo(print, "L")
   assert(a.activelines == nil)
   local b = debug.getinfo(test, "SfL")
-  assert(b.name == nil and b.what == "Lua" and b.linedefined == 11 and
+  assert(b.name == nil and b.what == "Lua" and b.linedefined == 13 and
          b.lastlinedefined == b.linedefined + 10 and
          b.func == test and not string.find(b.short_src, "%["))
   assert(b.activelines[b.linedefined + 1] and

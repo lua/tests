@@ -125,6 +125,7 @@ assert(string.find(t, prompt .. ".*" .. prompt .. ".*" .. prompt))
 
 -- test for error objects
 prepfile[[
+require "debug"
 m = {x=0}
 setmetatable(m, {__tostring = function(x)
   return debug.getinfo(4).currentline + x.x
@@ -132,7 +133,7 @@ end})
 error(m)
 ]]
 NoRun([[lua %s 2> %s]], prog, out)
-checkout(progname..": 5\n")
+checkout(progname..": 6\n")
 
 
 s = [=[ -- 

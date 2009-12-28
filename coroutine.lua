@@ -350,13 +350,13 @@ else
   t = table.pack(T.testC(state, [[
     rawgeti R 1     # get main thread
     pushstring 'XX'
-    getfield G X    # get function for body
+    getfield E X    # get function for body
     pushstring AA      # arg
     resume 1 1      # 'resume' shadows previous stack!
     gettop
-    setfield G T    # top
-    setfield G B    # second yielded value
-    setfield G A    # fist yielded value
+    setfield E T    # top
+    setfield E B    # second yielded value
+    setfield E A    # fist yielded value
     rawgeti R 1     # get main thread
     pushnum 5       # arg (noise)
     resume 1 1      # after coroutine ends, previous stack is back

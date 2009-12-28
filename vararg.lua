@@ -18,7 +18,7 @@ end
 
 function vararg (...) return {n = select('#', ...), ...} end
 
-local call = function (f, args) return f(unpack(args, 1, args.n)) end
+local call = function (f, args) return f(table.unpack(args, 1, args.n)) end
 
 assert(f() == 0)
 assert(f({1,2,3}, 1, 2, 3) == 3)
@@ -110,7 +110,7 @@ f = loadstring[[
 assert(f("a", "b", nil, {}, assert))
 assert(f())
 
-a = {select(3, unpack{10,20,30,40})}
+a = {select(3, table.unpack{10,20,30,40})}
 assert(table.getn(a) == 2 and a[1] == 30 and a[2] == 40)
 a = {select(1)}
 assert(next(a) == nil)

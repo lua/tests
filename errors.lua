@@ -32,7 +32,7 @@ assert(doit("error()") == nil)
 
 
 -- test common errors/errors that crashed in the past
-assert(doit("unpack({}, 1, n=2^30)"))
+assert(doit("table.unpack({}, 1, n=2^30)"))
 assert(doit("a=math.sin()"))
 assert(not doit("tostring(1)") and doit("tostring()"))
 assert(doit"tonumber()")
@@ -129,8 +129,8 @@ checkmessage("string.sub('a', {})", "#2")
 checkmessage("('a'):sub{}", "#1")
 
 checkmessage("table.sort({1,2,3}, table.sort)", "'table.sort'")
--- next message may be 'unpack' or '_G.unpack'
-checkmessage("string.gsub('s', 's', unpack)", "unpack'")
+-- next message may be 'setmetatable' or '_G.setmetatable'
+checkmessage("string.gsub('s', 's', setmetatable)", "setmetatable'")
 
 -- tests for errors in coroutines
 
@@ -228,7 +228,7 @@ end)
 assert(msg == 15)
 
 res, msg = pcall(function ()
-  for i = 999900, 1000000, 1 do unpack({}, 1, i) end
+  for i = 999900, 1000000, 1 do table.unpack({}, 1, i) end
 end)
 assert(string.find(msg, "too many results"))
 

@@ -288,7 +288,7 @@ assert(a[10] == 10 and b == a and a[13] == 'x')
 
 do
   local f = function (n) local x = {}; for i=1,n do x[i]=i end;
-                         return unpack(x) end;
+                         return table.unpack(x) end;
   local a,b,c
   a,b = 0, f(1)
   assert(a == 0 and b == 1)

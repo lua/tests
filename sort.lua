@@ -2,6 +2,8 @@ print "testing (parts of) table library"
 
 print "testing unpack"
 
+local unpack = table.unpack
+
 local x,y,z,a
 a = {}; lim = 2000
 for i=1, lim do a[i]=i end

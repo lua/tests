@@ -90,7 +90,7 @@ function f (t, ...) return t, {...} end
 t.__call = f
 
 do
-  local x,y = a(unpack{'a', 1})
+  local x,y = a(table.unpack{'a', 1})
   assert(x==a and y[1]=='a' and y[2]==1 and y[3]==nil)
   x,y = a()
   assert(x==a and y[1]==nil)

@@ -66,10 +66,10 @@ end
 local a = {}
 for i=1,lim do a[i] = i end   -- build auxiliary table
 for k=0,lim do
-  local a = {unpack(a,1,k)}
+  local a = {table.unpack(a,1,k)}
   assert(#a == k)
   check(a, k, 0)
-  a = {1,2,3,unpack(a,1,k)}
+  a = {1,2,3,table.unpack(a,1,k)}
   check(a, k+3, 0)
   assert(#a == k + 3)
 end
@@ -126,7 +126,7 @@ function foo (n, ...)
   check(arg, mp2(n+1), 1)
 end
 local a = {}
-for i=1,lim do a[i] = true; foo(i, unpack(a)) end
+for i=1,lim do a[i] = true; foo(i, table.unpack(a)) end
 
 end
 
@@ -416,7 +416,7 @@ local function f (n, p)
   return function (_,n)
            if n > 0 then
              n = n-1
-             return n, unpack(t)
+             return n, table.unpack(t)
            end
          end, nil, n
 end

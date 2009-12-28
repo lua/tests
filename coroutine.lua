@@ -25,9 +25,9 @@ function foo (a, ...)
   assert(coroutine.status(f) == "running")
   local arg = {...}
   for i=1,table.getn(arg) do
-    _G.x = {coroutine.yield(unpack(arg[i]))}
+    _G.x = {coroutine.yield(table.unpack(arg[i]))}
   end
-  return unpack(a)
+  return table.unpack(a)
 end
 
 f = coroutine.create(foo)
@@ -394,7 +394,7 @@ for _, j in ipairs{lim - 10, lim - 5, lim - 1, lim, lim + 1} do
   co = coroutine.create(function()
          t = {}
          for i = 1, j do t[i] = i end
-         return unpack(t)
+         return table.unpack(t)
        end)
   local r, msg = coroutine.resume(co)
   assert(not r)
@@ -519,7 +519,7 @@ print('testing coroutine API')
 local function apico (...)
   local x = {...}
   return coroutine.wrap(function ()
-    return T.testC(unpack(x))
+    return T.testC(table.unpack(x))
   end)
 end
 

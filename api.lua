@@ -94,7 +94,8 @@ tcheck(t, {n=6,1,2,3,4,"alo", "joao"})
 do  -- test returning more results than fit in the caller stack
   local a = {}
   for i=1,1000 do a[i] = true end; a[999] = 10
-  local b = T.testC([[pcall 1 -1; pop 1; tostring -1; return 1]], unpack, a)
+  local b = T.testC([[pcall 1 -1; pop 1; tostring -1; return 1]],
+                    table.unpack, a)
   assert(b == "10")
 end
 

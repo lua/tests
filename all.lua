@@ -29,7 +29,7 @@ end
 assert(os.setlocale"C")
 
 local T,print,gcinfo,format,write,assert,type,unpack =
-      T,print,gcinfo,string.format,io.write,assert,type,unpack
+      T,print,gcinfo,string.format,io.write,assert,type,table.unpack
 
 local function formatmem (m)
   if m < 1024 then return m

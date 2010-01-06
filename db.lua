@@ -439,6 +439,21 @@ assert(not string.find(debug.traceback("hi"), "'traceback'"))
 assert(string.find(debug.traceback("hi", 0), "'traceback'"))
 assert(string.find(debug.traceback(), "^stack traceback:\n"))
 
+
+-- testing nparams, nups e isvararg
+local t = debug.getinfo(print, "u")
+assert(t.isvararg == true and t.nparams == 0 and t.nups == 0)
+
+t = debug.getinfo(function (a,b,c) end, "u")
+assert(t.isvararg == false and t.nparams == 3 and t.nups == 0)
+
+t = debug.getinfo(function (a,b,...) return t[a] end, "u")
+assert(t.isvararg == true and t.nparams == 2 and t.nups == 1)
+
+t = debug.getinfo(1)   -- main
+assert(t.isvararg == true and t.nparams == 0 and t.nups == 0)
+
+
 -- testing debugging of coroutines
 
 local function checktraceback (co, p, level)

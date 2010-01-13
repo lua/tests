@@ -139,6 +139,7 @@ assert(require"P1" == P1 and P1 == m)
 assert(require"P1" == P1)
 assert(P1._PACKAGE == "")
 
+assert(package.searchpath("P1.xuxu", package.path) == "libs/P1/xuxu.lua")
 local m = assert(require"P1.xuxu")
 assert(m == P1.xuxu and m._NAME == "P1.xuxu" and AA == 0 and m.AA == 20)
 assert(require"P1.xuxu" == P1.xuxu and P1.xuxu == m)
@@ -232,6 +233,7 @@ else
   assert(package.loadlib("libs/lib11.so", p.."luaopen_lib11"))
   package.cpath = "libs/?.so"
   require"lib2"
+  assert(x == 0.5)   -- access to global environment
   assert(lib2.id("x") == "x")
   local fs = require"lib1.sub"
   assert(fs == lib1.sub and next(lib1.sub) == nil)

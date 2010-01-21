@@ -132,7 +132,7 @@ assert(cap[0] == "div" and cap[1] == a and cap[2] == 0 and cap[3]==nil)
 assert(a%2 == a)
 assert(cap[0] == "mod" and cap[1] == a and cap[2] == 2 and cap[3]==nil)
 assert(-a == a)
-assert(cap[0] == "unm" and cap[1] == a)
+assert(cap[0] == "unm" and cap[1] == a and cap[2] == nil)
 assert(a^4 == a)
 assert(cap[0] == "pow" and cap[1] == a and cap[2] == 4 and cap[3]==nil)
 assert(a^'4' == a)
@@ -142,7 +142,7 @@ assert(cap[0] == "pow" and cap[1] == 4 and cap[2] == a and cap[3]==nil)
 assert('4'^a == '4')
 assert(cap[0] == "pow" and cap[1] == '4' and cap[2] == a and cap[3]==nil)
 assert(#a == a)
-assert(cap[0] == "len"and cap[1] == a)
+assert(cap[0] == "len"and cap[1] == a and cap[2] == nil)
 
 
 t = {}
@@ -343,6 +343,7 @@ assert(a.x == 1 and rawget(a, "x", 3) == 1)
 print '+'
 
 -- testing metatables for basic types
+require'debug'
 mt = {}
 debug.setmetatable(10, mt)
 assert(getmetatable(-2) == mt)

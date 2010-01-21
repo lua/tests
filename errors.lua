@@ -141,7 +141,7 @@ function f (n)
 end
 assert(string.find(f(), "C stack overflow"))
 
-checkmessage("coroutine.yield()", "yield across")
+checkmessage("coroutine.yield()", "outside a coroutine")
 
 f1 = function () table.sort({1,2,3}, coroutine.yield) end
 f = coroutine.wrap(function () return pcall(f1) end)

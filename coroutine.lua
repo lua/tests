@@ -1,5 +1,7 @@
 print "testing coroutines"
 
+require'debug'
+
 local f
 
 local main, ismain = coroutine.running()
@@ -558,7 +560,7 @@ assert(not pcall(co))   -- coroutine is dead now
 
 f = T.makeCfunc("pushnum 3; pushnum 5; yield 1;")
 co = coroutine.wrap(function ()
-  f(); f(); return 10
+  assert(f() == 23); assert(f() == 23); return 10
 end)
 assert(co(23,16) == 5)
 assert(co(23,16) == 5)

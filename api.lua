@@ -4,6 +4,7 @@ if T==nil then
   return
 end
 
+require "debug"
 
 local pack = table.pack
 
@@ -15,6 +16,10 @@ end
 
 
 print('testing C API')
+
+a = T.testC("pushvalue R; return 1")
+assert(a == debug.getregistry())
+
 
 -- testing allignment
 a = T.d2s(12458954321123)

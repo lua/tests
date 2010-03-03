@@ -121,7 +121,7 @@ assert(io.read() == "second line")
 local x = io.input():seek()
 assert(io.read() == "third line ")
 assert(io.input():seek("set", x))
-assert(io.read('*l') == "third line ")
+assert(io.read('*L') == "third line \n")
 assert(io.read(1) == "ç")
 assert(io.read(string.len"fourth_line") == "fourth_line")
 assert(io.input():seek("cur", -string.len"fourth_line"))
@@ -175,6 +175,88 @@ assert(io.read(0) == nil)
 assert(io.close(io.input()))
 
 assert(os.remove(file))
+
+-- test for *L format
+io.output(file); io.write"\n\nline\nother":close()
+io.input(file)
+assert(io.read"*L" == "\n")
+assert(io.read"*L" == "\n")
+assert(io.read"*L" == "line\n")
+assert(io.read"*L" == "other")
+assert(io.read"*L" == nil)
+
+local f = assert(io.open(file))
+local s = ""
+for l in f:lines("*L") do s = s .. l end
+assert(s == "\n\nline\nother")
+f:close()
+
+io.input(file)
+s = ""
+for l in io.lines(nil, "*L") do s = s .. l end
+assert(s == "\n\nline\nother")
+
+s = ""
+for l in io.lines(file, "*L") do s = s .. l end
+assert(s == "\n\nline\nother")
+
+s = ""
+for l in io.lines(file, "*l") do s = s .. l end
+assert(s == "lineother")
+
+io.output(file); io.write"a = 10 + 34\na = 2*a\na = -a\n":close()
+local t = {}
+loadin(t, io.lines(file, "*L"))()
+assert(t.a == -((10 + 34) * 2))
+
+
+-- test for multipe arguments in 'lines'
+io.output(file); io.write"0123456789\n":close()
+for a,b in io.lines(file, 1, 1) do
+  if a == "\n" then assert(b == nil)
+  else assert(tonumber(a) == b - 1)
+  end
+end
+
+for a,b,c in io.lines(file, 1, 2, "*a") do
+  assert(a == "0" and b == "12" and c == "3456789\n")
+end
+
+for a,b,c in io.lines(file, "*a", 0, 1) do
+  if a == "" then break end
+  assert(a == "0123456789\n" and b == nil and c == nil)
+end
+
+io.output(file); io.write"00\n10\n20\n30\n40\n":close()
+for a, b in io.lines(file, "*n", "*n") do
+  if a == 40 then assert(b == nil)
+  else assert(a == b - 10)
+  end
+end
+
+
+-- test load x lines
+io.output(file);
+io.write[[
+local y
+= X
+X =
+X *
+2 +
+X;
+X = 
+X
+-                                   y;
+]]:close()
+_G.X = 1
+assert(not load(io.lines(file)))
+load(io.lines(file, "*L"))()
+assert(_G.X == 2)
+load(io.lines(file, 1))()
+assert(_G.X == 4)
+load(io.lines(file, 3))()
+assert(_G.X == 8)
+
 print('+')
 
 local x1 = "string\n\n\\com \"\"''coisas [[estranhas]] ]]'"

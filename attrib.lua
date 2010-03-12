@@ -130,7 +130,7 @@ files = {
   ["P1/xuxu.lua"] = "AA = 20",
 }
 
-createfiles(files, "module(..., package.seeall)\n", "")
+createfiles(files, "_ENV = module(..., package.seeall)\n", "")
 AA = 0
 
 local m = assert(require"P1")
@@ -182,9 +182,9 @@ assert(not pcall(module, 'XUXU'))
 
 local assert, module, package = assert, module, package
 X = nil; x = 0; assert(_G.x == 0)   -- `x' must be a global variable
-in module"X" do x = 1; assert(_M.x == 1) end
-in module"X.a.b.c" do x = 2; assert(_M.x == 2) end
-in module("X.a.b", package.seeall) do 
+do local _ENV = module"X"; x = 1; assert(_M.x == 1) end
+do local _ENV = module"X.a.b.c"; x = 2; assert(_M.x == 2) end
+do local _ENV = module("X.a.b", package.seeall)
   x = 3
   assert(X._NAME == "X" and X.a.b.c._NAME == "X.a.b.c" and X.a.b._NAME == "X.a.b")
   assert(X._M == X and X.a.b.c._M == X.a.b.c and X.a.b._M == X.a.b)
@@ -194,17 +194,17 @@ in module("X.a.b", package.seeall) do
   assert(_PACKAGE.."c" == "X.a.c")
   assert(X.a._NAME == nil and X.a._M == nil)
 end
-in module("X.a", import("X")) do x = 4
+do local _ENV = module("X.a", import("X")); x = 4
   assert(X.a._NAME == "X.a" and X.a.x == 4 and X.a._M == X.a)
 end
-in module("X.a.b", package.seeall) do
+do local _ENV = module("X.a.b", package.seeall);
   assert(x == 3); x = 5
   assert(_NAME == "X.a.b" and X.a.b.x == 5)
   assert(X._G == nil and X.a._G == nil and X.a.b._G == _G and X.a.b.c._G == nil)
 end
 
-in _G do  --[
- assert(x == 0)
+_ENV = _G
+assert(x == 0)
 
 assert(not pcall(module, "x"))
 assert(not pcall(module, "math.sin"))
@@ -237,10 +237,10 @@ else
   assert(lib2.id("x") == "x")
   local fs = require"lib1.sub"
   assert(fs == lib1.sub and next(lib1.sub) == nil)
-  in module("lib2", package.seeall) do
+  do local _ENV = module("lib2", package.seeall);
     f = require"-lib2"
     assert(f.id("x") == "x" and _M == f and _NAME == "lib2")
-    in module("lib1.sub", package.seeall) do assert(_M == fs) end
+    do local _ENV =  module("lib1.sub", package.seeall); assert(_M == fs) end
   end
  
 end
@@ -254,7 +254,7 @@ do
   local p = package
   package = {}
   p.preload.pl = function (...)
-    module(...)
+    local _ENV = module(...)
     function xuxu (x) return x+20 end
   end
 
@@ -268,14 +268,10 @@ end
 
 end  --]
 
-end  --]
-
 
 print('+')
 
 print("testing assignments, logical operators, and constructors")
-
-in _G do --[
 
 local res, res2 = 27
 
@@ -394,4 +390,3 @@ print('OK')
 
 return res
 
-end  --]

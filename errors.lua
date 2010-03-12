@@ -1,5 +1,7 @@
 print("testing errors")
 
+require"debug"
+
 function doit (s)
   local f, msg = loadstring(s)
   if f == nil then return msg end
@@ -72,12 +74,26 @@ checkmessage("local aaa={bbb={}}; aaa.bbb:ddd(9)", "method 'ddd'")
 checkmessage("local a,b,c; (function () a = b+1 end)()", "upvalue 'b'")
 assert(not doit"local aaa={bbb={ddd=next}}; aaa.bbb:ddd(nil)")
 
+checkmessage("local _ENV = {x={}}; a = a + 1", "global 'a'")
+
 checkmessage("b=1; local aaa='a'; x=aaa+b", "local 'aaa'")
 checkmessage("aaa={}; x=3/aaa", "global 'aaa'")
 checkmessage("aaa='2'; b=nil;x=aaa*b", "global 'b'")
 checkmessage("aaa={}; x=-aaa", "global 'aaa'")
 assert(not string.find(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "'aaa'"))
 assert(not string.find(doit"aaa={}; (aaa or aaa)()", "'aaa'"))
+
+-- tests for field accesses after RK limit
+local t = {}
+for i = 1, 1000 do
+  t[i] = "a = x" .. i
+end
+local s = table.concat(t, "; ")
+t = nil
+checkmessage(s.."; a = bbb + 1", "global 'bbb'")
+checkmessage("local _ENV=_ENV;"..s.."; a = bbb + 1", "global 'bbb'")
+checkmessage(s.."; local t = {}; a = t.bbb + 1", "field 'bbb'")
+checkmessage(s.."; local t = {}; t:bbb()", "method 'bbb'")
 
 checkmessage([[aaa=9
 repeat until 3==3

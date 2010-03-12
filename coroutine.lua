@@ -470,10 +470,12 @@ assert(run(function ()
              return a.BB
            end, {"nidx", "idx"}) == print)
 
--- getglobal & setglobal
-f = function () AAA = BBB + 1; return AAA end
+-- getuptable & setuptable
+do local _ENV = _ENV
+  f = function () AAA = BBB + 1; return AAA end
+end
 g = new(10); g.k.BBB = 10;
-debug.setfenv(f, g)
+debug.setupvalue(f, 1, g)
 assert(run(f, {"idx", "nidx", "idx"}) == 11)
 assert(g.k.AAA == 11)
 

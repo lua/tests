@@ -38,7 +38,7 @@ end
 -- some basic instructions
 check(function ()
   (function () end){f()}
-end, 'CLOSURE', 'NEWTABLE', 'GETGLOBAL', 'CALL', 'SETLIST', 'CALL', 'RETURN')
+end, 'CLOSURE', 'NEWTABLE', 'GETTABUP', 'CALL', 'SETLIST', 'CALL', 'RETURN')
 
 
 -- sequence of LOADNILs
@@ -146,7 +146,7 @@ checkequal(function () if (a==nil) then a=1 end; if a~=nil then a=1 end end,
            function () if (a==9) then a=1 end; if a~=9 then a=1 end end)
 
 check(function () if a==nil then a=1 end end,
-'GETGLOBAL', 'EQ', 'JMP', 'LOADK', 'SETGLOBAL', 'RETURN')
+'GETTABUP', 'EQ', 'JMP', 'SETTABUP', 'RETURN')
 
 -- de morgan
 checkequal(function () local a; if not (a or b) then b=a end end,

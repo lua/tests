@@ -147,12 +147,6 @@ test([[while math.sin(1) do
 end
 a=1]], {1,2,4,7})
 
-test([[in {a=3,_G=_G} do
-  _G.assert(a == 3)
-end
-a=a
-]], {1,2,4})
-
 test([[for i=1,3 do
   a=i
 end
@@ -203,7 +197,7 @@ function f(a,b)
   assert(debug.setlocal(2, 4, "maçã") == "B")
   x = debug.getinfo(2)
   assert(x.func == g and x.what == "Lua" and x.name == 'g' and
-         x.nups == 0 and string.find(x.source, "^@.*db%.lua$"))
+         x.nups == 1 and string.find(x.source, "^@.*db%.lua$"))
   glob = glob+1
   assert(debug.getinfo(1, "l").currentline == L+1)
   assert(debug.getinfo(1, "l").currentline == L+2)
@@ -451,7 +445,8 @@ t = debug.getinfo(function (a,b,...) return t[a] end, "u")
 assert(t.isvararg == true and t.nparams == 2 and t.nups == 1)
 
 t = debug.getinfo(1)   -- main
-assert(t.isvararg == true and t.nparams == 0 and t.nups == 0)
+assert(t.isvararg == true and t.nparams == 0 and t.nups == 1 and
+       debug.getupvalue(t.func, 1) == "_ENV")
 
 
 -- testing debugging of coroutines

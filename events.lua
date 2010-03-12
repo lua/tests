@@ -2,7 +2,7 @@ print('testing metatables')
 
 X = 20; B = 30
 
-in setmetatable({}, {__index=_G}) do  --[
+_ENV = setmetatable({}, {__index=_G})
 
 collectgarbage()
 
@@ -310,7 +310,7 @@ assert(_G.X == 20)
 print'+'
 
 local _g = _G
-in setmetatable({}, {__index=function (_,k) return _g[k] end}) do  --[
+_ENV = setmetatable({}, {__index=function (_,k) return _g[k] end})
 
 -- testing proxies
 assert(getmetatable(newproxy()) == nil)
@@ -395,6 +395,4 @@ print 'OK'
 
 return 12
 
-end  --]
 
-end  --]

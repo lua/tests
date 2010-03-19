@@ -429,17 +429,6 @@ end
 assert(x == 5)
 
 
--- testing ipairs
-a = {}
-do
-  local x,y,z = ipairs(a)
-  assert(type(x) == 'function' and y == a and z == 0)
-end
-a = {nil, 1, nil, 3, nil, 5, 9, 23}
-local I = 0
-for i, v in ipairs(a) do I = I + 1; assert(i == I and a[i] == v) end
-assert(I == #a)
-
 
 -- testing __pairs metamethod
 a = {}
@@ -459,8 +448,7 @@ local function foo1 (e,i)
   if i <= e.n then return i,a[i] end
 end
 
-setmetatable(a, {__pairs = function (x) return foo, x, 0 end,
-                 __ipairs = function (x) return foo1, x, 0 end})
+setmetatable(a, {__pairs = function (x) return foo, x, 0 end})
 
 local i = 0
 for k,v in pairs(a) do
@@ -470,13 +458,6 @@ end
 
 a.n = 5
 a[3] = 30
-
-local i = 0
-for k,v in ipairs(a) do
-  i = i + 1
-  assert(k == i and v == a[i])
-end
-assert(i == a.n)
 
 a = {n=10}
 setmetatable(a, {__len = function (x) return x.n end,

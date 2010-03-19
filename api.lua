@@ -873,7 +873,7 @@ local testprog = [[
 local function foo () return end
 local t = {"x"}
 a = "aaa"
-for _, v in ipairs(t) do a=a..v end
+for i = 1, #t do a=a..t[i] end
 return true
 ]]
 
@@ -883,6 +883,7 @@ local t =os.tmpname()
 local f = assert(io.open(t, "w"))
 f:write(testprog)
 f:close()
+print(loadfile(t))
 testamem("dofile", function ()
   local a = loadfile(t)
   return a and a()

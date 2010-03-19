@@ -52,7 +52,9 @@ assert(a[3].get() == 3)
 assert(a[2].get() == 'a')
 
 a = {}
-for i, k in ipairs{'a', 'b'} do
+local t = {"a", "b"}
+for i = 1, #t do
+  local k = t[i]
   a[i] = {set = function(x, y) i=x; k=y end,
           get = function () return i, k end}
   if i == 2 then break end
@@ -74,7 +76,8 @@ for i=1,3 do
 end
 assert(f() == 1)
 
-for k, v in ipairs{"a", "b"} do
+for k = 1, #t do
+  local v = t[k]
   f = function () return k, v end
   break
 end

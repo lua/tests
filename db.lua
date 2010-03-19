@@ -323,9 +323,8 @@ t = getupvalues(foo2)
 assert(t.a == 1 and t.b == 2 and t.c == 3)
 assert(debug.setupvalue(foo1, 1, "xuxu") == "b")
 assert(({debug.getupvalue(foo2, 3)})[2] == "xuxu")
--- cannot manipulate C upvalues from Lua
-assert(debug.getupvalue(io.read, 1) == nil)  
-assert(debug.setupvalue(io.read, 1, 10) == nil)  
+-- upvalues of C functions are allways "called" "" (the empty string)
+assert(debug.getupvalue(io.read, 1) == "")  
 
 
 -- testing count hooks
@@ -373,7 +372,7 @@ local res = {"return",   -- first return (from sethook)
   "return", "return",
   "call",    -- last call (to sethook)
 }
-for _, k in ipairs(res) do assert(k == table.remove(b, 1)) end
+for i = 1, #res do assert(res[i] == table.remove(b, 1)) end
 
 b = 0
 debug.sethook(function (e)

@@ -15,7 +15,8 @@ assert(not pcall(coroutine.yield))
 
 local function eqtab (t1, t2)
   assert(table.getn(t1) == table.getn(t2))
-  for i,v in ipairs(t1) do
+  for i = 1, #t1 do
+    local v = t1[i]
     assert(t2[i] == v)
   end
 end
@@ -392,9 +393,11 @@ _X()
 -- bug (stack overflow)
 local j = 2^9
 local lim = 1000000    -- (C stack limit; assume 32-bit machine)
-for _, j in ipairs{lim - 10, lim - 5, lim - 1, lim, lim + 1} do
+local t = {lim - 10, lim - 5, lim - 1, lim, lim + 1}
+for i = 1, #t do
+  local j = t[i]
   co = coroutine.create(function()
-         t = {}
+         local t = {}
          for i = 1, j do t[i] = i end
          return table.unpack(t)
        end)

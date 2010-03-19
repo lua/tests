@@ -168,8 +168,8 @@ assert(table.concat(a, ",", 4) == "")
 
 local locales = { "ptb", "ISO-8859-1", "pt_BR" }
 local function trylocale (w)
-  for _, l in ipairs(locales) do
-    if os.setlocale(l, w) then return true end
+  for i = 1, #locales do
+    if os.setlocale(locales[i], w) then return true end
   end
   return false
 end

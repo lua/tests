@@ -248,7 +248,6 @@ else
 end
 _ENV = _G
 f, err, when = package.loadlib("donotexist", p.."xuxu")
-print(f, err, when)
 assert(not f and type(err) == "string" and (when == "open" or when == "absent"))
 
 

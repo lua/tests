@@ -74,12 +74,7 @@ tcheck(t, {n=4,2,3,3,5})
 t = pack(T.testC("copy -3 -1; gettop; return .", 2, 3, 4, 5))
 tcheck(t, {n=4,2,3,4,3})
 
-b, c = T.testC("copy E 1; gettop; return .", nil)
-assert(b == debug.getfenv(T.testC) and c == nil)
 
-a = {}
-T.testC("copy 2 E", a); assert(debug.getfenv(T.testC) == a)
-T.testC("rawgeti R 3; copy -1 E"); assert(debug.getfenv(T.testC) == _G)
 
 
 t = pack(T.testC("insert 3; pushvalue 3; remove 3; pushvalue 2; remove 2; \
@@ -311,7 +306,7 @@ end
 
 checkerrnopro("pushnum 3; call 0 0", "attempt to call")
 function f () f() end
-checkerrnopro("pushstring 'f'; gettable E; call 0 0;", "stack overflow")
+checkerrnopro("getglobal 'f'; call 0 0;", "stack overflow")
 
 
 -- testing table access
@@ -396,33 +391,18 @@ end
   
 
 
--- testing environments
-
-assert(T.testC"pushvalue E; return 1" == _G)
-local a = {}
-T.testC("replace E; return 1", a)
-assert(T.testC"rawgeti R 3; return 1" == _G)
-assert(T.testC"pushvalue E; return 1" == a)
-assert(debug.getfenv(T.testC) == a)
-assert(debug.getfenv(T.upvalue) == _G)
--- userdata inherit environment
-local u = T.testC"newuserdata 0; return 1"
-assert(debug.getfenv(u) == a)
--- functions inherit environment
-u = T.testC"pushcclosure 0; return 1"
-assert(debug.getfenv(u) == a)
-debug.setfenv(T.testC, _G)
-assert(T.testC"pushvalue E; return 1" == _G)
-
 -- bug in 5.1.2
-assert(not pcall(debug.setfenv, 3, {}))
-assert(not pcall(debug.setfenv, nil, {}))
-assert(not pcall(debug.setfenv, T.pushuserdata(1), {}))
+assert(not pcall(debug.setenv, 3, {}))
+assert(not pcall(debug.setenv, nil, {}))
+assert(not pcall(debug.setenv, T.pushuserdata(1), {}))
 
 local b = newproxy()
-assert(debug.getfenv(b) == _G)
-assert(debug.setfenv(b, a))
-assert(debug.getfenv(b) == a)
+local a = {}
+assert(debug.getenv(b) == nil)
+assert(debug.setenv(b, a))
+assert(debug.getenv(b) == a)
+assert(debug.setenv(b, nil))
+assert(debug.getenv(b) == nil)
 
 
 
@@ -663,24 +643,15 @@ end
 
 _G.x = "hello"
 
-assert(cpcall("getfield E x; return 1") == "hello")
+assert(cpcall("getglobal x; return 1") == "hello")
 
--- replace environment from 'cpcall'
-local env = {x=13}
-assert(cpcall("pushvalue 2; replace E; getfield E x; return 1", env)
-       == 13)
-assert(debug.getfenv(T.testC"rawgeti R 2; return 1") == env)
-
--- cpcall always restore environment back to original
-assert(cpcall("getfield E x; return 1") == "hello")
-assert(debug.getfenv(T.testC"rawgeti R 2; return 1") == _G)
 
 -- testing changing hooks during hooks
 _G.t = {}
 T.sethook([[
   # set a line hook after 3 count hooks
   sethook 4 0 '
-    getfield E t;
+    getglobal t;
     pushvalue -3; append -2
     pushvalue -2; append -2
   ']], "c", 3)
@@ -746,13 +717,6 @@ assert(L1)
 
 assert(T.doremote(L1, "X='a'; return 'a'") == 'a')
 
--- testing access to base-level environment
-a = T.testC(L1, [[
-  getfield E X     # should use global table as environment
-  return 1
-]])
-assert(a == 'a')
-assert(T.testC(L1, "gettop; return 1") + 0 == 1)
 
 assert(#pack(T.doremote(L1, "function f () return 'alo', 3 end; f()")) == 0)
 
@@ -788,7 +752,7 @@ T.closestate(L1);
 L1 = T.newstate()
 T.loadlib(L1)
 T.doremote(L1, "a = {}")
-T.testC(L1, [[pushstring "a"; gettable E; pushstring "x"; pushnum 1;
+T.testC(L1, [[getglobal "a"; pushstring "x"; pushnum 1;
              settable -3]])
 assert(T.doremote(L1, "return a.x") == "1")
 

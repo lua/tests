@@ -301,8 +301,8 @@ else
     resume -1, 1    # call it first time
     pushstatus
     xmove 3 0 0   # move results back to stack
-    setfield E X    # result
-    setfield E Y    # status
+    setglobal X    # result
+    setglobal Y    # status
     pushvalue 2     # push body (to call it again)
     pushstring 'b b b'
     xmove 0 3 2
@@ -353,13 +353,13 @@ else
   t = table.pack(T.testC(state, [[
     rawgeti R 1     # get main thread
     pushstring 'XX'
-    getfield E X    # get function for body
+    getglobal X    # get function for body
     pushstring AA      # arg
     resume 1 1      # 'resume' shadows previous stack!
     gettop
-    setfield E T    # top
-    setfield E B    # second yielded value
-    setfield E A    # fist yielded value
+    setglobal T    # top
+    setglobal B    # second yielded value
+    setglobal A    # fist yielded value
     rawgeti R 1     # get main thread
     pushnum 5       # arg (noise)
     resume 1 1      # after coroutine ends, previous stack is back

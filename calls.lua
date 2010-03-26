@@ -1,5 +1,7 @@
 print("testing functions and calls")
 
+require "debug"
+
 -- get the opportunity to test 'type' too ;)
 
 assert(type(1<2) == 'boolean')

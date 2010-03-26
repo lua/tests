@@ -1,5 +1,8 @@
 print('testing scanner')
 
+require "debug"
+
+
 local function dostring (x) return assert(loadstring(x))() end
 
 dostring("x = 'a\0a'")

@@ -281,4 +281,30 @@ end
 assert(table.getn(a) == 0)
 
 
+-- malformed patterns
+local function malform (p, m)
+  m = m or "malformed"
+  local r, msg = pcall(string.find, "a", p)
+  assert(not r and string.find(msg, m))
+end
+
+malform("[a")
+malform("[]")
+malform("[^]")
+malform("[a%]")
+malform("[a%")
+malform("%b")
+malform("%ba")
+malform("%")
+malform("%f", "missing")
+
+-- \0 in patterns
+assert(string.match("ab\0\1\2c", "[\0-\2]+") == "\0\1\2")
+assert(string.match("ab\0\1\2c", "[\0-\0]+") == "\0")
+assert(string.find("b$a", "$\0?") == 2)
+assert(string.find("abc\0efg", "%\0") == 4)
+assert(string.match("abc\0efg\0\1e\1g", "%b\0\1") == "\0efg\0\1e\1")
+assert(string.match("abc\0\0\0", "%\0+") == "\0\0\0")
+assert(string.match("abc\0\0\0", "%\0%\0?") == "\0\0")
+
 print('OK')

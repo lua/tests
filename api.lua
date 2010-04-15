@@ -251,7 +251,7 @@ assert(to("tonumber", "12") == 12)
 assert(to("tonumber", "s2") == 0)
 assert(to("tonumber", 1, 20) == 0)
 a = to("tocfunction", math.deg)
-assert(a(3) == math.deg(3) and a ~= math.deg)
+assert(a(3) == math.deg(3) and a == math.deg)
 
 
 -- testing deep C stack
@@ -261,7 +261,7 @@ for i = 1,12000 do
   prog[#prog + 1] = "pushnum " .. i * 10
 end
 
-prog[#prog + 1] = "rawgeti R 3"
+prog[#prog + 1] = "rawgeti R 2"   -- get global table in registry
 prog[#prog + 1] = "insert " .. -(2*12000 + 2)
 
 for i = 1,12000 do
@@ -367,6 +367,12 @@ do
   assert(b.x == 1 and c.x == 2)
   T.checkmemory()
 end
+
+
+-- testing absent upvalues from C-function pointers
+assert(T.testC[[isnull U1; return 1]] == true)
+assert(T.testC[[isnull U100; return 1]] == true)
+assert(T.testC[[pushvalue U1; return 1]] == nil)
 
 local f = T.testC[[ pushnum 10; pushnum 20; pushcclosure 2; return 1]]
 assert(T.upvalue(f, 1) == 10 and
@@ -620,30 +626,6 @@ end
 
 print'+'
 
-
--- test cpcall from registry (at index LUA_RIDX_CPCALL == 2)
-assert(T.testC([[
-    rawgeti R 2;	# get cpcall function
-    func2udata 2;	# push sin function
-    pushnum 3;		# arg
-    call 2 1;
-    return 1
-]], math.sin) == math.sin(3))
-
-function cpcall (c, x)
-  return T.testC([[
-    rawgeti R 2;	# get cpcall function
-    func2udata 2;	# push testC function
-    pushvalue 3;	# 1o arg to test C (code)
-    pushvalue 4;	# 2o arg to test C (arbitrary data)
-    call 3 1		# call cpcall
-    return 1
-  ]], T.testC, c, x)
-end
-
-_G.x = "hello"
-
-assert(cpcall("getglobal x; return 1") == "hello")
 
 
 -- testing changing hooks during hooks

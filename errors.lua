@@ -82,6 +82,10 @@ checkmessage("aaa={}; x=-aaa", "global 'aaa'")
 assert(not string.find(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "'aaa'"))
 assert(not string.find(doit"aaa={}; (aaa or aaa)()", "'aaa'"))
 
+checkmessage("print(print < 10)", "function")
+checkmessage("print(print < print)", "two function")
+
+
 -- tests for field accesses after RK limit
 local t = {}
 for i = 1, 1000 do

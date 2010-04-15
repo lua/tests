@@ -404,12 +404,15 @@ if T then
   for i=1,200 do local a = {} end
   T.totalmem(1000000000)
   collectgarbage()
-  local t = select(5, T.totalmem())
+  local t = T.totalmem("table")
   local a = {{}, {}, {}}   -- create 4 new tables
-  assert(select(5, T.totalmem()) == t + 4)
-  t = select(6, T.totalmem())
+  assert(T.totalmem("table") == t + 4)
+  t = T.totalmem("function")
   a = function () end   -- create 1 new closure
-  assert(select(6, T.totalmem()) == t + 1)
+  assert(T.totalmem("function") == t + 1)
+  t = T.totalmem("thread")
+  a = coroutine.create(function () end)   -- create 1 new coroutine
+  assert(T.totalmem("thread") == t + 1)
 end
 
 -- create a userdata to be collected when state is closed

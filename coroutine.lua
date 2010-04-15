@@ -589,6 +589,15 @@ assert(x() == 102)
 assert(x() == 23)
 
 
+f = T.makeCfunc[[pushstring 'a'; pushnum 102; yield 2; ]]
+
+a, b, c, d = T.testC([[newthread; pushvalue 2; xmove 0 3 1; resume 3 0;
+                       pushstatus; xmove 3 0 0;  resume 3 0; pushstatus;
+                       return 4; ]], f)
+
+assert(a == 'YIELD' and b == 'a' and c == 102 and d == 'OK')
+
+
 -- testing chain of suspendable C calls
 
 local count = 3   -- number of levels

@@ -243,7 +243,7 @@ assert(next(a) == string.rep('$', 11))
 
 -- ephemerons
 local mt = {__mode = 'k'}
-a = {}; setmetatable(a, mt)
+a = {10,20,30,40}; setmetatable(a, mt)
 x = nil
 for i = 1, 100 do local n = {}; a[n] = {k = {x}}; x = n end
 GC()
@@ -253,6 +253,7 @@ while n do n = a[n].k[1]; i = i + 1 end
 assert(i == 100)
 x = nil
 GC()
+for i = 1, 4 do assert(a[i] == i * 10); a[i] = nil end
 assert(next(a) == nil)
 
 local K = {}
@@ -393,6 +394,40 @@ do
     collectgarbage("step", 1)   -- steps should not unblock the collector
   until gcinfo() > 1000
   collectgarbage"restart"
+end
+
+
+if T then   -- tests for weird cases collecting upvalues
+  local a = 1200
+  local f = function () return a end    -- create upvalue for 'a'
+  assert(f() == 1200)
+
+  -- erase reference to upvalue 'a', mark it as dead, but does not collect it
+  T.gcstate("pause"); collectgarbage("stop")
+  f = nil
+  T.gcstate("sweepstring"); collectgarbage("stop")
+
+  -- this function will reuse that dead upvalue...
+  f = function () return a end
+  assert(f() == 1200)
+
+  -- create coroutine with local variable 'b'
+  local co = coroutine.wrap(function()
+    local b = 150
+    coroutine.yield(function () return b end)
+  end)
+
+  T.gcstate("pause"); collectgarbage("stop")
+  assert(co()() == 150)  -- create upvalue for 'b'
+
+  -- mark upvalue 'b' as dead, but does not collect it
+  T.gcstate("sweepstring"); collectgarbage("stop")
+
+  co()   -- finish coroutine, "closing" that dead upvalue
+
+  assert(f() == 1200)
+
+  print"+"
 end
 
 

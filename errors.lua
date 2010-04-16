@@ -86,6 +86,10 @@ checkmessage("print(print < 10)", "function")
 checkmessage("print(print < print)", "two function")
 
 
+-- global functions
+checkmessage("(io.write or print){}", "io.write")
+checkmessage("(collectgarbage or print){}", "collectgarbage")
+
 -- tests for field accesses after RK limit
 local t = {}
 for i = 1, 1000 do

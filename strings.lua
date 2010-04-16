@@ -141,6 +141,22 @@ assert(string.format("%d", 0x7fffffff) == tostring(2^31 - 1))
 assert(string.format("%u", 0x80000003) == tostring(0x80000003))
 assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
 
+-- errors in format
+
+local function check (fmt, msg)
+  local s, err = pcall(string.format, fmt, 10)
+  assert(not s and string.find(err, msg))
+end
+
+local aux = string.rep('0', 600)
+check("%100.3d", "too long")
+check("%1"..aux..".3d", "too long")
+check("%1.100d", "too long")
+check("%10.1"..aux.."004d", "too long")
+check("%t", "invalid option")
+check("%"..aux.."d", "repeated flags")
+
+
 assert(loadstring("return 1\n--comentário sem EOL no final")() == 1)
 
 
@@ -157,6 +173,8 @@ assert(table.concat({}, "x", 2^31-1, 2^31-2) == "")
 assert(table.concat({}, "x", -2^31+1, -2^31) == "")
 assert(table.concat({}, "x", 2^31-1, -2^31) == "")
 assert(table.concat({[2^31-1] = "alo"}, "x", 2^31-1, 2^31-1) == "alo")
+
+assert(not pcall(table.concat, {"a", "b", {}}))
 
 a = {"a","b","c"}
 assert(table.concat(a, ",", 1, 0) == "")

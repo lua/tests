@@ -198,6 +198,13 @@ x,y = T.testC([[
 ]], a, a)
 assert(x == a..a and y == 5)
 
+-- concat with 0 elements
+assert(T.testC("concat 0; return 1") == "")
+
+-- concat with 1 element
+assert(T.testC("concat 1; return 1", "xuxu") == "xuxu")
+
+
 
 -- testing lua_is
 
@@ -231,6 +238,7 @@ assert(count(nil) == 1)
 assert(count(io.stdin) == 1)
 assert(count(nil, 15) == 100)
 
+
 -- testing lua_to...
 
 function to (s, x, n)
@@ -243,18 +251,31 @@ assert(to("tostring", "alo") == "alo")
 assert(to("tostring", 12) == "12")
 assert(to("tostring", 12, 3) == nil)
 assert(to("objsize", {}) == 0)
+assert(to("objsize", {1,2,3}) == 3)
 assert(to("objsize", "alo\0\0a") == 6)
 assert(to("objsize", T.newuserdata(0)) == 0)
 assert(to("objsize", T.newuserdata(101)) == 101)
+assert(to("objsize", 124) == 0)
+assert(to("objsize", true) == 0)
 assert(to("tonumber", {}) == 0)
 assert(to("tonumber", "12") == 12)
 assert(to("tonumber", "s2") == 0)
 assert(to("tonumber", 1, 20) == 0)
+assert(to("topointer", 10) == 0)
+assert(to("topointer", true) == 0)
+assert(to("topointer", T.pushuserdata(20)) == 20)
+assert(to("topointer", io.read) ~= 0)
+assert(to("func2num", 20) == 0)
+assert(to("func2num", T.pushuserdata(10)) == 0)
+assert(to("func2num", io.read) ~= 0)
 a = to("tocfunction", math.deg)
 assert(a(3) == math.deg(3) and a == math.deg)
 
 
+
 -- testing deep C stack
+assert(not pcall(T.testC, "checkstack 1000023"))   -- too deep
+
 local prog = {"checkstack 30000", "newtable"}
 for i = 1,12000 do
   prog[#prog + 1] = "pushnum " .. i

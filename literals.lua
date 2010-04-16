@@ -5,7 +5,7 @@ require "debug"
 
 local function dostring (x) return assert(loadstring(x))() end
 
-dostring("x = 'a\0a'")
+dostring("x \v\f = \t\r 'a\0a' \v\f\f")
 assert(x == 'a\0a' and string.len(x) == 3)
 
 -- escape sequences
@@ -27,10 +27,31 @@ assert(010 .. 020 .. -030 == "1020-30")
 -- hexadecimal escapes
 assert("\x00\x05\x10\x1f\x3C\xFF\xe8" == "\0\5\16\31\60\255\232")
 
+local function lexstring (x, y, n)
+  local f = assert(loadstring('return '..x..', debug.getinfo(1).currentline'))
+  local s, l = f()
+  assert(s == y and l == n)
+end
+
+lexstring("'abc\\*  \n   efg'", "abcefg", 2)
+lexstring("'abc\\*  \n\n\n'", "abc", 4)
+lexstring("'\\*  \n\t\f\v\n'",  "", 3)
+lexstring("[[\nalo\nalo\n\n]]", "alo\nalo\n\n", 5)
+lexstring("[[\nalo\ralo\n\n]]", "alo\nalo\n\n", 5)
+lexstring("[[\nalo\ralo\r\n]]", "alo\nalo\n", 4)
+lexstring("[[\ralo\n\ralo\r\n]]", "alo\nalo\n", 4)
+lexstring("[[alo]\n]alo]]", "alo]\n]alo", 2)
+
+assert("abc\*
+        def\*
+        ghi\*
+       " == 'abcdefghi')
+
 -- Error in escape sequences
 local function lexerror (s, err)
   local st, msg = loadstring('return '..s)
-  assert(not st and string.find(msg, "near '"..err.."'", 1, true))
+  if err ~= '<eof>' then err = "'"..err.."'" end
+  assert(not st and string.find(msg, "near "..err, 1, true))
 end
 lexerror([["abc\x"]], [[\x"]])
 lexerror([["\x]], [[\x]])
@@ -44,6 +65,14 @@ lexerror([["\xAG]], [[\xAG]])
 lexerror([["\999"]], [[\999]])
 lexerror([["xyz\300"]], [[\300]])
 
+
+-- unfinished strings
+lexerror("[=[alo]]", "<eof>")
+lexerror("[=[alo]=", "<eof>")
+lexerror("[=[alo]", "<eof>")
+lexerror("'alo", "<eof>")
+lexerror("'alo \\*  \n\n", "<eof>")
+lexerror("'alo \\*", "<eof>")
 
 -- valid characters in variable names
 for i = 0, 255 do

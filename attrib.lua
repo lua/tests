@@ -62,6 +62,7 @@ function removefiles (files)
 end
 
 local files = {
+  ["err.lua"] = "B = 15; a = a + 1;",
   ["A.lua"] = "",
   ["B.lua"] = "assert(...=='B');require 'A'",
   ["A.lc"] = "",
@@ -91,6 +92,10 @@ local try = function (p, n, r)
   assert(REQUIRED == p)
   assert(rr == r)
 end
+
+_G.a = nil
+assert(not pcall(require, "err"))
+assert(B == 15)
 
 assert(package.searchpath("C", package.path) == DIR .. "C.lua")
 assert(require"C" == 25)

@@ -155,6 +155,7 @@ check("%1.100d", "too long")
 check("%10.1"..aux.."004d", "too long")
 check("%t", "invalid option")
 check("%"..aux.."d", "repeated flags")
+check("%d %d", "no value")
 
 
 assert(loadstring("return 1\n--comentário sem EOL no final")() == 1)

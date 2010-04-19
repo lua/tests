@@ -17,6 +17,7 @@ print("current path:\n  " .. string.gsub(package.path, ";", "\n  "))
 
 local c = os.clock()
 
+local collectgarbage = collectgarbage
 
 do
 
@@ -28,10 +29,10 @@ end
 
 assert(os.setlocale"C")
 
-local T,print,gcinfo,format,write,assert,type,unpack =
-      T,print,gcinfo,string.format,io.write,assert,type,table.unpack
+local T,print,format,write,assert,type,unpack =
+      T,print,string.format,io.write,assert,type,table.unpack
 
-local function formatmem (m)
+local function F (m)
   if m < 1024 then return m
   else
     m = m/1024 - m/1024%1
@@ -45,14 +46,15 @@ end
 
 local showmem = function ()
   if not T then
-    print(format("    ---- total memory: %s ----\n", formatmem(gcinfo())))
+    print(format("    ---- total memory: %s ----\n",
+          F(collectgarbage("count"))))
   else
     T.checkmemory()
-    local a,b,c = T.totalmem()
-    local d,e = gcinfo()
+    local total, numblocks, maxmem = T.totalmem()
+    local count = collectgarbage("count")
     print(format(
-  "\n    ---- total memory: %s (%dK), max use: %s,  blocks: %d\n",
-                        formatmem(a), d, formatmem(b), c))
+      "\n    ---- total memory: %s (%dK), max use: %s,  blocks: %d\n",
+      F(total), count, F(maxmem), numblocks))
     print(format("\t(strings:  %d, tables: %d, functions: %d, "..
                  "\n\tudata: %d, threads: %d)",
                  T.totalmem"string", T.totalmem"table", T.totalmem"function",
@@ -143,8 +145,8 @@ _G.showmem = showmem
 
 end
 
-local _G, collectgarbage, showmem, print, format, clock =
-      _G, collectgarbage, showmem, print, string.format, os.clock
+local _G, showmem, print, format, clock =
+      _G, showmem, print, string.format, os.clock
 
 -- erase (almost) all globals
 print('cleaning all!!!!')

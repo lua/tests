@@ -40,12 +40,10 @@ assert(not doit("tostring(1)") and doit("tostring()"))
 assert(doit"tonumber()")
 assert(doit"repeat until 1; a")
 checksyntax("break label", "", "label", 1)
-assert(doit";")
-assert(doit"a=1;;")
 assert(doit"return;;")
+assert(doit"while true do break;; end")
 assert(doit"assert(false)")
 assert(doit"assert(nil)")
-assert(doit"a=math.sin\n(3)")
 assert(doit("function a (... , ...) end"))
 assert(doit("function a (, ...) end"))
 
@@ -173,28 +171,59 @@ assert(string.find(select(2, f()), "yield across"))
 
 -- testing line error
 
-function lineerror (s)
+local function lineerror (s, l)
   local err,msg = pcall(loadstring(s))
   local line = string.match(msg, ":(%d+):")
-  return line and line+0
+  assert((line and line+0) == l)
 end
 
-assert(lineerror"local a\n for i=1,'a' do \n print(i) \n end" == 2)
-assert(lineerror"\n local a \n for k,v in 3 \n do \n print(k) \n end" == 3)
-assert(lineerror"\n\n for k,v in \n 3 \n do \n print(k) \n end" == 4)
-assert(lineerror"function a.x.y ()\na=a+1\nend" == 1)
+lineerror("local a\n for i=1,'a' do \n print(i) \n end", 2)
+lineerror("\n local a \n for k,v in 3 \n do \n print(k) \n end", 3)
+lineerror("\n\n for k,v in \n 3 \n do \n print(k) \n end", 4)
+lineerror("function a.x.y ()\na=a+1\nend", 1)
+
+lineerror("a = \na\n+\n{}", 3)
+lineerror("a = \n3\n+\n(\n4\n/\nprint)", 6)
+lineerror("a = \nprint\n+\n(\n4\n/\n7)", 3)
+
+lineerror("a\n=\n-\n\nprint\n;", 3)
+
+lineerror([[
+a
+(
+23)
+]], 1)
+
+lineerror([[
+local a = {x = 13}
+a
+.
+x
+(
+23
+)
+]], 2)
+
+lineerror([[
+local a = {x = 13}
+a
+.
+x
+(
+23 + a
+)
+]], 6)
 
 local p = [[
 function g() f() end
 function f(x) error('a', X) end
 g()
 ]]
-X=3;assert(lineerror(p) == 3)
-X=0;assert(lineerror(p) == nil)
-X=1;assert(lineerror(p) == 2)
-X=2;assert(lineerror(p) == 1)
+X=3;lineerror((p), 3)
+X=0;lineerror((p), nil)
+X=1;lineerror((p), 2)
+X=2;lineerror((p), 1)
 
-lineerror = nil
 
 C = 0
 local l = debug.getinfo(1, "l").currentline; function y () C=C+1; y() end

@@ -158,13 +158,17 @@ function Op(x) return setmetatable({x=x}, t) end
 
 local function test ()
   assert(not(Op(1)<Op(1)) and (Op(1)<Op(2)) and not(Op(2)<Op(1)))
+  assert(not(1 < Op(1)) and (Op(1) < 2) and not(2 < Op(1)))
   assert(not(Op('a')<Op('a')) and (Op('a')<Op('b')) and not(Op('b')<Op('a')))
+  assert(not('a' < Op('a')) and (Op('a') < 'b') and not(Op('b') < Op('a')))
   assert((Op(1)<=Op(1)) and (Op(1)<=Op(2)) and not(Op(2)<=Op(1)))
   assert((Op('a')<=Op('a')) and (Op('a')<=Op('b')) and not(Op('b')<=Op('a')))
   assert(not(Op(1)>Op(1)) and not(Op(1)>Op(2)) and (Op(2)>Op(1)))
   assert(not(Op('a')>Op('a')) and not(Op('a')>Op('b')) and (Op('b')>Op('a')))
   assert((Op(1)>=Op(1)) and not(Op(1)>=Op(2)) and (Op(2)>=Op(1)))
+  assert((1 >= Op(1)) and not(1 >= Op(2)) and (Op(2) >= 1))
   assert((Op('a')>=Op('a')) and not(Op('a')>=Op('b')) and (Op('b')>=Op('a')))
+  assert(('a' >= Op('a')) and not(Op('a') >= 'b') and (Op('b') >= Op('a')))
 end
 
 test()
@@ -274,7 +278,6 @@ t1 = {};  c = {}; setmetatable(c, t1)
 d = {}
 t1.__eq = function () return true end
 t1.__lt = function () return true end
-assert(c ~= d and not pcall(function () return c < d end))
 setmetatable(d, t1)
 assert(c == d and c < d and not(d <= c))
 t2 = {}

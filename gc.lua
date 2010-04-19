@@ -103,6 +103,7 @@ do
   end
 end
 
+foo = nil
 print('long strings')
 x = "01234567890123456789012345678901234567890123456789012345678901234567890123456789"
 assert(string.len(x)==80)
@@ -162,12 +163,12 @@ do
   assert(not collectgarbage("isrunning"))
   repeat
     local a = {}
-  until gcinfo() > 1000
+  until gcinfo() > 2 * x
   collectgarbage"restart"
   assert(collectgarbage("isrunning"))
   repeat
     local a = {}
-  until gcinfo() < 1000
+  until gcinfo() <= x * 1.4
 end
 
 lim = 15
@@ -371,7 +372,7 @@ end
 local thread_id = 0
 local threads = {}
 
-function fn(thread)
+local function fn (thread)
     local x = {}
     threads[thread_id] = function()
                              thread = x
@@ -390,9 +391,9 @@ do
   collectgarbage()
   collectgarbage"stop"
   repeat
-    for i=1,100 do local a = {} end
+    for i=1,1000 do _ENV.a = {} end
     collectgarbage("step", 1)   -- steps should not unblock the collector
-  until gcinfo() > 1000
+  until gcinfo() > 2 * x
   collectgarbage"restart"
 end
 

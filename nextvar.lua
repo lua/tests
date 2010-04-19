@@ -145,6 +145,10 @@ local nofind = {}
 a,b,c = 1,2,3
 a,b,c = nil
 
+
+-- next uses always the same iteraction function
+assert(next{} == next{})
+
 local function find (name)
   local n,v
   while 1 do

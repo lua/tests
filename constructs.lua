@@ -1,6 +1,12 @@
-print "testing syntax"
+;;print "testing syntax";;
 
 require "debug"
+
+-- testing semicollons
+do ;;; end
+; do ; a = 3; assert(a == 3) end;
+;
+
 
 -- testing priorities
 

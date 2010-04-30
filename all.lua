@@ -2,8 +2,8 @@
 
 math.randomseed(0)
 
-collectgarbage("setstepmul", 180)
-collectgarbage("setpause", 190)
+collectgarbage("setstepmul", 200)
+collectgarbage("setpause", 200)
 
 
 --[=[

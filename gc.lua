@@ -125,6 +125,7 @@ assert(_G["while"] == 234)
 local k,b = collectgarbage("count")
 assert(k*1024 == math.floor(k)*1024 + b)
 
+print("steps")
 
 local bytes = gcinfo()
 while 1 do
@@ -134,6 +135,7 @@ while 1 do
   a = {}
 end
 
+print("steps (2)")
 
 local function dosteps (siz)
   collectgarbage()
@@ -151,7 +153,7 @@ local function dosteps (siz)
 end
 
 assert(dosteps(0) > 10)
-assert(dosteps(6) < dosteps(2))
+assert(dosteps(10) < dosteps(2))
 assert(dosteps(10000) == 1)
 assert(collectgarbage("step", 1000000) == true)
 assert(collectgarbage("step", 1000000))
@@ -173,6 +175,7 @@ do
   until gcinfo() <= x * 1.4
 end
 
+print("clearing tables")
 lim = 15
 a = {}
 -- fill a with `collectable' indices

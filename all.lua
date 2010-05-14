@@ -88,7 +88,7 @@ do
   local next, newproxy, stderr = next, newproxy, io.stderr
   getmetatable(u).__gc = function (o)
     stderr:write'.'
-    assert(eph[o]() == o and next(eph) == o and next(eph, o) == nil)
+    --assert(eph[o]() == o and next(eph) == o and next(eph, o) == nil)
     local n = newproxy(o)
     eph[n] = function () return n end
     o = nil
@@ -98,11 +98,21 @@ end
 
 local f = assert(loadfile('gc.lua'))
 f()
+
+collectgarbage("gen")
 dofile('db.lua')
 assert(dofile('calls.lua') == deep and deep)
 olddofile('strings.lua')
 olddofile('literals.lua')
 assert(dofile('attrib.lua') == 27)
+
+collectgarbage("inc")   -- redo some tests in incremental mode
+olddofile('strings.lua')
+olddofile('literals.lua')
+dofile('constructs.lua')
+dofile('api.lua')
+
+collectgarbage("gen")   -- back to generational mode
 assert(dofile('locals.lua') == 5)
 dofile('constructs.lua')
 dofile('code.lua')

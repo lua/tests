@@ -438,6 +438,23 @@ end
 
 
 if T then
+  require "debug"
+  collectgarbage("gen")
+  x = T.newuserdata(0)
+  T.gcstate("propagate")    -- ensure 'x' is old
+  T.gcstate("sweepstring")
+  T.gcstate("propagate")
+  assert(string.find(T.gccolor(x), "/old"))
+  local y = T.newuserdata(0)
+  debug.setmetatable(y, {__gc = true})   -- bless the new udata before
+  debug.setmetatable(x, {__gc = true})   -- the old one
+  assert(string.find(T.gccolor(y), "white"))
+  T.checkmemory()
+  collectgarbage("inc")
+end
+
+
+if T then
   print("emergency collections")
   collectgarbage()
   collectgarbage()

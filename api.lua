@@ -21,6 +21,12 @@ a = T.testC("pushvalue R; return 1")
 assert(a == debug.getregistry())
 
 
+-- absindex
+assert(T.testC("settop 10; absindex -1; return 1") == 10)
+assert(T.testC("settop 5; absindex -5; return 1") == 1)
+assert(T.testC("settop 10; absindex 1; return 1") == 1)
+assert(T.testC("settop 10; absindex R; return 1") < -10)
+
 -- testing allignment
 a = T.d2s(12458954321123)
 assert(string.len(a) == 8)   -- sizeof(double)
@@ -968,6 +974,12 @@ res1, res2, top = T.testC([[testudata -1 xuxu
 			    return 3]], y)
 assert(not res1 and not res2 and top == 4)
 
+-- erase metatables
+do
+  local r = debug.getregistry()
+  assert(r.xuxu == mt_xuxu and r.xuxu1 == d)
+  r.xuxu = nil; r.xuxu1 = nil
+end
 
 print'OK'
 

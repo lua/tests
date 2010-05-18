@@ -270,6 +270,14 @@ assert(os.remove(file))
 assert(os.remove(file) == nil)
 assert(os.remove(otherfile) == nil)
 
+-- loading binary file
+io.output(file)
+assert(io.write(string.dump(function () return 10, '\0alo\255', 'hi' end)))
+io.close()
+a, b, c = assert(loadfile(file))()
+assert(a == 10 and b == "\0alo\255" and c == "hi")
+assert(os.remove(file))
+
 io.output(file)
 assert(io.write("qualquer coisa\n"))
 assert(io.write("mais qualquer coisa"))

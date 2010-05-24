@@ -35,6 +35,8 @@ assert(string.find('alo123alo', '^12') == nil)
 assert(f('aloALO', '%l*') == 'alo')
 assert(f('aLo_ALO', '%a*') == 'aLo')
 
+assert(f("  \n\r*&\n\r   xuxu  \n\n", "%g%g%g+") == "xuxu")
+
 assert(f('aaab', 'a*') == 'aaa');
 assert(f('aaa', '^.*$') == 'aaa');
 assert(f('aaa', 'b*') == '');

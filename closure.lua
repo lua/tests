@@ -19,7 +19,7 @@ function f(x)
   return a
 end
 
-a = f(10)
+local a = f(10)
 -- force a GC in this level
 local x = {[1] = {}}   -- to detect a GC
 setmetatable(x, {__mode = 'kv'})
@@ -37,6 +37,16 @@ assert(a[3]() == 20+A)
 assert(a[8]() == 10+A)
 assert(getmetatable(x).__mode == 'kv')
 assert(B.g == 19)
+
+
+-- testing equality
+a = {}
+for i = 1, 5 do  a[i] = function (x) return x + a + _ENV end  end
+assert(a[3] == a[4] and a[4] == a[5])
+
+for i = 1, 5 do  a[i] = function (x) return i + a + _ENV end  end
+assert(a[3] ~= a[4] and a[4] ~= a[5])
+
 
 -- testing closures with 'for' control variable
 a = {}

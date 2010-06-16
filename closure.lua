@@ -47,6 +47,11 @@ assert(a[3] == a[4] and a[4] == a[5])
 for i = 1, 5 do  a[i] = function (x) return i + a + _ENV end  end
 assert(a[3] ~= a[4] and a[4] ~= a[5])
 
+local function f()
+  return function (x)  return math.sin(_ENV[x])  end
+end
+assert(f() == f())
+
 
 -- testing closures with 'for' control variable
 a = {}

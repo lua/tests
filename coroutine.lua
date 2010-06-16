@@ -346,7 +346,7 @@ else
   T.loadlib(state)
 
   assert(T.doremote(state, [[
-    baselibopen();
+    corolibopen();
     X = function (x) coroutine.yield(x, 'BB'); return 'CC' end;
     return 'ok']]))
 

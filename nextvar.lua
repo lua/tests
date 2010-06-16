@@ -11,6 +11,27 @@ for i=1,100 do
   assert(#a == i)
 end
 
+-- testing ipairs
+local x = 0
+for k,v in ipairs{10,20,30;x=12} do
+  x = x + 1
+  assert(k == x and v == x * 10)
+end
+
+for _ in ipairs{x=12, y=24} do assert(nil) end
+
+-- test for 'false' x ipair
+x = false
+local i = 0
+for k,v in ipairs{true,false,true,false} do
+  i = i + 1
+  x = not x
+  assert(x == v)
+end
+assert(i == 4)
+
+-- iterator function is always the same
+assert(type(ipairs{}) == 'function' and ipairs{} == ipairs{})
 
 if T then
 -- testing table sizes
@@ -434,7 +455,7 @@ assert(x == 5)
 
 
 
--- testing __pairs metamethod
+-- testing __pairs and __ipairs metamethod
 a = {}
 do
   local x,y,z = pairs(a)
@@ -465,11 +486,11 @@ a[3] = 30
 
 a = {n=10}
 setmetatable(a, {__len = function (x) return x.n end,
-                 __pairs = function (x) return function (e,i)
+                 __ipairs = function (x) return function (e,i)
                              if i < #e then return i+1 end
                            end, x, 0 end})
 i = 0
-for k,v in pairs(a) do
+for k,v in ipairs(a) do
   i = i + 1
   assert(k == i and v == nil)
 end

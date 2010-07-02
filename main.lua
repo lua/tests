@@ -125,7 +125,7 @@ assert(string.find(t, prompt .. ".*" .. prompt .. ".*" .. prompt))
 
 -- test for error objects
 prepfile[[
-require "debug"
+debug = require "debug"
 m = {x=0}
 setmetatable(m, {__tostring = function(x)
   return debug.getinfo(4).currentline + x.x
@@ -159,7 +159,7 @@ prepfile[[#comment in 1st line without \n at the end]]
 RUN("lua %s", prog)
   
 prepfile[[#test line number when file starts with comment line
-require"debug"
+debug = require"debug"
 print(debug.getinfo(1).currentline)
 ]]
 RUN("lua %s > %s", prog, out)

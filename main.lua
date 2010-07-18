@@ -60,10 +60,10 @@ function NoRun (...)
 end
 
 -- test 2 files
-prepfile("print(1); a=2")
-prepfile("print(a)", otherprog)
+prepfile("print(1); a=2; return {x=15}")
+prepfile(("print(a); print(_G['%s'].x)"):format(prog), otherprog)
 RUN("lua -l %s -l%s -lstring -l io %s > %s", prog, otherprog, otherprog, out)
-checkout("1\n2\n2\n")
+checkout("1\n2\n15\n2\n15\n")
 
 local a = [[
   assert(table.getn(arg) == 3 and arg[1] == 'a' and

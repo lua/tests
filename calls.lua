@@ -1,6 +1,6 @@
 print("testing functions and calls")
 
-require "debug"
+local debug = require "debug"
 
 -- get the opportunity to test 'type' too ;)
 

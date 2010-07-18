@@ -1,6 +1,6 @@
 ;;print "testing syntax";;
 
-require "debug"
+local debug = require "debug"
 
 -- testing semicollons
 do ;;; end

@@ -438,7 +438,7 @@ end
 
 
 if T then
-  require "debug"
+  local debug = require "debug"
   collectgarbage("gen")
   x = T.newuserdata(0)
   T.gcstate("propagate")    -- ensure 'x' is old

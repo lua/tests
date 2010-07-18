@@ -1,6 +1,6 @@
 print "testing large tables"
 
-require"debug" 
+local debug = require"debug" 
 
 local lim = 2^18 + 1000
 local prog = { "local y = {0" }

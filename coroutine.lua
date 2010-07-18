@@ -1,6 +1,6 @@
 print "testing coroutines"
 
-require'debug'
+local debug = require'debug'
 
 local f
 
@@ -346,7 +346,7 @@ else
   T.loadlib(state)
 
   assert(T.doremote(state, [[
-    corolibopen();
+    coroutine = require'coroutine';
     X = function (x) coroutine.yield(x, 'BB'); return 'CC' end;
     return 'ok']]))
 

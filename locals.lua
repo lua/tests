@@ -1,6 +1,6 @@
 print('testing local variables and environments')
 
-require"debug"
+local debug = require"debug"
 
 
 -- bug in 5.1:

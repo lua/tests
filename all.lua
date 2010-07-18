@@ -146,7 +146,7 @@ end
 
 print("final OK !!!")
 
-require "debug"
+local debug = require "debug"
 
 debug.sethook(function (a) assert(type(a) == 'string') end, "cr")
 

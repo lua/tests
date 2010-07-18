@@ -1,6 +1,6 @@
 print('testing scanner')
 
-require "debug"
+debug = require "debug"
 
 
 local function dostring (x) return assert(loadstring(x))() end

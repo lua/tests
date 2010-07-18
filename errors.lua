@@ -1,6 +1,6 @@
 print("testing errors")
 
-require"debug"
+local debug = require"debug"
 
 function doit (s)
   local f, msg = loadstring(s)
@@ -46,6 +46,7 @@ assert(doit"assert(false)")
 assert(doit"assert(nil)")
 assert(doit("function a (... , ...) end"))
 assert(doit("function a (, ...) end"))
+assert(doit("local t={}; t = t[#t] + 1"))
 
 checksyntax([[
   local a = {4

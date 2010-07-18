@@ -171,7 +171,7 @@ t()
 
 
 -- test for debug manipulation of upvalues
-require'debug'
+local debug = require'debug'
 
 do
   local a , b, c = 3, 5, 7

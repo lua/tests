@@ -4,7 +4,7 @@ if T==nil then
   return
 end
 
-require "debug"
+local debug = require "debug"
 
 local pack = table.pack
 
@@ -734,23 +734,22 @@ assert(a == 'alo' and b == '3')
 
 T.doremote(L1, "_ERRORMESSAGE = nil")
 -- error: `sin' is not defined
-a, b = T.doremote(L1, "return sin(1)")
+a, _, b = T.doremote(L1, "return sin(1)")
 assert(a == nil and b == 2)   -- 2 == run-time error
 
 -- error: syntax error
 a, b, c = T.doremote(L1, "return a+")
-assert(a == nil and b == 3 and type(c) == "string")   -- 3 == syntax error
+assert(a == nil and c == 3 and type(b) == "string")   -- 3 == syntax error
 
 T.loadlib(L1)
-a, b = T.doremote(L1, [[
-  a = strlibopen()
-  a = packageopen()
-  a = baselibopen(); assert(a == _G and require("_G") == a)
-  a = iolibopen(); assert(type(a.read) == "function")
-  assert(require("io") == a)
-  a = tablibopen(); assert(type(a.insert) == "function")
-  a = dblibopen(); assert(type(a.getlocal) == "function")
-  a = mathlibopen(); assert(type(a.sin) == "function")
+a, b, c = T.doremote(L1, [[
+  string = require'string'
+  a = require'_G'; assert(a == _G and require("_G") == a)
+  io = require'io'; assert(type(io.read) == "function")
+  assert(require("io") == io)
+  a = require'table'; assert(type(a.insert) == "function")
+  a = require'debug'; assert(type(a.getlocal) == "function")
+  a = require'math'; assert(type(a.sin) == "function")
   return string.sub('okinama', 1, 2)
 ]])
 assert(a == "ok")

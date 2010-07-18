@@ -1,4 +1,4 @@
-require "debug"
+debug = require "debug"
 
 print('testing i/o')
 

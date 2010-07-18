@@ -346,7 +346,7 @@ assert(a.x == 1 and rawget(a, "x", 3) == 1)
 print '+'
 
 -- testing metatables for basic types
-require'debug'
+local debug = require'debug'
 mt = {}
 debug.setmetatable(10, mt)
 assert(getmetatable(-2) == mt)

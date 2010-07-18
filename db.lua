@@ -1,6 +1,6 @@
 -- testing debug library
 
-require "debug"
+debug = require "debug"
 
 local function dostring(s) return assert(loadstring(s))() end
 
@@ -166,6 +166,20 @@ print'+'
 -- invalid levels in [gs]etlocal
 assert(not pcall(debug.getlocal, 20, 1))
 assert(not pcall(debug.setlocal, -1, 1, 10))
+
+
+-- parameter names
+local function foo (a,b,...) local d, e end
+local co = coroutine.create(foo)
+
+assert(debug.getlocal(foo, 1) == 'a')
+assert(debug.getlocal(foo, 2) == 'b')
+assert(debug.getlocal(foo, 3) == nil)
+assert(debug.getlocal(co, foo, 1) == 'a')
+assert(debug.getlocal(co, foo, 2) == 'b')
+assert(debug.getlocal(co, foo, 3) == nil)
+
+assert(debug.getlocal(print, 1) == nil)
 
 
 a = {}; L = nil

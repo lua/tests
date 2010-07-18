@@ -68,6 +68,15 @@ local function check (t, na, nh)
   end
 end
 
+
+-- testing C library sizes
+do
+  local s = 0
+  for _ in pairs(math) do s = s + 1 end
+  check(math, 0, mp2(s))
+end
+
+
 -- testing constructor sizes
 local lim = 40
 local s = 'return {'

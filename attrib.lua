@@ -7,7 +7,6 @@ assert(require"math" == math)
 assert(require"table" == table)
 assert(require"io" == io)
 assert(require"os" == os)
-assert(require"debug" == debug)
 assert(require"coroutine" == coroutine)
 
 assert(type(package.path) == "string")
@@ -386,12 +385,15 @@ end
 do
   local a,i,j,b
   a = {'a', 'b'}; i=1; j=2; b=a
-  function foo ()
+  local function foo ()
     i, a[i], a, j, a[j], a[i+j] = j, i, i, b, j, i
   end
   foo()
   assert(i == 2 and b[1] == 1 and a == 1 and j == b and b[2] == 2 and
          b[3] == 1)
+  local t = {}
+  (function (a) t[a], a = 10, 20  end)(1);
+  assert(t[1] == 10)
 end
 
 print('OK')

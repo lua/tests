@@ -59,6 +59,32 @@ function NoRun (...)
   assert(auxrun(...) ~= 0)
 end
 
+-- test environment variables used by Lua
+prepfile("print(package.path)")
+
+RUN("env LUA_INIT= LUA_PATH=x lua %s > %s", prog, out)
+checkout("x\n")
+
+RUN("env LUA_INIT= LUA_PATH_5_2=y LUA_PATH=x lua %s > %s", prog, out)
+checkout("y\n")
+
+prepfile("print(package.cpath)")
+
+RUN("env LUA_INIT= LUA_CPATH=xuxu lua %s > %s", prog, out)
+checkout("xuxu\n")
+
+RUN("env LUA_INIT= LUA_CPATH_5_2=yacc LUA_CPATH=x lua %s > %s", prog, out)
+checkout("yacc\n")
+
+prepfile("print(X)")
+RUN("env LUA_INIT='X=3' lua %s > %s", prog, out)
+checkout("3\n")
+
+prepfile("print(X)")
+RUN("env LUA_INIT_5_2='X=10' LUA_INIT='X=3' lua %s > %s", prog, out)
+checkout("10\n")
+
+
 -- test 2 files
 prepfile("print(1); a=2; return {x=15}")
 prepfile(("print(a); print(_G['%s'].x)"):format(prog), otherprog)

@@ -425,17 +425,17 @@ end
 
 
 -- bug in 5.1.2
-assert(not pcall(debug.setenv, 3, {}))
-assert(not pcall(debug.setenv, nil, {}))
-assert(not pcall(debug.setenv, T.pushuserdata(1), {}))
+assert(not pcall(debug.setuservalue, 3, {}))
+assert(not pcall(debug.setuservalue, nil, {}))
+assert(not pcall(debug.setuservalue, T.pushuserdata(1), {}))
 
 local b = newproxy()
 local a = {}
-assert(debug.getenv(b) == nil)
-assert(debug.setenv(b, a))
-assert(debug.getenv(b) == a)
-assert(debug.setenv(b, nil))
-assert(debug.getenv(b) == nil)
+assert(debug.getuservalue(b) == nil)
+assert(debug.setuservalue(b, a))
+assert(debug.getuservalue(b) == a)
+assert(debug.setuservalue(b, nil))
+assert(debug.getuservalue(b) == nil)
 
 
 

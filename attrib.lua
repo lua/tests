@@ -136,25 +136,20 @@ files = {
   ["P1/xuxu.lua"] = "AA = 20",
 }
 
-createfiles(files, "_ENV = module(..., package.seeall)\n", "")
+createfiles(files, "_ENV = {}\n", "\nreturn _ENV\n")
 AA = 0
 
 local m = assert(require"P1")
-assert(m == P1 and m._NAME == "P1" and AA == 0 and m.AA == 10)
-assert(require"P1" == P1 and P1 == m)
-assert(require"P1" == P1)
-assert(P1._PACKAGE == "")
+assert(AA == 0 and m.AA == 10)
+assert(require"P1" == m)
+assert(require"P1" == m)
 
 assert(package.searchpath("P1.xuxu", package.path) == "libs/P1/xuxu.lua")
-local m = assert(require"P1.xuxu")
-assert(m == P1.xuxu and m._NAME == "P1.xuxu" and AA == 0 and m.AA == 20)
-assert(require"P1.xuxu" == P1.xuxu and P1.xuxu == m)
-assert(require"P1.xuxu" == P1.xuxu)
-assert(require"P1" == P1)
-assert(P1.xuxu._PACKAGE == "P1.")
-assert(P1.AA == 10 and P1._PACKAGE == "")
-assert(P1._G == _G and P1.xuxu._G == _G)
-
+m.xuxu = assert(require"P1.xuxu")
+assert(AA == 0 and m.xuxu.AA == 20)
+assert(require"P1.xuxu" == m.xuxu)
+assert(require"P1.xuxu" == m.xuxu)
+assert(require"P1" == m and m.AA == 10)
 
 
 removefiles(files)
@@ -186,73 +181,51 @@ end
 -- cannot change environment of a C function
 assert(not pcall(module, 'XUXU'))
 
-local assert, module, package = assert, module, package
-X = nil; x = 0; assert(_G.x == 0)   -- `x' must be a global variable
-do local _ENV = module"X"; x = 1; assert(_M.x == 1) end
-do local _ENV = module"X.a.b.c"; x = 2; assert(_M.x == 2) end
-do local _ENV = module("X.a.b", package.seeall)
-  x = 3
-  assert(X._NAME == "X" and X.a.b.c._NAME == "X.a.b.c" and X.a.b._NAME == "X.a.b")
-  assert(X._M == X and X.a.b.c._M == X.a.b.c and X.a.b._M == X.a.b)
-  assert(X.x == 1 and X.a.b.c.x == 2 and X.a.b.x == 3)
-  assert(X._PACKAGE == "" and X.a.b.c._PACKAGE == "X.a.b." and
-         X.a.b._PACKAGE == "X.a.")
-  assert(_PACKAGE.."c" == "X.a.c")
-  assert(X.a._NAME == nil and X.a._M == nil)
-end
-do local _ENV = module("X.a", import("X")); x = 4
-  assert(X.a._NAME == "X.a" and X.a.x == 4 and X.a._M == X.a)
-end
-do local _ENV = module("X.a.b", package.seeall);
-  assert(x == 3); x = 5
-  assert(_NAME == "X.a.b" and X.a.b.x == 5)
-  assert(X._G == nil and X.a._G == nil and X.a.b._G == _G and X.a.b.c._G == nil)
-end
-
-_ENV = _G
-assert(x == 0)
-
-assert(not pcall(module, "x"))
-assert(not pcall(module, "math.sin"))
 
 
--- testing C libraries
+-- testing require of C libraries
 
 
 local p = ""   -- On Mac OS X, redefine this to "_"
 
+-- check whether loadlib works in this system
 local st, err, when = package.loadlib("libs/lib1.so", "*")
 if not st then
+  local f, err, when = package.loadlib("donotexist", p.."xuxu")
+  assert(not f and type(err) == "string" and when == "absent")
   (Message or print)('\a\n >>> cannot load dynamic library <<<\n\a')
   print(err, when)
 else
-  local f = assert(package.loadlib("libs/lib1.so", p.."luaopen_lib1"))
-  f()   -- open library
-  assert(require("lib1") == lib1)
-  collectgarbage()
-  assert(lib1.id("x") == "x")
+  -- tests for loadlib
+  local f = assert(package.loadlib("libs/lib1.so", p.."onefunction"))
+  local a, b = f(15, 25)
+  assert(a == 25 and b == 15)
+
   f = assert(package.loadlib("libs/lib1.so", p.."anotherfunc"))
   assert(f(10, 20) == "1020\n")
-  f, err, when = package.loadlib("libs/lib1.so", p.."xuxu")
+
+  -- check error messages
+  local f, err, when = package.loadlib("libs/lib1.so", p.."xuxu")
   assert(not f and type(err) == "string" and when == "init")
+  f, err, when = package.loadlib("donotexist", p.."xuxu")
+  assert(not f and type(err) == "string" and when == "open")
+
   -- symbols from 'lib1' must be visible to other libraries
-  assert(package.loadlib("libs/lib11.so", p.."luaopen_lib11"))
+  f = assert(package.loadlib("libs/lib11.so", p.."luaopen_lib11"))
+  assert(f() == "exported")
+
+  -- test C modules with prefixes in names
   package.cpath = "libs/?.so"
-  require"lib2"
+  local lib2 = require"v-lib2"
   assert(x == 0.5)   -- access to global environment
   assert(lib2.id("x") == "x")
+
+  -- test C submodules
   local fs = require"lib1.sub"
-  assert(fs == lib1.sub and next(lib1.sub) == nil)
-  do local _ENV = module("lib2", package.seeall);
-    f = require"-lib2"
-    assert(f.id("x") == "x" and _M == f and _NAME == "lib2")
-    do local _ENV =  module("lib1.sub", package.seeall); assert(_M == fs) end
-  end
- 
+  assert(fs.id(45) == 45)
 end
+
 _ENV = _G
-f, err, when = package.loadlib("donotexist", p.."xuxu")
-assert(not f and type(err) == "string" and (when == "open" or when == "absent"))
 
 
 -- testing preload
@@ -261,19 +234,18 @@ do
   local p = package
   package = {}
   p.preload.pl = function (...)
-    local _ENV = module(...)
+    local _ENV = {}
     function xuxu (x) return x+20 end
+    return _ENV
   end
 
-  require"pl"
+  local pl = require"pl"
   assert(require"pl" == pl)
   assert(pl.xuxu(10) == 30)
 
   package = p
   assert(type(package.path) == "string")
 end
-
-end  --]
 
 
 print('+')
@@ -400,3 +372,4 @@ print('OK')
 
 return res
 
+end

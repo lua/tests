@@ -239,6 +239,13 @@ cannotload("unexpected symbol", load("*a = 123"))
 cannotload("hhi", load(function () error("hhi") end))
 cannotload("hhi", loadin({}, function () error("hhi") end))
 
+-- any value is valid for _ENV
+assert(loadin(123, "return _ENV")() == 123)
+
+-- loadin fails if there is no _ENV variable
+a = string.dump(function (x) return x end)
+assert(not pcall(loadin, {}, a))
+
 -- test generic load with nested functions
 x = [[
   return function (x)

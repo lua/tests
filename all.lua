@@ -113,6 +113,8 @@ dofile('constructs.lua')
 dofile('api.lua')
 
 collectgarbage("gen")   -- back to generational mode
+collectgarbage("setpause", 200)
+collectgarbage("setmajorinc", 500)
 assert(dofile('locals.lua') == 5)
 dofile('constructs.lua')
 dofile('code.lua')

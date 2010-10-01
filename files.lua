@@ -271,28 +271,32 @@ assert(os.remove(file))
 assert(os.remove(file) == nil)
 assert(os.remove(otherfile) == nil)
 
+-- testing loadfile
+local function testloadfile (s, expres)
+  io.output(file)
+  if s then io.write(s) end
+  io.close()
+  local res = assert(loadfile(file))()
+  assert(os.remove(file))
+  assert(res == expres)
+end
+
 -- loading empty file
-io.output(file)
-io.close()
-a = assert(loadfile(file))()
-assert(a == nil)
-assert(os.remove(file))
+testloadfile(nil, nil)
 
 -- loading file with initial comment without end of line
-io.output(file)
-assert(io.write("# a non-ending comment"))
-io.close()
-a = assert(loadfile(file))()
-assert(a == nil)
-assert(os.remove(file))
+testloadfile("# a non-ending comment", nil)
+
+
+-- checking Unicode BOM in files
+testloadfile("\xEF\xBB\xBF# some comment\nreturn 234", 234)
+testloadfile("\xEF\xBB\xBFreturn 239", 239)
+testloadfile("\xEF\xBB\xBF", nil)   -- empty file with a BOM
+
 
 -- checking line numbers in files with initial comments
-io.output(file)
-assert(io.write("# a comment\nreturn debug.getinfo(1).currentline"))
-io.close()
-a = assert(loadfile(file))()
-assert(a == 2)
-assert(os.remove(file))
+testloadfile("# a comment\nreturn debug.getinfo(1).currentline", 2)
+
 
 -- loading binary file
 io.output(file)
@@ -301,6 +305,7 @@ io.close()
 a, b, c = assert(loadfile(file))()
 assert(a == 10 and b == "\0alo\255" and c == "hi")
 assert(os.remove(file))
+
 
 -- loading binary file with initial comment
 io.output(file)

@@ -196,10 +196,6 @@ local function find1 (name)
   return nil  -- not found
 end
 
-do   -- create 10000 new global variables
-  for i=1,10000 do _G[i] = i end
-end
-
 
 a = {x=90, y=8, z=23}
 assert(table.foreach(a, function(i,v) if i=='x' then return v end end) == 90)
@@ -246,16 +242,11 @@ end
 assert(n.n == 9000)
 a = nil
 
--- remove those 10000 new global variables
-for i=1,10000 do _G[i] = nil end
-
 do   -- clear global table
   local a = {}
-  local preserve = {io = 1, string = 1, debug = 1, os = 1,
-                    coroutine = 1, table = 1, math = 1, bit = 1}
   for n,v in pairs(_G) do a[n]=v end
   for n,v in pairs(a) do
-    if not preserve[n] and type(v) ~= "function" and
+    if not package.loaded[n] and type(v) ~= "function" and
        not string.find(n, "^[%u_]") then
      _G[n] = nil
     end

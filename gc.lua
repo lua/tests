@@ -97,7 +97,7 @@ end
 ]]
 do
   local step = 1
-  if rawget(_G, "_soft") then step = 13 end
+  if _soft then step = 13 end
   for i=1, string.len(prog), step do
     for j=i, string.len(prog), step do
       pcall(loadstring(string.sub(prog, i, j)))
@@ -364,7 +364,7 @@ u = nil
 assert(not pcall(collectgarbage))
 
 
-if not rawget(_G, "_soft") then
+if not _soft then
   print("deep structures")
   local a = {}
   for i = 1,200000 do

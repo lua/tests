@@ -1,3 +1,7 @@
+if _soft then
+  return 'a'
+end
+
 print "testing large tables"
 
 local debug = require"debug" 

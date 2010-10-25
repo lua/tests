@@ -2,6 +2,11 @@ print("testing errors")
 
 local debug = require"debug"
 
+-- avoid problems with 'strict' module (which may generate other error messages)
+local mt = getmetatable(_G) or {}
+local oldmm = mt.__index
+mt.__index = nil
+
 function doit (s)
   local f, msg = loadstring(s)
   if f == nil then return msg end
@@ -11,7 +16,8 @@ end
 
 
 function checkmessage (prog, msg)
-  assert(string.find(doit(prog), msg, 1, true))
+  local m = doit(prog)
+  assert(string.find(m, msg, 1, true))
 end
 
 function checksyntax (prog, extra, token, line)
@@ -34,7 +40,9 @@ assert(doit("error()") == nil)
 
 
 -- test common errors/errors that crashed in the past
-assert(doit("table.unpack({}, 1, n=2^30)"))
+if not _no32 then
+  assert(doit("table.unpack({}, 1, n=2^30)"))
+end
 assert(doit("a=math.sin()"))
 assert(not doit("tostring(1)") and doit("tostring()"))
 assert(doit"tonumber()")
@@ -120,7 +128,7 @@ x.a()]], "field 'a'")
 checkmessage([[
 prefix = nil
 insert = nil
-while 1 do  
+while 1 do
   local a
   if nil then break end
   insert(prefix, a)
@@ -226,64 +234,76 @@ X=1;lineerror((p), 2)
 X=2;lineerror((p), 1)
 
 
-C = 0
-local l = debug.getinfo(1, "l").currentline; function y () C=C+1; y() end
+if not _soft then
+  -- several tests that exaust the Lua stack
+  C = 0
+  local l = debug.getinfo(1, "l").currentline; function y () C=C+1; y() end
 
-local function checkstackmessage (m)
-  return (string.find(m, "^.-:%d+: stack overflow"))
-end
-assert(checkstackmessage(doit('y()')))
-assert(checkstackmessage(doit('y()')))
-assert(checkstackmessage(doit('y()')))
--- teste de linhas em erro
-C = 0
-local l1
-local function g(x)
-  l1 = debug.getinfo(x, "l").currentline; y()
-end
-local _, stackmsg = xpcall(g, debug.traceback, 1)
-local stack = {}
-for line in string.gmatch(stackmsg, "[^\n]*") do
-  local curr = string.match(line, ":(%d+):")
-  if curr then table.insert(stack, tonumber(curr)) end
-end
-local i=1
-while stack[i] ~= l1 do
-  assert(stack[i] == l)
-  i = i+1
-end
-assert(i > 15)
-
-
--- error in error handling
-local res, msg = xpcall(error, error)
-assert(not res and type(msg) == 'string')
-
-local function f (x)
-  if x==0 then error('a\n')
-  else
-    local aux = function () return f(x-1) end
-    local a,b = xpcall(aux, aux)
-    return a,b
+  local function checkstackmessage (m)
+    return (string.find(m, "^.-:%d+: stack overflow"))
   end
+  -- repeated stack overflows (to check stack recovery)
+  assert(checkstackmessage(doit('y()')))
+  print('+')
+  assert(checkstackmessage(doit('y()')))
+  print('+')
+  assert(checkstackmessage(doit('y()')))
+  print('+')
+
+
+  -- error lines in stack overflow
+  C = 0
+  local l1
+  local function g(x)
+    l1 = debug.getinfo(x, "l").currentline; y()
+  end
+  local _, stackmsg = xpcall(g, debug.traceback, 1)
+  print('+')
+  local stack = {}
+  for line in string.gmatch(stackmsg, "[^\n]*") do
+    local curr = string.match(line, ":(%d+):")
+    if curr then table.insert(stack, tonumber(curr)) end
+  end
+  local i=1
+  while stack[i] ~= l1 do
+    assert(stack[i] == l)
+    i = i+1
+  end
+  assert(i > 15)
+
+
+  -- error in error handling
+  local res, msg = xpcall(error, error)
+  assert(not res and type(msg) == 'string')
+  print('+')
+
+  local function f (x)
+    if x==0 then error('a\n')
+    else
+      local aux = function () return f(x-1) end
+      local a,b = xpcall(aux, aux)
+      return a,b
+    end
+  end
+  f(3)
+
+  local function loop (x,y,z) return 1 + loop(x, y, z) end
+ 
+  local res, msg = xpcall(loop, function (m)
+    assert(string.find(m, "stack overflow"))
+    local res, msg = pcall(loop)
+    assert(string.find(msg, "error handling"))
+    assert(math.sin(0) == 0)
+    return 15
+  end)
+  assert(msg == 15)
+
+  res, msg = pcall(function ()
+    for i = 999900, 1000000, 1 do table.unpack({}, 1, i) end
+  end)
+  assert(string.find(msg, "too many results"))
+
 end
-f(3)
-
-local function loop (x,y,z) return 1 + loop(x, y, z) end
-
-local res, msg = xpcall(loop, function (m)
-  assert(string.find(m, "stack overflow"))
-  local res, msg = pcall(loop)
-  assert(string.find(msg, "error handling"))
-  assert(math.sin(0) == 0)
-  return 15
-end)
-assert(msg == 15)
-
-res, msg = pcall(function ()
-  for i = 999900, 1000000, 1 do table.unpack({}, 1, i) end
-end)
-assert(string.find(msg, "too many results"))
 
 
 -- non string messages
@@ -311,7 +331,7 @@ assert(a==3 and I == nil)
 print('+')
 
 lim = 1000
-if rawget(_G, "_soft") then lim = 100 end
+if _soft then lim = 100 end
 for i=1,lim do
   doit('a = ')
   doit('a = 4+nil')
@@ -366,11 +386,12 @@ assert(c > 255 and string.find(b, "too many upvalues") and
 -- local variables
 s = "\nfunction foo ()\n  local "
 for j = 1,300 do
-  s = s.."a"..j..", " 
+  s = s.."a"..j..", "
 end
 s = s.."b\n"
 local a,b = loadstring(s)
 assert(string.find(b, "line 2"))
 
+mt.__index = oldmm
 
 print('OK')

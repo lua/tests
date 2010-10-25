@@ -1,4 +1,4 @@
-if rawget(_G, "_soft") then return 10 end
+if _soft then return 10 end
 
 print "testing large programs (>64k)"
 
@@ -40,8 +40,6 @@ s = 0; n=0
 for a,b in pairs(b) do s=s+b; n=n+1 end
 assert(s==13977183656.5  and n==70001)
 
-require "checktable"
-stat(b)
 
 a = nil; b = nil
 print'+'

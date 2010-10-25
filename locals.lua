@@ -81,22 +81,24 @@ assert(c.a == 3)
 
 -- testing limits for special instructions
 
-local a
-local p = 4
-for i=2,31 do
-  for j=-3,3 do
-    assert(loadstring(string.format([[local a=%s;a=a+
-                                            %s;
-                                      assert(a
-                                      ==2^%s)]], j, p-j, i))) ()
-    assert(loadstring(string.format([[local a=%s;
-                                      a=a-%s;
-                                      assert(a==-2^%s)]], -j, p-j, i))) ()
-    assert(loadstring(string.format([[local a,b=0,%s;
-                                      a=b-%s;
-                                      assert(a==-2^%s)]], -j, p-j, i))) ()
+if not _soft then
+  local a
+  local p = 4
+  for i=2,31 do
+    for j=-3,3 do
+      assert(loadstring(string.format([[local a=%s;a=a+
+                                              %s;
+                                        assert(a
+                                        ==2^%s)]], j, p-j, i))) ()
+      assert(loadstring(string.format([[local a=%s;
+                                        a=a-%s;
+                                        assert(a==-2^%s)]], -j, p-j, i))) ()
+      assert(loadstring(string.format([[local a,b=0,%s;
+                                        a=b-%s;
+                                        assert(a==-2^%s)]], -j, p-j, i))) ()
+    end
+    p =2*p
   end
-  p =2*p
 end
 
 print'+'

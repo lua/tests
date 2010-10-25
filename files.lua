@@ -1,7 +1,5 @@
 debug = require "debug"
 
-print('testing i/o')
-
 assert(type(os.getenv"PATH") == "string")
 
 assert(io.input(io.stdin) == io.stdin)
@@ -27,7 +25,15 @@ a,b,c = io.open('/a/b/c/d', 'w')
 assert(not a and type(b) == "string" and type(c) == "number")
 
 local file = os.tmpname()
-assert(io.open(file, "w")):close()   -- make sure file exists
+local f, msg = io.open(file, "w")
+if not f then
+  (Message or print)("'os.tmpname' file cannot be open; skipping file tests")
+
+else  --{  most tests here need tmpname
+f:close()
+
+print('testing i/o')
+
 local otherfile = os.tmpname()
 
 assert(not pcall(io.open, file, "rw"))     -- invalid mode
@@ -245,7 +251,7 @@ X =
 X *
 2 +
 X;
-X = 
+X =
 X
 -                                   y;
 ]]:close()
@@ -299,7 +305,7 @@ testloadfile("# a comment\nreturn debug.getinfo(1).currentline", 2)
 
 
 -- loading binary file
-io.output(file)
+io.output(io.open(file, "wb"))
 assert(io.write(string.dump(function () return 10, '\0alo\255', 'hi' end)))
 io.close()
 a, b, c = assert(loadfile(file))()
@@ -308,7 +314,7 @@ assert(os.remove(file))
 
 
 -- loading binary file with initial comment
-io.output(file)
+io.output(io.open(file, "wb"))
 assert(io.write("#this is a comment for a binary file\0\n",
                 string.dump(function () return 20, '\0\0\0' end)))
 io.close()
@@ -396,31 +402,45 @@ do
 end
 
 
--- testing large files (> BUFSIZ)
-io.output(file)
-for i=1,5001 do io.write('0123456789123') end
-io.write('\n12346'):close()
-io.input(file)
-local x = io.read('*a')
-io.input():seek('set', 0)
-local y = io.read(30001)..io.read(1005)..io.read(0)..io.read(1)..io.read(100003)
-assert(x == y and string.len(x) == 5001*13 + 6)
-io.input():seek('set', 0)
-y = io.read()  -- huge line
-assert(x == y..'\n'..io.read())
-assert(io.read() == nil)
-io.close(io.input())
-assert(os.remove(file))
-x = nil; y = nil
-
-x, y = pcall(io.popen, "ls")
-if x then
-  assert(y:read("*a"))
-  assert(y:close() == 0)
-  assert(not io.open("no program with this name"))
-else
-  (Message or print)('\a\n >>> popen not available<<<\n\a')
+if not _soft then
+  -- testing large files (> BUFSIZ)
+  io.output(file)
+  for i=1,5001 do io.write('0123456789123') end
+  io.write('\n12346'):close()
+  io.input(file)
+  local x = io.read('*a')
+  io.input():seek('set', 0)
+  local y = io.read(30001)..io.read(1005)..io.read(0)..
+            io.read(1)..io.read(100003)
+  assert(x == y and string.len(x) == 5001*13 + 6)
+  io.input():seek('set', 0)
+  y = io.read()  -- huge line
+  assert(x == y..'\n'..io.read())
+  assert(io.read() == nil)
+  io.close(io.input())
+  assert(os.remove(file))
+  x = nil; y = nil
 end
+
+if not _port then
+  x, y = pcall(io.popen, "ls")
+  if x then
+    assert(y:read("*a"))
+    assert(y:close() == 0)
+  else
+    (Message or print)('\a\n >>> popen not available<<<\n\a')
+  end
+end
+
+
+-- testing tmpfile
+f = io.tmpfile()
+assert(io.type(f) == "file")
+f:write("alo")
+f:seek("set")
+assert(f:read"*a" == "alo")
+
+end --}
 
 print'+'
 
@@ -447,9 +467,11 @@ assert(not pcall(os.date, "%O"))   -- invalid conversion specifier
 assert(not pcall(os.date, "%E"))   -- invalid conversion specifier
 assert(not pcall(os.date, "%Ea"))   -- invalid conversion specifier
 
--- assume POSIX
-assert(type(os.date("%Ex")) == 'string')
-assert(type(os.date("%Oy")) == 'string')
+if not _port then
+  -- assume POSIX
+  assert(type(os.date("%Ex")) == 'string')
+  assert(type(os.date("%Oy")) == 'string')
+end
 
 assert(os.time(T) == t)
 assert(not pcall(os.time, {hour = 12}))
@@ -466,7 +488,7 @@ do
   T.isdst = nil
   local t1 = os.time(T)
   assert(t == t1)   -- if isdst is absent uses correct default
-end   
+end
 
 t = os.time(T)
 T.year = T.year-1;
@@ -493,11 +515,5 @@ local s = os.date('%S')
 io.write(string.format('test done on %2.2d/%2.2d/%d', d, m, a))
 io.write(string.format(', at %2.2d:%2.2d:%2.2d\n', h, min, s))
 io.write(string.format('%s\n', _VERSION))
-
-f = io.tmpfile()
-assert(io.type(f) == "file")
-f:write("alo")
-f:seek("set")
-assert(f:read"*a" == "alo")
 
 

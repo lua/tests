@@ -1,5 +1,31 @@
 #!../lua
 
+local version = "Lua 5.2"
+if _VERSION ~= version then
+  io.stderr:write("\nThis test suite is for ", version, ", not for ", _VERSION,
+    "\nExiting tests\n")
+  return
+end
+
+local usertests = rawget(_G, "_U")
+
+_soft = false      -- true to avoid long or memory consuming tests
+_port = false      -- true to avoid non-portable tests
+_no32 = false      -- true to avoid tests that assume 32 bits
+_nomsg = false     -- true to avoid messages about tests not performed
+
+
+if usertests then
+  _soft = true; _port = true; _no32 = true; _nomsg = true
+end
+
+-- no "internal" tests for user tests
+if usertests then T = nil end
+
+T = rawget(_G, "T")  -- avoid problems with 'strict' module
+
+package.path = "?;./?.lua" .. package.path
+
 math.randomseed(0)
 
 collectgarbage("setstepmul", 200)
@@ -12,7 +38,7 @@ collectgarbage("setpause", 200)
 
 ]=]
 
-print("current path:\n  " .. string.gsub(package.path, ";", "\n  "))
+print("current path:\n****" .. package.path .. "****\n")
 
 
 local c = os.clock()
@@ -21,34 +47,43 @@ local collectgarbage = collectgarbage
 
 do
 
+-- track messages for tests not performed
 local msgs = {}
 function Message (m)
-  print(m)
-  msgs[#msgs+1] = string.sub(m, 3, -3)
+  if not _nomsg then
+    print(m)
+    msgs[#msgs+1] = string.sub(m, 3, -3)
+  end
 end
 
 assert(os.setlocale"C")
 
-local T,print,format,write,assert,type,unpack =
-      T,print,string.format,io.write,assert,type,table.unpack
+local T,print,format,write,assert,type,unpack,floor =
+      T,print,string.format,io.write,assert,type,table.unpack,math.floor
 
 local function F (m)
   if m < 1024 then return m
   else
-    m = m/1024 - m/1024%1
+    m = floor(m/1024)
     if m < 1024 then return m.."K"
     else
-      m = m/1024 - m/1024%1
+      m = floor(m/1024)
       return m.."M"
     end
   end
 end
 
-local showmem = function ()
-  if not T then
-    print(format("    ---- total memory: %s ----\n",
-          F(collectgarbage("count"))))
-  else
+local showmem
+if not T then
+  local max = 0
+  showmem = function ()
+    local m = collectgarbage("count") * 1024
+    max = (m > max) and m or max
+    print(format("    ---- total memory: %s, max memory: %s ----\n",
+          F(m), F(max)))
+  end
+else
+  showmem = function ()
     T.checkmemory()
     local total, numblocks, maxmem = T.totalmem()
     local count = collectgarbage("count")
@@ -59,8 +94,6 @@ local showmem = function ()
                  "\n\tudata: %d, threads: %d)",
                  T.totalmem"string", T.totalmem"table", T.totalmem"function",
                  T.totalmem"userdata", T.totalmem"thread"))
-
-          
   end
 end
 
@@ -96,6 +129,7 @@ do
   end
 end
 
+report"gc.lua"
 local f = assert(loadfile('gc.lua'))
 f()
 
@@ -118,7 +152,7 @@ collectgarbage("setmajorinc", 500)
 assert(dofile('locals.lua') == 5)
 dofile('constructs.lua')
 dofile('code.lua')
-do
+if not _G._soft then
   report('big.lua')
   local f = coroutine.wrap(assert(loadfile('big.lua')))
   assert(f() == 'b')

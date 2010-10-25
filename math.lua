@@ -10,7 +10,7 @@ do
   assert(a == -a and 0 == -0)
 end
 
--- testing hexadecimal numbers
+-- testing hexadecimal numerals
 assert(0x10 == 16 and 0xfff == 2^12 - 1 and 0XFB == 251)
 assert(0xFFFFFFFF == 2^32 - 1)
 assert(0x.FFFFFFFF == 1 - 0x.00000001)
@@ -137,11 +137,18 @@ assert(8388609 + -8388609 == 0)
 assert(8388608 + -8388608 == 0)
 assert(8388607 + -8388607 == 0)
 
-if rawget(_G, "_soft") then return end
+-- testing implicit convertions
+
+local a,b = '10', '20'
+assert(a*b == 200 and a+b == 30 and a-b == -10 and a/b == 0.5 and -b == -20)
+assert(a == '10' and b == '20')
+
+
+if _soft then return end
 
 f = io.tmpfile()
 assert(f)
-f:write("a = {")
+f:write("_ENV.a = {")
 i = 1
 repeat
   f:write("{", math.sin(i), ", ", math.cos(i), ", ", i/3, "},\n")
@@ -151,6 +158,7 @@ f:write("}")
 f:seek("set", 0)
 assert(loadstring(f:read('*a')))()
 assert(f:close())
+a = _ENV.a   -- may be local
 
 assert(eq(a[300][1], math.sin(300)))
 assert(eq(a[600][1], math.sin(600)))
@@ -193,12 +201,6 @@ do   -- testing -0 and NaN
   assert(a3 == a5)
 end
 
--- testing implicit convertions
-
-local a,b = '10', '20'
-assert(a*b == 200 and a+b == 30 and a-b == -10 and a/b == 0.5 and -b == -20)
-assert(a == '10' and b == '20')
-
 
 math.randomseed(0)
 
@@ -230,7 +232,6 @@ repeat
   i=i+1
   flag = (Max == 0 and Min == -10)
 until flag or i>10000
-assert(-10 <= Min and Max<=0)
 assert(flag);
 
 

@@ -351,9 +351,13 @@ local f,m,c = debug.gethook()
 assert(m == "" and c == 4)
 debug.sethook(function (e) a=a+1 end, "", 4000)
 a=0; for i=1,1000 do end; assert(a == 0)
-debug.sethook(print, "", 2^24 - 1)   -- count upperbound
-local f,m,c = debug.gethook()
-assert(({debug.gethook()})[3] == 2^24 - 1)
+
+if not _no32 then
+  debug.sethook(print, "", 2^24 - 1)   -- count upperbound
+  local f,m,c = debug.gethook()
+  assert(({debug.gethook()})[3] == 2^24 - 1)
+end
+
 debug.sethook()
 
 
@@ -402,6 +406,7 @@ debug.sethook()
 assert(b == 2)   -- two tail calls
 
 lim = 30000
+if _soft then limit = 3000 end
 local function foo (x)
   if x==0 then
     assert(debug.getinfo(2).what == "main")

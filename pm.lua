@@ -197,15 +197,17 @@ assert(not pcall(string.gsub, "alo", "(.)", "%2"))
 assert(not pcall(string.gsub, "alo", "(%1)", "a"))
 assert(not pcall(string.gsub, "alo", "(%0)", "a"))
 
--- big strings
-local a = string.rep('a', 300000)
-assert(string.find(a, '^a*.?$'))
-assert(not string.find(a, '^a*.?b$'))
-assert(string.find(a, '^a-.?$'))
+if not _soft then
+  -- big strings
+  local a = string.rep('a', 300000)
+  assert(string.find(a, '^a*.?$'))
+  assert(not string.find(a, '^a*.?b$'))
+  assert(string.find(a, '^a-.?$'))
 
--- bug in 5.1.2
-a = string.rep('a', 10000) .. string.rep('b', 10000)
-assert(not pcall(string.gsub, a, 'b'))
+  -- bug in 5.1.2
+  a = string.rep('a', 10000) .. string.rep('b', 10000)
+  assert(not pcall(string.gsub, a, 'b'))
+end
 
 -- deep nest of gsubs
 function rev (s)
@@ -310,3 +312,4 @@ assert(string.match("abc\0\0\0", "%\0+") == "\0\0\0")
 assert(string.match("abc\0\0\0", "%\0%\0?") == "\0\0")
 
 print('OK')
+

@@ -1,5 +1,8 @@
 # testing special comment on first line
 
+-- most (all?) tests here assume a reasonable "Unix-like" shell
+if _port then return end
+
 print ("testing lua.c options")
 
 assert(os.execute() ~= 0)   -- machine has a system command
@@ -88,7 +91,7 @@ checkout("10\n")
 -- test 2 files
 prepfile("print(1); a=2; return {x=15}")
 prepfile(("print(a); print(_G['%s'].x)"):format(prog), otherprog)
-RUN("lua -l %s -l%s -lstring -l io %s > %s", prog, otherprog, otherprog, out)
+RUN("env LUA_PATH='?;;' lua -l %s -l%s -lstring -l io %s > %s", prog, otherprog, otherprog, out)
 checkout("1\n2\n15\n2\n15\n")
 
 local a = [[
@@ -105,7 +108,7 @@ RUN('lua "-e " -- %s a b c', prog)
 
 prepfile"assert(arg==nil)"
 prepfile("assert(arg)", otherprog)
-RUN("lua -l%s - < %s", prog, otherprog)
+RUN("env LUA_PATH='?;;' lua -l%s - < %s", prog, otherprog)
 
 prepfile""
 RUN("lua - < %s > %s", prog, out)

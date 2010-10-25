@@ -30,9 +30,11 @@ assert(string.sub("123456789",-10,-20) == "")
 assert(string.sub("123456789",-1) == "9")
 assert(string.sub("123456789",-4) == "6789")
 assert(string.sub("123456789",-6, -4) == "456")
-assert(string.sub("123456789",-2^31, -4) == "123456")
-assert(string.sub("123456789",-2^31, 2^31 - 1) == "123456789")
-assert(string.sub("123456789",-2^31, -2^31) == "")
+if not _no32 then
+  assert(string.sub("123456789",-2^31, -4) == "123456")
+  assert(string.sub("123456789",-2^31, 2^31 - 1) == "123456789")
+  assert(string.sub("123456789",-2^31, -2^31) == "")
+end
 assert(string.sub("\000123456789",3,5) == "234")
 assert(("\000123456789"):sub(8) == "789")
 print('+')
@@ -61,7 +63,7 @@ assert(#"\0\0\0" == 3)
 assert(#"1234567890" == 10)
 
 assert(string.byte("a") == 97)
-assert(string.byte("á") > 127)
+assert(string.byte("\xe4") > 127)
 assert(string.byte(string.char(255)) == 255)
 assert(string.byte(string.char(0)) == 0)
 assert(string.byte("\0") == 0)
@@ -76,10 +78,10 @@ assert(string.byte("hi", 9, 10) == nil)
 assert(string.byte("hi", 2, 1) == nil)
 assert(string.char() == "")
 assert(string.char(0, 255, 0) == "\0\255\0")
-assert(string.char(0, string.byte("á"), 0) == "\0á\0")
-assert(string.char(string.byte("ál\0óu", 1, -1)) == "ál\0óu")
-assert(string.char(string.byte("ál\0óu", 1, 0)) == "")
-assert(string.char(string.byte("ál\0óu", -10, 100)) == "ál\0óu")
+assert(string.char(0, string.byte("\xe4"), 0) == "\0\xe4\0")
+assert(string.char(string.byte("\xe4l\0óu", 1, -1)) == "\xe4l\0óu")
+assert(string.char(string.byte("\xe4l\0óu", 1, 0)) == "")
+assert(string.char(string.byte("\xe4l\0óu", -10, 100)) == "\xe4l\0óu")
 print('+')
 
 assert(string.upper("ab\0c") == "AB\0C")
@@ -111,8 +113,8 @@ assert(string.format('%q', "\0") == [["\0"]])
 assert(loadstring(string.format('return %q', x))() == x)
 x = "\0\1\0023\5\0009"
 assert(loadstring(string.format('return %q', x))() == x)
-assert(string.format("\0%c\0%c%x\0", string.byte("á"), string.byte("b"), 140) ==
-              "\0á\0b8c\0")
+assert(string.format("\0%c\0%c%x\0", string.byte("\xe4"), string.byte("b"), 140) ==
+              "\0\xe4\0b8c\0")
 assert(string.format('') == "")
 assert(string.format("%c",34)..string.format("%c",48)..string.format("%c",90)..string.format("%c",100) ==
        string.format("%c%c%c%c", 34, 48, 90, 100))
@@ -123,7 +125,8 @@ x = string.format('"%-50s"', 'a')
 assert(#x == 52)
 assert(string.sub(x, 1, 4) == '"a  ')
 
-assert(string.format("-%.20s.20s", string.rep("%", 2000)) == "-"..string.rep("%", 20)..".20s")
+assert(string.format("-%.20s.20s", string.rep("%", 2000)) ==
+                     "-"..string.rep("%", 20)..".20s")
 assert(string.format('"-%20s.20s"', string.rep("%", 2000)) ==
        string.format("%q", "-"..string.rep("%", 2000)..".20s"))
 
@@ -131,15 +134,17 @@ assert(string.format('"-%20s.20s"', string.rep("%", 2000)) ==
 -- longest number that can be formated
 assert(string.len(string.format('%99.99f', -1e308)) >= 100)
 
---border cases for format (assumes no long long)
-assert(string.format("%8x", -1) == "ffffffff")
-assert(string.format("%d", -1) == "-1")
-assert(string.format("%8x", 0xffffffff) == "ffffffff")
-assert(string.format("%d", 0xffffffff) == "-1")
-assert(string.format("%8x", 0x7fffffff) == "7fffffff")
-assert(string.format("%d", 0x7fffffff) == tostring(2^31 - 1))
-assert(string.format("%u", 0x80000003) == tostring(0x80000003))
-assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
+if not _no32 then
+  --border cases for format (assumes no long long)
+  assert(string.format("%8x", -1) == "ffffffff")
+  assert(string.format("%d", -1) == "-1")
+  assert(string.format("%8x", 0xffffffff) == "ffffffff")
+  assert(string.format("%d", 0xffffffff) == "-1")
+  assert(string.format("%8x", 0x7fffffff) == "7fffffff")
+  assert(string.format("%d", 0x7fffffff) == tostring(2^31 - 1))
+  assert(string.format("%u", 0x80000003) == tostring(0x80000003))
+  assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
+end
 
 -- errors in format
 
@@ -170,10 +175,12 @@ assert(table.concat(a, "b", 20, 20) == "xuxu")
 assert(table.concat(a, "", 20, 21) == "xuxuxuxu")
 assert(table.concat(a, "x", 22, 21) == "")
 assert(table.concat(a, "3", 2999) == "xuxu3xuxu")
-assert(table.concat({}, "x", 2^31-1, 2^31-2) == "")
-assert(table.concat({}, "x", -2^31+1, -2^31) == "")
-assert(table.concat({}, "x", 2^31-1, -2^31) == "")
-assert(table.concat({[2^31-1] = "alo"}, "x", 2^31-1, 2^31-1) == "alo")
+if not _no32 then
+  assert(table.concat({}, "x", 2^31-1, 2^31-2) == "")
+  assert(table.concat({}, "x", -2^31+1, -2^31) == "")
+  assert(table.concat({}, "x", 2^31-1, -2^31) == "")
+  assert(table.concat({[2^31-1] = "alo"}, "x", 2^31-1, 2^31-1) == "alo")
+end
 
 assert(not pcall(table.concat, {"a", "b", {}}))
 
@@ -184,6 +191,8 @@ assert(table.concat(a, ",", 1, 2) == "a,b")
 assert(table.concat(a, ",", 2) == "b,c")
 assert(table.concat(a, ",", 3) == "c")
 assert(table.concat(a, ",", 4) == "")
+
+if not _port then
 
 local locales = { "ptb", "ISO-8859-1", "pt_BR" }
 local function trylocale (w)
@@ -211,6 +220,8 @@ end
 os.setlocale("C")
 assert(os.setlocale() == 'C')
 assert(os.setlocale(nil, "numeric") == 'C')
+
+end
 
 print('OK')
 

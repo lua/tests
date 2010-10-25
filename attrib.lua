@@ -1,4 +1,7 @@
-do --[
+-- The tests for 'require' assume some specific directories and libraries;
+-- better to avoid them in generic machines
+
+if not _port then --[
 
 print "testing require"
 
@@ -247,8 +250,9 @@ do
   assert(type(package.path) == "string")
 end
 
-
 print('+')
+
+end  --]
 
 print("testing assignments, logical operators, and constructors")
 
@@ -372,4 +376,3 @@ print('OK')
 
 return res
 
-end

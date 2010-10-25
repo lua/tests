@@ -27,17 +27,19 @@ assert(a==1 and x==nil)
 a,x = unpack({1,2}, 1, 1)
 assert(a==1 and x==nil)
 
-assert(not pcall(unpack, {}, 0, 2^31-1))
-assert(not pcall(unpack, {}, 1, 2^31-1))
-assert(not pcall(unpack, {}, -(2^31), 2^31-1))
-assert(not pcall(unpack, {}, -(2^31 - 1), 2^31-1))
-assert(pcall(unpack, {}, 2^31-1, 0))
-assert(pcall(unpack, {}, 2^31-1, 1))
-pcall(unpack, {}, 1, 2^31)
-a, b = unpack({[2^31-1] = 20}, 2^31-1, 2^31-1)
-assert(a == 20 and b == nil)
-a, b = unpack({[2^31-1] = 20}, 2^31-2, 2^31-1)
-assert(a == nil and b == 20)
+if not _no32 then
+  assert(not pcall(unpack, {}, 0, 2^31-1))
+  assert(not pcall(unpack, {}, 1, 2^31-1))
+  assert(not pcall(unpack, {}, -(2^31), 2^31-1))
+  assert(not pcall(unpack, {}, -(2^31 - 1), 2^31-1))
+  assert(pcall(unpack, {}, 2^31-1, 0))
+  assert(pcall(unpack, {}, 2^31-1, 1))
+  pcall(unpack, {}, 1, 2^31)
+  a, b = unpack({[2^31-1] = 20}, 2^31-1, 2^31-1)
+  assert(a == 20 and b == nil)
+  a, b = unpack({[2^31-1] = 20}, 2^31-2, 2^31-1)
+  assert(a == nil and b == 20)
+end
 
 print "testing pack"
 
@@ -106,7 +108,7 @@ perm{1,2,3,4,5,6}
 perm{2,2,3,3,5,6}
 
 limit = 30000
-if rawget(_G, "_soft") then limit = 5000 end
+if _soft then limit = 5000 end
 
 a = {}
 for i=1,limit do

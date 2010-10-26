@@ -127,15 +127,17 @@ end
 a = {}
 for i=1,16 do a[i] = i end
 check(a, 16, 0)
-for i=1,11 do a[i] = nil end
-for i=30,40 do a[i] = nil end   -- force a rehash (?)
-check(a, 0, 8)
-a[10] = 1
-for i=30,40 do a[i] = nil end   -- force a rehash (?)
-check(a, 0, 8)
-for i=1,14 do a[i] = nil end
-for i=30,50 do a[i] = nil end   -- force a rehash (?)
-check(a, 0, 4)
+if not _port then
+  for i=1,11 do a[i] = nil end
+  for i=30,50 do a[i] = nil end   -- force a rehash (?)
+  check(a, 0, 8)   -- only 5 elements in the table
+  a[10] = 1
+  for i=30,50 do a[i] = nil end   -- force a rehash (?)
+  check(a, 0, 8)   -- only 6 elements in the table
+  for i=1,14 do a[i] = nil end
+  for i=18,50 do a[i] = nil end   -- force a rehash (?)
+  check(a, 0, 4)   -- only 2 elements ([15] and [16])
+end
 
 -- reverse filling
 for i=1,lim do

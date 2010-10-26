@@ -68,6 +68,19 @@ assert(tonumber(string.rep('1', 32), 2) + 1 == 2^32)
 --assert(tonumber('-fffffFFFFF', 16)-1 == -2^40)
 assert(tonumber('ffffFFFF', 16)+1 == 2^32)
 
+assert(tonumber('0x') == nil)
+assert(tonumber('x') == nil)
+assert(tonumber('x3') == nil)
+assert(tonumber('0x2') == 2)
+assert(tonumber('0x 2') == nil)
+assert(tonumber('23x') == nil)
+
+if not _port then
+  assert(tonumber('  0x2.5  ') == 0x25/16)
+  assert(tonumber('  -0x2.5  ') == -0x25/16)
+  assert(tonumber('  0x0.51p8  ') == 0x51)
+end
+
 assert(1.1 == 1.+.1)
 assert(100.0 == 1E2 and .01 == 1e-2)
 assert(1111111111111111-1111111111111110== 1000.00e-03)

@@ -178,6 +178,23 @@ f = coroutine.wrap(function () return pcall(f1) end)
 assert(string.find(select(2, f()), "yield across"))
 
 
+-- testing size of 'source' info; size of buffer for that info is
+-- LUA_IDSIZE, declared as 60 in luaconf. Get one position for '\0'.
+idsize = 60 - 1
+local function checksize (source)
+  -- syntax error
+  local _, msg = loadstring("x", source)
+  msg = string.match(msg, "^([^:]*):")   -- get source (1st part before ':')
+  assert(msg:len() <= idsize)
+end
+
+for i = 60 - 10, 60 + 10 do   -- check border cases around 60
+  checksize("@" .. string.rep("x", i))   -- file names
+  checksize(string.rep("x", i - 10))     -- string sources
+  checksize("=" .. string.rep("x", i))   -- exact sources
+end
+
+
 -- testing line error
 
 local function lineerror (s, l)

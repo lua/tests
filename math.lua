@@ -10,14 +10,6 @@ do
   assert(a == -a and 0 == -0)
 end
 
--- testing hexadecimal numerals
-assert(0x10 == 16 and 0xfff == 2^12 - 1 and 0XFB == 251)
-assert(0xFFFFFFFF == 2^32 - 1)
-assert(0x.FFFFFFFF == 1 - 0x.00000001)
-assert(0xa.a == 10 + 10/16)
-assert(0xa.ap4 == 0XAA)
-assert(0x4P-2 == 1)
-
 do
   local x = -1
   local mz = 0/x
@@ -77,10 +69,18 @@ assert(tonumber('00x2') == nil)
 assert(tonumber('0x 2') == nil)
 assert(tonumber('23x') == nil)
 
+-- testing hexadecimal numerals
+assert(0x10 == 16 and 0xfff == 2^12 - 1 and 0XFB == 251)
+assert(0xFFFFFFFF == 2^32 - 1)
+
 if not _port then
   assert(tonumber('  0x2.5  ') == 0x25/16)
   assert(tonumber('  -0x2.5  ') == -0x25/16)
   assert(tonumber('  0x0.51p8  ') == 0x51)
+  assert(0x.FFFFFFFF == 1 - 0x.00000001)
+  assert(0xa.a == 10 + 10/16)
+  assert(0xa.ap4 == 0XAA)
+  assert(0x4P-2 == 1)
 end
 
 assert(1.1 == 1.+.1)

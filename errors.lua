@@ -93,6 +93,16 @@ checkmessage("print(print < 10)", "function")
 checkmessage("print(print < print)", "two function")
 
 
+-- passing light userdata instead of full userdata
+_G.D = debug
+checkmessage([[
+  -- create light udata
+  local x = D.upvalueid(function () return debug end, 1)
+  D.getuservalue(x)
+]], "light userdata")
+_G.D = nil
+
+
 -- global functions
 checkmessage("(io.write or print){}", "io.write")
 checkmessage("(collectgarbage or print){}", "collectgarbage")

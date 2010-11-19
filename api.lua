@@ -437,6 +437,8 @@ assert(debug.getuservalue(b) == a)
 assert(debug.setuservalue(b, nil))
 assert(debug.getuservalue(b) == nil)
 
+assert(debug.getuservalue(4) == nil)
+
 
 
 -- testing locks (refs)

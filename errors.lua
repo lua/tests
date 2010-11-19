@@ -98,7 +98,7 @@ _G.D = debug
 checkmessage([[
   -- create light udata
   local x = D.upvalueid(function () return debug end, 1)
-  D.getuservalue(x)
+  D.setuservalue(x, {})
 ]], "light userdata")
 _G.D = nil
 

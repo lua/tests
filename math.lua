@@ -99,7 +99,7 @@ assert(0.1e-30 > 0.9E-31 and 0.9E30 < 0.1e31)
 
 assert(0.123456 > 0.123455)
 
-assert(tonumber('+1.23E30') == 1.23*10^30)
+assert(tonumber('+1.23E18') == 1.23*10^18)
 
 -- testing order operators
 assert(not(1<1) and (1<2) and not(2<1))
@@ -191,10 +191,10 @@ do   -- testing -0 and NaN
   assert(1/mz < 0 and 0 < 1/z)
   local a = {[mz] = 1}
   assert(a[z] == 1 and a[mz] == 1)
-  mz, z = -1/1e1000, 1/1e1000
+  mz, z = -1/1e5000, 1/1e5000
   assert(mz == z)
   assert(1/mz < 0 and 0 < 1/z)
-  local NaN = 10e500 - 10e400
+  local NaN = 1e5000 - 1e5000
   assert(NaN ~= NaN)
   assert(not (NaN < NaN))
   assert(not (NaN <= NaN))

@@ -419,15 +419,17 @@ for i=0,1,-1 do error'not here' end
 a = nil; for i=1,1 do assert(not a); a=1 end; assert(a)
 a = nil; for i=1,1,-1 do assert(not a); a=1 end; assert(a)
 
-a = 0; for i=0, 1, 0.1 do a=a+1 end; assert(a==11)
--- precision problems
---a = 0; for i=1, 0, -0.01 do a=a+1 end; assert(a==101)
-a = 0; for i=0, 0.999999999, 0.1 do a=a+1 end; assert(a==10)
-a = 0; for i=1, 1, 1 do a=a+1 end; assert(a==1)
-a = 0; for i=1e10, 1e10, -1 do a=a+1 end; assert(a==1)
-a = 0; for i=1, 0.99999, 1 do a=a+1 end; assert(a==0)
-a = 0; for i=99999, 1e5, -1 do a=a+1 end; assert(a==0)
-a = 0; for i=1, 0.99999, -1 do a=a+1 end; assert(a==1)
+if not _port then
+  a = 0; for i=0, 1, 0.1 do a=a+1 end; assert(a==11)
+  -- precision problems
+  --a = 0; for i=1, 0, -0.01 do a=a+1 end; assert(a==101)
+  a = 0; for i=0, 0.999999999, 0.1 do a=a+1 end; assert(a==10)
+  a = 0; for i=1, 1, 1 do a=a+1 end; assert(a==1)
+  a = 0; for i=1e10, 1e10, -1 do a=a+1 end; assert(a==1)
+  a = 0; for i=1, 0.99999, 1 do a=a+1 end; assert(a==0)
+  a = 0; for i=99999, 1e5, -1 do a=a+1 end; assert(a==0)
+  a = 0; for i=1, 0.99999, -1 do a=a+1 end; assert(a==1)
+end
 
 -- conversion
 a = 0; for i="10","1","-2" do a=a+1 end; assert(a==5)

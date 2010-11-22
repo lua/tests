@@ -191,10 +191,11 @@ do   -- testing -0 and NaN
   assert(1/mz < 0 and 0 < 1/z)
   local a = {[mz] = 1}
   assert(a[z] == 1 and a[mz] == 1)
-  mz, z = -1/1e5000, 1/1e5000
+  local inf = math.huge * 2 + 1
+  mz, z = -1/inf, 1/inf
   assert(mz == z)
   assert(1/mz < 0 and 0 < 1/z)
-  local NaN = 1e5000 - 1e5000
+  local NaN = inf - inf
   assert(NaN ~= NaN)
   assert(not (NaN < NaN))
   assert(not (NaN <= NaN))

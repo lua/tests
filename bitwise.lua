@@ -1,7 +1,7 @@
 print("testing bitwise operations")
 
 assert(bit32.band() == bit32.bnot(0))
-assert(bit32.test() == true)
+assert(bit32.btest() == true)
 assert(bit32.bor() == 0)
 assert(bit32.bxor() == 0)
 
@@ -58,9 +58,9 @@ local c = {0, 1, 2, 3, 10, 0x80000000, 0xaaaaaaaa, 0x55555555,
 for _, b in pairs(c) do
   assert(bit32.band(b) == b)
   assert(bit32.band(b, b) == b)
-  assert(bit32.test(b, b) == (b ~= 0))
+  assert(bit32.btest(b, b) == (b ~= 0))
   assert(bit32.band(b, b, b) == b)
-  assert(bit32.test(b, b, b) == (b ~= 0))
+  assert(bit32.btest(b, b, b) == (b ~= 0))
   assert(bit32.band(b, bit32.bnot(b)) == 0)
   assert(bit32.bor(b, bit32.bnot(b)) == bit32.bnot(0))
   assert(bit32.bor(b) == b)

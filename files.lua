@@ -82,6 +82,9 @@ for i=1,120 do
   collectgarbage()
 end
 
+io.input():close()
+io.close()
+
 assert(os.rename(file, otherfile))
 assert(os.rename(file, otherfile) == nil)
 
@@ -114,6 +117,7 @@ assert(io.type(f) == "closed file")
 io.input(file)
 f = io.open(otherfile):lines()
 for l in io.lines() do assert(l == f()) end
+f = nil; collectgarbage()
 assert(os.remove(otherfile))
 
 io.input(file)
@@ -191,6 +195,7 @@ assert(io.read"*L" == "\n")
 assert(io.read"*L" == "line\n")
 assert(io.read"*L" == "other")
 assert(io.read"*L" == nil)
+io.input():close()
 
 local f = assert(io.open(file))
 local s = ""
@@ -202,6 +207,7 @@ io.input(file)
 s = ""
 for l in io.lines(nil, "*L") do s = s .. l end
 assert(s == "\n\nline\nother")
+io.input():close()
 
 s = ""
 for l in io.lines(file, "*L") do s = s .. l end
@@ -233,6 +239,7 @@ for a,b,c in io.lines(file, "*a", 0, 1) do
   if a == "" then break end
   assert(a == "0123456789\n" and b == nil and c == nil)
 end
+collectgarbage()   -- to close file in previous iteration
 
 io.output(file); io.write"00\n10\n20\n30\n40\n":close()
 for a, b in io.lines(file, "*n", "*n") do
@@ -257,6 +264,7 @@ X
 ]]:close()
 _G.X = 1
 assert(not load(io.lines(file)))
+collectgarbage()   -- to close file in previous iteration
 load(io.lines(file, "*L"))()
 assert(_G.X == 2)
 load(io.lines(file, 1))()
@@ -330,7 +338,7 @@ assert(io.output(assert(io.open(otherfile, 'wb')))
        :write("outra coisa\0\1\3\0\0\0\0\255\0")
        :close())
 
-local filehandle = assert(io.open(file, 'r+b'))
+local filehandle = assert(io.open(file, 'r+'))
 local otherfilehandle = assert(io.open(otherfile, 'rb'))
 assert(filehandle ~= otherfilehandle)
 assert(type(filehandle) == "userdata")

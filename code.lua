@@ -27,7 +27,7 @@ end
 function checkequal (a, b)
   a = T.listcode(a)
   b = T.listcode(b)
-  for i = 1, table.getn(a) do
+  for i = 1, #a do
     a[i] = string.gsub(a[i], '%b()', '')   -- remove line number
     b[i] = string.gsub(b[i], '%b()', '')   -- remove line number
     assert(a[i] == b[i])

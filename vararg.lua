@@ -10,7 +10,7 @@ end
 
 function c12 (...)
   assert(arg == nil)
-  local x = {...}; x.n = table.getn(x)
+  local x = {...}; x.n = #x
   local res = (x.n==2 and x[1] == 1 and x[2] == 2)
   if res then res = 55 end
   return res, 2
@@ -111,7 +111,7 @@ assert(f("a", "b", nil, {}, assert))
 assert(f())
 
 a = {select(3, table.unpack{10,20,30,40})}
-assert(table.getn(a) == 2 and a[1] == 30 and a[2] == 40)
+assert(#a == 2 and a[1] == 30 and a[2] == 40)
 a = {select(1)}
 assert(next(a) == nil)
 a = {select(-1, 3, 5, 7)}

@@ -11,9 +11,9 @@ assert(select(lim, unpack(a)) == lim and select('#', unpack(a)) == lim)
 x = unpack(a)
 assert(x == 1)
 x = {unpack(a)}
-assert(table.getn(x) == lim and x[1] == 1 and x[lim] == lim)
+assert(#x == lim and x[1] == 1 and x[lim] == lim)
 x = {unpack(a, lim-2)}
-assert(table.getn(x) == 3 and x[1] == lim-2 and x[3] == lim)
+assert(#x == 3 and x[1] == lim-2 and x[3] == lim)
 x = {unpack(a, 10, 6)}
 assert(next(x) == nil)   -- no elements
 x = {unpack(a, 11, 10)}

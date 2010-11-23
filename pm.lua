@@ -245,7 +245,7 @@ t = {3, 6, 9}
 for i in string.gmatch ("xuxx uu ppar r", "()(.)%2") do
   assert(i == table.remove(t, 1))
 end
-assert(table.getn(t) == 0)
+assert(#t == 0)
 
 t = {}
 for i,j in string.gmatch("13 14 10 = 11, 15= 16, 22=23", "(%d+)%s*=%s*(%d+)") do
@@ -282,7 +282,7 @@ local a = {1, 5, 9, 14, 17,}
 for k in string.gmatch("alo alo th02 is 1hat", "()%f[%w%d]") do
   assert(table.remove(a, 1) == k)
 end
-assert(table.getn(a) == 0)
+assert(#a == 0)
 
 
 -- malformed patterns

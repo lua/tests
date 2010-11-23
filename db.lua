@@ -19,7 +19,7 @@ function test (s, l, p)
     assert(l == line, "wrong trace!!")
   end
   debug.sethook(f,"l"); loadstring(s)(); debug.sethook()
-  assert(table.getn(l) == 0)
+  assert(#l == 0)
 end
 
 
@@ -521,7 +521,7 @@ a,b = debug.getlocal(co, 1, 2)
 assert(a == "a" and b == 1)
 debug.setlocal(co, 1, 2, "hi")
 assert(debug.gethook(co) == foo)
-assert(table.getn(tr) == 2 and
+assert(#tr == 2 and
        tr[1] == l.currentline-1 and tr[2] == l.currentline)
 
 a,b,c = pcall(coroutine.resume, co)
@@ -530,7 +530,7 @@ checktraceback(co, {"yield", "in function <"})
 
 a,b = coroutine.resume(co)
 assert(a and b == "hi")
-assert(table.getn(tr) == 4 and tr[4] == l.currentline+2)
+assert(#tr == 4 and tr[4] == l.currentline+2)
 assert(debug.gethook(co) == foo)
 assert(debug.gethook() == nil)
 checktraceback(co, {})

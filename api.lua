@@ -579,7 +579,7 @@ T.unref(e); T.unref(f)
 collectgarbage()
 
 -- check that unref objects have been collected
-assert(table.getn(cl) == 1 and cl[1] == nc)
+assert(#cl == 1 and cl[1] == nc)
 
 x = T.getref(d)
 assert(type(x) == 'userdata' and debug.getmetatable(x) == tt)
@@ -593,7 +593,7 @@ n5 = T.newuserdata(0)
 debug.setmetatable(n5, {__gc=F})
 n5 = T.udataval(n5)
 collectgarbage()
-assert(table.getn(cl) == 4)
+assert(#cl == 4)
 -- check order of collection
 assert(cl[2] == n5 and cl[3] == nb and cl[4] == na)
 
@@ -606,7 +606,7 @@ for i=30,1,-1 do
 end
 cl = {}
 a = nil; collectgarbage()
-assert(table.getn(cl) == 30)
+assert(#cl == 30)
 for i=1,30 do assert(cl[i] == na[i]) end
 na = nil
 
@@ -622,10 +622,10 @@ a = {[x] = 1}
 x = T.udataval(x)
 collectgarbage()
 -- old `x' cannot be collected (`a' still uses it)
-assert(table.getn(cl) == 0)
+assert(#cl == 0)
 for n in pairs(a) do a[n] = nil end
 collectgarbage()
-assert(table.getn(cl) == 1 and cl[1] == x)   -- old `x' must be collected
+assert(#cl == 1 and cl[1] == x)   -- old `x' must be collected
 
 -- testing lua_equal
 assert(T.testC("compare 2 4 0; return 1", print, 1, print, 20))

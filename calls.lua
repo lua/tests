@@ -157,7 +157,7 @@ print('+')
 
 function unlpack (t, i)
   i = i or 1
-  if (i <= table.getn(t)) then
+  if (i <= #t) then
     return t[i], unlpack(t, i+1)
   end
 end

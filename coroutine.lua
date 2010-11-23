@@ -14,7 +14,7 @@ assert(not pcall(coroutine.yield))
 -- tests for multiple yield/resume arguments
 
 local function eqtab (t1, t2)
-  assert(table.getn(t1) == table.getn(t2))
+  assert(#t1 == #t2)
   for i = 1, #t1 do
     local v = t1[i]
     assert(t2[i] == v)
@@ -27,7 +27,7 @@ function foo (a, ...)
   assert(x == f and y == false)
   assert(coroutine.status(f) == "running")
   local arg = {...}
-  for i=1,table.getn(arg) do
+  for i=1,#arg do
     _G.x = {coroutine.yield(table.unpack(arg[i]))}
   end
   return table.unpack(a)
@@ -104,7 +104,7 @@ while 1 do
   x = filter(n, x)
 end
 
-assert(table.getn(a) == 25 and a[table.getn(a)] == 97)
+assert(#a == 25 and a[#a] == 97)
 
 
 -- yielding across C boundaries
@@ -498,22 +498,6 @@ assert(run(function ()
              return s
            end, {"for", "for", "for"}) == 10)
 
-
--- yields inside foreachi (testing context preservation)
-function f (a,b)
-  coroutine.yield(a, new(a) + b)
-end
-
-t = {new(10),new(20),new(30)}
-
-co = coroutine.wrap(function() table.foreachi(t, f) end)
-
-for i = 1,#t do
-  local k,v,x = co()
-  assert(k == nil and v == "add")
-  local k,v,x = co()
-  assert(k == i and v == t[i].x + i and x == nil)
-end
 
 
 -- tests for coroutine API

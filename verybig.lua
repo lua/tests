@@ -49,7 +49,7 @@ function f(x) b=x end
 a = f{$3$} or 10
 
 assert(a==10)
-assert(b[1] == "a10" and b[2] == 5 and b[table.getn(b)-1] == "a50009")
+assert(b[1] == "a10" and b[2] == 5 and b[#b-1] == "a50009")
 
 
 function xxxx (x) return b[x] end

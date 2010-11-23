@@ -95,7 +95,7 @@ RUN("env LUA_PATH='?;;' lua -l %s -l%s -lstring -l io %s > %s", prog, otherprog,
 checkout("1\n2\n15\n2\n15\n")
 
 local a = [[
-  assert(table.getn(arg) == 3 and arg[1] == 'a' and
+  assert(#arg == 3 and arg[1] == 'a' and
          arg[2] == 'b' and arg[3] == 'c')
   assert(arg[-1] == '--' and arg[-2] == "-e " and arg[-3] == '%s')
   assert(arg[4] == nil and arg[-4] == nil)

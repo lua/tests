@@ -199,24 +199,6 @@ local function find1 (name)
 end
 
 
-a = {x=90, y=8, z=23}
-assert(table.foreach(a, function(i,v) if i=='x' then return v end end) == 90)
-assert(table.foreach(a, function(i,v) if i=='a' then return v end end) == nil)
-table.foreach({}, error)
-
-table.foreachi({x=10, y=20}, error)
-local a = {n = 1}
-table.foreachi({n=3}, function (i, v)
-  assert(a.n == i and not v)
-  a.n=a.n+1
-end)
-a = {10,20,30,nil,50}
-table.foreachi(a, function (i,v) assert(a[i] == v) end)
-assert(table.foreachi({'a', 'b', 'c'}, function (i,v)
-         if i==2 then return v end
-       end) == 'b')
-
-
 assert(print==find("print") and print == find1("print"))
 assert(_G["print"]==find("print"))
 assert(assert==find1("assert"))
@@ -257,47 +239,10 @@ do   -- clear global table
 end
 
 
--- testing yields inside foreach
-
-local t = {'a', 'b', 'c', 'd'}
-
-local co = coroutine.create(function ()
-      return table.foreach(t, function (k,v)
-               return coroutine.yield(k,v)
-             end)
-     end)
-
-for i = 1, #t - 2 do
-  local st, k, v = coroutine.resume(co)
-  assert(k == i and v == t[k])
-end
-
-local st, v = coroutine.resume(co, t)
-assert(v == t)
-assert(not coroutine.resume(co))
-
-
-local co = coroutine.create(function ()
-             table.foreach(t, coroutine.yield)
-             return 10
-           end)
-
-for i = 1, #t do
-  local st, k, v = coroutine.resume(co)
-  assert(k == i and v == t[k])
-end
-
-assert(select(2, coroutine.resume(co)) == 10)
-
-
 -- 
 
 local function checknext (a)
   local b = {}
-  table.foreach(a, function (k,v) b[k] = v end)
-  for k,v in pairs(b) do assert(a[k] == v) end
-  for k,v in pairs(a) do assert(b[k] == v) end
-  b = {}
   do local k,v = next(a); while k do b[k] = v; k,v = next(a,k) end end
   for k,v in pairs(b) do assert(a[k] == v) end
   for k,v in pairs(a) do assert(b[k] == v) end
@@ -309,13 +254,13 @@ checknext{1,2,3,x=1,y=2,z=3}
 checknext{1,2,3,4,x=1,y=2,z=3}
 checknext{1,2,3,4,5,x=1,y=2,z=3}
 
-assert(table.getn{} == 0)
-assert(table.getn{[-1] = 2} == 0)
-assert(table.getn{1,2,3,nil,nil} == 3)
+assert(#{} == 0)
+assert(#{[-1] = 2} == 0)
+assert(#{1,2,3,nil,nil} == 3)
 for i=0,40 do
   local a = {}
   for j=1,i do a[j]=j end
-  assert(table.getn(a) == i)
+  assert(#a == i)
 end
 
 -- 'maxn' is now deprecated, but it is easily defined in Lua
@@ -338,7 +283,7 @@ table.maxn = nil
 -- int overflow
 a = {}
 for i=0,50 do a[math.pow(2,i)] = true end
-assert(a[table.getn(a)])
+assert(a[#a])
 
 print('+')
 
@@ -361,7 +306,7 @@ assert(n == 5)
 local function test (a)
   table.insert(a, 10); table.insert(a, 2, 20);
   table.insert(a, 1, -1); table.insert(a, 40);
-  table.insert(a, table.getn(a)+1, 50)
+  table.insert(a, #a+1, 50)
   table.insert(a, 2, -2)
   assert(table.remove(a,1) == -1)
   assert(table.remove(a,1) == -2)
@@ -378,7 +323,7 @@ assert(a.n == 0 and a[-7] == "ban")
 
 a = {[-7] = "ban"};
 test(a)
-assert(a.n == nil and table.getn(a) == 0 and a[-7] == "ban")
+assert(a.n == nil and #a == 0 and a[-7] == "ban")
 
 
 table.insert(a, 1, 10); table.insert(a, 1, 20); table.insert(a, 1, -1)
@@ -393,7 +338,7 @@ assert(table.remove(a, 1) == 'c')
 assert(table.remove(a, 1) == 'd')
 assert(table.remove(a, 1) == 'a')
 assert(table.remove(a, 1) == 'b')
-assert(table.getn(a) == 0 and a.n == nil)
+assert(#a == 0 and a.n == nil)
 
 a = {10,20,30,40}
 assert(table.remove(a, #a + 1) == nil and table.remove(a, 0) == nil)

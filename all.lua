@@ -115,18 +115,21 @@ end
 dofile('main.lua')
 
 do
-  local u = newproxy(true)
   local eph = setmetatable({}, {__mode = "k"})   -- create an ephemeron table
-  eph[u] = function () return u end
-  local next, newproxy, stderr = next, newproxy, io.stderr
-  getmetatable(u).__gc = function (o)
-    stderr:write'.'
-    --assert(eph[o]() == o and next(eph) == o and next(eph, o) == nil)
-    local n = newproxy(o)
+  local next, setmetatable, stderr = next, setmetatable, io.stderr
+  local mt = {}
+  -- each time a table is collected, create a new one to be
+  -- collected next cycle
+  mt.__gc = function (o)
+    stderr:write'.'    -- mark progress
+    -- assert(eph[o]() == o and next(eph) == o and next(eph, o) == nil)
+    local n = setmetatable({}, mt)   -- replicate object
     eph[n] = function () return n end
     o = nil
     local a,b,c,d,e = nil    -- erase 'o' from the stack
   end
+  local n = setmetatable({}, mt)   -- replicate object
+  eph[n] = function () return n end
 end
 
 report"gc.lua"

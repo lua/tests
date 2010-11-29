@@ -81,12 +81,35 @@ for _, b in pairs(c) do
   end
 end
 
-print("+")
-
 assert(not pcall(bit32.band, {}))
 assert(not pcall(bit32.bnot, "a"))
 assert(not pcall(bit32.lshift, 45))
 assert(not pcall(bit32.lshift, 45, print))
 assert(not pcall(bit32.rshift, 45, print))
+
+print("+")
+
+
+-- testing extract/replace
+
+assert(bit32.extract(0x12345678, 0, 4) == 8)
+assert(bit32.extract(0x12345678, 4, 4) == 7)
+assert(bit32.extract(0xa0001111, 28, 4) == 0xa)
+assert(bit32.extract(0xa0001111, 31, 1) == 1)
+assert(bit32.extract(0x50000111, 31, 1) == 0)
+assert(bit32.extract(0xf2345679, 0, 32) == 0xf2345679)
+
+assert(not pcall(bit32.extract, 0, -1))
+assert(not pcall(bit32.extract, 0, 32))
+assert(not pcall(bit32.extract, 0, 0, 33))
+assert(not pcall(bit32.extract, 0, 31, 2))
+
+assert(bit32.replace(0x12345678, 5, 28, 4) == 0x52345678)
+assert(bit32.replace(0x12345678, 0x87654321, 0, 32) == 0x87654321)
+assert(bit32.replace(0, 1, 2) == 2^2)
+assert(bit32.replace(0, -1, 4) == 2^4)
+assert(bit32.replace(-1, 0, 31) == 2^31 - 1)
+assert(bit32.replace(-1, 0, 1, 2) == 2^32 - 7)
+
 
 print'OK'

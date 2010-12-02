@@ -407,6 +407,7 @@ do
   f:write("a\n"):seek("set", 1)
   assert(fr:read("*all") == "xa\n")  -- now we have a whole line
   f:close(); fr:close()
+  assert(os.remove(file))
 end
 
 

@@ -32,6 +32,8 @@ function f(...)
   end
 end
 
+-- testing 'tonumber'
+
 assert(tonumber{} == nil)
 assert(tonumber'+0.01' == 1/100 and tonumber'+.01' == 0.01 and
        tonumber'.01' == 0.01    and tonumber'-1.' == -1 and
@@ -42,6 +44,8 @@ assert(tonumber'+ 0.01' == nil and tonumber'+.e1' == nil and
 assert(tonumber('-012') == -010-2)
 assert(tonumber('-1.2e2') == - - -120)
 assert(f(tonumber('1  a')) == nil)
+assert(f(tonumber('1\0')) == nil)
+assert(f(tonumber('1\0', 2)) == nil)
 assert(f(tonumber('e1')) == nil)
 assert(f(tonumber('e  1')) == nil)
 assert(f(tonumber(' 3.4.5 ')) == nil)
@@ -61,27 +65,37 @@ assert(tonumber(string.rep('1', 32), 2) + 1 == 2^32)
 assert(tonumber('ffffFFFF', 16)+1 == 2^32)
 assert(tonumber('0ffffFFFF', 16)+1 == 2^32)
 
+-- testing 'tonumber' for invalid hexadecimal formats
+
 assert(tonumber('0x') == nil)
 assert(tonumber('x') == nil)
 assert(tonumber('x3') == nil)
-assert(tonumber('0x2') == 2)
 assert(tonumber('00x2') == nil)
 assert(tonumber('0x 2') == nil)
+assert(tonumber('0 x2') == nil)
 assert(tonumber('23x') == nil)
+assert(tonumber('- 0xaa') == nil)
+
 
 -- testing hexadecimal numerals
+
 assert(0x10 == 16 and 0xfff == 2^12 - 1 and 0XFB == 251)
 assert(0xFFFFFFFF == 2^32 - 1)
+assert(tonumber('+0x2') == 2)
+assert(tonumber('-0xaA') == -170)
+assert(tonumber('-0xffFFFfff') == -2^32 + 1)
 
 if not _port then
   assert(loadstring[[
     assert(tonumber('  0x2.5  ') == 0x25/16)
     assert(tonumber('  -0x2.5  ') == -0x25/16)
-    assert(tonumber('  0x0.51p8  ') == 0x51)
-    assert(0x.FFFFFFFF == 1 - 0x.00000001)
-    assert(0xa.a == 10 + 10/16)
-    assert(0xa.ap4 == 0XAA)
+    assert(tonumber('  +0x0.51p+8  ') == 0x51)
+    assert(0x.FfffFFFF == 1 - 0x.00000001)
+    assert(0xA.a == 10 + 10/16)
+    assert(0xa.aP4 == 0XAA)
     assert(0x4P-2 == 1)
+    assert(tonumber('0x0.51p') == nil)
+    assert(tonumber('0x5p+-2') == nil)
   ]])()
 end
 

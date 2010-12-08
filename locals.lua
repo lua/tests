@@ -35,7 +35,7 @@ local f
 x = 1
 
 a = nil
-loadstring('local a = {}')()
+load('local a = {}')()
 assert(a == nil)
 
 function f (a)
@@ -86,14 +86,13 @@ if not _soft then
   local p = 4
   for i=2,31 do
     for j=-3,3 do
-      assert(loadstring(string.format([[local a=%s;a=a+
-                                              %s;
-                                        assert(a
-                                        ==2^%s)]], j, p-j, i))) ()
-      assert(loadstring(string.format([[local a=%s;
+      assert(load(string.format([[local a=%s;
+                                        a=a+%s;
+                                        assert(a ==2^%s)]], j, p-j, i))) ()
+      assert(load(string.format([[local a=%s;
                                         a=a-%s;
                                         assert(a==-2^%s)]], -j, p-j, i))) ()
-      assert(loadstring(string.format([[local a,b=0,%s;
+      assert(load(string.format([[local a,b=0,%s;
                                         a=b-%s;
                                         assert(a==-2^%s)]], -j, p-j, i))) ()
     end

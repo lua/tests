@@ -151,7 +151,7 @@ function f(a,b) return string.gsub(a,'.',b) end
 assert(string.gsub("trocar tudo em |teste|b| é |beleza|al|", "|([^|]*)|([^|]*)|", f) ==
             "trocar tudo em bbbbb é alalalalalal")
 
-local function dostring (s) return loadstring(s)() or "" end
+local function dostring (s) return load(s)() or "" end
 assert(string.gsub("alo $a=1$ novamente $return a$", "$([^$]*)%$", dostring) ==
             "alo  novamente 1")
 

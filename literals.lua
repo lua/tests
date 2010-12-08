@@ -3,7 +3,7 @@ print('testing scanner')
 debug = require "debug"
 
 
-local function dostring (x) return assert(loadstring(x))() end
+local function dostring (x) return assert(load(x))() end
 
 dostring("x \v\f = \t\r 'a\0a' \v\f\f")
 assert(x == 'a\0a' and string.len(x) == 3)
@@ -28,7 +28,7 @@ assert(010 .. 020 .. -030 == "1020-30")
 assert("\x00\x05\x10\x1f\x3C\xFF\xe8" == "\0\5\16\31\60\255\232")
 
 local function lexstring (x, y, n)
-  local f = assert(loadstring('return '..x..', debug.getinfo(1).currentline'))
+  local f = assert(load('return '..x..', debug.getinfo(1).currentline'))
   local s, l = f()
   assert(s == y and l == n)
 end
@@ -49,7 +49,7 @@ assert("abc\*
 
 -- Error in escape sequences
 local function lexerror (s, err)
-  local st, msg = loadstring('return '..s)
+  local st, msg = load('return '..s)
   if err ~= '<eof>' then err = "'"..err.."'" end
   assert(not st and string.find(msg, "near "..err, 1, true))
 end
@@ -77,9 +77,9 @@ lexerror("'alo \\*", "<eof>")
 -- valid characters in variable names
 for i = 0, 255 do
   local s = string.char(i)
-  assert(not string.find(s, "[a-zA-Z_]") == not loadstring(s .. "=1"))
+  assert(not string.find(s, "[a-zA-Z_]") == not load(s .. "=1"))
   assert(not string.find(s, "[a-zA-Z_0-9]") ==
-         not loadstring("a" .. s .. "1 = 1"))
+         not load("a" .. s .. "1 = 1"))
 end
 
 
@@ -113,7 +113,7 @@ assert(string.find(a1, a2) == 31)
 print('+')
 
 a1 = [==[temp = [[um valor qualquer]]; ]==]
-assert(loadstring(a1))()
+assert(load(a1))()
 assert(temp == 'um valor qualquer')
 -- long strings --
 b = "001234567890123456789012345678901234567891234567890123456789012345678901234567890012345678901234567890123456789012345678912345678901234567890123456789012345678900123456789012345678901234567890123456789123456789012345678901234567890123456789001234567890123456789012345678901234567891234567890123456789012345678901234567890012345678901234567890123456789012345678912345678901234567890123456789012345678900123456789012345678901234567890123456789123456789012345678901234567890123456789001234567890123456789012345678901234567891234567890123456789012345678901234567890012345678901234567890123456789012345678912345678901234567890123456789012345678900123456789012345678901234567890123456789123456789012345678901234567890123456789001234567890123456789012345678901234567891234567890123456789012345678901234567890012345678901234567890123456789012345678912345678901234567890123456789012345678900123456789012345678901234567890123456789123456789012345678901234567890123456789"
@@ -215,18 +215,18 @@ local function gen (c, n)
 end
 
 for s in coroutine.wrap(function () gen("", len) end) do
-  assert(s == loadstring("return [====[\n"..s.."]====]")())
+  assert(s == load("return [====[\n"..s.."]====]")())
 end
 
 
 -- testing decimal point locale
 if os.setlocale("pt_BR") or os.setlocale("ptb") then
   assert(tonumber("3,4") == 3.4 and tonumber"3.4" == nil)
-  assert(assert(loadstring("return 3.4"))() == 3.4)
-  assert(assert(loadstring("return .4,3"))() == .4)
-  assert(assert(loadstring("return 4."))() == 4.)
-  assert(assert(loadstring("return 4.+.5"))() == 4.5)
-  local a,b = loadstring("return 4.5.")
+  assert(assert(load("return 3.4"))() == 3.4)
+  assert(assert(load("return .4,3"))() == .4)
+  assert(assert(load("return 4."))() == 4.)
+  assert(assert(load("return 4.+.5"))() == 4.5)
+  local a,b = load("return 4.5.")
   assert(string.find(b, "'4%.5%.'"))
   assert(os.setlocale("C"))
 else
@@ -238,12 +238,12 @@ end
 -- testing %q x line ends
 local s = "a string with \r and \n and \r\n and \n\r"
 local c = string.format("return %q", s)
-assert(assert(loadstring(c))() == s)
+assert(assert(load(c))() == s)
 
 -- testing errors
-assert(not loadstring"a = 'non-ending string")
-assert(not loadstring"a = 'non-ending string\n'")
-assert(not loadstring"a = '\\345'")
-assert(not loadstring"a = [=x]")
+assert(not load"a = 'non-ending string")
+assert(not load"a = 'non-ending string\n'")
+assert(not load"a = '\\345'")
+assert(not load"a = [=x]")
 
 print('OK')

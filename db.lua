@@ -2,7 +2,7 @@
 
 debug = require "debug"
 
-local function dostring(s) return assert(loadstring(s))() end
+local function dostring(s) return assert(load(s))() end
 
 print"testing debug library and debug information"
 
@@ -18,7 +18,7 @@ function test (s, l, p)
     if p then print(l, line) end
     assert(l == line, "wrong trace!!")
   end
-  debug.sethook(f,"l"); loadstring(s)(); debug.sethook()
+  debug.sethook(f,"l"); load(s)(); debug.sethook()
   assert(#l == 0)
 end
 
@@ -44,7 +44,7 @@ end
 
 -- test file and string names truncation
 a = "function f () end"
-local function dostring (s, x) return loadstring(s, x)() end
+local function dostring (s, x) return load(s, x)() end
 dostring(a)
 assert(debug.getinfo(f).short_src == string.format('[string "%s"]', a))
 dostring(a..string.format("; %s\n=1", string.rep('p', 400)))
@@ -317,7 +317,7 @@ debug.sethook(function (e)
   assert(e == "call")
   dostring("XX = 12")  -- test dostring inside hooks
   -- testing errors inside hooks
-  assert(not pcall(loadstring("a='joao'+1")))
+  assert(not pcall(load("a='joao'+1")))
   debug.sethook(function (e, l) 
     assert(debug.getinfo(2, "l").currentline == l)
     local f,m,c = debug.gethook()
@@ -454,7 +454,7 @@ print"+"
 
 
 -- testing local function information
-co = loadstring[[
+co = load[[
   local A = function ()
     return x
   end

@@ -57,7 +57,7 @@ print "testing string length overflow"
 
 local longs = string.rep("\0", 2^25)
 local function catter (i)
-  return assert(loadstring(
+  return assert(load(
     string.format("return function(a) return a%s end",
                      string.rep("..a", i-1))))()
 end

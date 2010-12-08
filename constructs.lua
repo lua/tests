@@ -162,7 +162,7 @@ return function ( a , b , c , d , e )
 end , { a = 1 , b = 2 >= 1 , } or { 1 };
 ]]
 f = string.gsub(f, "%s+", "\n");   -- force a SETLINE between opcodes
-f,a = loadstring(f)();
+f,a = load(f)();
 assert(a.a == 1 and a.b)
 
 function g (a,b,c,d,e)
@@ -243,7 +243,7 @@ repeat
       while %s do WX2 = a; break end
       repeat if (%s) then break end; assert(b)  until not(%s)
   ]], s1, s, s1, s, s1, s, s1, s, s)
-  assert(loadstring(s))()
+  assert(load(s))()
   assert(X and not NX and not WX1 == K and not WX2 == K)
   if math.fmod(i,4000) == 0 then print('+') end
   i = i+1

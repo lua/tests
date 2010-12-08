@@ -68,12 +68,12 @@ assert(t[1] == 1 and t[2] == 2 and t[3] == 3 and t[4] == 'a')
 
 function fat(x)
   if x <= 1 then return 1
-  else return x*loadstring("return fat(" .. x-1 .. ")")()
+  else return x*load("return fat(" .. x-1 .. ")")()
   end
 end
 
-assert(loadstring "loadstring 'assert(fat(6)==720)' () ")()
-a = loadstring('return fat(5), 3')
+assert(load "load 'assert(fat(6)==720)' () ")()
+a = load('return fat(5), 3')
 a,b = a()
 assert(a == 120 and b == 3)
 print('+')
@@ -226,7 +226,7 @@ a()  -- empty chunk
 
 assert(not load(function () return true end))
 
-x = string.dump(loadstring("x = 1; return x"))
+x = string.dump(load("x = 1; return x"))
 a = assert(load(read1(x), nil, "b"))
 assert(a() == 1 and _G.x == 1)
 cannotload("attempt to load", load(read1(x), nil, "t"))
@@ -278,7 +278,7 @@ assert(a()(2)(3)(10) == 15)
 
 -- test for dump/undump with upvalues
 local a, b = 20, 30
-x = loadstring(string.dump(function (x)
+x = load(string.dump(function (x)
   if x == "set" then a = 10+b; b = b+1 else
   return a
   end

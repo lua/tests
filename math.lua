@@ -86,7 +86,7 @@ assert(tonumber('-0xaA') == -170)
 assert(tonumber('-0xffFFFfff') == -2^32 + 1)
 
 if not _port then
-  assert(loadstring[[
+  assert(load[[
     assert(tonumber('  0x2.5  ') == 0x25/16)
     assert(tonumber('  -0x2.5  ') == -0x25/16)
     assert(tonumber('  +0x0.51p+8  ') == 0x51)
@@ -187,7 +187,7 @@ repeat
 until i > 1000
 f:write("}")
 f:seek("set", 0)
-assert(loadstring(f:read('*a')))()
+assert(load(f:read('*a')))()
 assert(f:close())
 a = _ENV.a   -- may be local
 

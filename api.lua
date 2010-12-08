@@ -503,7 +503,7 @@ F = function (x)
   local d = T.newuserdata(100)   -- cria lixo
   d = nil
   assert(debug.getmetatable(x).__gc == F)
-  loadstring("table.insert({}, {})")()   -- cria mais lixo
+  load("table.insert({}, {})")()   -- cria mais lixo
   collectgarbage()   -- forca coleta de lixo durante coleta!
   assert(debug.getmetatable(x).__gc == F)   -- coleta anterior nao melou isso?
   local dummy = {}    -- cria lixo durante coleta
@@ -690,7 +690,7 @@ do   -- testing errors during GC
     debug.setmetatable(a[i], {__gc = function (x) error("error inside gc") end})
   end
   for i=2,20,2 do   -- mark the other half to count and to create more garbage
-    debug.setmetatable(a[i], {__gc = function (x) loadstring("A=A+1")() end})
+    debug.setmetatable(a[i], {__gc = function (x) load("A=A+1")() end})
   end
   _G.A = 0
   a = 0
@@ -778,7 +778,7 @@ print('+')
 assert(not pcall(T.newuserdata, 2^32-4))
 collectgarbage()
 T.totalmem(T.totalmem()+5000)   -- set low memory limit (+5k)
-assert(not pcall(loadstring"local a={}; for i=1,100000 do a[i]=i end"))
+assert(not pcall(load"local a={}; for i=1,100000 do a[i]=i end"))
 T.totalmem(1000000000)          -- restore high limit
 
 -- test memory errors; increase memory limit in small steps, so that
@@ -828,7 +828,7 @@ function expand (n,s)
 end
 
 G=0; collectgarbage(); a =collectgarbage("count")
-loadstring(expand(20,"G=G+1"))()
+load(expand(20,"G=G+1"))()
 assert(G==20); collectgarbage();  -- assert(gcinfo() <= a+1)
 
 testamem("thread creation", function ()
@@ -839,7 +839,7 @@ end)
 -- testing memory x compiler
 
 testamem("loadstring", function ()
-  return loadstring("x=1")  -- try to do a loadstring
+  return load("x=1")  -- try to do load a string
 end)
 
 
@@ -873,9 +873,9 @@ testamem("string creation", function ()
 end)
 
 testamem("dump/undump", function ()
-  local a = loadstring(testprog)
+  local a = load(testprog)
   local b = a and string.dump(a)
-  a = b and loadstring(b)
+  a = b and load(b)
   return a and a()
 end)
 

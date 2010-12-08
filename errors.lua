@@ -8,7 +8,7 @@ local oldmm = mt.__index
 mt.__index = nil
 
 function doit (s)
-  local f, msg = loadstring(s)
+  local f, msg = load(s)
   if f == nil then return msg end
   local cond, msg = pcall(f)
   return (not cond) and msg
@@ -193,7 +193,7 @@ assert(string.find(select(2, f()), "yield across"))
 idsize = 60 - 1
 local function checksize (source)
   -- syntax error
-  local _, msg = loadstring("x", source)
+  local _, msg = load("x", source)
   msg = string.match(msg, "^([^:]*):")   -- get source (1st part before ':')
   assert(msg:len() <= idsize)
 end
@@ -208,7 +208,7 @@ end
 -- testing line error
 
 local function lineerror (s, l)
-  local err,msg = pcall(loadstring(s))
+  local err,msg = pcall(load(s))
   local line = string.match(msg, ":(%d+):")
   assert((line and line+0) == l)
 end
@@ -353,7 +353,7 @@ checksyntax("'aa'", "", "'aa'", 1)
 -- test 255 as first char in a chunk
 checksyntax("\255a = 1", "", "char(255)", 1)
 
-doit('I = loadstring("a=9+"); a=3')
+doit('I = load("a=9+"); a=3')
 assert(a==3 and I == nil)
 print('+')
 
@@ -368,7 +368,7 @@ end
 -- testing syntax limits
 local function testrep (init, rep)
   local s = "local a; "..init .. string.rep(rep, 400)
-  local a,b = loadstring(s)
+  local a,b = load(s)
   assert(not a and string.find(b, "syntax levels"))
 end
 testrep("a=", "{")
@@ -382,7 +382,7 @@ testrep("a=", "a..")
 testrep("a=", "a^")
 
 local s = ("a,"):rep(200).."a=nil"
-local a,b = loadstring(s)
+local a,b = load(s)
 assert(not a and string.find(b, "variable names"))
 
 
@@ -406,7 +406,7 @@ for j = 1,lim do
   c = c + 2
 end
 s = s.."\nend  end end"
-local a,b = loadstring(s)
+local a,b = load(s)
 assert(c > 255 and string.find(b, "too many upvalues") and
        string.find(b, "line 5"))
 
@@ -416,7 +416,7 @@ for j = 1,300 do
   s = s.."a"..j..", "
 end
 s = s.."b\n"
-local a,b = loadstring(s)
+local a,b = load(s)
 assert(string.find(b, "line 2"))
 
 mt.__index = oldmm

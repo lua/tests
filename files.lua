@@ -466,7 +466,7 @@ assert(os.date(string.rep("%", 200)) == string.rep("%", 100))
 
 local t = os.time()
 T = os.date("*t", t)
-loadstring(os.date([[assert(T.year==%Y and T.month==%m and T.day==%d and
+load(os.date([[assert(T.year==%Y and T.month==%m and T.day==%d and
   T.hour==%H and T.min==%M and T.sec==%S and
   T.wday==%w+1 and T.yday==%j and type(T.isdst) == 'boolean')]], t))()
 
@@ -486,7 +486,7 @@ assert(os.time(T) == t)
 assert(not pcall(os.time, {hour = 12}))
 
 T = os.date("!*t", t)
-loadstring(os.date([[!assert(T.year==%Y and T.month==%m and T.day==%d and
+load(os.date([[!assert(T.year==%Y and T.month==%m and T.day==%d and
   T.hour==%H and T.min==%M and T.sec==%S and
   T.wday==%w+1 and T.yday==%j and type(T.isdst) == 'boolean')]], t))()
 

@@ -151,7 +151,7 @@ table.sort(A)
 check(A)
 
 table.sort(A, function (x, y)
-          loadstring(string.format("A[%q] = ''", x))()
+          load(string.format("A[%q] = ''", x))()
           collectgarbage()
           return x<y
         end)

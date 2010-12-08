@@ -242,9 +242,24 @@ cannotload("hhi", loadin({}, function () error("hhi") end))
 -- any value is valid for _ENV
 assert(loadin(123, "return _ENV")() == 123)
 
--- loadin fails if there is no _ENV variable
+-- loadin fails if there is no upvalues
 a = string.dump(function (x) return x end)
 assert(not pcall(loadin, {}, a))
+
+-- load when _ENV is not first upvalue
+local x; XX = 123
+local function h ()
+  local y=x   -- use 'x', so that it becomes 1st upvalue
+  return XX   -- global name
+end
+local d = string.dump(h)
+x = load(d, "", "b")
+assert(debug.getupvalue(x, 2) == '_ENV')
+debug.setupvalue(x, 2, _G)
+assert(x() == 123)
+
+assert(assert(loadin({XX = 13}, "return XX + ..."))(4) == 17)
+
 
 -- test generic load with nested functions
 x = [[

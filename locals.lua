@@ -73,7 +73,7 @@ end
 
 -- test for global table of loaded chunks
 assert(getenv(load"a=3") == _G)
-local c = {}; local f = loadin(c, "a = 3")
+local c = {}; local f = load("a = 3", nil, nil, c)
 assert(getenv(f) == c)
 assert(c.a == nil)
 f()

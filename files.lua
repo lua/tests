@@ -219,7 +219,7 @@ assert(s == "lineother")
 
 io.output(file); io.write"a = 10 + 34\na = 2*a\na = -a\n":close()
 local t = {}
-loadin(t, io.lines(file, "*L"))()
+load(io.lines(file, "*L"), nil, nil, t)()
 assert(t.a == -((10 + 34) * 2))
 
 

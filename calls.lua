@@ -214,14 +214,14 @@ function cannotload (msg, a,b)
   assert(not a and string.find(b, msg))
 end
 
-a = assert(loadin(_G, read1(x), "modname", "t"))
+a = assert(load(read1(x), "modname", "t", _G))
 assert(a() == "\0" and _G.x == 33)
 assert(debug.getinfo(a).source == "modname")
 -- cannot read text in binary mode
-cannotload("attempt to load", loadin({}, read1(x), "modname", "b"))
+cannotload("attempt to load", load(read1(x), "modname", "b", {}))
 cannotload("attempt to load", load(x, "modname", "b"))
 
-a = assert(loadin({}, function () return nil end))
+a = assert(load(function () return nil end))
 a()  -- empty chunk
 
 assert(not load(function () return true end))
@@ -237,14 +237,10 @@ assert(not pcall(string.dump, print))  -- no dump of C functions
 cannotload("unexpected symbol", load(read1("*a = 123")))
 cannotload("unexpected symbol", load("*a = 123"))
 cannotload("hhi", load(function () error("hhi") end))
-cannotload("hhi", loadin({}, function () error("hhi") end))
 
 -- any value is valid for _ENV
-assert(loadin(123, "return _ENV")() == 123)
+assert(load("return _ENV", nil, nil, 123)() == 123)
 
--- loadin fails if there is no upvalues
-a = string.dump(function (x) return x end)
-assert(not pcall(loadin, {}, a))
 
 -- load when _ENV is not first upvalue
 local x; XX = 123
@@ -258,7 +254,7 @@ assert(debug.getupvalue(x, 2) == '_ENV')
 debug.setupvalue(x, 2, _G)
 assert(x() == 123)
 
-assert(assert(loadin({XX = 13}, "return XX + ..."))(4) == 17)
+assert(assert(load("return XX + ...", nil, nil, {XX = 13}))(4) == 17)
 
 
 -- test generic load with nested functions

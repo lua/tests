@@ -16,7 +16,7 @@ prog[#prog + 1] = "return 0"
 prog = table.concat(prog, ";")
 
 local env = {string = string, assert = assert}
-local f = assert(loadin(env, prog))
+local f = assert(load(prog, nil, nil, env))
 
 f()
 assert(env.X[lim] == lim - 1 and env.X[lim + 1] == lim)

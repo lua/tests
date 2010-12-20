@@ -547,6 +547,7 @@ do
   assert(collectgarbage("count") >= x+10)
   collectgarbage()  -- now frees memory
   assert(collectgarbage("count") <= x+1)
+  collectgarbage("restart")
 end
 
 
@@ -595,6 +596,8 @@ collectgarbage()
 assert(#cl == 4)
 -- check order of collection
 assert(cl[2] == n5 and cl[3] == nb and cl[4] == na)
+
+collectgarbage"restart"
 
 
 a, na = {}, {}

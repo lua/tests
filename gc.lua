@@ -35,11 +35,23 @@ limit = 5000
 
 
 local function GC1 ()
-  local u = newproxy(true)
+  local u
+  local b     -- must be declared after 'u' (to be above it in the stack)
   local finish = false
-  getmetatable(u).__gc = function () finish = true end
-  u = nil
-  repeat local a = {} until finish
+  u = setmetatable({}, {__gc = function () finish = true end})
+  b = {34}
+  repeat u = {} until finish
+  assert(b[1] == 34)   -- 'u' was collected, but 'b' was not
+
+  finish = false; local i = 1
+  u = setmetatable({}, {__gc = function () finish = true end})
+  repeat i = i + 1; u = i .. i until finish
+  assert(b[1] == 34)   -- 'u' was collected, but 'b' was not
+
+  finish = false
+  u = setmetatable({}, {__gc = function () finish = true end})
+  repeat local i; u = function () return i end until finish
+  assert(b[1] == 34)   -- 'u' was collected, but 'b' was not
 end
 
 local function GC()  GC1(); GC1() end
@@ -284,21 +296,27 @@ assert(next(a) == nil)
 -- testing errors during GC
 do
 collectgarbage("stop")   -- stop collection
-local u = newproxy(true)
+local u = {}
 local s = {}; setmetatable(s, {__mode = 'k'})
-getmetatable(u).__gc = function (o)
+setmetatable(u, {__gc = function (o)
   local i = s[o]
   s[i] = true
   assert(not s[i - 1])   -- check proper finalization order
   if i == 8 then error("here") end   -- error during GC
-end
+end})
 
-for i = 6, 10 do local n = newproxy(u); s[n] = i end
+for i = 6, 10 do
+  local n = setmetatable({}, getmetatable(u))
+  s[n] = i
+end
 
 assert(not pcall(collectgarbage))
 for i = 8, 10 do assert(s[i]) end
 
-for i = 1, 5 do local n = newproxy(u); s[n] = i end
+for i = 1, 5 do
+  local n = setmetatable({}, getmetatable(u))
+  s[n] = i
+end
 
 collectgarbage()
 for i = 1, 10 do assert(s[i]) end
@@ -310,42 +328,55 @@ print '+'
 
 
 -- testing userdata
-collectgarbage("stop")   -- stop collection
-local u = newproxy(true)
-local s = 0
-local a = {[u] = 0}; setmetatable(a, {__mode = 'vk'})
-for i=1,10 do a[newproxy(u)] = i end
-for k in pairs(a) do assert(getmetatable(k) == getmetatable(u)) end
-local a1 = {}; for k,v in pairs(a) do a1[k] = v end
-for k,v in pairs(a1) do a[v] = k end
-for i =1,10 do assert(a[i]) end
-getmetatable(u).a = a1
-getmetatable(u).u = u
-do
-  local u = u
-  getmetatable(u).__gc = function (o)
-    assert(a[o] == 10-s)
-    assert(a[10-s] == nil) -- udata already removed from weak table
-    assert(getmetatable(o) == getmetatable(u))
-    assert(getmetatable(o).a[o] == 10-s)
-    s=s+1
+if T==nil then
+  (Message or print)('\a\n >>> testC not active: skipping userdata GC tests <<<\n\a')
+
+else
+
+  local function newproxy(u)
+    return setmetatable(T.newuserdata(0), getmetatable(u))
   end
+
+  collectgarbage("stop")   -- stop collection
+  local u = newproxy(nil)
+  debug.setmetatable(u, {__gc = true})
+  local s = 0
+  local a = {[u] = 0}; setmetatable(a, {__mode = 'vk'})
+  for i=1,10 do a[newproxy(u)] = i end
+  for k in pairs(a) do assert(getmetatable(k) == getmetatable(u)) end
+  local a1 = {}; for k,v in pairs(a) do a1[k] = v end
+  for k,v in pairs(a1) do a[v] = k end
+  for i =1,10 do assert(a[i]) end
+  getmetatable(u).a = a1
+  getmetatable(u).u = u
+  do
+    local u = u
+    getmetatable(u).__gc = function (o)
+      assert(a[o] == 10-s)
+      assert(a[10-s] == nil) -- udata already removed from weak table
+      assert(getmetatable(o) == getmetatable(u))
+    assert(getmetatable(o).a[o] == 10-s)
+      s=s+1
+    end
+  end
+  a1, u = nil
+  assert(next(a) ~= nil)
+  collectgarbage()
+  assert(s==11)
+  collectgarbage()
+  assert(next(a) == nil)  -- finalized keys are removed in two cycles
 end
-a1, u = nil
-assert(next(a) ~= nil)
-collectgarbage()
-assert(s==11)
-collectgarbage()
-assert(next(a) == nil)  -- finalized keys are removed in two cycles
 
 
 -- __gc x weak tables
-local u = newproxy(true)
+local u = setmetatable({}, {__gc = true})
+-- __gc metamethod should be collected before running
 setmetatable(getmetatable(u), {__mode = "v"})
 getmetatable(u).__gc = function (o) os.exit(1) end  -- cannot happen
+u = nil
 collectgarbage()
 
-local u = newproxy(true)
+local u = setmetatable({}, {__gc = true})
 local m = getmetatable(u)
 m.x = {[{0}] = 1; [0] = {1}}; setmetatable(m.x, {__mode = "kv"});
 m.__gc = function (o)
@@ -358,8 +389,7 @@ assert(m==10)
 
 
 -- errors during collection
-u = newproxy(true)
-getmetatable(u).__gc = function () error "!!!" end
+u = setmetatable({}, {__gc = function () error "!!!" end})
 u = nil
 assert(not pcall(collectgarbage))
 
@@ -473,29 +503,30 @@ if T then
   assert(T.totalmem("thread") == t + 1)
 end
 
--- create a userdata to be collected when state is closed
+-- create an object to be collected when state is closed
 do
-  local newproxy,assert,type,print,getmetatable =
-        newproxy,assert,type,print,getmetatable
-  local u = newproxy(true)
-  local tt = getmetatable(u)
-  ___Glob = {u}   -- avoid udata being collected before program end
+  local setmetatable,assert,type,print,getmetatable =
+        setmetatable,assert,type,print,getmetatable
+  local tt = {}
   tt.__gc = function (o)
     assert(getmetatable(o) == tt)
     -- create new objects during GC
     local a = 'xuxu'..(10+3)..'joao', {}
     ___Glob = o  -- ressurect object!
-    newproxy(o)  -- creates a new one with same metatable
+    setmetatable({}, tt)  -- creates a new one with same metatable
     print(">>> closing state " .. "<<<\n")
   end
+  local u = setmetatable({}, tt)
+  ___Glob = {u}   -- avoid object being collected before program end
 end
 
--- create several udata to raise errors when collected while closing state
+-- create several objects to raise errors when collected while closing state
 do
-  local u = newproxy(true)
-  getmetatable(u).__gc = function (o) return o + 1 end
-  table.insert(___Glob, u)  -- preserve udata until the end
-  for i = 1,10 do table.insert(___Glob, newproxy(u)) end
+  local mt = {__gc = function (o) return o + 1 end}
+  for i = 1,10 do
+    -- create object and preserve it until the end
+    table.insert(___Glob, setmetatable({}, mt))
+  end
 end
 
 print('OK')

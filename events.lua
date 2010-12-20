@@ -315,29 +315,6 @@ print'+'
 local _g = _G
 _ENV = setmetatable({}, {__index=function (_,k) return _g[k] end})
 
--- testing proxies
-assert(getmetatable(newproxy()) == nil)
-assert(getmetatable(newproxy(false)) == nil)
-
-local u = newproxy(true)
-
-getmetatable(u).__newindex = function (u,k,v)
-  getmetatable(u)[k] = v
-end
-
-getmetatable(u).__index = function (u,k)
-  return getmetatable(u)[k]
-end
-
-for i=1,10 do u[i] = i end
-for i=1,10 do assert(u[i] == i) end
-
-getmetatable(u).__len = function () return 10 end
-assert(#u == 10)
-
-local k = newproxy(u)
-assert(getmetatable(k) == getmetatable(u))
-
 
 a = {}
 rawset(a, "x", 1, 2, 3)

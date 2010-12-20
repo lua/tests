@@ -429,7 +429,7 @@ assert(not pcall(debug.setuservalue, 3, {}))
 assert(not pcall(debug.setuservalue, nil, {}))
 assert(not pcall(debug.setuservalue, T.pushuserdata(1), {}))
 
-local b = newproxy()
+local b = T.newuserdata(0)
 local a = {}
 assert(debug.getuservalue(b) == nil)
 assert(debug.setuservalue(b, a))
@@ -532,7 +532,7 @@ do
   -- udata without finalizer
   x = collectgarbage("count")
   collectgarbage("stop")
-  for i=1,1000 do newproxy(false) end
+  for i=1,1000 do T.newuserdata(0) end
   assert(collectgarbage("count") > x+10)
   collectgarbage()
   assert(collectgarbage("count") <= x+1)
@@ -540,9 +540,8 @@ do
   x = collectgarbage("count")
   collectgarbage()
   collectgarbage("stop")
-  a = newproxy(true)
-  getmetatable(a).__gc = function () end
-  for i=1,1000 do newproxy(a) end
+  a = {__gc = function () end}
+  for i=1,1000 do debug.setmetatable(T.newuserdata(0), a) end
   assert(collectgarbage("count") >= x+10)
   collectgarbage()  -- this collection only calls TM, without freeing memory
   assert(collectgarbage("count") >= x+10)

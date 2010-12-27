@@ -173,6 +173,7 @@ assert(not collectgarbage("isrunning"))
 
 
 do
+  collectgarbage()
   local x = gcinfo()
   collectgarbage()
   collectgarbage"stop"
@@ -334,7 +335,7 @@ if T==nil then
 else
 
   local function newproxy(u)
-    return setmetatable(T.newuserdata(0), getmetatable(u))
+    return debug.setmetatable(T.newuserdata(0), debug.getmetatable(u))
   end
 
   collectgarbage("stop")   -- stop collection
@@ -441,7 +442,7 @@ if T then   -- tests for weird cases collecting upvalues
   -- erase reference to upvalue 'a', mark it as dead, but does not collect it
   T.gcstate("pause"); collectgarbage("stop")
   f = nil
-  T.gcstate("sweepstring"); collectgarbage("stop")
+  T.gcstate("sweepstring")
 
   -- this function will reuse that dead upvalue...
   f = function () return a end
@@ -453,15 +454,16 @@ if T then   -- tests for weird cases collecting upvalues
     coroutine.yield(function () return b end)
   end)
 
-  T.gcstate("pause"); collectgarbage("stop")
+  T.gcstate("pause")
   assert(co()() == 150)  -- create upvalue for 'b'
 
   -- mark upvalue 'b' as dead, but does not collect it
-  T.gcstate("sweepstring"); collectgarbage("stop")
+  T.gcstate("sweepstring")
 
   co()   -- finish coroutine, "closing" that dead upvalue
 
   assert(f() == 1200)
+  collectgarbage("restart")
 
   print"+"
 end

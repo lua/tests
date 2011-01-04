@@ -145,6 +145,14 @@ assert(#a == a)
 assert(cap[0] == "len"and cap[1] == a and cap[2] == nil)
 
 
+-- test for rawlen
+t = setmetatable({1,2,3}, {__len = function () return 10 end})
+assert(#t == 10 and rawlen(t) == 3)
+assert(rawlen"abc" == 3)
+assert(not pcall(rawlen, io.stdin))
+assert(not pcall(rawlen, 34))
+assert(not pcall(rawlen))
+
 t = {}
 t.__lt = function (a,b,c)
   collectgarbage()

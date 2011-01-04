@@ -150,8 +150,8 @@ end
 print("steps (2)")
 
 local function dosteps (siz)
+  assert(not collectgarbage("isrunning"))
   collectgarbage()
-  collectgarbage"stop"
   assert(not collectgarbage("isrunning"))
   local a = {}
   for i=1,100 do a[i] = {{}}; local b = {} end
@@ -164,6 +164,7 @@ local function dosteps (siz)
   return i
 end
 
+collectgarbage"stop"
 assert(dosteps(0) > 10)
 assert(dosteps(10) < dosteps(2))
 assert(dosteps(10000) == 1)
@@ -471,18 +472,18 @@ end
 
 if T then
   local debug = require "debug"
-  collectgarbage("gen")
+  collectgarbage("gen"); collectgarbage("stop")
   x = T.newuserdata(0)
   T.gcstate("propagate")    -- ensure 'x' is old
   T.gcstate("sweepstring")
   T.gcstate("propagate")
   assert(string.find(T.gccolor(x), "/old"))
   local y = T.newuserdata(0)
-  debug.setmetatable(y, {__gc = true})   -- bless the new udata before
-  debug.setmetatable(x, {__gc = true})   -- the old one
+  debug.setmetatable(y, {__gc = true})   -- bless the new udata before...
+  debug.setmetatable(x, {__gc = true})   -- ...the old one
   assert(string.find(T.gccolor(y), "white"))
   T.checkmemory()
-  collectgarbage("inc")
+  collectgarbage("inc"); collectgarbage("restart")
 end
 
 
@@ -530,5 +531,8 @@ do
     table.insert(___Glob, setmetatable({}, mt))
   end
 end
+
+-- just to make sure
+assert(collectgarbage'isrunning')
 
 print('OK')

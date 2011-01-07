@@ -82,6 +82,10 @@ return AA]]
 
 createfiles(files, "", extras)
 
+-- testing explicit "dir" separator in 'searchpath'
+assert(package.searchpath("C.lua", DIR.."?", "") == DIR.."C.lua")
+assert(package.searchpath(DIR.."C.lua", "?", "/") == DIR.."C.lua")
+assert(package.searchpath(".\\C.lua", DIR.."?", "\\") == DIR.."./C.lua")
 
 local oldpath = package.path
 

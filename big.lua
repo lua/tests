@@ -52,18 +52,26 @@ f, X = nil
 
 coroutine.yield'b'
 
+if not _no32 then
 
 print "testing string length overflow"
-
-local longs = string.rep("\0", 2^25)
+-- number of strings to be concatenated
+local repstrings = 192
+-- size of each string
+local ssize = math.ceil(2^32 / repstrings) + 1
+-- this should be larger than maximum size_t
+assert(repstrings * ssize > 2^32)
+local longs = string.rep("\0", ssize)
 local function catter (i)
   return assert(load(
     string.format("return function(a) return a%s end",
                      string.rep("..a", i-1))))()
 end
-local rep129 = catter(129)
-local a, b = pcall(rep129, longs)
+local rep = catter(repstrings)
+local a, b = pcall(rep, longs)
 assert(not a and string.find(b, "overflow"))
+
+end
 
 print'OK'
 

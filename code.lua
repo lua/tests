@@ -67,12 +67,6 @@ check(function () while true do local a = -1 end end,
 check(function () while 1 do local a = -1 end end,
 'LOADK', 'JMP', 'RETURN')
 
-check(function () repeat local x = 1 until false end,
-'LOADK', 'JMP', 'RETURN')
-
-check(function () repeat local x until nil end,
-'LOADNIL', 'JMP', 'RETURN')
-
 check(function () repeat local x = 1 until true end,
 'LOADK', 'RETURN')
 

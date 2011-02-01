@@ -292,6 +292,7 @@ local function allcases (n)
         end
       end
     end
+    print('+')
   end
   mem[n] = res   -- memoize
   return res

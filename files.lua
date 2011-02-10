@@ -435,7 +435,8 @@ if not _port then
   x, y = pcall(io.popen, "ls")
   if x then
     assert(y:read("*a"))
-    assert(y:close() == 0)
+    local s, t = y:close()
+    assert(s == 0 and t == "exit")
   else
     (Message or print)('\a\n >>> popen not available<<<\n\a')
   end

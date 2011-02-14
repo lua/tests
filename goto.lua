@@ -3,24 +3,34 @@ local function errmsg (code, m)
   assert(not st and string.find(msg, m))
 end
 
+-- cannot see label inside block
 errmsg([[
 goto l1;
 do @l1: end
 ]], "label 'l1'")
 
+-- repeated label
+errmsg([[
+@l1:
+@l1:
+]], "label 'l1'")
+
+-- undefined label
 errmsg([[
 goto l1;
 local aa
-@l1: print(3)
+@l1: @l2: print(3)
 ]], "local 'aa'")
 
+-- jumping over variable definition
 errmsg([[
 do local bb, cc; goto l1; end
 local aa
 @l1: print(3)
 ]], "local 'aa'")
 
-errmsg([[  -- cannot continue a repeat-until
+-- cannot continue a repeat-until
+errmsg([[
   repeat
     if x then goto cont end
     local xuxu = 10
@@ -28,6 +38,7 @@ errmsg([[  -- cannot continue a repeat-until
   until xuxu < x
 ]], "local 'xuxu'")
 
+-- simple gotos
 local x
 do
   local y = 12
@@ -35,10 +46,11 @@ do
   @l2: x = x + 1; goto l3
   @l1: x = y; goto l2
 end
-@l3: assert(x == 13)
+@l3: @l3_1: assert(x == 13)
 
+-- ok to jump over local dec. to end of block
 do
-  goto l1   -- ok to jump over local dec. to end of block
+  goto l1
   local a = 23
   x = a
   @l1:;
@@ -55,8 +67,9 @@ end
 
 if print then
   goto l1   -- ok to jump over local dec. to end of block
+  goto l2   -- ok to jump over local dec. to end of block
   local x
-  @l1:
+  @l1: ; @l2: ;;
 else end
 
 do
@@ -64,13 +77,15 @@ do
   goto l3
   @l1: a[#a + 1] = 1; goto l2;
   @l2: a[#a + 1] = 2; goto l5;
-  @l3: a[#a + 1] = 3; goto l1;
+  @l3:
+  @l3a: a[#a + 1] = 3; goto l1;
   @l4: a[#a + 1] = 4; goto l6;
   @l5: a[#a + 1] = 5; goto l4;
   @l6: assert(a[1] == 3 and a[2] == 1 and a[3] == 2 and
               a[4] == 5 and a[5] == 4)
-  if not a[6] then a[6] = true; goto l3 end   -- do it twice
+  if not a[6] then a[6] = true; goto l3a end   -- do it twice
 end
+
 
 
 --------------------------------------------------------------------------------

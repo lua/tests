@@ -431,14 +431,28 @@ if not _soft then
   x = nil; y = nil
 end
 
+-- test for popen/pclose
 if not _port then
-  x, y = pcall(io.popen, "ls")
-  if x then
-    assert(y:read("*a"))
-    local s, t = y:close()
-    assert(s == 0 and t == "exit")
-  else
-    (Message or print)('\a\n >>> popen not available<<<\n\a')
+  local tests = {
+    -- command,   what,  code
+    {"ls > /dev/null", "ok"},
+    {"not-to-be-found-command", "exit"},
+    {"exit 3", "exit", 3},
+    {"exit 129", "exit", 129},
+    {"kill -s HUP $$", "signal", 1},
+    {"kill -s KILL $$", "signal", 9},
+    {"sh -c 'kill -s HUP $$'", "exit"},
+  }
+  print("\n(some error messages are expected now)")
+  for _, v in ipairs(tests) do
+    local x, y, z = io.popen(v[1]):close()
+    if v[2] == "ok" then
+      assert(x == true and y == nil and z == nil)
+    else
+      assert(y == v[2])   -- correct 'what'
+      -- correct code if known (but always different from 0)
+      assert((v[3] == nil and z > 0) or v[3] == z)
+    end
   end
 end
 

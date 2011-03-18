@@ -16,7 +16,7 @@ do
   while arg[i] do i=i-1 end
   progname = arg[i+1]
 end
-print(progname)
+print("progname: "..progname)
 
 local prepfile = function (s, p)
   p = p or prog
@@ -58,8 +58,12 @@ function RUN (...)
 end
 
 function NoRun (...)
-  print("\n(the next error is expected by the test)")
   assert(not auxrun(...))
+end
+
+function NoRunMsg (...)
+  print("\n(the next error is expected by the test)")
+  return NoRun(...)
 end
 
 -- test environment variables used by Lua
@@ -140,7 +144,7 @@ RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
 checkprogout("6\n10\n10\n\n")
 
 prepfile("a = [[b\nc\nd\ne]]\n=a")
-print(prog)
+print("temporary program file: "..prog)
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
 checkprogout("b\nc\nd\ne\n\n")
 
@@ -161,7 +165,7 @@ setmetatable(m, {__tostring = function(x)
 end})
 error(m)
 ]]
-NoRun([[lua %s 2> %s]], prog, out)
+NoRun([[lua %s 2> %s]], prog, out)   -- no message
 checkout(progname..": 6\n")
 
 
@@ -208,9 +212,9 @@ RUN("lua %s", prog)
 prepfile("os.exit(true, true)")
 RUN("lua %s", prog)
 prepfile("os.exit(1, true)")
-NoRun("lua %s", prog)
+NoRun("lua %s", prog)   -- no message
 prepfile("os.exit(false, true)")
-NoRun("lua %s", prog)
+NoRun("lua %s", prog)   -- no message
 
 assert(os.remove(prog))
 assert(os.remove(otherprog))
@@ -218,9 +222,9 @@ assert(not os.remove(out))
 
 RUN("lua -v")
 
-NoRun("lua -h")
-NoRun("lua -e")
-NoRun("lua -e a")
-NoRun("lua -f")
+NoRunMsg("lua -h")
+NoRunMsg("lua -e")
+NoRunMsg("lua -e a")
+NoRunMsg("lua -f")
 
 print("OK")

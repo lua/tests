@@ -5,7 +5,7 @@ if _port then return end
 
 print ("testing lua.c options")
 
-assert(os.execute() ~= 0)   -- machine has a system command
+assert(os.execute())   -- machine has a system command
 
 prog = os.tmpname()
 otherprog = os.tmpname()
@@ -54,12 +54,12 @@ function auxrun (...)
 end
 
 function RUN (...)
-  assert(auxrun(...) == 0)
+  assert(auxrun(...))
 end
 
 function NoRun (...)
   print("\n(the next error is expected by the test)")
-  assert(auxrun(...) ~= 0)
+  assert(not auxrun(...))
 end
 
 -- test environment variables used by Lua

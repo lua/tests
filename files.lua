@@ -431,7 +431,7 @@ if not _soft then
   x = nil; y = nil
 end
 
--- test for popen/pclose
+-- test for popen/pclose and execute
 if not _port then
   local tests = {
     -- command,   what,  code
@@ -442,10 +442,13 @@ if not _port then
     {"kill -s HUP $$", "signal", 1},
     {"kill -s KILL $$", "signal", 9},
     {"sh -c 'kill -s HUP $$'", "exit"},
+    {'lua -e "os.exit(20, true)"', "exit", 20},
   }
   print("\n(some error messages are expected now)")
   for _, v in ipairs(tests) do
     local x, y, z = io.popen(v[1]):close()
+    local x1, y1, z1 = os.execute(v[1])
+    assert(x == x1 and y == y1 and z == z1)
     if v[2] == "ok" then
       assert(x == true and y == nil and z == nil)
     else

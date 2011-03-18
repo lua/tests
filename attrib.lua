@@ -38,18 +38,23 @@ end
 do
   local oldpath = package.path
   package.path = {}
-  local s, err = pcall(require, "xuxu")
+  local s, err = pcall(require, "no-such-file")
   assert(not s and string.find(err, "package.path"))
   package.path = oldpath
 end
 
 print('+')
 
+-- auxiliary directory with C modules and temporary files
 local DIR = "libs/"
+
+-- prepend DIR to a name
+local function D (x) return DIR .. x end
+
 
 local function createfiles (files, preextras, posextras)
   for n,c in pairs(files) do
-    io.output(DIR..n)
+    io.output(D(n))
     io.write(string.format(preextras, n))
     io.write(c)
     io.write(string.format(posextras, n))
@@ -59,11 +64,12 @@ end
 
 function removefiles (files)
   for n in pairs(files) do
-    os.remove(DIR..n)
+    os.remove(D(n))
   end
 end
 
 local files = {
+  ["names.lua"] = "do return {...} end\n",
   ["err.lua"] = "B = 15; a = a + 1;",
   ["A.lua"] = "",
   ["B.lua"] = "assert(...=='B');require 'A'",
@@ -83,9 +89,9 @@ return AA]]
 createfiles(files, "", extras)
 
 -- testing explicit "dir" separator in 'searchpath'
-assert(package.searchpath("C.lua", DIR.."?", "") == DIR.."C.lua")
-assert(package.searchpath(DIR.."C.lua", "?", "/") == DIR.."C.lua")
-assert(package.searchpath(".\\C.lua", DIR.."?", "\\") == DIR.."./C.lua")
+assert(package.searchpath("C.lua", D"?", "") == D"C.lua")
+assert(package.searchpath(D"C.lua", "?", "/") == D"C.lua")
+assert(package.searchpath(".\\C.lua", D"?", "\\") == D"./C.lua")
 
 local oldpath = package.path
 
@@ -99,11 +105,14 @@ local try = function (p, n, r)
   assert(rr == r)
 end
 
+a = require"names"
+assert(a[1] == "names" and a[2] == D"names.lua")
+
 _G.a = nil
 assert(not pcall(require, "err"))
 assert(B == 15)
 
-assert(package.searchpath("C", package.path) == DIR .. "C.lua")
+assert(package.searchpath("C", package.path) == D"C.lua")
 assert(require"C" == 25)
 assert(require"C" == 25)
 AA = nil
@@ -115,10 +124,10 @@ package.loaded.A = nil
 try('B', nil, true)   -- should not reload package
 try('A', 'A.lua', true)
 package.loaded.A = nil
-os.remove(DIR..'A.lua')
+os.remove(D'A.lua')
 AA = {}
 try('A', 'A.lc', AA)  -- now must find second option
-assert(package.searchpath("A", package.path) == DIR .. "A.lc")
+assert(package.searchpath("A", package.path) == D"A.lc")
 assert(require("A") == AA)
 AA = false
 try('K', 'L', false)     -- default option
@@ -151,7 +160,7 @@ assert(AA == 0 and m.AA == 10)
 assert(require"P1" == m)
 assert(require"P1" == m)
 
-assert(package.searchpath("P1.xuxu", package.path) == "libs/P1/xuxu.lua")
+assert(package.searchpath("P1.xuxu", package.path) == D"P1/xuxu.lua")
 m.xuxu = assert(require"P1.xuxu")
 assert(AA == 0 and m.xuxu.AA == 20)
 assert(require"P1.xuxu" == m.xuxu)
@@ -196,7 +205,7 @@ assert(not pcall(module, 'XUXU'))
 local p = ""   -- On Mac OS X, redefine this to "_"
 
 -- check whether loadlib works in this system
-local st, err, when = package.loadlib("libs/lib1.so", "*")
+local st, err, when = package.loadlib(D"lib1.so", "*")
 if not st then
   local f, err, when = package.loadlib("donotexist", p.."xuxu")
   assert(not f and type(err) == "string" and when == "absent")
@@ -204,31 +213,34 @@ if not st then
   print(err, when)
 else
   -- tests for loadlib
-  local f = assert(package.loadlib("libs/lib1.so", p.."onefunction"))
+  local f = assert(package.loadlib(D"lib1.so", p.."onefunction"))
   local a, b = f(15, 25)
   assert(a == 25 and b == 15)
 
-  f = assert(package.loadlib("libs/lib1.so", p.."anotherfunc"))
+  f = assert(package.loadlib(D"lib1.so", p.."anotherfunc"))
   assert(f(10, 20) == "1020\n")
 
   -- check error messages
-  local f, err, when = package.loadlib("libs/lib1.so", p.."xuxu")
+  local f, err, when = package.loadlib(D"lib1.so", p.."xuxu")
   assert(not f and type(err) == "string" and when == "init")
   f, err, when = package.loadlib("donotexist", p.."xuxu")
   assert(not f and type(err) == "string" and when == "open")
 
   -- symbols from 'lib1' must be visible to other libraries
-  f = assert(package.loadlib("libs/lib11.so", p.."luaopen_lib11"))
+  f = assert(package.loadlib(D"lib11.so", p.."luaopen_lib11"))
   assert(f() == "exported")
 
   -- test C modules with prefixes in names
-  package.cpath = "libs/?.so"
+  package.cpath = D"?.so"
   local lib2 = require"v-lib2"
-  assert(x == 0.5)   -- access to global environment
+  -- check correct access to global environment and correct
+  -- parameters
+  assert(_ENV.x == "v-lib2" and _ENV.y == D"v-lib2.so")
   assert(lib2.id("x") == "x")
 
   -- test C submodules
   local fs = require"lib1.sub"
+  assert(_ENV.x == "lib1.sub" and _ENV.y == D"lib1.so")
   assert(fs.id(45) == 45)
 end
 
@@ -241,7 +253,7 @@ do
   local p = package
   package = {}
   p.preload.pl = function (...)
-    local _ENV = {}
+    local _ENV = {...}
     function xuxu (x) return x+20 end
     return _ENV
   end
@@ -249,6 +261,7 @@ do
   local pl = require"pl"
   assert(require"pl" == pl)
   assert(pl.xuxu(10) == 30)
+  assert(pl[1] == "pl" and pl[2] == nil)
 
   package = p
   assert(type(package.path) == "string")

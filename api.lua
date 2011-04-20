@@ -116,7 +116,7 @@ assert(T.testC("pushstring 10; pushnum 20; arith -; return 1") == -10)
 assert(T.testC("pushstring 10; pushstring -20; arith *; return 1") == -200)
 assert(T.testC("pushstring 10; pushstring 3; arith ^; return 1") == 1000)
 a,b,c = T.testC([[pushnum 1;
-                  pushstring 10; pushstring 3; arith _;
+                  pushstring 10; arith _;
                   pushstring 5; return 3]])
 assert(a == 1 and b == -10 and c == "5")
 mt = {__add = function (a,b) return setmetatable({a[1] + b[1]}, mt) end,
@@ -128,7 +128,7 @@ a,b,c = setmetatable({4}, mt),
 x,y,z = T.testC("arith +; return 2", 10, a, b)
 assert(x == 10 and y[1] == 12 and z == nil)
 assert(T.testC("arith %; return 1", a, c)[1] == 4%-3)
-assert(T.testC("arith _; arith +; arith %; return 1", b, a, c, b)[1] ==
+assert(T.testC("arith _; arith +; arith %; return 1", b, a, c)[1] ==
                8 % (4 + (-3)*2))
 
 

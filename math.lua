@@ -197,33 +197,8 @@ assert(a*b == 200 and a+b == 30 and a-b == -10 and a/b == 0.5 and -b == -20)
 assert(a == '10' and b == '20')
 
 
-if _soft then return end
-
-f = io.tmpfile()
-assert(f)
-f:write("_ENV.a = {")
-i = 1
-repeat
-  f:write("{", math.sin(i), ", ", math.cos(i), ", ", i/3, "},\n")
-  i=i+1
-until i > 1000
-f:write("}")
-f:seek("set", 0)
-assert(load(f:read('*a')))()
-assert(f:close())
-a = _ENV.a   -- may be local
-
-assert(eq(a[300][1], math.sin(300)))
-assert(eq(a[600][1], math.sin(600)))
-assert(eq(a[500][2], math.cos(500)))
-assert(eq(a[800][2], math.cos(800)))
-assert(eq(a[200][3], 200/3))
-assert(eq(a[1000][3], 1000/3, 0.001))
-print('+')
-
-a = nil
-
-do   -- testing -0 and NaN
+if not _port then
+  print("testing -0 and NaN")
   local mz, z = -0, 0
   assert(mz == z)
   assert(1/mz < 0 and 0 < 1/z)
@@ -256,37 +231,35 @@ do   -- testing -0 and NaN
 end
 
 
-math.randomseed(0)
+if not _port then
+  print("testing 'math.random'")
+  math.randomseed(0)
 
-local i = 0
-local Max = 0
-local Min = 2
-repeat
-  local t = math.random()
-  Max = math.max(Max, t)
-  Min = math.min(Min, t)
-  i=i+1
-  flag = eq(Max, 1, 0.001) and eq(Min, 0, 0.001)
-until flag or i>10000
-assert(0 <= Min and Max<1)
-assert(flag);
+  local function aux (x1, x2, p)
+    local Max = -math.huge
+    local Min = math.huge
+    for i = 0, 20000 do
+      local t = math.random(table.unpack(p))
+      Max = math.max(Max, t)
+      Min = math.min(Min, t)
+      if eq(Max, x2, 0.001) and eq(Min, x1, 0.001) then
+        goto ok
+      end
+    end
+    -- loop ended without satisfing condition
+    assert(false)
+   @ok:
+    assert(x1 <= Min and Max<=x2)
+  end
+
+  aux(0, 1, {})
+  aux(-10, 0, {-10,0})
+end
 
 for i=1,10 do
   local t = math.random(5)
   assert(1 <= t and t <= 5)
 end
-
-i = 0
-Max = -200
-Min = 200
-repeat
-  local t = math.random(-10,0)
-  Max = math.max(Max, t)
-  Min = math.min(Min, t)
-  i=i+1
-  flag = (Max == 0 and Min == -10)
-until flag or i>10000
-assert(flag);
 
 
 print('OK')

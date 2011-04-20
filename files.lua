@@ -412,7 +412,7 @@ end
 
 
 if not _soft then
-  -- testing large files (> BUFSIZ)
+  print("testing large files (> BUFSIZ)")
   io.output(file)
   for i=1,5001 do io.write('0123456789123') end
   io.write('\n12346'):close()
@@ -431,8 +431,8 @@ if not _soft then
   x = nil; y = nil
 end
 
--- test for popen/pclose and execute
-if not _port then
+if not _noposix then
+  print("testing popen/pclose and execute")
   local tests = {
     -- command,   what,  code
     {"ls > /dev/null", "ok"},
@@ -494,8 +494,7 @@ assert(not pcall(os.date, "%O"))   -- invalid conversion specifier
 assert(not pcall(os.date, "%E"))   -- invalid conversion specifier
 assert(not pcall(os.date, "%Ea"))   -- invalid conversion specifier
 
-if not _port then
-  -- assume POSIX
+if not _noposix then
   assert(type(os.date("%Ex")) == 'string')
   assert(type(os.date("%Oy")) == 'string')
 end

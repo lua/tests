@@ -7,16 +7,31 @@ if _VERSION ~= version then
   return
 end
 
-local usertests = rawget(_G, "_U")
+
+-- next variables control the execution of some tests
+-- true means no test (so an undefined variable does not skip a test)
+-- defaults are for Linux; test everything
 
 _soft = false      -- true to avoid long or memory consuming tests
 _port = false      -- true to avoid non-portable tests
 _no32 = false      -- true to avoid tests that assume 32 bits
 _nomsg = false     -- true to avoid messages about tests not performed
+_noposix = false   -- false assumes LUA_USE_POSIX
+_nolonglong = false  -- false assumes LUA_USE_LONGLONG
+_noformatA = false   -- false assumes LUA_USE_AFORMAT
 
+
+local usertests = rawget(_G, "_U")
 
 if usertests then
-  _soft = true; _port = true; _no32 = true; _nomsg = true
+  -- tests for sissies ;)  Avoid problems
+  _soft = true
+  _port = true
+  _no32 = true
+  _nomsg = true
+  _noposix = true
+  _nolonglong = true
+  _noformatA = true; 
 end
 
 -- no "internal" tests for user tests

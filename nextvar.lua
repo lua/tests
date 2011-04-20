@@ -33,7 +33,7 @@ assert(i == 4)
 -- iterator function is always the same
 assert(type(ipairs{}) == 'function' and ipairs{} == ipairs{})
 
-if T then
+if T then  --[
 -- testing table sizes
 
 local function log2 (x) return math.log(x, 2) end
@@ -160,7 +160,7 @@ end
 local a = {}
 for i=1,lim do a[i] = true; foo(i, table.unpack(a)) end
 
-end
+end  --]
 
 
 -- test size operation on empty tables
@@ -365,9 +365,8 @@ a = nil; for i=1,1 do assert(not a); a=1 end; assert(a)
 a = nil; for i=1,1,-1 do assert(not a); a=1 end; assert(a)
 
 if not _port then
-  a = 0; for i=0, 1, 0.1 do a=a+1 end; assert(a==11)
-  -- precision problems
-  --a = 0; for i=1, 0, -0.01 do a=a+1 end; assert(a==101)
+  print("testing precision in numeric for")
+  local a = 0; for i=0, 1, 0.1 do a=a+1 end; assert(a==11)
   a = 0; for i=0, 0.999999999, 0.1 do a=a+1 end; assert(a==10)
   a = 0; for i=1, 1, 1 do a=a+1 end; assert(a==1)
   a = 0; for i=1e10, 1e10, -1 do a=a+1 end; assert(a==1)

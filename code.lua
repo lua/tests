@@ -45,15 +45,20 @@ end, 'CLOSURE', 'NEWTABLE', 'GETTABUP', 'CALL', 'SETLIST', 'CALL', 'RETURN')
 check(function ()
   local a,b,c
   local d; local e;
-  a = nil; d=nil
+  local f,g,h;
+  d = nil; d=nil; b=nil; a=nil; c=nil;
 end, 'LOADNIL', 'RETURN')
 
 check(function ()
-  local a = 1
-  local a,b,c
-  local d; local e;
-  a = nil; d=nil
-end, 'LOADK', 'LOADNIL', 'RETURN')
+  local a,b,c,d = 1,1,1,1
+  d=nil;c=nil;b=nil;a=nil
+end, 'LOADK', 'LOADK', 'LOADK', 'LOADK', 'LOADNIL', 'RETURN')
+
+do
+  local a,b,c,d = 1,1,1,1
+  d=nil;c=nil;b=nil;a=nil
+  assert(a == nil and b == nil and c == nil and d == nil)
+end
 
 
 -- single return

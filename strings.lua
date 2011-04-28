@@ -140,20 +140,41 @@ assert(string.format("-%.20s.20s", string.rep("%", 2000)) ==
 assert(string.format('"-%20s.20s"', string.rep("%", 2000)) ==
        string.format("%q", "-"..string.rep("%", 2000)..".20s"))
 
+-- format x tostring
+assert(string.format("%s %s", nil, true) == "nil true")
+assert(string.format("%s %.4s", false, true) == "false true")
+assert(string.format("%.3s %.3s", false, true) == "fal tru")
+local m = setmetatable({}, {__tostring = function () return "hello" end})
+assert(string.format("%s %.10s", m, m) == "hello hello")
+
 
 -- longest number that can be formated
 assert(string.len(string.format('%99.99f', -1e308)) >= 100)
 
-if not _no32 then
-  --border cases for format (assumes no long long)
-  assert(string.format("%8x", -1) == "ffffffff")
+if not _nolonglong then
+  print("testing large numbers for format")
+  assert(string.format("%8x", -1) == "ffffffffffffffff")
   assert(string.format("%d", -1) == "-1")
+  assert(tonumber(string.format("%u", -1)) == 2^64)
   assert(string.format("%8x", 0xffffffff) == "ffffffff")
-  assert(string.format("%d", 0xffffffff) == "-1")
   assert(string.format("%8x", 0x7fffffff) == "7fffffff")
-  assert(string.format("%d", 0x7fffffff) == tostring(2^31 - 1))
-  assert(string.format("%u", 0x80000003) == tostring(0x80000003))
+  assert(string.format("%d", 2^53) == "9007199254740992")
+  assert(string.format("%d", -2^53) == "-9007199254740992")
   assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
+  -- maximum integer that fits both in 64-int and (exact) double
+  local x = 2^64 - 2^(64-53)
+  assert(x == 0xfffffffffffff800)
+  assert(tonumber(string.format("%u", x)) == x)
+  assert(tonumber(string.format("0X%x", x)) == x)
+  assert(string.format("%x", x) == "fffffffffffff800")
+end
+
+if not _noformatA then
+  print("testing 'format %a %A'")
+  assert(string.format("%.2a", 0.5) == "0x1.00p-1")
+  assert(string.format("%A", 0x1fffffffffffff) == "0X1.FFFFFFFFFFFFFP+52")
+  assert(string.format("%.4a", -3) == "-0x1.8000p+1")
+  assert(tonumber(string.format("%a", -0.1)) == -0.1)
 end
 
 -- errors in format

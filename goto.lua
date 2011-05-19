@@ -1,5 +1,5 @@
 local function errmsg (code, m)
-  local st, msg = loadstring(code)
+  local st, msg = load(code)
   assert(not st and string.find(msg, m))
 end
 

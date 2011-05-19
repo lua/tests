@@ -299,7 +299,7 @@ local function allcases (n)
 end
 
 for _, v in pairs(allcases(4)) do
-  local res = loadstring("return " .. v[1])()
+  local res = load("return " .. v[1])()
   assert(res == v[2])
 end
 ------------------------------------------------------------------

@@ -450,9 +450,9 @@ if not _noposix then
     local x1, y1, z1 = os.execute(v[1])
     assert(x == x1 and y == y1 and z == z1)
     if v[2] == "ok" then
-      assert(x == true and y == nil and z == nil)
+      assert(x == true and y == 'exit' and z == 0)
     else
-      assert(y == v[2])   -- correct 'what'
+      assert(x == nil and y == v[2])   -- correct status and 'what'
       -- correct code if known (but always different from 0)
       assert((v[3] == nil and z > 0) or v[3] == z)
     end

@@ -221,6 +221,8 @@ end
 
 -- testing decimal point locale
 if os.setlocale("pt_BR") or os.setlocale("ptb") then
+  assert(not load("á = 3"))  -- parser still works with C locale
+  assert(not load("a = (3,4)"))
   assert(tonumber("3,4") == 3.4 and tonumber"3.4" == nil)
   assert(assert(load("return 3.4"))() == 3.4)
   assert(assert(load("return .4,3"))() == .4)

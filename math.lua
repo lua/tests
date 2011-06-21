@@ -248,7 +248,7 @@ if not _port then
     end
     -- loop ended without satisfing condition
     assert(false)
-   @ok:
+   ::ok::
     assert(x1 <= Min and Max<=x2)
   end
 

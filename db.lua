@@ -369,7 +369,7 @@ assert(t.a == 1 and t.b == 2 and t.c == 3)
 assert(debug.setupvalue(foo1, 1, "xuxu") == "b")
 assert(({debug.getupvalue(foo2, 3)})[2] == "xuxu")
 -- upvalues of C functions are allways "called" "" (the empty string)
-assert(debug.getupvalue(io.read, 1) == "")  
+assert(debug.getupvalue(string.gmatch("x", "x"), 1) == "")  
 
 
 -- testing count hooks

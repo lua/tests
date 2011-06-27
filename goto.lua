@@ -4,33 +4,15 @@ local function errmsg (code, m)
 end
 
 -- cannot see label inside block
-errmsg([[
-goto l1;
-do ::l1:: end
-]], "label 'l1'")
+errmsg([[ goto l1; do ::l1:: end ]], "label 'l1'")
+errmsg([[ do ::l1:: end goto l1; ]], "label 'l1'")
 
 -- repeated label
-errmsg([[
-::l1::
-::l1::
-]], "label 'l1'")
+errmsg([[ ::l1:: ::l1:: ]], "label 'l1'")
 
-errmsg([[
-do ::l1:: end
-do ::l1:: end
-]], "label 'l1'")
-
-errmsg([[
-do do ::l1:: end end
-::l1::
-]], "label 'l1'")
 
 -- undefined label
-errmsg([[
-goto l1;
-local aa
-::l1:: ::l2:: print(3)
-]], "local 'aa'")
+errmsg([[ goto l1; local aa ::l1:: ::l2:: print(3) ]], "local 'aa'")
 
 -- jumping over variable definition
 errmsg([[
@@ -40,12 +22,10 @@ local aa
 ]], "local 'aa'")
 
 -- jumping into a block
-errmsg([[
-do ::l1:: end
-goto l1
-]], "label 'l1'")
+errmsg([[ do ::l1:: end goto l1 ]], "label 'l1'")
+errmsg([[ goto l1 do ::l1:: end ]], "label 'l1'")
 
--- cannot continue a repeat-until
+-- cannot continue a repeat-until with variables
 errmsg([[
   repeat
     if x then goto cont end
@@ -64,28 +44,32 @@ do
 end
 ::l3:: ::l3_1:: assert(x == 13)
 
+-- goto to correct label when nested
+do goto l3; ::l3:: end   -- does not loop jumping to previous label 'l3'
+
 -- ok to jump over local dec. to end of block
 do
-  goto la1
+  goto l1
   local a = 23
   x = a
-  ::la1::;
+  ::l1::;
 end
 
 while true do
   goto l4
-  goto l5  -- ok to jump over local dec. to end of block
-  goto l5  -- multiple uses of same label
+  goto l1  -- ok to jump over local dec. to end of block
+  goto l1  -- multiple uses of same label
   local x = 45
-  ::l5:: ;;;
+  ::l1:: ;;;
 end
 ::l4:: assert(x == 13)
 
 if print then
-  goto lb1   -- ok to jump over local dec. to end of block
-  goto lb2   -- ok to jump over local dec. to end of block
+  goto l1   -- ok to jump over local dec. to end of block
+  error("should not be here")
+  goto l2   -- ok to jump over local dec. to end of block
   local x
-  ::lb1:: ; ::lb2:: ;;
+  ::l1:: ; ::l2:: ;;
 else end
 
 -- to repeat a label in a different function is OK

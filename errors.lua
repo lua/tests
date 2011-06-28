@@ -90,8 +90,6 @@ assert(not string.find(doit"aaa={}; (aaa or aaa)()", "'aaa'"))
 checkmessage("print(print < 10)", "function")
 checkmessage("print(print < print)", "two function")
 
-checkmessage("print(('hello')[1])", "field '1'")
-
 
 -- passing light userdata instead of full userdata
 _G.D = debug

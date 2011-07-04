@@ -4,7 +4,7 @@ print "testing unpack"
 
 local unpack = table.unpack
 
-local x,y,z,a
+local x,y,z,a,n
 a = {}; lim = 2000
 for i=1, lim do a[i]=i end
 assert(select(lim, unpack(a)) == lim and select('#', unpack(a)) == lim)
@@ -43,14 +43,14 @@ end
 
 print "testing pack"
 
-a = table.pack()
-assert(a[1] == nil and a.n == 0)
+a, n = table.pack()
+assert(a[1] == nil and a.n == 0 and n == 0) 
 
-a = table.pack(table)
-assert(a[1] == table and a.n == 1)
+a, n = table.pack(table)
+assert(a[1] == table and a.n == 1 and n == 1)
 
-a = table.pack(nil, nil, nil, nil)
-assert(a[1] == nil and a.n == 4)
+a, n = table.pack(nil, nil, nil, nil)
+assert(a[1] == nil and a.n == 4 and n == 4)
 
 
 print"testing sort"

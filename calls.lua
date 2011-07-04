@@ -169,7 +169,7 @@ function equaltab (t1, t2)
   end
 end
 
-local pack = table.pack
+local pack = function (...) return (table.pack(...)) end
 
 function f() return 1,2,30,4 end
 function ret2 (a,b) return a,b end

@@ -33,18 +33,18 @@ local function lexstring (x, y, n)
   assert(s == y and l == n)
 end
 
-lexstring("'abc\\*  \n   efg'", "abcefg", 2)
-lexstring("'abc\\*  \n\n\n'", "abc", 4)
-lexstring("'\\*  \n\t\f\v\n'",  "", 3)
+lexstring("'abc\\z  \n   efg'", "abcefg", 2)
+lexstring("'abc\\z  \n\n\n'", "abc", 4)
+lexstring("'\\z  \n\t\f\v\n'",  "", 3)
 lexstring("[[\nalo\nalo\n\n]]", "alo\nalo\n\n", 5)
 lexstring("[[\nalo\ralo\n\n]]", "alo\nalo\n\n", 5)
 lexstring("[[\nalo\ralo\r\n]]", "alo\nalo\n", 4)
 lexstring("[[\ralo\n\ralo\r\n]]", "alo\nalo\n", 4)
 lexstring("[[alo]\n]alo]]", "alo]\n]alo", 2)
 
-assert("abc\*
-        def\*
-        ghi\*
+assert("abc\z
+        def\z
+        ghi\z
        " == 'abcdefghi')
 
 -- Error in escape sequences
@@ -71,8 +71,8 @@ lexerror("[=[alo]]", "<eof>")
 lexerror("[=[alo]=", "<eof>")
 lexerror("[=[alo]", "<eof>")
 lexerror("'alo", "<eof>")
-lexerror("'alo \\*  \n\n", "<eof>")
-lexerror("'alo \\*", "<eof>")
+lexerror("'alo \\z  \n\n", "<eof>")
+lexerror("'alo \\z", "<eof>")
 
 -- valid characters in variable names
 for i = 0, 255 do

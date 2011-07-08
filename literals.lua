@@ -61,6 +61,8 @@ lexerror([["\xr"]], [[\xr]])
 lexerror([["\x.]], [[\x.]])
 lexerror([["\x8%"]], [[\x8%]])
 lexerror([["\xAG]], [[\xAG]])
+lexerror([["\g"]], [[\g]])
+lexerror([["\."]], [[\.]])
 
 lexerror([["\999"]], [[\999]])
 lexerror([["xyz\300"]], [[\300]])

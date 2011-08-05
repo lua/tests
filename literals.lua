@@ -25,7 +25,7 @@ assert('\0\0\0alo' == '\0' .. '\0\0' .. 'alo')
 assert(010 .. 020 .. -030 == "1020-30")
 
 -- hexadecimal escapes
-assert("\x00\x05\x10\x1f\x3C\xFF\xe8" == "\0\5\16\31\60\255\232")
+assert("\x00\x05\x10\x1f\x3C\xfF\xe8" == "\0\5\16\31\60\255\232")
 
 local function lexstring (x, y, n)
   local f = assert(load('return '..x..', debug.getinfo(1).currentline'))
@@ -54,18 +54,22 @@ local function lexerror (s, err)
   assert(not st and string.find(msg, "near "..err, 1, true))
 end
 lexerror([["abc\x"]], [[\x"]])
+lexerror([["abc\x]], [[\x]])
 lexerror([["\x]], [[\x]])
 lexerror([["\x5"]], [[\x5"]])
 lexerror([["\x5]], [[\x5]])
 lexerror([["\xr"]], [[\xr]])
+lexerror([["\xr]], [[\xr]])
 lexerror([["\x.]], [[\x.]])
 lexerror([["\x8%"]], [[\x8%]])
 lexerror([["\xAG]], [[\xAG]])
 lexerror([["\g"]], [[\g]])
+lexerror([["\g]], [[\g]])
 lexerror([["\."]], [[\.]])
 
 lexerror([["\999"]], [[\999]])
 lexerror([["xyz\300"]], [[\300]])
+lexerror([["   \256"]], [[\256]])
 
 
 -- unfinished strings
@@ -75,6 +79,7 @@ lexerror("[=[alo]", "<eof>")
 lexerror("'alo", "<eof>")
 lexerror("'alo \\z  \n\n", "<eof>")
 lexerror("'alo \\z", "<eof>")
+lexerror([['alo \98]], "<eof>")
 
 -- valid characters in variable names
 for i = 0, 255 do

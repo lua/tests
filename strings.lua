@@ -153,9 +153,9 @@ assert(string.len(string.format('%99.99f', -1e308)) >= 100)
 
 if not _nolonglong then
   print("testing large numbers for format")
-  assert(string.format("%8x", -1) == "ffffffffffffffff")
+  assert(string.format("%8x", 2^52 - 1) == "fffffffffffff")
   assert(string.format("%d", -1) == "-1")
-  assert(tonumber(string.format("%u", -1)) == 2^64)
+  assert(tonumber(string.format("%u", 2^62)) == 2^62)
   assert(string.format("%8x", 0xffffffff) == "ffffffff")
   assert(string.format("%8x", 0x7fffffff) == "7fffffff")
   assert(string.format("%d", 2^53) == "9007199254740992")

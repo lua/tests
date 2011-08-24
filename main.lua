@@ -91,6 +91,13 @@ prepfile("print(X)")
 RUN("env LUA_INIT_5_2='X=10' LUA_INIT='X=3' lua %s > %s", prog, out)
 checkout("10\n")
 
+-- test option '-E'
+prepfile("print(package.path, package.cpath)")
+RUN("env LUA_INIT='error(10)' LUA_PATH=xxx LUA_CPATH=xxx lua -E %s > %s",
+     prog, out)
+local t = getoutput()
+assert(not string.find(t, "xxx") and string.find(t, "lua"))
+
 
 -- test 2 files
 prepfile("print(1); a=2; return {x=15}")

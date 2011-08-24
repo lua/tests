@@ -48,6 +48,7 @@ collectgarbage()
 
 a = setmetatable({}, t)
 function f(t, i, v) rawset(t, i, v-3) end
+setmetatable(t, t)   -- causes a bug in 5.1 !
 t.__newindex = f
 a[1] = 30; a.x = "101"; a[5] = 200
 assert(a[1] == 27 and a.x == 98 and a[5] == 197)
@@ -86,6 +87,7 @@ do  -- newindex
 end
 
 
+setmetatable(t, nil)
 function f (t, ...) return t, {...} end
 t.__call = f
 

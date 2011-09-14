@@ -155,5 +155,28 @@ checkequal(function (l) local a; return 0 <= a and a <= l end,
            function (l) local a; return not (not(a >= 0) or not(a <= l)) end)
 
 
+-- if-goto optimizations
+check(function (a)
+        if a == 1 then goto l1
+        elseif a == 2 then goto l2
+        elseif a == 3 then goto l2
+        else if a == 4 then goto l3
+             else goto l3
+             end
+        end
+        ::l1:: ::l2:: ::l3:: ::l4:: 
+end, 'EQ', 'JMP', 'EQ', 'JMP', 'EQ', 'JMP', 'EQ', 'JMP', 'JMP', 'RETURN')
+
+checkequal(
+function (a) while a < 10 do a = a + 1 end end,
+function (a) ::L2:: if not(a < 10) then goto L1 end; a = a + 1;
+                goto L2; ::L1:: end
+)
+
+checkequal(
+function (a) while a < 10 do a = a + 1 end end,
+function (a) while true do if not(a < 10) then break end; a = a + 1; end end
+)
+
 print 'OK'
 

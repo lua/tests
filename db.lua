@@ -111,7 +111,7 @@ then
 else
   a=2
 end
-]], {2,4,7})
+]], {2,3,4,7})
 
 test([[--
 if nil then
@@ -141,11 +141,10 @@ end
 
 test([[while math.sin(1) do
   if math.sin(1)
-  then
-    break
+  then break
   end
 end
-a=1]], {1,2,4,7})
+a=1]], {1,2,3,6})
 
 test([[for i=1,3 do
   a=i

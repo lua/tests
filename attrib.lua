@@ -347,6 +347,8 @@ a[f] = print
 a[a] = a
 assert(a[a][a][a][a][print] == assert)
 a[print](a[a[f]] == a[print])
+assert(not pcall(function () a[nil] = 10 end))
+assert(a[nil] == nil)
 a = nil
 
 a = {10,9,8,7,6,5,4,3,2; [-3]='a', [f]=print, a='a', b='ab'}

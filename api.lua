@@ -106,6 +106,19 @@ do  -- test returning more results than fit in the caller stack
 end
 
 
+-- testing globals
+_G.a = 14; _G.b = "a31"
+local a = {T.testC[[
+  getglobal a;
+  getglobal b;
+  getglobal b;
+  setglobal a;
+  gettop;
+  return .
+]]}
+assert(a[2] == 14 and a[3] == "a31" and a[4] == nil and _G.a == "a31")
+
+
 -- testing arith
 assert(T.testC("pushnum 10; pushnum 20; arith /; return 1") == 0.5)
 assert(T.testC("pushnum 10; pushnum 20; arith -; return 1") == -10)

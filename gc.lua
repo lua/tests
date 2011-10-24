@@ -261,6 +261,26 @@ collectgarbage()
 assert(next(a) == string.rep('$', 11))
 
 
+-- 'bug' in 5.1
+a = {}
+local t = {x = 10}
+local C = setmetatable({key = t}, {__mode = 'v'})
+local C1 = setmetatable({[t] = 1}, {__mode = 'k'})
+a.x = t  -- this should not prevent 't' from being removed from
+         -- weak table 'C' by the time 'a' is finalized
+
+setmetatable(a, {__gc = function (u)
+                          assert(C.key == nil)
+                          assert(type(next(C1)) == 'table')
+                          end})
+
+a, t = nil
+collectgarbage()
+collectgarbage()
+assert(next(C) == nil and next(C1) == nil)
+C, C1 = nil
+
+
 -- ephemerons
 local mt = {__mode = 'k'}
 a = {10,20,30,40}; setmetatable(a, mt)

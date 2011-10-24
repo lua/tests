@@ -391,6 +391,19 @@ do
   assert(t[1] == 10)
 end
 
+-- bug in 5.2 beta
+local function foo ()
+  local a
+  return function ()
+    local b
+    a, b = 3, 14    -- local and upvalue have same index
+    return a, b
+  end
+end
+
+local a, b = foo()()
+assert(a == 3 and b == 14)
+
 print('OK')
 
 return res

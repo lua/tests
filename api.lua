@@ -293,9 +293,15 @@ assert(a(3) == math.deg(3) and a == math.deg)
 
 
 -- testing deep C stack
-assert(not pcall(T.testC, "checkstack 1000023"))   -- too deep
+do
+  local s, msg = pcall(T.testC, "checkstack 1000023 XXXX")   -- too deep
+  assert(not s and string.find(msg, "XXXX"))
+  s = string.rep("pushnil;checkstack 1 XX;", 1000000)
+  s, msg = pcall(T.testC, s)
+  assert(not s and string.find(msg, "XX"))
+end
 
-local prog = {"checkstack 30000", "newtable"}
+local prog = {"checkstack 30000 msg", "newtable"}
 for i = 1,12000 do
   prog[#prog + 1] = "pushnum " .. i
   prog[#prog + 1] = "pushnum " .. i * 10
@@ -424,7 +430,7 @@ assert(T.upvalue(f, 2) == "xuxu")
 
 -- large closures
 do
-  local A = "checkstack 300" ..
+  local A = "checkstack 300 msg;" ..
             string.rep("pushnum 10;", 255) ..
             "pushcclosure 255; return 1"
   A = T.testC(A)

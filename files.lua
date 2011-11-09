@@ -185,6 +185,31 @@ assert(io.read('*a') == ';end of file\n')
 assert(io.read(0) == nil)
 assert(io.close(io.input()))
 
+
+-- test errors in read/write
+do
+  local function ismsg (m)
+    -- error message is not a code number
+    return (type(m) == "string" and tonumber(m) == nil)
+  end
+
+  -- read
+  local f = io.open(file, "w")
+  local r, m, c = f:read()
+  assert(r == nil and ismsg(m) and type(c) == "number")
+  assert(f:close())
+  -- write
+  f = io.open(file, "r")
+  r, m, c = f:write("whatever")
+  assert(r == nil and ismsg(m) and type(c) == "number")
+  assert(f:close())
+  -- lines
+  f = io.open(file, "w")
+  r, m = pcall(f:lines())
+  assert(r == false and ismsg(m))
+  assert(f:close())
+end
+
 assert(os.remove(file))
 
 -- test for *L format

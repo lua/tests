@@ -21,15 +21,21 @@ assert(type(package.config) == "string")
 print("package config: "..string.gsub(package.config, "\n", "|"))
 
 do
+  -- create a path with 'max' templates,
+  -- each with 1-10 repetitions of '?'
   local max = 2000
   local t = {}
   for i = 1,max do t[i] = string.rep("?", i%10 + 1) end
   t[#t + 1] = ";"    -- empty template
   local path = table.concat(t, ";")
+  -- use that path in a search
   local s, err = package.searchpath("xuxu", path)
+  -- search fails; check that message has an occurence of
+  -- '??????????' with ? replaced by xuxu and at least 'max' lines
   assert(not s and
          string.find(err, string.rep("xuxu", 10)) and
          #string.gsub(err, "[^\n]", "") >= max)
+  -- path with one very long template
   local path = string.rep("?", max)
   local s, err = package.searchpath("xuxu", path)
   assert(not s and string.find(err, string.rep('xuxu', max)))
@@ -89,7 +95,10 @@ return AA]]
 createfiles(files, "", extras)
 
 -- testing explicit "dir" separator in 'searchpath'
-assert(package.searchpath("C.lua", D"?", "") == D"C.lua")
+assert(package.searchpath("C.lua", D"?", "", "") == D"C.lua")
+assert(package.searchpath("C.lua", D"?", ".", ".") == D"C.lua")
+assert(package.searchpath("--x-", D"?", "-", "X") == D"XXxX")
+assert(package.searchpath("---xX", D"?", "---", "XX") == D"XXxX")
 assert(package.searchpath(D"C.lua", "?", "/") == D"C.lua")
 assert(package.searchpath(".\\C.lua", D"?", "\\") == D"./C.lua")
 
@@ -120,6 +129,7 @@ try('B', 'B.lua', true)
 assert(package.loaded.B)
 assert(require"B" == true)
 assert(package.loaded.A)
+assert(require"C" == 25)
 package.loaded.A = nil
 try('B', nil, true)   -- should not reload package
 try('A', 'A.lua', true)

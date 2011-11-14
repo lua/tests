@@ -218,8 +218,8 @@ a = assert(load(read1(x), "modname", "t", _G))
 assert(a() == "\0" and _G.x == 33)
 assert(debug.getinfo(a).source == "modname")
 -- cannot read text in binary mode
-cannotload("attempt to load", load(read1(x), "modname", "b", {}))
-cannotload("attempt to load", load(x, "modname", "b"))
+cannotload("attempt to load a text chunk", load(read1(x), "modname", "b", {}))
+cannotload("attempt to load a text chunk", load(x, "modname", "b"))
 
 a = assert(load(function () return nil end))
 a()  -- empty chunk
@@ -235,8 +235,8 @@ assert(f() == nil)   -- should read the empty chunk
 x = string.dump(load("x = 1; return x"))
 a = assert(load(read1(x), nil, "b"))
 assert(a() == 1 and _G.x == 1)
-cannotload("attempt to load", load(read1(x), nil, "t"))
-cannotload("attempt to load", load(x, nil, "t"))
+cannotload("attempt to load a binary chunk", load(read1(x), nil, "t"))
+cannotload("attempt to load a binary chunk", load(x, nil, "t"))
 
 assert(not pcall(string.dump, print))  -- no dump of C functions
 

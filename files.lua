@@ -355,6 +355,41 @@ a, b, c = assert(loadfile(file))()
 assert(a == 20 and b == "\0\0\0" and c == nil)
 assert(os.remove(file))
 
+
+-- 'loadfile' with 'env'
+do
+  local f = io.open(file, 'w')
+  f:write[[
+    if (...) then a = 15; return b, c, d
+    else return _ENV
+    end
+  ]]
+  f:close()
+  local t = {b = 12, c = "xuxu", d = print}
+  local f = assert(loadfile(file, 't', t))
+  local b, c, d = f(1)
+  assert(t.a == 15 and b == 12 and c == t.c and d == print)
+  assert(f() == t)
+  f = assert(loadfile(file, 't', nil))
+  assert(f() == nil)
+  f = assert(loadfile(file))
+  assert(f() == _G)
+  assert(os.remove(file))
+end
+
+
+-- 'loadfile' x modes
+do
+  io.open(file, 'w'):write("return 10"):close()
+  local s, m = loadfile(file, 'b')
+  assert(not s and string.find(m, "a text chunk"))
+  io.open(file, 'w'):write("\27 return 10"):close()
+  local s, m = loadfile(file, 't')
+  assert(not s and string.find(m, "a binary chunk"))
+  assert(os.remove(file))
+end
+
+
 io.output(file)
 assert(io.write("qualquer coisa\n"))
 assert(io.write("mais qualquer coisa"))

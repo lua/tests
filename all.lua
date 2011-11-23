@@ -151,20 +151,20 @@ report"gc.lua"
 local f = assert(loadfile('gc.lua'))
 f()
 
-collectgarbage("gen")
+collectgarbage("generational")
 dofile('db.lua')
 assert(dofile('calls.lua') == deep and deep)
 olddofile('strings.lua')
 olddofile('literals.lua')
 assert(dofile('attrib.lua') == 27)
 
-collectgarbage("inc")   -- redo some tests in incremental mode
+collectgarbage("incremental")   -- redo some tests in incremental mode
 olddofile('strings.lua')
 olddofile('literals.lua')
 dofile('constructs.lua')
 dofile('api.lua')
 
-collectgarbage("gen")   -- back to generational mode
+collectgarbage("generational")   -- back to generational mode
 collectgarbage("setpause", 200)
 collectgarbage("setmajorinc", 500)
 assert(dofile('locals.lua') == 5)

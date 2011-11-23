@@ -492,7 +492,7 @@ end
 
 if T then
   local debug = require "debug"
-  collectgarbage("gen"); collectgarbage("stop")
+  collectgarbage("generational"); collectgarbage("stop")
   x = T.newuserdata(0)
   T.gcstate("propagate")    -- ensure 'x' is old
   T.gcstate("sweepstring")
@@ -503,7 +503,7 @@ if T then
   debug.setmetatable(x, {__gc = true})   -- ...the old one
   assert(string.find(T.gccolor(y), "white"))
   T.checkmemory()
-  collectgarbage("inc"); collectgarbage("restart")
+  collectgarbage("incremental"); collectgarbage("restart")
 end
 
 

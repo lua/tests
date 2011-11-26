@@ -76,14 +76,18 @@ assert(os.setlocale"C")
 local T,print,format,write,assert,type,unpack,floor =
       T,print,string.format,io.write,assert,type,table.unpack,math.floor
 
+-- use K for 1000 and M for 1000000 (not 2^10 -- 2^20)
 local function F (m)
-  if m < 1024 then return m
+  local function round (m)
+    m = m + 0.04999
+    return m - (m % 0.1)     -- keep one decimal digit
+  end
+  if m < 1000 then return m
   else
-    m = floor(m/1024)
-    if m < 1024 then return m.."K"
+    m = m / 1000
+    if m < 1000 then return round(m).."K"
     else
-      m = floor(m/1024)
-      return m.."M"
+      return round(m/1000).."M"
     end
   end
 end

@@ -298,7 +298,10 @@ local function allcases (n)
   return res
 end
 
-for _, v in pairs(allcases(4)) do
+-- do not do too many combinations for soft tests
+local level = _soft and 3 or 4
+
+for _, v in pairs(allcases(level)) do
   local res = load("return " .. v[1])()
   assert(res == v[2])
 end

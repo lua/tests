@@ -167,6 +167,9 @@ if not _nolonglong then
   assert(tonumber(string.format("%u", x)) == x)
   assert(tonumber(string.format("0X%x", x)) == x)
   assert(string.format("%x", x) == "fffffffffffff800")
+  assert(string.format("%d", x/2) == "9223372036854774784")
+  assert(string.format("%d", -x/2) == "-9223372036854774784")
+  assert(string.format("%x", 2^63) == "8000000000000000")
 end
 
 if not _noformatA then
@@ -192,6 +195,12 @@ check("%10.1"..aux.."004d", "too long")
 check("%t", "invalid option")
 check("%"..aux.."d", "repeated flags")
 check("%d %d", "no value")
+
+
+-- integers out of range
+assert(not pcall(string.format, "%d", 2^63))
+assert(not pcall(string.format, "%x", 2^64))
+assert(not pcall(string.format, "%x", -1))
 
 
 assert(load("return 1\n--comentário sem EOL no final")() == 1)

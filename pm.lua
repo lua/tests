@@ -209,12 +209,12 @@ if not _soft then
   assert(not pcall(string.gsub, a, 'b'))
 end
 
--- deep nest of gsubs
+-- recursive nest of gsubs
 function rev (s)
   return string.gsub(s, "(.)(.+)", function (c,s1) return rev(s1)..c end)
 end
 
-local x = string.rep('012345', 10)
+local x = "abcdef"
 assert(rev(rev(x)) == x)
 
 

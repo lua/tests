@@ -522,7 +522,7 @@ F = function (x)
   local d = T.newuserdata(100)   -- cria lixo
   d = nil
   assert(debug.getmetatable(x).__gc == F)
-  load("table.insert({}, {})")()   -- cria mais lixo
+  assert(load("table.insert({}, {})"))()   -- cria mais lixo
   collectgarbage()   -- forca coleta de lixo durante coleta!
   assert(debug.getmetatable(x).__gc == F)   -- coleta anterior nao melou isso?
   local dummy = {}    -- cria lixo durante coleta

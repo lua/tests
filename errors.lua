@@ -367,7 +367,7 @@ end
 local function testrep (init, rep)
   local s = "local a; "..init .. string.rep(rep, 400)
   local a,b = load(s)
-  assert(not a and string.find(b, "syntax levels"))
+  assert(not a and string.find(b, "levels"))
 end
 testrep("a=", "{")
 testrep("a=", "(")
@@ -381,7 +381,7 @@ testrep("a=", "a^")
 
 local s = ("a,"):rep(200).."a=nil"
 local a,b = load(s)
-assert(not a and string.find(b, "variable names"))
+assert(not a and string.find(b, "levels"))
 
 
 -- testing other limits

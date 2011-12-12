@@ -84,16 +84,16 @@ RUN("env LUA_INIT= LUA_CPATH_5_2=yacc LUA_CPATH=x lua %s > %s", prog, out)
 checkout("yacc\n")
 
 prepfile("print(X)")
-RUN("env LUA_INIT='X=3' lua %s > %s", prog, out)
+RUN('env LUA_INIT="X=3" lua %s > %s', prog, out)
 checkout("3\n")
 
 prepfile("print(X)")
-RUN("env LUA_INIT_5_2='X=10' LUA_INIT='X=3' lua %s > %s", prog, out)
+RUN('env LUA_INIT_5_2="X=10" LUA_INIT="X=3" lua %s > %s', prog, out)
 checkout("10\n")
 
 -- test option '-E'
 prepfile("print(package.path, package.cpath)")
-RUN("env LUA_INIT='error(10)' LUA_PATH=xxx LUA_CPATH=xxx lua -E %s > %s",
+RUN('env LUA_INIT="error(10)" LUA_PATH=xxx LUA_CPATH=xxx lua -E %s > %s',
      prog, out)
 local defaultpath = getoutput()
 defaultpath = string.match(defaultpath, "^(.-)\t")   -- remove tab
@@ -103,7 +103,7 @@ assert(not string.find(defaultpath, "xxx") and string.find(defaultpath, "lua"))
 -- test replacement of ';;' to default path
 local function convert (p)
   prepfile("print(package.path)")
-  RUN("env LUA_PATH='%s' lua %s > %s", p, prog, out)
+  RUN('env LUA_PATH="%s" lua %s > %s', p, prog, out)
   local expected = getoutput()
   expected = string.sub(expected, 1, -2)   -- cut final end of line
   assert(string.gsub(p, ";;", ";"..defaultpath..";") == expected)
@@ -120,7 +120,7 @@ convert(";;a;;;bc")
 -- test 2 files
 prepfile("print(1); a=2; return {x=15}")
 prepfile(("print(a); print(_G['%s'].x)"):format(prog), otherprog)
-RUN("env LUA_PATH='?;;' lua -l %s -l%s -lstring -l io %s > %s", prog, otherprog, otherprog, out)
+RUN('env LUA_PATH="?;;" lua -l %s -l%s -lstring -l io %s > %s', prog, otherprog, otherprog, out)
 checkout("1\n2\n15\n2\n15\n")
 
 local a = [[
@@ -137,7 +137,7 @@ RUN('lua "-e " -- %s a b c', prog)
 
 prepfile"assert(arg==nil)"
 prepfile("assert(arg)", otherprog)
-RUN("env LUA_PATH='?;;' lua -l%s - < %s", prog, otherprog)
+RUN('env LUA_PATH="?;;" lua -l%s - < %s', prog, otherprog)
 
 prepfile""
 RUN("lua - < %s > %s", prog, out)

@@ -95,8 +95,26 @@ checkout("10\n")
 prepfile("print(package.path, package.cpath)")
 RUN("env LUA_INIT='error(10)' LUA_PATH=xxx LUA_CPATH=xxx lua -E %s > %s",
      prog, out)
-local t = getoutput()
-assert(not string.find(t, "xxx") and string.find(t, "lua"))
+local defaultpath = getoutput()
+defaultpath = string.match(defaultpath, "^(.-)\t")   -- remove tab
+assert(not string.find(defaultpath, "xxx") and string.find(defaultpath, "lua"))
+
+
+-- test replacement of ';;' to default path
+local function convert (p)
+  prepfile("print(package.path)")
+  RUN("env LUA_PATH='%s' lua %s > %s", p, prog, out)
+  local expected = getoutput()
+  expected = string.sub(expected, 1, -2)   -- cut final end of line
+  assert(string.gsub(p, ";;", ";"..defaultpath..";") == expected)
+end
+
+convert(";")
+convert(";;")
+convert(";;;")
+convert(";;;;")
+convert(";;;;;")
+convert(";;a;;;bc")
 
 
 -- test 2 files

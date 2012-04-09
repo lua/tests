@@ -1,5 +1,9 @@
 print("testing numbers and math lib")
 
+
+-- basic float notation
+assert(0e12 == 0 and .0 == 0 and 0. == 0 and .2e2 == 20 and 2.E-1 == 0.2)
+
 do
   local a,b,c = "2", " 3e0 ", " 10  "
   assert(a+b == 5 and -b == -3 and b+"2" == 5 and "10"-c == 0)
@@ -12,9 +16,9 @@ end
 
 do
   local x = -1
-  local mz = 0/x
+  local mz = 0/x   -- minus zero
   t = {[0] = 10, 20, 30, 40, 50}
-  assert(t[mz] == t[0])
+  assert(t[mz] == t[0] and t[-0] == t[0])
 end
 
 do
@@ -115,10 +119,14 @@ assert(tonumber('- 0xaa') == nil)
 -- testing hexadecimal numerals
 
 assert(0x10 == 16 and 0xfff == 2^12 - 1 and 0XFB == 251)
+assert(0x0p12 == 0 and 0x.0p-3 == 0)
 assert(0xFFFFFFFF == 2^32 - 1)
 assert(tonumber('+0x2') == 2)
 assert(tonumber('-0xaA') == -170)
 assert(tonumber('-0xffFFFfff') == -2^32 + 1)
+
+-- possible confusion with decimal exponent
+assert(0E+1 == 0 and 0xE+1 == 15 and 0xe-1 == 13)
 
 
 -- floating hexas

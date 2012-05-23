@@ -148,8 +148,17 @@ local m = setmetatable({}, {__tostring = function () return "hello" end})
 assert(string.format("%s %.10s", m, m) == "hello hello")
 
 
+assert(string.format("%x", 0.3) == "0")
+assert(string.format("%02x", 0.1) == "00")
+assert(string.format("%08X", 2^32 - 1) == "FFFFFFFF")
+assert(string.format("%+08d", 2^31 - 1) == "+2147483647")
+assert(string.format("%+08d", -2^31) == "-2147483648")
+
+
 -- longest number that can be formated
 assert(string.len(string.format('%99.99f', -1e308)) >= 100)
+
+
 
 if not _nolonglong then
   print("testing large numbers for format")
@@ -169,6 +178,7 @@ if not _nolonglong then
   assert(string.format("%x", x) == "fffffffffffff800")
   assert(string.format("%d", x/2) == "9223372036854774784")
   assert(string.format("%d", -x/2) == "-9223372036854774784")
+  assert(string.format("%d", -2^63) == "-9223372036854775808")
   assert(string.format("%x", 2^63) == "8000000000000000")
 end
 
@@ -200,6 +210,7 @@ check("%d %d", "no value")
 -- integers out of range
 assert(not pcall(string.format, "%d", 2^63))
 assert(not pcall(string.format, "%x", 2^64))
+assert(not pcall(string.format, "%x", -2^64))
 assert(not pcall(string.format, "%x", -1))
 
 

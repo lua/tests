@@ -678,4 +678,14 @@ a,b = T.testC(
 assert(a == "OK" and b == 0)   -- no ctx outside continuations
 
 
+-- bug in nCcalls
+local co = coroutine.wrap(function ()
+  local a = {pcall(pcall,pcall,pcall,pcall,pcall,pcall,pcall,error,"hi")}
+  return pcall(assert, table.unpack(a))
+end)
+
+local a = {co()}
+assert(a[10] == "hi")
+
+
 print'OK'

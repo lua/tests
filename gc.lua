@@ -174,18 +174,17 @@ assert(not collectgarbage("isrunning"))
 
 
 do
-  collectgarbage()
+  collectgarbage(); collectgarbage()
   local x = gcinfo()
-  collectgarbage()
   collectgarbage"stop"
   assert(not collectgarbage("isrunning"))
   repeat
     local a = {}
-  until gcinfo() > 2 * x
+  until gcinfo() > 3 * x
   collectgarbage"restart"
   assert(collectgarbage("isrunning"))
   repeat
-    local a = {}
+    local a = {1,2,3,4,5,6}
   until gcinfo() <= x * 1.4
 end
 
@@ -444,9 +443,9 @@ while thread_id < 1000 do
 end
 
 do
-  local x = gcinfo()
   collectgarbage()
   collectgarbage"stop"
+  local x = gcinfo()
   repeat
     for i=1,1000 do _ENV.a = {} end
     collectgarbage("step", 1)   -- steps should not unblock the collector

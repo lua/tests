@@ -294,11 +294,13 @@ assert(a(3) == math.deg(3) and a == math.deg)
 
 -- testing deep C stack
 do
+  collectgarbage("stop")
   local s, msg = pcall(T.testC, "checkstack 1000023 XXXX")   -- too deep
   assert(not s and string.find(msg, "XXXX"))
   s = string.rep("pushnil;checkstack 1 XX;", 1000000)
   s, msg = pcall(T.testC, s)
   assert(not s and string.find(msg, "XX"))
+  collectgarbage("restart")
 end
 
 local prog = {"checkstack 30000 msg", "newtable"}

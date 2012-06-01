@@ -165,15 +165,19 @@ local function dosteps (siz)
 end
 
 collectgarbage"stop"
-assert(dosteps(0) > 10)
-assert(dosteps(10) < dosteps(2))
-assert(dosteps(10000) == 1)
+if not _port then
+  -- test the "size" of basic GC steps (whatever they mean...)
+  assert(dosteps(0) > 10)
+  assert(dosteps(10) < dosteps(2))
+end
+assert(dosteps(100000) == 1)
 assert(collectgarbage("step", 1000000) == true)
 assert(collectgarbage("step", 1000000))
 assert(not collectgarbage("isrunning"))
 
 
-do
+if not _port then
+  -- test the pace of the collector
   collectgarbage(); collectgarbage()
   local x = gcinfo()
   collectgarbage"stop"
@@ -184,8 +188,8 @@ do
   collectgarbage"restart"
   assert(collectgarbage("isrunning"))
   repeat
-    local a = {1,2,3,4,5,6}
-  until gcinfo() <= x * 1.4
+    local a = {}
+  until gcinfo() <= x * 2
 end
 
 print("clearing tables")
@@ -343,6 +347,12 @@ collectgarbage()
 for i = 1, 10 do assert(s[i]) end
 
 getmetatable(u).__gc = false
+
+
+-- __gc errors with non-string messages
+setmetatable({}, {__gc = function () error{} end})
+local a, b = pcall(collectgarbage)
+assert(not a and type(b) == "string" and string.find(b, "error in __gc"))
 
 end
 print '+'

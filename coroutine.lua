@@ -290,6 +290,43 @@ else
 
   assert(B/A == 11)
 
+  local line = debug.getinfo(1, "l").currentline + 2    -- get line number
+  local function foo ()
+    local x = 10    --<< this line is 'line'
+    x = x + 10
+    _G.XX = x
+  end
+
+  -- testing yields in line hook
+  local co = coroutine.wrap(function ()
+    T.sethook("setglobal X; yield 0", "l", 0); foo(); return 10 end)
+
+  _G.XX = nil;
+  _G.X = nil; co(); assert(_G.X == line)
+  _G.X = nil; co(); assert(_G.X == line + 1)
+  _G.X = nil; co(); assert(_G.X == line + 2 and _G.XX == nil)
+  _G.X = nil; co(); assert(_G.X == line + 3 and _G.XX == 20)
+  assert(co() == 10)
+
+  -- testing yields in count hook
+  co = coroutine.wrap(function ()
+    T.sethook("yield 0", "", 1); foo(); return 10 end)
+
+  _G.XX = nil;
+  local c = 0
+  repeat c = c + 1; local a = co() until a == 10
+  assert(_G.XX == 20 and c == 10)
+
+  co = coroutine.wrap(function ()
+    T.sethook("yield 0", "", 2); foo(); return 10 end)
+
+  _G.XX = nil;
+  local c = 0
+  repeat c = c + 1; local a = co() until a == 10
+  assert(_G.XX == 20 and c == 5)
+  _G.X = nil; _G.XX = nil
+
+
   print "testing coroutine API"
   
   -- reusing a thread

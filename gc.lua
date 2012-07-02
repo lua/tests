@@ -157,7 +157,7 @@ local function dosteps (siz)
   for i=1,100 do a[i] = {{}}; local b = {} end
   local x = gcinfo()
   local i = 0
-  repeat
+  repeat   -- do steps until it completes a collection cycle
     i = i+1
   until collectgarbage("step", siz)
   assert(gcinfo() < x)
@@ -165,15 +165,21 @@ local function dosteps (siz)
 end
 
 collectgarbage"stop"
+
 if not _port then
   -- test the "size" of basic GC steps (whatever they mean...)
   assert(dosteps(0) > 10)
   assert(dosteps(10) < dosteps(2))
 end
+
+-- collector should do a full collection with so many steps
 assert(dosteps(100000) == 1)
 assert(collectgarbage("step", 1000000) == true)
-assert(collectgarbage("step", 1000000))
+assert(collectgarbage("step", 1000000) == true)
+
 assert(not collectgarbage("isrunning"))
+collectgarbage"restart"
+assert(collectgarbage("isrunning"))
 
 
 if not _port then
@@ -191,6 +197,7 @@ if not _port then
     local a = {}
   until gcinfo() <= x * 2
 end
+
 
 print("clearing tables")
 lim = 15

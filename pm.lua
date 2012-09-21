@@ -32,6 +32,18 @@ assert(string.find('', '\0') == nil)
 assert(string.find('alo123alo', '12') == 4)
 assert(string.find('alo123alo', '^12') == nil)
 
+assert(string.match("aaab", ".*b") == "aaab")
+assert(string.match("aaa", ".*a") == "aaa")
+assert(string.match("b", ".*b") == "b")
+
+assert(string.match("aaab", ".+b") == "aaab")
+assert(string.match("aaa", ".+a") == "aaa")
+assert(not string.match("b", ".+b"))
+
+assert(string.match("aaab", ".?b") == "ab")
+assert(string.match("aaa", ".?a") == "aa")
+assert(string.match("b", ".?b") == "b")
+
 assert(f('aloALO', '%l*') == 'alo')
 assert(f('aLo_ALO', '%a*') == 'aLo')
 
@@ -196,6 +208,19 @@ assert(not pcall(string.gsub, "alo", "(.", {}))
 assert(not pcall(string.gsub, "alo", "(.)", "%2"))
 assert(not pcall(string.gsub, "alo", "(%1)", "a"))
 assert(not pcall(string.gsub, "alo", "(%0)", "a"))
+
+-- bug since 2.5 (C-stack overflow)
+do
+  local function f (size)
+    local s = string.rep("a", size)
+    local p = string.rep(".?", size)
+    return pcall(string.match, s, p)
+  end
+  local r, m = f(80)
+  assert(r and #m == 80)
+  r, m = f(200000)
+  assert(not r and string.find(m, "too complex"))
+end
 
 if not _soft then
   -- big strings

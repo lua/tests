@@ -357,7 +357,8 @@ a[f] = print
 a[a] = a
 assert(a[a][a][a][a][print] == assert)
 a[print](a[a[f]] == a[print])
-assert(not pcall(function () a[nil] = 10 end))
+assert(not pcall(function () local a = {}; a[nil] = 10 end))
+assert(not pcall(function () local a = {[nil] = 10} end))
 assert(a[nil] == nil)
 a = nil
 

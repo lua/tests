@@ -60,7 +60,7 @@ local c = os.clock()
 
 local collectgarbage = collectgarbage
 
-do
+do   -- (
 
 -- track messages for tests not performed
 local msgs = {}
@@ -208,10 +208,25 @@ debug.sethook(function (a) assert(type(a) == 'string') end, "cr")
 -- to survive outside block
 _G.showmem = showmem
 
-end
+end   --)
 
-local _G, showmem, print, format, clock =
-      _G, showmem, print, string.format, os.clock
+local _G, showmem, print, format, clock, assert, open =
+      _G, showmem, print, string.format, os.clock, assert, io.open
+
+-- file with time of last performed test
+local fname = T and "time-debug.txt" or "time.txt"
+local lasttime
+
+if not usertests then
+  -- open file with time of last performed test
+  local f = io.open(fname)
+  if f then
+    lasttime = assert(tonumber(f:read'*a'))
+    f:close();
+  else   -- no such file; assume it is recording time for first time
+    lasttime = nil
+  end
+end
 
 -- erase (almost) all globals
 print('cleaning all!!!!')
@@ -229,4 +244,16 @@ collectgarbage()
 collectgarbage()
 collectgarbage();showmem()
 
-print(format("\n\ntotal time: %.2f\n", clock()-c))
+local time = clock() - c
+
+print(format("\n\ntotal time: %.2f\n", time))
+
+if not usertests then
+  lasttime = lasttime or time    -- if there is no last time, ignore difference
+  -- check whether current test time differs more than 5% from last time
+  local diff = (time - lasttime) / time
+  local tolerance = 0.05    -- 5%
+  assert(diff < tolerance and diff > -tolerance)
+  assert(open(fname, "w")):write(time):close()
+end
+

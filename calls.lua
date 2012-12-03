@@ -232,6 +232,11 @@ local t = {nil, "return ", "3"}
 f, msg = load(function () return table.remove(t, 1) end)
 assert(f() == nil)   -- should read the empty chunk
 
+-- another small bug (in 5.2.1)
+f = load(string.dump(function () return 1 end), nil, "b", {})
+assert(type(f) == "function" and f() == 1)
+
+
 x = string.dump(load("x = 1; return x"))
 a = assert(load(read1(x), nil, "b"))
 assert(a() == 1 and _G.x == 1)

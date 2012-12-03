@@ -345,6 +345,16 @@ a, b, c = assert(loadfile(file))()
 assert(a == 10 and b == "\0alo\255" and c == "hi")
 assert(os.remove(file))
 
+-- bug in 5.2.1
+do
+  io.output(io.open(file, "wb"))
+  -- save function with no upvalues
+  assert(io.write(string.dump(function () return 1 end)))
+  io.close()
+  f = assert(loadfile(file, "b", {}))
+  assert(type(f) == "function" and f() == 1)
+  assert(os.remove(file))
+end
 
 -- loading binary file with initial comment
 io.output(io.open(file, "wb"))

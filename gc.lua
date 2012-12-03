@@ -12,7 +12,7 @@ do
   -- save original parameters
   local a = collectgarbage("setpause", 200)
   local b = collectgarbage("setstepmul", 200)
-  local t = {0, 2, 10, 90, 100, 500, 5000, 30000}
+  local t = {0, 2, 10, 90, 500, 5000, 30000, 2^31 - 2}
   for i = 1, #t do
     local p = t[i]
     for j = 1, #t do
@@ -26,6 +26,7 @@ do
   -- restore original parameters
   collectgarbage("setpause", a)
   collectgarbage("setstepmul", b)
+  collectgarbage()
 end
 
 

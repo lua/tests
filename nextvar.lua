@@ -334,6 +334,9 @@ a = {[-1] = "ban"}
 test(a)
 assert(#a == 0 and table.remove(a) == nil and a[-1] == "ban")
 
+a = {[0] = "ban"}
+assert(#a == 0 and table.remove(a) == "ban" and a[0] == nil)
+
 table.insert(a, 1, 10); table.insert(a, 1, 20); table.insert(a, 1, -1)
 assert(table.remove(a) == 10)
 assert(table.remove(a) == 20)

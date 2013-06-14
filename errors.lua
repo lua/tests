@@ -63,8 +63,6 @@ checksyntax([[
 -- tests for better error messages
 
 checkmessage("a=1; bbbb=2; a=math.sin(3)+bbbb(3)", "global 'bbbb'")
-checkmessage("a=1; local a,bbbb=2,3; a = math.sin(1) and bbbb(3)",
-       "local 'bbbb'")
 checkmessage("a={}; do local a=1 end a:bbbb(3)", "method 'bbbb'")
 checkmessage("local a={}; a.bbbb(3)", "field 'bbbb'")
 assert(not string.find(doit"a={13}; local bbbb=1; a[bbbb](3)", "'bbbb'"))
@@ -84,11 +82,26 @@ checkmessage("b=1; local aaa='a'; x=aaa+b", "local 'aaa'")
 checkmessage("aaa={}; x=3/aaa", "global 'aaa'")
 checkmessage("aaa='2'; b=nil;x=aaa*b", "global 'b'")
 checkmessage("aaa={}; x=-aaa", "global 'aaa'")
+
+-- short circuit
+checkmessage("a=1; local a,bbbb=2,3; a = math.sin(1) and bbbb(3)",
+       "local 'bbbb'")
+checkmessage("a=1; local a,bbbb=2,3; a = bbbb(1) or a(3)", "local 'bbbb'")
+checkmessage("local a,b,c,f = 1,1,1; f((a and b) or c)", "local 'f'")
+checkmessage("local a,b,c = 1,1,1; ((a and b) or c)()", "call a number value")
 assert(not string.find(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "'aaa'"))
 assert(not string.find(doit"aaa={}; (aaa or aaa)()", "'aaa'"))
 
 checkmessage("print(print < 10)", "function")
 checkmessage("print(print < print)", "two function")
+
+-- integer division and conversion overflow
+checkmessage("local a = 2.0^100; x = a//2", "local a")
+checkmessage("local a = 1 // 2.0^100", "out of range")
+checkmessage("local a = 2.0^100 // 1", "out of range")
+checkmessage("string.sub('a', 2.0^100)", "out of range")
+checkmessage("a = 24 // 0", "divide by zero")
+checkmessage("a = 1 % 0", "'n%0'")
 
 
 -- passing light userdata instead of full userdata
@@ -149,6 +162,8 @@ checkmessage([[  -- tail call
 checkmessage([[collectgarbage("nooption")]], "invalid option")
 
 checkmessage([[x = print .. "a"]], "concatenate")
+checkmessage([[x = "a" .. false]], "concatenate")
+checkmessage([[x = {} .. 2]], "concatenate")
 
 checkmessage("getmetatable(io.stdin).__gc()", "no value")
 

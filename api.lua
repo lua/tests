@@ -128,6 +128,13 @@ assert(T.testC("pushnum 10; pushstring 20; arith /; return 1") == 0.5)
 assert(T.testC("pushstring 10; pushnum 20; arith -; return 1") == -10)
 assert(T.testC("pushstring 10; pushstring -20; arith *; return 1") == -200)
 assert(T.testC("pushstring 10; pushstring 3; arith ^; return 1") == 1000)
+assert(T.testC("arith /; return 1", 2, 0) == 10.0/0)
+a = T.testC("pushnum 10; pushnum 3; arith \\; return 1")
+assert(a == 3 and not math.isfloat(a))
+a = assert(T.testC("pushint 10; pushint 3; arith +; return 1"))
+assert(a == 13 and not math.isfloat(a))
+a = assert(T.testC("pushnum 10; pushint 3; arith +; return 1"))
+assert(a == 13 and math.isfloat(a))
 a,b,c = T.testC([[pushnum 1;
                   pushstring 10; arith _;
                   pushstring 5; return 3]])
@@ -143,6 +150,11 @@ assert(x == 10 and y[1] == 12 and z == nil)
 assert(T.testC("arith %; return 1", a, c)[1] == 4%-3)
 assert(T.testC("arith _; arith +; arith %; return 1", b, a, c)[1] ==
                8 % (4 + (-3)*2))
+
+-- errors in arithmetic
+assert(not pcall(T.testC, "arith \\", 10, 0))
+assert(not pcall(T.testC, "arith \\", 10, 2.0^90))   -- integer overflow
+assert(not pcall(T.testC, "arith %", 10, 0))
 
 
 -- testing compare
@@ -785,7 +797,7 @@ T.closestate(L1);
 L1 = T.newstate()
 T.loadlib(L1)
 T.doremote(L1, "a = {}")
-T.testC(L1, [[getglobal "a"; pushstring "x"; pushnum 1;
+T.testC(L1, [[getglobal "a"; pushstring "x"; pushint 1;
              settable -3]])
 assert(T.doremote(L1, "return a.x") == "1")
 

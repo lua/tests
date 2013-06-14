@@ -48,7 +48,7 @@ assert(bit32.arshift(0x12345678, -1) == 0x12345678 * 2)
 assert(bit32.arshift(-1, 1) == 0xffffffff)
 assert(bit32.arshift(-1, 24) == 0xffffffff)
 assert(bit32.arshift(-1, 32) == 0xffffffff)
-assert(bit32.arshift(-1, -1) == (-1 * 2) % 2^32)
+assert(bit32.arshift(-1, -1) == bit32.band(-1 * 2, 0xffffffff))
 
 print("+")
 -- some special cases
@@ -76,8 +76,15 @@ for _, b in pairs(c) do
   assert(bit32.rrotate(b, 32) == b)
   assert(bit32.lshift(bit32.lshift(b, -4), 4) == bit32.band(b, bit32.bnot(0xf)))
   assert(bit32.rshift(bit32.rshift(b, 4), -4) == bit32.band(b, bit32.bnot(0xf)))
+end
+
+-- for this test, use at most 24 bits (mantissa of a single float)
+c = {0, 1, 2, 3, 10, 0x800000, 0xaaaaaa, 0x555555, 0xffffff, 0x7fffff}
+for _, b in pairs(c) do
   for i = -40, 40 do
-    assert(bit32.lshift(b, i) == math.floor((b * 2^i) % 2^32))
+    local x = bit32.lshift(b, i)
+    local y = math.floor(math.fmod(b * 2.0^i, 2.0^32))
+    assert(math.fmod(x - y, 2.0^32) == 0)
   end
 end
 
@@ -110,6 +117,18 @@ assert(bit32.replace(0, 1, 2) == 2^2)
 assert(bit32.replace(0, -1, 4) == 2^4)
 assert(bit32.replace(-1, 0, 31) == 2^31 - 1)
 assert(bit32.replace(-1, 0, 1, 2) == 2^32 - 7)
+
+
+-- testing conversion of floats
+
+assert(bit32.bor(3.9) == 3)
+assert(bit32.bor(-3.9) == 0xfffffffc)
+if math.numbits'f' >= 64 then
+  assert(bit32.bor(2.0^32 - 4.9) == 0xfffffffb)
+  assert(bit32.bor(-2.0^32 - 5.8) == 0xfffffffa)
+  assert(bit32.bor(2.0^48 - 4.5) == 0xfffffffb)
+  assert(bit32.bor(-2.0^48 - 5.5) == 0xfffffffa)
+end
 
 
 print'OK'

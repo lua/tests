@@ -13,6 +13,28 @@ do
 end
 
 
+-- testing reuse in constant table
+local function checkKlist (func, list)
+  local k = T.listk(func)
+  assert(#k == #list)
+  for i = 1, #k do
+    assert(k[i] == list[i] and math.isfloat(k[i]) == math.isfloat(list[i]))
+  end
+end
+
+local function foo ()
+  local a
+  a = 0; a = 0.0; a = -0.0; a = 3.0 - 3
+  a = 3.78/4; a = -0.0; a = 3.78/4
+  a = -3.78/4; a = 3.78/4; a = -3.78/4
+  a = -3.79/4; a = 0.0; a = 0; a = -0.0
+end
+
+checkKlist(foo, {0, 0.0, -0.0, 3.78/4, -3.78/4, -3.79/4})
+
+
+-- testing opcodes
+
 function check (f, ...)
   local arg = {...}
   local c = T.listcode(f)
@@ -113,16 +135,25 @@ end,
   'SETTABLE', 'SETTABLE', 'SETTABLE', 'SUB', 'DIV', 'LOADK',
   'SETTABLE', 'RETURN')
 
+
 -- constant folding
-local function f () return -((2^8 + -(-1)) % 8)/2 * 4 - 3 end
-
-check(f, 'LOADK', 'RETURN')
-assert(f() == -5)
-
+local function checkK (func, val)
+  check(func, 'LOADK', 'RETURN')
+  local k = T.listk(func)
+  assert(#k == 1 and k[1] == val and math.isfloat(k[1]) == math.isfloat(val))
+  assert(func() == val)
+end
+checkK(function () return 3^-1 end, 1/3)
+checkK(function () return (1 + 1)^(50 + 50) end, 0)
+checkK(function () return (-2)^(31 - 2) end, -0x20000000)
+checkK(function () return (-3^-1 + 5) // 3.2 end, 1)
+checkK(function () return -3 / 0 end, -1/0)
+checkK(function () return -3 % 5 end, 2)
+checkK(function () return -((2.0^8 + -(-1)) % 8)/2 * 4 - 3 end, -5.0)
+checkK(function () return -((2^8 + -(-1)) % 8)//2 * 4 - 3 end, -7)
 
 -- bug in constant folding for 5.1
-check(function () return -nil end,
-  'LOADNIL', 'UNM', 'RETURN')
+check(function () return -nil end, 'LOADNIL', 'UNM', 'RETURN')
 
 
 check(function ()

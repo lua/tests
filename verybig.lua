@@ -62,21 +62,21 @@ b = {$1$
   b30014 = 16777215,
   b30015 = 16777216,
   b30016 = 16777217,
-  b30017 = 4294967294,
-  b30018 = 4294967295,
-  b30019 = 4294967296,
-  b30020 = 4294967297,
+  b30017 = 0x7fffff,
+  b30018 = -0x7fffff,
+  b30019 = 0x1ffffff,
+  b30020 = -0x1ffffd,
   b30021 = -65534,
   b30022 = -65535,
   b30023 = -65536,
-  b30024 = -4294967297,
+  b30024 = -0xffffff,
   b30025 = 15012.5,
   $2$
 };
 
-assert(b.a50008 == 25004 and b["a11"] == 5.5)
-assert(b.a33007 == 16503.5 and b.a50009 == 25004.5)
-assert(b["b"..30024] == -4294967297)
+assert(b.a50008 == 25004 and b["a11"] == -5.5)
+assert(b.a33007 == -16503.5 and b.a50009 == -25004.5)
+assert(b["b"..30024] == -0xffffff)
 
 function b:xxx (a,b) return a+b end
 assert(b:xxx(10, 12) == 22)   -- pushself with non-constant index
@@ -84,8 +84,8 @@ b.xxx = nil
 
 s = 0; n=0
 for a,b in pairs(b) do s=s+b; n=n+1 end
-assert(s==13977183656.5  and n==70001)
-
+-- with 32-bit floats, exact value of 's' depends on summation order
+assert(81800000.0 < s and s < 81860000 and n == 70001)
 
 a = nil; b = nil
 print'+'
@@ -110,22 +110,27 @@ return 10
 ]]
 
 -- functions to fill in the $n$
+
+local function sig (x)
+  return (x % 2 == 0) and '' or '-'
+end
+
 F = {
 function ()   -- $1$
   for i=10,50009 do
-    io.write('a', i, ' = ', 5+((i-10)/2), ',\n')
+    io.write('a', i, ' = ', sig(i), 5+((i-10)/2), ',\n')
   end
 end,
 
 function ()   -- $2$
   for i=30026,50009 do
-    io.write('b', i, ' = ', 15013+((i-30026)/2), ',\n')
+    io.write('b', i, ' = ', sig(i), 15013+((i-30026)/2), ',\n')
   end
 end,
 
 function ()   -- $3$
   for i=10,50009 do
-    io.write('"a', i, '", ', 5+((i-10)/2), ',\n')
+    io.write('"a', i, '", ', sig(i), 5+((i-10)/2), ',\n')
   end
 end,
 }

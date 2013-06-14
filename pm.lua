@@ -5,14 +5,6 @@ function f(s, p)
   if i then return string.sub(s, i, e) end
 end
 
-function f1(s, p)
-  p = string.gsub(p, "%%([0-9])", function (s) return "%" .. (s+1) end)
-  p = string.gsub(p, "^(^?)", "%1()", 1)
-  p = string.gsub(p, "($?)$", "()%1", 1)
-  local t = {string.match(s, p)}
-  return string.sub(s, t[1], t[#t] - 1)
-end
-
 a,b = string.find('', '')    -- empty patterns are tricky
 assert(a == 1 and b == 0);
 a,b = string.find('alo', '')
@@ -85,6 +77,17 @@ assert(f(']]]áb', '[^]]') == 'á')
 assert(f("0alo alo", "%x*") == "0a")
 assert(f("alo alo", "%C+") == "alo alo")
 print('+')
+
+
+function f1(s, p)
+  p = string.gsub(p, "%%([0-9])", function (s)
+        return "%" .. (tonumber(s)+1)
+       end)
+  p = string.gsub(p, "^(^?)", "%1()", 1)
+  p = string.gsub(p, "($?)$", "()%1", 1)
+  local t = {string.match(s, p)}
+  return string.sub(s, t[1], t[#t] - 1)
+end
 
 assert(f1('alo alx 123 b\0o b\0o', '(..*) %1') == "b\0o b\0o")
 assert(f1('axz123= 4= 4 34', '(.+)=(.*)=%2 %1') == '3= 4= 4 3')

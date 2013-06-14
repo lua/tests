@@ -89,8 +89,26 @@ assert(os.rename(file, otherfile))
 assert(os.rename(file, otherfile) == nil)
 
 io.output(io.open(otherfile, "ab"))
-assert(io.write("\n\n\t\t  3450\n"));
+assert(io.write("\n\n\t\t  ", 3450, "\n"));
 io.close()
+
+-- test writing/reading numbers
+local largeint = 2^(math.numbits'i' - 1) - 1
+f = assert(io.open(file, "w"))
+f:write(largeint, '\n')
+f:write(0xABCp-3, '\n')
+f:write(0, '\n')
+f:write(-largeint, '\n')
+f:write(-0xABCp-3, '\n')
+assert(f:close())
+f = assert(io.open(file, "r"))
+assert(f:read("*i") == largeint)
+assert(f:read("*n") == 0xABCp-3)
+assert(f:read("*i") == 0)
+assert(f:read("*i") == -largeint)
+assert(f:read("*n") == -0xABCp-3)
+assert(f:close())
+assert(os.remove(file))
 
 -- test line generators
 assert(not pcall(io.lines, "non-existent-file"))
@@ -138,7 +156,7 @@ assert(io.read(string.len"fourth_line") == "fourth_line")
 assert(io.input():seek("cur", -string.len"fourth_line"))
 assert(io.read() == "fourth_line")
 assert(io.read() == "")  -- empty line
-assert(io.read('*n') == 3450)
+assert(io.read('*i') == 3450)
 assert(io.read(1) == '\n')
 assert(io.read(0) == nil)  -- end of file
 assert(io.read(1) == nil)  -- end of file
@@ -267,7 +285,7 @@ end
 collectgarbage()   -- to close file in previous iteration
 
 io.output(file); io.write"00\n10\n20\n30\n40\n":close()
-for a, b in io.lines(file, "*n", "*n") do
+for a, b in io.lines(file, "*i", "*n") do
   if a == 40 then assert(b == nil)
   else assert(a == b - 10)
   end

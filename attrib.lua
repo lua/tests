@@ -228,7 +228,7 @@ else
   assert(a == 25 and b == 15)
 
   f = assert(package.loadlib(D"lib1.so", p.."anotherfunc"))
-  assert(f(10, 20) == "1020\n")
+  assert(f(10, 20) == "10.020.0\n")
 
   -- check error messages
   local f, err, when = package.loadlib(D"lib1.so", p.."xuxu")
@@ -348,7 +348,7 @@ assert(a[1<2] == 20 and a[1>2] == 10)
 function f(a) return a end
 
 local a = {}
-for i=3000,-3000,-1 do a[i] = i; end
+for i=3000,-3000,-1 do a[i + 0.0] = i; end
 a[10e30] = "alo"; a[true] = 10; a[false] = 20
 assert(a[10e30] == 'alo' and a[not 1] == 20 and a[10<20] == 10)
 for i=3000,-3000,-1 do assert(a[i] == i); end
@@ -368,12 +368,21 @@ assert(a[1]==10 and a[-3]==a.a and a[f]==print and a.x=='a' and not a.y)
 a[1], f(a)[2], b, c = {['alo']=assert}, 10, a[1], a[f], 6, 10, 23, f(a), 2
 a[1].alo(a[2]==10 and b==10 and c==print)
 
-a[2^31] = 10; a[2^31+1] = 11; a[-2^31] = 12;
-a[2^32] = 13; a[-2^32] = 14; a[2^32+1] = 15; a[10^33] = 16;
+-- test of large float/integer indices 
+local bits = (math.numbits("float") >=64) and 53 or 24
+bits = math.min(bits, math.numbits("int"))
 
-assert(a[2^31] == 10 and a[2^31+1] == 11 and a[-2^31] == 12 and
-       a[2^32] == 13 and a[-2^32] == 14 and a[2^32+1] == 15 and
-       a[10^33] == 16)
+a[2.0^bits] = 10; a[2.0^bits - 1] = 11;
+a[-2.0^bits] = 12; a[-2.0^bits + 1] = 13;
+
+assert(a[2^bits] == 10 and a[2^bits - 1] == 11 and
+       a[-2^bits] == 12 and a[-2^bits + 1] == 13)
+
+a[-2^bits + 1] = 25
+a[2^bits] = 14
+
+assert(a[2.0^bits] == 14 and a[2.0^bits - 1] == 11 and
+       a[-2.0^bits] == 12 and a[-2.0^bits + 1] == 25)
 
 a = nil
 

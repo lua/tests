@@ -111,7 +111,6 @@ assert(type(tostring(12)) == 'string')
 assert(''..12 == '12' and type(12 .. '') == 'string')
 assert(string.find(tostring{}, 'table:'))
 assert(string.find(tostring(print), 'function:'))
-assert(tostring(1234567890123) == '1234567890123')
 assert(#tostring('\0') == 1)
 assert(tostring(true) == "true")
 assert(tostring(false) == "false")
@@ -156,39 +155,49 @@ assert(string.format("%+08d", -2^31) == "-2147483648")
 
 
 -- longest number that can be formated
-assert(string.len(string.format('%99.99f', -1e308)) >= 100)
+local largefinite = (math.numbits("float") >= 64) and 1e308 or 1e38
+assert(string.len(string.format('%99.99f', -largefinite)) >= 100)
 
 
+print("testing large numbers for format")
 
-if not _nolonglong then
-  print("testing large numbers for format")
-  assert(string.format("%8x", 2^52 - 1) == "fffffffffffff")
-  assert(string.format("%d", -1) == "-1")
-  assert(tonumber(string.format("%u", 2^62)) == 2^62)
-  assert(string.format("%8x", 0xffffffff) == "ffffffff")
-  assert(string.format("%8x", 0x7fffffff) == "7fffffff")
+assert(string.format("%08x", 2^22 - 1) == "003fffff")
+assert(string.format("%d", -1) == "-1")
+assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
+
+
+if math.numbits("int") >= 64 then
+  -- "large" for 64 bits
+  local max, min = 2^63 - 1, -2^63
+  assert(max + 1 == min)
+  assert(string.format("%x", 2^52 - 1) == "fffffffffffff")
+  assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
   assert(string.format("%d", 2^53) == "9007199254740992")
   assert(string.format("%d", -2^53) == "-9007199254740992")
-  assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
-  -- maximum integer that fits both in 64-int and (exact) double
-  local x = 2^64 - 2^(64-53)
-  assert(x == 0xfffffffffffff800)
-  assert(tonumber(string.format("%u", x)) == x)
-  assert(tonumber(string.format("0X%x", x)) == x)
-  assert(string.format("%x", x) == "fffffffffffff800")
-  assert(string.format("%d", x/2) == "9223372036854774784")
-  assert(string.format("%d", -x/2) == "-9223372036854774784")
-  assert(string.format("%d", -2^63) == "-9223372036854775808")
-  assert(string.format("%x", 2^63) == "8000000000000000")
+  assert(string.format("%x", max) == "7fffffffffffffff")
+  assert(string.format("%x", min) == "8000000000000000")
+  assert(string.format("%d", max) == "9223372036854775807")
+  assert(string.format("%d", min) == "-9223372036854775808")
+  assert(tostring(1234567890123) == '1234567890123')
+else
+  -- "large" for 32 bits
+  local max, min = 2^31 - 1, -2^31
+  assert(max + 1 == min)
+  assert(string.format("%8x", -1) == "ffffffff")
+  assert(string.format("%x", max) == "7fffffff")
+  assert(string.format("%x", min) == "80000000")
+  assert(string.format("%d", max) == "2147483647")
+  assert(string.format("%d", min) == "-2147483648")
 end
 
 if not _noformatA then
   print("testing 'format %a %A'")
   assert(string.format("%.2a", 0.5) == "0x1.00p-1")
-  assert(string.format("%A", 0x1fffffffffffff) == "0X1.FFFFFFFFFFFFFP+52")
+  assert(string.format("%A", 0x1fffff.0) == "0X1.FFFFFP+20")
   assert(string.format("%.4a", -3) == "-0x1.8000p+1")
   assert(tonumber(string.format("%a", -0.1)) == -0.1)
 end
+
 
 -- errors in format
 
@@ -205,13 +214,6 @@ check("%10.1"..aux.."004d", "too long")
 check("%t", "invalid option")
 check("%"..aux.."d", "repeated flags")
 check("%d %d", "no value")
-
-
--- integers out of range
-assert(not pcall(string.format, "%d", 2^63))
-assert(not pcall(string.format, "%x", 2^64))
-assert(not pcall(string.format, "%x", -2^64))
-assert(not pcall(string.format, "%x", -1))
 
 
 assert(load("return 1\n--comentário sem EOL no final")() == 1)

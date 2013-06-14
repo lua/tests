@@ -1,6 +1,6 @@
 #!../lua
 
-local version = "Lua 5.2"
+local version = "Lua 5.3"
 if _VERSION ~= version then
   io.stderr:write("\nThis test suite is for ", version, ", not for ", _VERSION,
     "\nExiting tests\n")
@@ -253,7 +253,10 @@ if not usertests then
   -- check whether current test time differs more than 5% from last time
   local diff = (time - lasttime) / time
   local tolerance = 0.05    -- 5%
-  assert(diff < tolerance and diff > -tolerance)
+  if (diff >= tolerance or diff <= -tolerance) then
+    print(format("WARNING: time difference from previous test: %+.1f%%",
+                  diff * 100))
+  end
   assert(open(fname, "w")):write(time):close()
 end
 

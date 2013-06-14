@@ -1,5 +1,13 @@
 print("testing numbers and math lib")
 
+local intbits = math.numbits("int")
+
+local minint = 2^(intbits - 1)
+local maxint = minint - 1
+
+
+-- number of bits in the mantissa of a floating-point number
+local floatbits = ({[32] = 24, [64] = 53, [96] = 64})[math.numbits("float")]
 
 -- basic float notation
 assert(0e12 == 0 and .0 == 0 and 0. == 0 and .2e2 == 20 and 2.E-1 == 0.2)
@@ -28,12 +36,78 @@ do
   assert(-math.huge < -10e30)
 end
 
-function f(...)
-  if select('#', ...) == 1 then
-    return (...)
-  else
-    return "***"
+
+-- integer arithmetic
+assert(minint < minint + 1)
+assert(maxint - 1 < maxint)
+assert(0 - minint == minint)
+assert(2^intbits == 0)
+assert(minint * minint == 0)
+assert(maxint * maxint * maxint == maxint)
+
+
+-- testing integer division and conversions
+
+for _, i in pairs{-16, -15, -3, -2, -1, 0, 1, 2, 3, 15} do
+  for _, j in pairs{-16, -15, -3, -2, -1, 1, 2, 3, 15} do
+    assert(i // j == math.floor(i / j))
   end
+end
+
+assert(maxint + 0.0 == maxint)
+assert(maxint + 0.0 == 2.0^(intbits - 1) - 1.0)
+assert(minint + 0.0 == minint)
+assert(minint + 0.0 == -2.0^(intbits - 1))
+
+assert(math.pi // 1 == 3)
+assert(-math.pi // 1 == -4)
+
+assert(maxint // maxint == 1)
+assert(maxint // 1 == maxint)
+assert((maxint - 1) // maxint == 0)
+assert(maxint // (maxint - 1) == 1)
+assert(minint // minint == 1)
+assert(minint // minint == 1)
+assert((minint + 1) // minint == 0)
+assert(minint // (minint + 1) == 1)
+assert(minint // 1 == minint)
+
+assert(minint // -1 == -minint)
+assert(minint // -2 == 2^(intbits - 2))
+assert(maxint // -1 == -maxint)
+
+
+-- avoiding errors at compile time
+assert(not pcall(assert(load"return 2 // 0")))
+assert(not pcall(assert(load"return 2.3 // 0")))
+assert(not pcall(assert(load("return 2.0^" .. (intbits - 1) .. " // 1"))))
+assert(not pcall(assert(load("return math.huge // 1"))))
+assert(not pcall(assert(load("return 1 // 2.0^" .. (intbits - 1)))))
+assert(not pcall(assert(load"return 2.3 // '0.0'")))
+
+
+-- testing overflow errors when converting from float to integer
+local function f2i (x) return x // 1 end
+assert(not pcall(f2i, math.huge))     -- +inf
+assert(not pcall(f2i, -math.huge))    -- -inf
+assert(not pcall(f2i, 0/0))           -- NaN
+
+if floatbits < intbits then
+  -- overflow tests when float cannot represent all integers
+  assert(maxint + 1.0 == maxint)
+  assert(minint - 1.0 == minint)
+  assert(not pcall(f2i, maxint + 0.0))
+  assert(f2i(2.0^(intbits - 2)) == 2^(intbits - 2))
+  assert(f2i(-2.0^(intbits - 2)) == -2^(intbits - 2))
+  assert((2.0^(floatbits - 1) + 1.0) // 1 == 2^(floatbits - 1) + 1)
+else
+  -- overflow tests when float can represent all integers
+  assert(maxint + 1.0 > maxint)
+  assert(minint - 1.0 < minint)
+  assert(f2i(maxint + 0.0) == maxint)
+  assert(not pcall(f2i, maxint + 1.0))
+  assert(f2i(minint + 0.0) == minint)
+  assert(not pcall(f2i, minint - 1.0))
 end
 
 
@@ -46,6 +120,11 @@ assert(" -0xa " + 1 == -9)
 
 
 -- testing 'tonumber'
+assert(tonumber("0") == 0)
+assert(tonumber("") == nil)
+assert(tonumber("  ") == nil)
+assert(tonumber("-") == nil)
+assert(tonumber("  -0x ") == nil)
 assert(tonumber{} == nil)
 assert(tonumber'+0.01' == 1/100 and tonumber'+.01' == 0.01 and
        tonumber'.01' == 0.01    and tonumber'-1.' == -1 and
@@ -57,9 +136,7 @@ assert(tonumber('-012') == -010-2)
 assert(tonumber('-1.2e2') == - - -120)
 
 assert(tonumber("0xffffffffffff") == 2^(4*12) - 1)
-assert(tonumber("0x"..string.rep("f", 150)) == 2^(4*150) - 1)
-assert(tonumber('0x3.' .. string.rep('0', 100)) == 3)
-assert(tonumber('0x0.' .. string.rep('0', 150).."1") == 2^(-4*151))
+assert(tonumber("0x"..string.rep("f", (intbits//4))) == 2^intbits - 1)
 
 -- testing 'tonumber' with base
 assert(tonumber('  001010  ', 2) == 10)
@@ -70,8 +147,7 @@ assert(tonumber('  -10  ', 36) == -36)
 assert(tonumber('  +1Z  ', 36) == 36 + 35)
 assert(tonumber('  -1z  ', 36) == -36 + -35)
 assert(tonumber('-fFfa', 16) == -(10+(16*(15+(16*(15+(16*15)))))))
-assert(tonumber(string.rep('1', 42), 2) + 1 == 2^42)
-assert(tonumber(string.rep('1', 34), 2) + 1 == 2^34)
+assert(tonumber(string.rep('1', (intbits - 2)), 2) + 1 == 2^(intbits - 2))
 assert(tonumber('ffffFFFF', 16)+1 == 2^32)
 assert(tonumber('0ffffFFFF', 16)+1 == 2^32)
 assert(tonumber('-0ffffffFFFF', 16) - 1 == -2^40)
@@ -79,7 +155,33 @@ for i = 2,36 do
   assert(tonumber('\t10000000000\t', i) == i^10)
 end
 
--- testing 'tonumber' fo invalid formats
+if not _soft then
+  -- tests with very long numerals
+  assert(tonumber("0x"..string.rep("f", 13)..".0") == 2.0^(4*13) - 1)
+  assert(tonumber("0x"..string.rep("f", 150)..".0") == 2.0^(4*150) - 1)
+  assert(tonumber("0x"..string.rep("f", 300)..".0") == 2.0^(4*300) - 1)
+  assert(tonumber("0x"..string.rep("f", 500)..".0") == 2.0^(4*500) - 1)
+  assert(tonumber('0x3.' .. string.rep('0', 1000)) == 3)
+  assert(tonumber('0x' .. string.rep('0', 1000) .. 'a') == 10)
+  assert(tonumber('0x0.' .. string.rep('0', 13).."1") == 2.0^(-4*14))
+  assert(tonumber('0x0.' .. string.rep('0', 150).."1") == 2.0^(-4*151))
+  assert(tonumber('0x0.' .. string.rep('0', 300).."1") == 2.0^(-4*301))
+  assert(tonumber('0x0.' .. string.rep('0', 500).."1") == 2.0^(-4*501))
+
+  assert(tonumber('0xe03' .. string.rep('0', 1000) .. 'p-4000') == 3587.0)
+  assert(tonumber('0x.' .. string.rep('0', 1000) .. '74p4004') == 0x7.4)
+end
+
+-- testing 'tonumber' for invalid formats
+
+local function f (...)
+  if select('#', ...) == 1 then
+    return (...)
+  else
+    return "***"
+  end
+end
+
 assert(f(tonumber('fFfa', 15)) == nil)
 assert(f(tonumber('099', 8)) == nil)
 assert(f(tonumber('1\0', 2)) == nil)
@@ -148,10 +250,15 @@ assert(100.0 == 1E2 and .01 == 1e-2)
 assert(1111111111111111-1111111111111110== 1000.00e-03)
 --     1234567890123456
 assert(1.1 == '1.'+'.1')
-assert('1111111111111111'-'1111111111111110' == tonumber"  +0.001e+3 \n\t")
+assert(tonumber'1111111111111111'-tonumber'1111111111111110' ==
+       tonumber"  +0.001e+3 \n\t")
 
 function eq (a,b,limit)
-  if not limit then limit = 10E-10 end
+  if not limit then
+    if math.numbits("float") >= 64 then limit = 1E-11
+    else limit = 1E-5
+    end
+  end
   return math.abs(a-b) <= limit
 end
 
@@ -159,7 +266,7 @@ assert(0.1e-30 > 0.9E-31 and 0.9E30 < 0.1e31)
 
 assert(0.123456 > 0.123455)
 
-assert(tonumber('+1.23E18') == 1.23*10^18)
+assert(tonumber('+1.23E18') == 1.23*10.0^18)
 
 -- testing order operators
 assert(not(1<1) and (1<2) and not(2<1))
@@ -174,12 +281,22 @@ assert(('a'>='a') and not('a'>='b') and ('b'>='a'))
 -- testing mod operator
 assert(-4%3 == 2)
 assert(4%-3 == -2)
+assert(-4.0%3 == 2.0)
+assert(4%-3.0 == -2.0)
 assert(math.pi - math.pi % 1 == 3)
 assert(math.pi - math.pi % 0.001 == 3.141)
 
-local function testbit(a, n)
-  return a/2^n % 2 >= 1
+assert(minint % -1 == 0)
+assert(minint % -2 == 0)
+assert(maxint % -2 == -1)
+
+do
+  local x = 0.0 % 0
+  assert(x ~= x)    -- Not a Number
+  x = 1.3 % 0
+  assert(x ~= x)    -- Not a Number
 end
+
 
 assert(eq(math.sin(-9.8)^2 + math.cos(-9.8)^2, 1))
 assert(eq(math.tan(math.pi/4), 1))
@@ -221,7 +338,7 @@ assert(a == '10' and b == '20')
 
 if not _port then
   print("testing -0 and NaN")
-  local mz, z = -0, 0
+  local mz, z = -0.0, 0.0
   assert(mz == z)
   assert(1/mz < 0 and 0 < 1/z)
   local a = {[mz] = 1}
@@ -276,12 +393,14 @@ if not _port then
 
   aux(0, 1, {})
   aux(-10, 0, {-10,0})
+  aux(1, 6, {6})
 end
 
 for i=1,10 do
   local t = math.random(5)
   assert(1 <= t and t <= 5)
 end
+assert(not pcall(math.random, 1, 2, 3))
 
 
 print('OK')

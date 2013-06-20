@@ -240,7 +240,7 @@ if os.setlocale("pt_BR") or os.setlocale("ptb") then
   assert(os.setlocale("C"))
 else
   (Message or print)(
-   '\a\n >>> pt_BR locale not available: skipping decimal point tests <<<\n\a')
+   '\n >>> pt_BR locale not available: skipping decimal point tests <<<\n')
 end
 
 

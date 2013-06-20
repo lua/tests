@@ -220,7 +220,7 @@ local st, err, when = package.loadlib(D"lib1.so", "*")
 if not st then
   local f, err, when = package.loadlib("donotexist", p.."xuxu")
   assert(not f and type(err) == "string" and when == "absent")
-  ;(Message or print)('\a\n >>> cannot load dynamic library <<<\n\a')
+  ;(Message or print)('\n >>> cannot load dynamic library <<<\n')
   print(err, when)
 else
   -- tests for loadlib

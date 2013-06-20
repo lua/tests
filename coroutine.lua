@@ -258,7 +258,7 @@ assert(_G.f() == 12)
 
 
 if not T then
-  (Message or print)('\a\n >>> testC not active: skipping yield/hook tests <<<\n\a')
+  (Message or print)('\n >>> testC not active: skipping yield/hook tests <<<\n')
 else
   print "testing yields inside hooks"
 
@@ -539,7 +539,7 @@ assert(run(function ()
 
 -- tests for coroutine API
 if T==nil then
-  (Message or print)('\a\n >>> testC not active: skipping coroutine API tests <<<\n\a')
+  (Message or print)('\n >>> testC not active: skipping coroutine API tests <<<\n')
   return
 end
 

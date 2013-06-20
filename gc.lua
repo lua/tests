@@ -368,7 +368,7 @@ print '+'
 
 -- testing userdata
 if T==nil then
-  (Message or print)('\a\n >>> testC not active: skipping userdata GC tests <<<\n\a')
+  (Message or print)('\n >>> testC not active: skipping userdata GC tests <<<\n')
 
 else
 

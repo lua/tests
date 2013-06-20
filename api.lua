@@ -1,6 +1,6 @@
 
 if T==nil then
-  (Message or print)('\a\n >>> testC not active: skipping API tests <<<\n\a')
+  (Message or print)('\n >>> testC not active: skipping API tests <<<\n')
   return
 end
 

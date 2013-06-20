@@ -1,5 +1,5 @@
 if T==nil then
-  (Message or print)('\a\n >>> testC not active: skipping opcode tests <<<\n\a')
+  (Message or print)('\n >>> testC not active: skipping opcode tests <<<\n')
   return
 end
 print "testing code generation and optimizations"

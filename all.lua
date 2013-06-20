@@ -195,6 +195,8 @@ if #msgs > 0 then
   print()
 end
 
+print(string.format("%d-bit integers, %d-bit floats",
+        math.numbits'i', math.numbits'f'))
 print("final OK !!!")
 
 local debug = require "debug"

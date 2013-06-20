@@ -239,35 +239,38 @@ assert(table.concat(a, ",", 2) == "b,c")
 assert(table.concat(a, ",", 3) == "c")
 assert(table.concat(a, ",", 4) == "")
 
+if not _port then
 
-local locales = { "ptb", "ISO-8859-1", "pt_BR" }
-local function trylocale (w)
-  for i = 1, #locales do
-    if os.setlocale(locales[i], w) then return true end
+  local locales = { "ptb", "ISO-8859-1", "pt_BR" }
+  local function trylocale (w)
+    for i = 1, #locales do
+      if os.setlocale(locales[i], w) then return true end
+    end
+    return false
   end
-  return false
-end
 
-if not trylocale("collate")  then
-  print("locale not supported")
-else
-  assert("alo" < "álo" and "álo" < "amo")
-end
+  if not trylocale("collate")  then
+    print("locale not supported")
+  else
+    assert("alo" < "álo" and "álo" < "amo")
+  end
 
-if not trylocale("ctype") then
-  print("locale not supported")
-else
-  assert(load("a = 3.4"));  -- parser should not change outside locale
-  assert(not load("á = 3.4"));  -- even with errors
-  assert(string.gsub("áéíóú", "%a", "x") == "xxxxx")
-  assert(string.gsub("áÁéÉ", "%l", "x") == "xÁxÉ")
-  assert(string.gsub("áÁéÉ", "%u", "x") == "áxéx")
-  assert(string.upper"áÁé{xuxu}ção" == "ÁÁÉ{XUXU}ÇÃO")
-end
+  if not trylocale("ctype") then
+    print("locale not supported")
+  else
+    assert(load("a = 3.4"));  -- parser should not change outside locale
+    assert(not load("á = 3.4"));  -- even with errors
+    assert(string.gsub("áéíóú", "%a", "x") == "xxxxx")
+    assert(string.gsub("áÁéÉ", "%l", "x") == "xÁxÉ")
+    assert(string.gsub("áÁéÉ", "%u", "x") == "áxéx")
+    assert(string.upper"áÁé{xuxu}ção" == "ÁÁÉ{XUXU}ÇÃO")
+  end
 
-os.setlocale("C")
-assert(os.setlocale() == 'C')
-assert(os.setlocale(nil, "numeric") == 'C')
+  os.setlocale("C")
+  assert(os.setlocale() == 'C')
+  assert(os.setlocale(nil, "numeric") == 'C')
+
+end
 
 print('OK')
 

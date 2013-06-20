@@ -127,7 +127,7 @@ end
 a = {}
 for i=1,16 do a[i] = i end
 check(a, 16, 0)
-if not _port then
+do
   for i=1,11 do a[i] = nil end
   for i=30,50 do a[i] = nil end   -- force a rehash (?)
   check(a, 0, 8)   -- only 5 elements in the table
@@ -378,12 +378,12 @@ for i=0,1,-1 do error'not here' end
 a = nil; for i=1,1 do assert(not a); a=1 end; assert(a)
 a = nil; for i=1,1,-1 do assert(not a); a=1 end; assert(a)
 
-if not _port then
+do
   print("testing precision in numeric for")
-  local a = 0; for i=0, 1, 0.1 do a=a+1 end; assert(a==11)
+  local a
   a = 0; for i=0, 0.999999999, 0.1 do a=a+1 end; assert(a==10)
   a = 0; for i=1, 1, 1 do a=a+1 end; assert(a==1)
-  a = 0; for i=1e10, 1e10, -1 do a=a+1 end; assert(a==1)
+  a = 0; for i=1e6, 1e6, -1 do a=a+1 end; assert(a==1)
   a = 0; for i=1, 0.99999, 1 do a=a+1 end; assert(a==0)
   a = 0; for i=99999, 1e5, -1 do a=a+1 end; assert(a==0)
   a = 0; for i=1, 0.99999, -1 do a=a+1 end; assert(a==1)

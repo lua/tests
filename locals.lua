@@ -79,9 +79,8 @@ assert(c.a == nil)
 f()
 assert(c.a == 3)
 
--- testing limits for special instructions
-
-if not _soft then
+-- old test for limits for special instructions (now just a generic test)
+do
   local a
   local p = 4
   for i=2, (math.numbits("int") - 2) do

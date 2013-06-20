@@ -336,7 +336,7 @@ assert(a*b == 200 and a+b == 30 and a-b == -10 and a/b == 0.5 and -b == -20)
 assert(a == '10' and b == '20')
 
 
-if not _port then
+do
   print("testing -0 and NaN")
   local mz, z = -0.0, 0.0
   assert(mz == z)
@@ -370,7 +370,7 @@ if not _port then
 end
 
 
-if not _port then
+do
   print("testing 'math.random'")
   math.randomseed(0)
 

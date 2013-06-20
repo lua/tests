@@ -1,8 +1,3 @@
--- The tests for 'require' assume some specific directories and libraries;
--- better to avoid them in generic machines
-
-if not _port then --[
-
 print "testing require"
 
 assert(require"string" == string)
@@ -50,6 +45,12 @@ do
 end
 
 print('+')
+
+
+-- The next tests for 'require' assume some specific directories and
+-- libraries.
+
+if not _port then --[
 
 -- auxiliary directory with C modules and temporary files
 local DIR = "libs/"

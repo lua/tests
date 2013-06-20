@@ -40,9 +40,7 @@ assert(doit("error()") == nil)
 
 
 -- test common errors/errors that crashed in the past
-if not _no32 then
-  assert(doit("table.unpack({}, 1, n=2^30)"))
-end
+assert(doit("table.unpack({}, 1, n=2^30)"))
 assert(doit("a=math.sin()"))
 assert(not doit("tostring(1)") and doit("tostring()"))
 assert(doit"tonumber()")

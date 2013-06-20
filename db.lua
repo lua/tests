@@ -382,7 +382,7 @@ assert(m == "" and c == 4)
 debug.sethook(function (e) a=a+1 end, "", 4000)
 a=0; for i=1,1000 do end; assert(a == 0)
 
-if not _no32 then
+do
   debug.sethook(print, "", 2^24 - 1)   -- count upperbound
   local f,m,c = debug.gethook()
   assert(({debug.gethook()})[3] == 2^24 - 1)

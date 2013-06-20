@@ -30,11 +30,9 @@ assert(string.sub("123456789",-10,-20) == "")
 assert(string.sub("123456789",-1) == "9")
 assert(string.sub("123456789",-4) == "6789")
 assert(string.sub("123456789",-6, -4) == "456")
-if not _no32 then
-  assert(string.sub("123456789",-2^31, -4) == "123456")
-  assert(string.sub("123456789",-2^31, 2^31 - 1) == "123456789")
-  assert(string.sub("123456789",-2^31, -2^31) == "")
-end
+assert(string.sub("123456789",-2^31, -4) == "123456")
+assert(string.sub("123456789",-2^31, 2^31 - 1) == "123456789")
+assert(string.sub("123456789",-2^31, -2^31) == "")
 assert(string.sub("\000123456789",3,5) == "234")
 assert(("\000123456789"):sub(8) == "789")
 print('+')
@@ -95,10 +93,8 @@ assert(string.rep('teste', 0, 'xuxu') == '')
 assert(string.rep('teste', 1, 'xuxu') == 'teste')
 assert(string.rep('\1\0\1', 2, '\0\0') == '\1\0\1\0\0\1\0\1')
 assert(string.rep('', 10, '.') == string.rep('.', 9))
-if not _no32 then
-  assert(not pcall(string.rep, "aa", 2^30))
-  assert(not pcall(string.rep, "", 2^30, "aa"))
-end
+assert(not pcall(string.rep, "aa", 2^30))
+assert(not pcall(string.rep, "", 2^30, "aa"))
 
 assert(string.reverse"" == "")
 assert(string.reverse"\0\1\2\3" == "\3\2\1\0")
@@ -228,12 +224,10 @@ assert(table.concat(a, "b", 20, 20) == "xuxu")
 assert(table.concat(a, "", 20, 21) == "xuxuxuxu")
 assert(table.concat(a, "x", 22, 21) == "")
 assert(table.concat(a, "3", 2999) == "xuxu3xuxu")
-if not _no32 then
-  assert(table.concat({}, "x", 2^31-1, 2^31-2) == "")
-  assert(table.concat({}, "x", -2^31+1, -2^31) == "")
-  assert(table.concat({}, "x", 2^31-1, -2^31) == "")
-  assert(table.concat({[2^31-1] = "alo"}, "x", 2^31-1, 2^31-1) == "alo")
-end
+assert(table.concat({}, "x", 2^31-1, 2^31-2) == "")
+assert(table.concat({}, "x", -2^31+1, -2^31) == "")
+assert(table.concat({}, "x", 2^31-1, -2^31) == "")
+assert(table.concat({[2^31-1] = "alo"}, "x", 2^31-1, 2^31-1) == "alo")
 
 assert(not pcall(table.concat, {"a", "b", {}}))
 
@@ -245,7 +239,6 @@ assert(table.concat(a, ",", 2) == "b,c")
 assert(table.concat(a, ",", 3) == "c")
 assert(table.concat(a, ",", 4) == "")
 
-if not _port then
 
 local locales = { "ptb", "ISO-8859-1", "pt_BR" }
 local function trylocale (w)
@@ -275,8 +268,6 @@ end
 os.setlocale("C")
 assert(os.setlocale() == 'C')
 assert(os.setlocale(nil, "numeric") == 'C')
-
-end
 
 print('OK')
 

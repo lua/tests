@@ -14,10 +14,8 @@ end
 
 _soft = false      -- true to avoid long or memory consuming tests
 _port = false      -- true to avoid non-portable tests
-_no32 = false      -- true to avoid tests that assume 32 bits
 _nomsg = false     -- true to avoid messages about tests not performed
 _noposix = false   -- false assumes LUA_USE_POSIX
-_nolonglong = false  -- false assumes LUA_USE_LONGLONG
 _noformatA = false   -- false assumes LUA_USE_AFORMAT
 
 
@@ -27,10 +25,8 @@ if usertests then
   -- tests for sissies ;)  Avoid problems
   _soft = true
   _port = true
-  _no32 = true
   _nomsg = true
   _noposix = true
-  _nolonglong = true
   _noformatA = true; 
 end
 

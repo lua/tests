@@ -1,7 +1,7 @@
 # testing special comment on first line
 
 -- most (all?) tests here assume a reasonable "Unix-like" shell
-if _port then return end
+if _noposix then return end
 
 print ("testing lua.c options")
 

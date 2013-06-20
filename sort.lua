@@ -27,7 +27,7 @@ assert(a==1 and x==nil)
 a,x = unpack({1,2}, 1, 1)
 assert(a==1 and x==nil)
 
-if not _no32 then
+do
   assert(not pcall(unpack, {}, 0, 2^31-1))
   assert(not pcall(unpack, {}, 1, 2^31-1))
   assert(not pcall(unpack, {}, -(2^31), 2^31-1))

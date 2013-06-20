@@ -52,14 +52,14 @@ f, X = nil
 
 coroutine.yield'b'
 
-if not _no32 then   -- {
+if math.numbits'i' <= 32 then   -- {
 
 print "testing string length overflow"
 
 local repstrings = 192          -- number of strings to be concatenated
 local ssize = math.ceil(2.0^32 / repstrings) + 1   -- size of each string
 
-assert(repstrings * ssize > 2.0^32)  -- it should be larger than maximum size_t
+assert(repstrings * ssize > 2.0^32)  -- it should be larger than maximum size
 
 local longs = string.rep("\0", ssize)   -- create one long string
 

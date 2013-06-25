@@ -1,13 +1,14 @@
 print("testing numbers and math lib")
 
-local intbits = math.numbits("int")
+local debug = require"debug"
+local intbits = debug.numbits("int")
 
 local minint = 2^(intbits - 1)
 local maxint = minint - 1
 
 
 -- number of bits in the mantissa of a floating-point number
-local floatbits = ({[32] = 24, [64] = 53, [96] = 64})[math.numbits("float")]
+local floatbits = ({[32] = 24, [64] = 53, [96] = 64})[debug.numbits("float")]
 
 -- basic float notation
 assert(0e12 == 0 and .0 == 0 and 0. == 0 and .2e2 == 20 and 2.E-1 == 0.2)
@@ -29,12 +30,25 @@ do
   assert(t[mz] == t[0] and t[-0] == t[0])
 end
 
-do
+do   -- extra tests for 'modf' (problematic in C because of extra return)
   local a,b = math.modf(3.5)
-  assert(a == 3 and b == 0.5)
-  assert(math.huge > 10e30)
-  assert(-math.huge < -10e30)
+  assert(a == 3.0 and b == 0.5)
+  a,b = math.modf(-2.5)
+  assert(a == -2.0 and b == -0.5)
+  a,b = math.modf(-3e23)
+  assert(a == -3e23 and b == 0.0)
+  a,b = math.modf(3e35)
+  assert(a == 3e35 and b == 0.0)
+  a,b = math.modf(-1/0)   -- -inf
+  assert(a == -1/0 and b == 0.0)
+  a,b = math.modf(1/0)   -- inf
+  assert(a == 1/0 and b == 0.0)
+  a,b = math.modf(0/0)   -- NaN
+  assert(a ~= a and b ~= b)
 end
+
+assert(math.huge > 10e30)
+assert(-math.huge < -10e30)
 
 
 -- integer arithmetic
@@ -255,7 +269,7 @@ assert(tonumber'1111111111111111'-tonumber'1111111111111110' ==
 
 function eq (a,b,limit)
   if not limit then
-    if math.numbits("float") >= 64 then limit = 1E-11
+    if debug.numbits("float") >= 64 then limit = 1E-11
     else limit = 1E-5
     end
   end

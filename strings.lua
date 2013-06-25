@@ -151,7 +151,7 @@ assert(string.format("%+08d", -2^31) == "-2147483648")
 
 
 -- longest number that can be formated
-local largefinite = (math.numbits("float") >= 64) and 1e308 or 1e38
+local largefinite = (require'debug'.numbits("float") >= 64) and 1e308 or 1e38
 assert(string.len(string.format('%99.99f', -largefinite)) >= 100)
 
 
@@ -162,7 +162,7 @@ assert(string.format("%d", -1) == "-1")
 assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
 
 
-if math.numbits("int") >= 64 then
+if require'debug'.numbits("int") >= 64 then
   -- "large" for 64 bits
   local max, min = 2^63 - 1, -2^63
   assert(max + 1 == min)
@@ -188,9 +188,9 @@ end
 
 if not _noformatA then
   print("testing 'format %a %A'")
-  assert(string.format("%.2a", 0.5) == "0x1.00p-1")
-  assert(string.format("%A", 0x1fffff.0) == "0X1.FFFFFP+20")
-  assert(string.format("%.4a", -3) == "-0x1.8000p+1")
+  assert(tonumber(string.format("%.2a", 0.5)) == 0x1.00p-1)
+  assert(tonumber(string.format("%A", 0x1fffff.0)) == 0X1.FFFFFP+20)
+  assert(tonumber(string.format("%.4a", -3)) == -0x1.8000p+1)
   assert(tonumber(string.format("%a", -0.1)) == -0.1)
 end
 

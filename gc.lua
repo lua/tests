@@ -1,5 +1,7 @@
 print('testing garbage collection')
 
+local debug = require"debug"
+
 collectgarbage()
 
 assert(collectgarbage("isrunning"))

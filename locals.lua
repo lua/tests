@@ -83,7 +83,7 @@ assert(c.a == 3)
 do
   local a
   local p = 4
-  for i=2, (math.numbits("int") - 2) do
+  for i=2, (debug.numbits("int") - 2) do
     for j=-3,3 do
       assert(load(string.format([[local a=%s;
                                         a=a+%s;

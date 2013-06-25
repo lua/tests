@@ -1,4 +1,4 @@
-debug = require "debug"
+local debug = require "debug"
 
 assert(type(os.getenv"PATH") == "string")
 
@@ -93,7 +93,7 @@ assert(io.write("\n\n\t\t  ", 3450, "\n"));
 io.close()
 
 -- test writing/reading numbers
-local largeint = 2^(math.numbits'i' - 1) - 1
+local largeint = 2^(debug.numbits'i' - 1) - 1
 f = assert(io.open(file, "w"))
 f:write(largeint, '\n')
 f:write(0xABCp-3, '\n')

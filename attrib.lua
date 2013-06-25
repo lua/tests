@@ -370,8 +370,8 @@ a[1], f(a)[2], b, c = {['alo']=assert}, 10, a[1], a[f], 6, 10, 23, f(a), 2
 a[1].alo(a[2]==10 and b==10 and c==print)
 
 -- test of large float/integer indices 
-local bits = (math.numbits("float") >=64) and 53 or 24
-bits = math.min(bits, math.numbits("int"))
+local bits = (require'debug'.numbits("float") >=64) and 53 or 24
+bits = math.min(bits, require'debug'.numbits("int"))
 
 a[2.0^bits] = 10; a[2.0^bits - 1] = 11;
 a[-2.0^bits] = 12; a[-2.0^bits + 1] = 13;

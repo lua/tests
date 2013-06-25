@@ -52,7 +52,7 @@ f, X = nil
 
 coroutine.yield'b'
 
-if math.numbits'i' <= 32 then   -- {
+if debug.numbits'i' <= 32 then   -- {
 
 print "testing string length overflow"
 

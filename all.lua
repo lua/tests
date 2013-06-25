@@ -76,7 +76,7 @@ local T,print,format,write,assert,type,unpack,floor =
 local function F (m)
   local function round (m)
     m = m + 0.04999
-    return m - (m % 0.1)     -- keep one decimal digit
+    return format("%.1f", m)      -- keep one decimal digit
   end
   if m < 1000 then return m
   else
@@ -195,11 +195,11 @@ if #msgs > 0 then
   print()
 end
 
-print(string.format("%d-bit integers, %d-bit floats",
-        math.numbits'i', math.numbits'f'))
-print("final OK !!!")
-
 local debug = require "debug"
+
+print(string.format("%d-bit integers, %d-bit floats",
+        debug.numbits'i', debug.numbits'f'))
+print("final OK !!!")
 
 debug.sethook(function (a) assert(type(a) == 'string') end, "cr")
 

@@ -369,21 +369,33 @@ assert(a[1]==10 and a[-3]==a.a and a[f]==print and a.x=='a' and not a.y)
 a[1], f(a)[2], b, c = {['alo']=assert}, 10, a[1], a[f], 6, 10, 23, f(a), 2
 a[1].alo(a[2]==10 and b==10 and c==print)
 
+
 -- test of large float/integer indices 
-local bits = (require'debug'.numbits("float") >=64) and 53 or 24
-bits = math.min(bits, require'debug'.numbits("int"))
 
-a[2.0^bits] = 10; a[2.0^bits - 1] = 11;
-a[-2.0^bits] = 12; a[-2.0^bits + 1] = 13;
+local maxint = 2^63 - 1      -- compute maximum "integer" that fits in a float
+if maxint <= 0 then maxint = 2^31 - 1 end
+assert(maxint > 0 and -maxint < 0 and not math.isfloat(maxint))
 
-assert(a[2^bits] == 10 and a[2^bits - 1] == 11 and
-       a[-2^bits] == 12 and a[-2^bits + 1] == 13)
+while maxint - 1.0 == maxint + 0.0 do   -- trim (if needed) to fit in a float
+  maxint = maxint // 2
+end
 
-a[-2^bits + 1] = 25
-a[2^bits] = 14
+maxintF = maxint + 0.0   -- float version
 
-assert(a[2.0^bits] == 14 and a[2.0^bits - 1] == 11 and
-       a[-2.0^bits] == 12 and a[-2.0^bits + 1] == 25)
+assert(math.isfloat(maxintF) and maxintF >= 2.0^16)
+
+-- floats and integers must index the same places
+a[maxintF] = 10; a[maxintF - 1.0] = 11;
+a[-maxintF] = 12; a[-maxintF + 1.0] = 13;
+
+assert(a[maxint] == 10 and a[maxint - 1] == 11 and
+       a[-maxint] == 12 and a[-maxint + 1] == 13)
+
+a[maxint] = 20
+a[-maxint] = 22
+
+assert(a[maxintF] == 20 and a[maxintF - 1.0] == 11 and
+       a[-maxintF] == 22 and a[-maxintF + 1.0] == 13)
 
 a = nil
 

@@ -162,9 +162,9 @@ assert(string.format("%d", -1) == "-1")
 assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
 
 
-if require'debug'.numbits("int") >= 64 then
+local max, min = 2^63 - 1, -2^63
+if max > 0 and min < 0 then
   -- "large" for 64 bits
-  local max, min = 2^63 - 1, -2^63
   assert(max + 1 == min)
   assert(string.format("%x", 2^52 - 1) == "fffffffffffff")
   assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
@@ -177,7 +177,7 @@ if require'debug'.numbits("int") >= 64 then
   assert(tostring(1234567890123) == '1234567890123')
 else
   -- "large" for 32 bits
-  local max, min = 2^31 - 1, -2^31
+  max, min = 2^31 - 1, -2^31
   assert(max + 1 == min)
   assert(string.format("%8x", -1) == "ffffffff")
   assert(string.format("%x", max) == "7fffffff")

@@ -1,14 +1,29 @@
 print("testing numbers and math lib")
 
-local debug = require"debug"
-local intbits = debug.numbits("int")
+local intbits = 64
+if 2^(intbits - 1) - 1 <= 0 then intbits = 32 end
 
 local minint = 2^(intbits - 1)
 local maxint = minint - 1
 
-
 -- number of bits in the mantissa of a floating-point number
-local floatbits = ({[32] = 24, [64] = 53, [96] = 64})[debug.numbits("float")]
+local floatbits = 24
+do
+  local p = 2.0^floatbits
+  while p < p + 1.0 do
+    p = p * 2.0
+    floatbits = floatbits + 1
+  end
+end
+
+do
+  assert(minint < 0 and maxint > 0 and 2^intbits == 0)
+  local x = 2.0^floatbits
+  assert(x > x - 1.0 and x == x + 1.0)
+
+  print(string.format("%d-bit integers, %d-bit (mantissa) floats",
+                       intbits, floatbits))
+end
 
 -- basic float notation
 assert(0e12 == 0 and .0 == 0 and 0. == 0 and .2e2 == 20 and 2.E-1 == 0.2)
@@ -269,7 +284,7 @@ assert(tonumber'1111111111111111'-tonumber'1111111111111110' ==
 
 function eq (a,b,limit)
   if not limit then
-    if debug.numbits("float") >= 64 then limit = 1E-11
+    if floatbits >= 50 then limit = 1E-11
     else limit = 1E-5
     end
   end

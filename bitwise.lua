@@ -123,7 +123,7 @@ assert(bit32.replace(-1, 0, 1, 2) == 2^32 - 7)
 
 assert(bit32.bor(3.9) == 3)
 assert(bit32.bor(-3.9) == 0xfffffffc)
-if require'debug'.numbits'f' >= 64 then
+if 2.0^50 < 2.0^50 + 1.0 then   -- large floats?
   assert(bit32.bor(2.0^32 - 4.9) == 0xfffffffb)
   assert(bit32.bor(-2.0^32 - 5.8) == 0xfffffffa)
   assert(bit32.bor(2.0^48 - 4.5) == 0xfffffffb)

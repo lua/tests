@@ -81,9 +81,9 @@ assert(c.a == 3)
 
 -- old test for limits for special instructions (now just a generic test)
 do
-  local a
-  local p = 4
-  for i=2, (debug.numbits("int") - 2) do
+  local i = 2
+  local p = 4    -- p == 2^i
+  repeat
     for j=-3,3 do
       assert(load(string.format([[local a=%s;
                                         a=a+%s;
@@ -95,8 +95,8 @@ do
                                         a=b-%s;
                                         assert(a==-2^%s)]], -j, p-j, i))) ()
     end
-    p =2*p
-  end
+    p = 2 * p;  i = i + 1
+  until p <= 0
 end
 
 print'+'
@@ -123,11 +123,14 @@ end
 
 assert(_ENV == _G)
 
-do local _ENV = (function (...) return ... end)(_G, dummy)
+do
+local dummy
+local _ENV = (function (...) return ... end)(_G, dummy)   -- {
 
 do local _ENV = {assert=assert}; assert(true) end
 mt = {_G = _G}
 local foo,x
+A = false    -- "declare" A
 do local _ENV = mt
   function foo (x)
     A = x
@@ -152,5 +155,5 @@ print('OK')
 
 return 5,f
 
-end
+end   -- }
 

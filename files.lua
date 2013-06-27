@@ -93,7 +93,9 @@ assert(io.write("\n\n\t\t  ", 3450, "\n"));
 io.close()
 
 -- test writing/reading numbers
-local largeint = 2^(debug.numbits'i' - 1) - 1
+local largeint = 2^(64 - 1) - 1
+if (largeint < 0) then largeint = 2^(32 - 1) - 1 end
+assert(largeint > 0)
 f = assert(io.open(file, "w"))
 f:write(largeint, '\n')
 f:write(0xABCp-3, '\n')

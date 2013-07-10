@@ -18,7 +18,7 @@ local function checkKlist (func, list)
   local k = T.listk(func)
   assert(#k == #list)
   for i = 1, #k do
-    assert(k[i] == list[i] and math.isfloat(k[i]) == math.isfloat(list[i]))
+    assert(k[i] == list[i] and debug.subtype(k[i]) == debug.subtype(list[i]))
   end
 end
 
@@ -142,7 +142,7 @@ end,
 local function checkK (func, val)
   check(func, 'LOADK', 'RETURN')
   local k = T.listk(func)
-  assert(#k == 1 and k[1] == val and math.isfloat(k[1]) == math.isfloat(val))
+  assert(#k == 1 and k[1] == val and debug.subtype(k[1]) == debug.subtype(val))
   assert(func() == val)
 end
 checkK(function () return 3^-1 end, 1/3)

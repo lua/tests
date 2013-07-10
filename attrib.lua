@@ -1,5 +1,7 @@
 print "testing require"
 
+local debug = require'debug'
+
 assert(require"string" == string)
 assert(require"math" == math)
 assert(require"table" == table)
@@ -374,7 +376,7 @@ a[1].alo(a[2]==10 and b==10 and c==print)
 
 local maxint = 2^63 - 1      -- compute maximum "integer" that fits in a float
 if maxint <= 0 then maxint = 2^31 - 1 end
-assert(maxint > 0 and -maxint < 0 and not math.isfloat(maxint))
+assert(maxint > 0 and -maxint < 0 and debug.subtype(maxint) == "integer")
 
 while maxint - 1.0 == maxint + 0.0 do   -- trim (if needed) to fit in a float
   maxint = maxint // 2
@@ -382,7 +384,7 @@ end
 
 maxintF = maxint + 0.0   -- float version
 
-assert(math.isfloat(maxintF) and maxintF >= 2.0^16)
+assert(debug.subtype(maxintF) == "float" and maxintF >= 2.0^16)
 
 -- floats and integers must index the same places
 a[maxintF] = 10; a[maxintF - 1.0] = 11;

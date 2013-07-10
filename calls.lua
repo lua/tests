@@ -2,17 +2,28 @@ print("testing functions and calls")
 
 local debug = require "debug"
 
--- get the opportunity to test 'type' too ;)
+-- get the opportunity to test 'type' and 'subtype' too ;)
 
 assert(type(1<2) == 'boolean')
 assert(type(true) == 'boolean' and type(false) == 'boolean')
-assert(type(nil) == 'nil' and type(-3) == 'number' and type'x' == 'string' and
-       type{} == 'table' and type(type) == 'function')
+assert(type(nil) == 'nil'
+   and type(-3) == 'number'
+   and type'x' == 'string'
+   and type{} == 'table'
+   and type(type) == 'function')
 
 assert(type(assert) == type(print))
-f = nil
 function f (x) return a:x (x) end
 assert(type(f) == 'function')
+
+assert(debug.subtype(f) == "Luafunction"
+   and debug.subtype(print) == "Cfunction"
+   and debug.subtype{} == "table"
+   and debug.subtype(true) == "boolean"
+   and debug.subtype(nil) == "nil"
+   and debug.subtype(0) == "integer"
+   and debug.subtype(0.0) == "float"
+   and debug.subtype(io.stdin) == "fulludata")
 
 
 -- testing local-function recursion

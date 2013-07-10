@@ -79,7 +79,8 @@ assert(maxint * maxint * maxint == maxint)
 
 for _, i in pairs{-16, -15, -3, -2, -1, 0, 1, 2, 3, 15} do
   for _, j in pairs{-16, -15, -3, -2, -1, 1, 2, 3, 15} do
-    assert(i // j == math.floor(i / j))
+    local iq, fq = i // j, i / j
+    assert(iq == math.floor(fq) and iq == math.ifloor(fq))
   end
 end
 
@@ -149,6 +150,14 @@ assert(" -0xa " + 1 == -9)
 
 
 -- testing 'tonumber'
+
+-- 'tonumber' with numbers
+assert(tonumber(3.4) == 3.4)
+assert(tonumber(3) == 3 and debug.subtype(tonumber(3)) == "integer")
+assert(tonumber(maxint) == maxint and tonumber(minint) == minint)
+assert(tonumber(1/0) == 1/0)
+
+-- 'tonumber' with strings
 assert(tonumber("0") == 0)
 assert(tonumber("") == nil)
 assert(tonumber("  ") == nil)
@@ -166,6 +175,7 @@ assert(tonumber('-1.2e2') == - - -120)
 
 assert(tonumber("0xffffffffffff") == 2^(4*12) - 1)
 assert(tonumber("0x"..string.rep("f", (intbits//4))) == 2^intbits - 1)
+assert(tonumber("-0x"..string.rep("f", (intbits//4))) == -(2^intbits - 1))
 
 -- testing 'tonumber' with base
 assert(tonumber('  001010  ', 2) == 10)
@@ -357,6 +367,21 @@ assert(tonumber(' -1.00000000000001 ') == -1.00000000000001)
 assert(8388609 + -8388609 == 0)
 assert(8388608 + -8388608 == 0)
 assert(8388607 + -8388607 == 0)
+
+
+
+do   -- testing ifloor
+  local n = math.ifloor(3.4)
+  assert(n == 3 and debug.subtype(n) == "integer")
+  n = math.ifloor(-3.4)
+  assert(n == -4 and debug.subtype(n) == "integer")
+  assert(math.ifloor(maxint) == maxint)
+  assert(math.ifloor(minint) == minint)
+  assert(math.ifloor(1e50) == nil)
+  assert(math.ifloor(-1e50) == nil)
+  assert(math.ifloor(0/0) == nil)
+  assert(not pcall(math.ifloor, {}))
+end
 
 -- testing implicit convertions
 

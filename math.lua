@@ -25,6 +25,8 @@ do
                        intbits, floatbits))
 end
 
+assert(math.type(0) == "integer" and math.type(0.0) == "float")
+
 -- basic float notation
 assert(0e12 == 0 and .0 == 0 and 0. == 0 and .2e2 == 20 and 2.E-1 == 0.2)
 
@@ -153,7 +155,7 @@ assert(" -0xa " + 1 == -9)
 
 -- 'tonumber' with numbers
 assert(tonumber(3.4) == 3.4)
-assert(tonumber(3) == 3 and debug.subtype(tonumber(3)) == "integer")
+assert(tonumber(3) == 3 and math.type(tonumber(3)) == "integer")
 assert(tonumber(maxint) == maxint and tonumber(minint) == minint)
 assert(tonumber(1/0) == 1/0)
 
@@ -372,9 +374,9 @@ assert(8388607 + -8388607 == 0)
 
 do   -- testing ifloor
   local n = math.ifloor(3.4)
-  assert(n == 3 and debug.subtype(n) == "integer")
+  assert(n == 3 and math.type(n) == "integer")
   n = math.ifloor(-3.4)
-  assert(n == -4 and debug.subtype(n) == "integer")
+  assert(n == -4 and math.type(n) == "integer")
   assert(math.ifloor(maxint) == maxint)
   assert(math.ifloor(minint) == minint)
   assert(math.ifloor(1e50) == nil)

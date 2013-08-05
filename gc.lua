@@ -511,18 +511,14 @@ end
 
 if T then
   local debug = require "debug"
-  collectgarbage("generational"); collectgarbage("stop")
-  x = T.newuserdata(0)
-  T.gcstate("propagate")    -- ensure 'x' is old
-  T.gcstate("sweepstring")
-  T.gcstate("propagate")
-  assert(string.find(T.gccolor(x), "/old"))
+  collectgarbage("stop")
+  local x = T.newuserdata(0)
   local y = T.newuserdata(0)
   debug.setmetatable(y, {__gc = true})   -- bless the new udata before...
   debug.setmetatable(x, {__gc = true})   -- ...the old one
   assert(string.find(T.gccolor(y), "white"))
   T.checkmemory()
-  collectgarbage("incremental"); collectgarbage("restart")
+  collectgarbage("restart")
 end
 
 

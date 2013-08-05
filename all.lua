@@ -39,8 +39,6 @@ package.path = "?;./?.lua" .. package.path
 
 math.randomseed(0)
 
-collectgarbage("setstepmul", 200)
-collectgarbage("setpause", 200)
 
 
 --[=[
@@ -147,22 +145,12 @@ report"gc.lua"
 local f = assert(loadfile('gc.lua'))
 f()
 
-collectgarbage("generational")
 dofile('db.lua')
 assert(dofile('calls.lua') == deep and deep)
 olddofile('strings.lua')
 olddofile('literals.lua')
 assert(dofile('attrib.lua') == 27)
 
-collectgarbage("incremental")   -- redo some tests in incremental mode
-olddofile('strings.lua')
-olddofile('literals.lua')
-dofile('constructs.lua')
-dofile('api.lua')
-
-collectgarbage("generational")   -- back to generational mode
-collectgarbage("setpause", 200)
-collectgarbage("setmajorinc", 500)
 assert(dofile('locals.lua') == 5)
 dofile('constructs.lua')
 dofile('code.lua')

@@ -475,34 +475,28 @@ end
 
 
 if T then   -- tests for weird cases collecting upvalues
-  local a = 1200
-  local f = function () return a end    -- create upvalue for 'a'
-  assert(f() == 1200)
 
-  -- erase reference to upvalue 'a', mark it as dead, but does not collect it
-  T.gcstate("pause"); collectgarbage("stop")
-  f = nil
-  T.gcstate("sweepstring")
+  function f ()
+    local a = {x = 20}
+    coroutine.yield(function () return a.x end)  -- will run collector
+    assert(T.gccolor(a) == "black")   -- all objects marked by now
+    a = {x = 30}   -- create a new object
+    assert(T.gccolor(a) == "white")   -- of course it is new...
+    coroutine.yield(100)   -- 'a' is still local to this thread
+  end
 
-  -- this function will reuse that dead upvalue...
-  f = function () return a end
-  assert(f() == 1200)
+  local t = setmetatable({}, {__mode = "kv"})
+  collectgarbage(); collectgarbage('stop')
+  -- create coroutine in a weak table, so it will never be marked
+  t.co = coroutine.wrap(f)
+  local f = t.co()   -- create function to access local 'a'
+  T.gcstate("atomic")   -- ensure all objects are traversed
+  assert(T.gcstate() == "atomic")
+  assert(t.co() == 100)   -- resume coroutine, creating new table for 'a'
+  assert(T.gccolor(t.co) == "white")  -- thread was not traversed
+  T.gcstate("pause")   -- collect thread, but should mark 'a' before that
+  assert(t.co == nil and f() == 30)   -- ensure correct access to 'a'
 
-  -- create coroutine with local variable 'b'
-  local co = coroutine.wrap(function()
-    local b = 150
-    coroutine.yield(function () return b end)
-  end)
-
-  T.gcstate("pause")
-  assert(co()() == 150)  -- create upvalue for 'b'
-
-  -- mark upvalue 'b' as dead, but does not collect it
-  T.gcstate("sweepstring")
-
-  co()   -- finish coroutine, "closing" that dead upvalue
-
-  assert(f() == 1200)
   collectgarbage("restart")
 
   print"+"

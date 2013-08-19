@@ -382,13 +382,17 @@ else
   local u = newproxy(nil)
   debug.setmetatable(u, {__gc = true})
   local s = 0
+  assert(T.isgclocal(u))
   local a = {[u] = 0}; setmetatable(a, {__mode = 'vk'})
+  assert(not T.isgclocal(u))
   for i=1,10 do a[newproxy(u)] = i end
   for k in pairs(a) do assert(getmetatable(k) == getmetatable(u)) end
   local a1 = {}; for k,v in pairs(a) do a1[k] = v end
   for k,v in pairs(a1) do a[v] = k end
   for i =1,10 do assert(a[i]) end
+  assert(T.isgclocal(a1))
   getmetatable(u).a = a1
+  assert(not T.isgclocal(a1))
   getmetatable(u).u = u
   do
     local u = u
@@ -476,7 +480,7 @@ end
 
 if T then   -- tests for weird cases collecting upvalues
 
-  function f ()
+  local function foo ()
     local a = {x = 20}
     coroutine.yield(function () return a.x end)  -- will run collector
     assert(T.gccolor(a) == "black")   -- all objects marked by now
@@ -488,7 +492,7 @@ if T then   -- tests for weird cases collecting upvalues
   local t = setmetatable({}, {__mode = "kv"})
   collectgarbage(); collectgarbage('stop')
   -- create coroutine in a weak table, so it will never be marked
-  t.co = coroutine.wrap(f)
+  t.co = coroutine.wrap(foo)
   local f = t.co()   -- create function to access local 'a'
   T.gcstate("atomic")   -- ensure all objects are traversed
   assert(T.gcstate() == "atomic")
@@ -498,6 +502,7 @@ if T then   -- tests for weird cases collecting upvalues
   assert(t.co == nil and f() == 30)   -- ensure correct access to 'a'
 
   collectgarbage("restart")
+  assert(T.isgclocal(foo) and T.isgclocal(f))
 
   print"+"
 end
@@ -510,9 +515,10 @@ if T then
   local y = T.newuserdata(0)
   debug.setmetatable(y, {__gc = true})   -- bless the new udata before...
   debug.setmetatable(x, {__gc = true})   -- ...the old one
-  assert(string.find(T.gccolor(y), "white"))
+  assert(T.gccolor(y) == "white")
   T.checkmemory()
   collectgarbage("restart")
+  assert(T.isgclocal(x) and T.isgclocal(y))
 end
 
 

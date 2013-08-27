@@ -1,3 +1,5 @@
+collectgarbage()
+
 local function errmsg (code, m)
   local st, msg = load(code)
   assert(not st and string.find(msg, m))

@@ -105,7 +105,7 @@ while 1 do
 end
 
 assert(#a == 25 and a[#a] == 97)
-
+x, a = nil
 
 -- yielding across C boundaries
 
@@ -227,6 +227,7 @@ assert(coroutine.resume(co, co) == false)
 
 
 -- attempt to resume 'normal' coroutine
+local co1, co2
 co1 = coroutine.create(function () return co2() end)
 co2 = coroutine.wrap(function ()
         assert(coroutine.status(co1) == 'normal')
@@ -241,6 +242,7 @@ assert(coroutine.status(co1) == 'dead')
 -- infinite recursion of coroutines
 a = function(a) coroutine.wrap(a)(a) end
 assert(not pcall(a, a))
+a = nil
 
 
 -- access to locals of erroneous coroutines
@@ -441,6 +443,7 @@ if not _soft then
     local r, msg = coroutine.resume(co)
     assert(not r)
   end
+  co = nil
 end
 
 
@@ -723,6 +726,5 @@ end)
 
 local a = {co()}
 assert(a[10] == "hi")
-
 
 print'OK'

@@ -92,11 +92,16 @@ end
 
 -- long variable names
 
-var = string.rep('a', 15000)
-prog = string.format("%s = 5", var)
-dostring(prog)
-assert(_G[var] == 5)
-var = nil
+var1 = string.rep('a', 15000) .. '1'
+var2 = string.rep('a', 15000) .. '2'
+prog = string.format([[
+  %s = 5
+  %s = %s + 1
+  return function () return %s - %s end
+]], var1, var2, var1, var1, var2)
+local f = dostring(prog)
+assert(_G[var1] == 5 and _G[var2] == 6 and f() == -1)
+var1, var2, f = nil
 print('+')
 
 -- escapes --

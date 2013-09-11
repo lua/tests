@@ -306,6 +306,7 @@ assert(a(3) == math.deg(3) and a == math.deg)
 
 -- testing deep C stack
 do
+  print("testing stack overflow")
   collectgarbage("stop")
   local s, msg = pcall(T.testC, "checkstack 1000023 XXXX")   -- too deep
   assert(not s and string.find(msg, "XXXX"))
@@ -313,6 +314,7 @@ do
   s, msg = pcall(T.testC, s)
   assert(not s and string.find(msg, "XX"))
   collectgarbage("restart")
+  print'+'
 end
 
 local prog = {"checkstack 30000 msg", "newtable"}
@@ -365,8 +367,10 @@ function checkerrnopro (code, msg)
 end
 
 checkerrnopro("pushnum 3; call 0 0", "attempt to call")
+print"stack overflow in unprotected thread"
 function f () f() end
 checkerrnopro("getglobal 'f'; call 0 0;", "stack overflow")
+print"+"
 
 
 -- testing table access

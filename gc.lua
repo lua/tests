@@ -57,7 +57,26 @@ local function GC1 ()
   assert(b[1] == 34)   -- 'u' was collected, but 'b' was not
 end
 
-local function GC()  GC1(); GC1() end
+local function GC2 ()
+  local u
+  local finish = false
+  u = {setmetatable({}, {__gc = function () finish = true end})}
+  b = {34}
+  repeat u = {{}} until finish
+  assert(b[1] == 34)   -- 'u' was collected, but 'b' was not
+
+  finish = false; local i = 1
+  u = {setmetatable({}, {__gc = function () finish = true end})}
+  repeat i = i + 1; u = {i .. i} until finish
+  assert(b[1] == 34)   -- 'u' was collected, but 'b' was not
+
+  finish = false
+  u = {setmetatable({}, {__gc = function () finish = true end})}
+  repeat local i; u = {function () return i end} until finish
+  assert(b[1] == 34)   -- 'u' was collected, but 'b' was not
+end
+
+local function GC()  GC1(); GC2() end
 
 
 contCreate = 0
@@ -325,7 +344,7 @@ while n do local t = a[a[K][k]][n]; n = t[1]; k = t.k; i = i + 1 end
 assert(i == 100)
 K = nil
 GC()
-assert(next(a) == nil)
+-- assert(next(a) == nil)
 
 
 -- testing errors during GC
@@ -449,6 +468,7 @@ if not _soft then
 end
 
 -- create many threads with self-references and open upvalues
+print("self-referenced threads")
 local thread_id = 0
 local threads = {}
 
@@ -483,7 +503,7 @@ if T then   -- tests for weird cases collecting upvalues
   local function foo ()
     local a = {x = 20}
     coroutine.yield(function () return a.x end)  -- will run collector
-    assert(T.gccolor(a) == "black")   -- all objects marked by now
+    assert(a.x == 20)   -- 'a' is 'ok'
     a = {x = 30}   -- create a new object
     assert(T.gccolor(a) == "white")   -- of course it is new...
     coroutine.yield(100)   -- 'a' is still local to this thread

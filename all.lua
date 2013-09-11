@@ -118,6 +118,7 @@ local function report (n) print("\n***** FILE '"..n.."'*****") end
 local olddofile = dofile
 dofile = function (n)
   showmem()
+  print("time :", os.clock() - c)
   report(n)
   local f = assert(loadfile(n))
   local b = string.dump(f)
@@ -129,16 +130,25 @@ dofile('main.lua')
 
 do
   local next, setmetatable, stderr = next, setmetatable, io.stderr
-  local mt = {}
+  -- track local collection
+  local mt1 = {}
   -- each time a table is collected, create a new one to be
   -- collected next cycle
-  mt.__gc = function (o)
-    stderr:write'.'    -- mark progress
-    local n = setmetatable({}, mt)   -- replicate object
-    o = nil
-    local a,b,c,d,e = nil    -- erase 'o' from the stack
+  mt1.__gc = function (o)
+     stderr:write'.'    -- mark progress
+     local n = setmetatable({}, mt1)   -- replicate object
+   end
+   local n = setmetatable({}, mt1)   -- replicate object
+
+  -- track global collection
+  local mt2 = {}
+  mt2.__gc = function (o)
+    stderr:write':'    -- mark progress
+    local n = setmetatable({}, mt2)   -- replicate object
+    n = {n}    -- make it non local
   end
-  local n = setmetatable({}, mt)   -- replicate object
+  local n = setmetatable({}, mt2)   -- replicate object
+  n = {n}    -- make it non local
 end
 
 report"gc.lua"

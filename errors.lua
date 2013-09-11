@@ -275,6 +275,7 @@ X=2;lineerror((p), 1)
 if not _soft then
   -- several tests that exaust the Lua stack
   collectgarbage()
+  print"testing stack overflow"
   C = 0
   local l = debug.getinfo(1, "l").currentline; function y () C=C+1; y() end
 

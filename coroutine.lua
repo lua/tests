@@ -25,6 +25,9 @@ _G.x = nil   -- declare x
 function foo (a, ...)
   local x, y = coroutine.running()
   assert(x == f and y == false)
+  -- next call should not corrupt coroutine (but must fail,
+  -- as it attempts to resume the running coroutine)
+  assert(coroutine.resume(f) == false)
   assert(coroutine.status(f) == "running")
   local arg = {...}
   for i=1,#arg do
@@ -215,12 +218,18 @@ assert(f() == 43 and f() == 53)
 function co_func (current_co)
   assert(coroutine.running() == current_co)
   assert(coroutine.resume(current_co) == false)
+  coroutine.yield(10, 20)
   assert(coroutine.resume(current_co) == false)
+  coroutine.yield(23)
   return 10
 end
 
 local co = coroutine.create(co_func)
-local a,b = coroutine.resume(co, co)
+local a,b,c = coroutine.resume(co, co)
+assert(a == true and b == 10 and c == 20)
+a,b = coroutine.resume(co, co)
+assert(a == true and b == 23)
+a,b = coroutine.resume(co, co)
 assert(a == true and b == 10)
 assert(coroutine.resume(co, co) == false)
 assert(coroutine.resume(co, co) == false)

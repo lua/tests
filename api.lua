@@ -574,8 +574,8 @@ do
   collectgarbage()
   assert(collectgarbage("count") <= x+1)
   -- udata with finalizer
-  x = collectgarbage("count")
   collectgarbage()
+  x = collectgarbage("count")
   collectgarbage("stop")
   a = {__gc = function () end}
   for i=1,1000 do debug.setmetatable(T.newuserdata(0), a) end

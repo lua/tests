@@ -100,6 +100,7 @@ checkmessage("local a = 2.0^100 // 1", "out of range")
 checkmessage("string.sub('a', 2.0^100)", "out of range")
 checkmessage("a = 24 // 0", "divide by zero")
 checkmessage("a = 1 % 0", "'n%0'")
+checkmessage("a = 1 ^ -4", "exponentiation")
 
 
 -- passing light userdata instead of full userdata

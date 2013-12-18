@@ -469,6 +469,12 @@ local mt = {
   __le = function(a,b) coroutine.yield(nil, "le"); return a - b <= 0 end,
   __add = function(a,b) coroutine.yield(nil, "add"); return a.x + b.x end,
   __sub = function(a,b) coroutine.yield(nil, "sub"); return a.x - b.x end,
+  __band = function(a,b)
+             a = type(a) == "table" and a.x or a
+             b = type(b) == "table" and b.x or b
+             coroutine.yield(nil, "band")
+             return a & b
+           end,
   __concat = function(a,b)
                coroutine.yield(nil, "concat");
                a = type(a) == "table" and a.x or a
@@ -509,6 +515,8 @@ assert(run(function () if (a<=b) then return '<=' else return '>' end end,
        {"lt"}) == "<=")
 assert(run(function () if (a==b) then return '==' else return '~=' end end,
        {"eq"}) == "~=")
+
+assert(run(function () return a & b + a end, {"add", "band"}) == 2)
 
 assert(run(function () return a..b end, {"concat"}) == "1012")
 

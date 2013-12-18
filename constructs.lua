@@ -20,9 +20,13 @@ assert(-3%5 == 2 and -3+5 == 2)
 assert(2*1+3/3 == 3 and 1+2 .. 3*1 == "33");
 assert(not(2+1 > 3*1) and "a".."b" > "a");
 
+assert(0xF0 | 0xCC ~ 0xAA & 0xFD == 0xF4)
+assert(0xFD & 0xAA ~ 0xCC | 0xF0 == 0xF4)
+assert(0xF0 & 0x0F + 1 == 0x10)
+
 assert(3^4//2^3//5 == 2)
 
-assert(-3+4*5//2^6^2//9+4%10/3 == (-3)+(((4*5)//(2^(6^2)))//9)+((4%10)/3))
+assert(-3+4*5//2^5^2//9+4%10/3 == (-3)+(((4*5)//(2^(5^2)))//9)+((4%10)/3))
 
 assert(not ((true or false) and nil))
 assert(      true or false  and nil)

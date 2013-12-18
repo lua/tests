@@ -1,5 +1,32 @@
 print("testing bitwise operations")
 
+-- use variables to avoid constant folding
+local a, b, c, d
+a = 0xFFFFFFFF
+assert(a & -1 == a)
+a = 0xF0F0F0F0
+assert(a | -1 == -1)
+assert(a ~ a == 0)
+a = 0xF0; b = 0xCC; c = 0xAA; d = 0xFD
+assert(a | b ~ c & d == 0xF4)
+
+a = 0xF0.3; b = 0xCC.23; c = 0xAA.1; d = 0xFD.4
+assert(a | b ~ c & d == 0xF4)
+
+if 2^63 - 1 > 0 then
+  a = 0xF000000000000000; b = 0xCC00000000000000;
+  c = 0xAA00000000000000; d = 0xFD00000000000000
+  assert(a | b ~ c & d == 0xF400000000000000)
+else
+  a = 0xF0000000; b = 0xCC000000;
+  c = 0xAA000000; d = 0xFD000000
+  assert(a | b ~ c & d == 0xF4000000)
+end
+assert(a | b < 0)
+
+
+
+
 assert(bit32.band() == bit32.bnot(0))
 assert(bit32.btest() == true)
 assert(bit32.bor() == 0)

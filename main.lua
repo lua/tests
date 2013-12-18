@@ -160,15 +160,15 @@ RUN("lua - < %s > %s", prog, out)
 checkout("1\tnil\n")
 
 prepfile[[
-= (6*2-6) -- ===
-a 
-= 10
+(6*2-6) -- ===
+a =
+10
 print(a)
-= a]]
+a]]
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
 checkprogout("6\n10\n10\n\n")
 
-prepfile("a = [[b\nc\nd\ne]]\n=a")
+prepfile("a = [[b\nc\nd\ne]]\na")
 print("temporary program file: "..prog)
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
 checkprogout("b\nc\nd\ne\n\n")
@@ -201,17 +201,17 @@ xuxu
 ]]
   local b = "\
 xuxu\n"
-  if x == 11 then return 1 , 2 end  --[[ test multiple returns ]]
+  if x == 11 then return 1 + 12 , 2 + 20 end  --[[ test multiple returns ]]
   return x + 1 
   --\\
 end
-=( f( 10 ) )
+return( f( 100 ) )
 assert( a == b )
-=f( 11 )  ]=]
+do return f( 11 ) end  ]=]
 s = string.gsub(s, ' ', '\n\n')
 prepfile(s)
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
-checkprogout("11\n1\t2\n\n")
+checkprogout("101\n13\t22\n\n")
   
 prepfile[[#comment in 1st line without \n at the end]]
 RUN("lua %s", prog)

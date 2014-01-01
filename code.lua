@@ -154,6 +154,9 @@ checkK(function () return -3 % 5 end, 2)
 checkK(function () return -((2.0^8 + -(-1)) % 8)/2 * 4 - 3 end, -5.0)
 checkK(function () return -((2^8 + -(-1)) % 8)//2 * 4 - 3 end, -7)
 checkK(function () return 0xF0.0 | 0xCC.3 ~ 0xAA & 0xFD end, 0xF4)
+checkK(function () return ~(~0xFF0 | 0xFF0) end, 0)
+checkK(function () return ~~-100023.8 end, -100024)
+checkK(function () return ((100 << 6) << -4) >> 2 end, 100)
 
 -- bug in constant folding for 5.1
 check(function () return -nil end, 'LOADNIL', 'UNM', 'RETURN')

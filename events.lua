@@ -117,6 +117,9 @@ t.__len = f("len")
 t.__band = f("band")
 t.__bor = f("bor")
 t.__bxor = f("bxor")
+t.__shl = f("shl")
+t.__shr = f("shr")
+t.__bnot = f("bnot")
 
 assert(b+5 == b)
 assert(cap[0] == "add" and cap[1] == b and cap[2] == 5 and cap[3]==nil)
@@ -157,6 +160,12 @@ assert('4'^a == '4')
 assert(cap[0] == "pow" and cap[1] == '4' and cap[2] == a and cap[3]==nil)
 assert(#a == a)
 assert(cap[0] == "len" and cap[1] == a)
+assert(~a == a)
+assert(cap[0] == "bnot" and cap[1] == a)
+assert(a << 3 == a)
+assert(cap[0] == "shl" and cap[1] == a and cap[2] == 3)
+assert(1.5 >> a == 1.5)
+assert(cap[0] == "shr" and cap[1] == 1.5 and cap[2] == a)
 
 
 -- test for rawlen

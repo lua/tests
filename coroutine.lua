@@ -469,12 +469,20 @@ local mt = {
   __le = function(a,b) coroutine.yield(nil, "le"); return a - b <= 0 end,
   __add = function(a,b) coroutine.yield(nil, "add"); return a.x + b.x end,
   __sub = function(a,b) coroutine.yield(nil, "sub"); return a.x - b.x end,
+  __mod = function(a,b) coroutine.yield(nil, "mod"); return a.x % b.x end,
+  __unm = function(a,b) coroutine.yield(nil, "unm"); return -a.x end,
+  __bnot = function(a,b) coroutine.yield(nil, "bnot"); return ~a.x end,
+  __shl = function(a,b) coroutine.yield(nil, "shl"); return a.x << b.x end,
+  __shr = function(a,b) coroutine.yield(nil, "shr"); return a.x >> b.x end,
   __band = function(a,b)
              a = type(a) == "table" and a.x or a
              b = type(b) == "table" and b.x or b
              coroutine.yield(nil, "band")
              return a & b
            end,
+  __bor = function(a,b) coroutine.yield(nil, "bor"); return a.x | b.x end,
+  __bxor = function(a,b) coroutine.yield(nil, "bxor"); return a.x ~ b.x end,
+
   __concat = function(a,b)
                coroutine.yield(nil, "concat");
                a = type(a) == "table" and a.x or a
@@ -517,6 +525,14 @@ assert(run(function () if (a==b) then return '==' else return '~=' end end,
        {"eq"}) == "~=")
 
 assert(run(function () return a & b + a end, {"add", "band"}) == 2)
+
+assert(run(function () return a % b end, {"mod"}) == 10)
+
+assert(run(function () return ~a & b end, {"bnot", "band"}) == ~10 & 12)
+assert(run(function () return a | b end, {"bor"}) == 10 | 12)
+assert(run(function () return a ~ b end, {"bxor"}) == 10 ~ 12)
+assert(run(function () return a << b end, {"shl"}) == 10 << 12)
+assert(run(function () return a >> b end, {"shr"}) == 10 >> 12)
 
 assert(run(function () return a..b end, {"concat"}) == "1012")
 

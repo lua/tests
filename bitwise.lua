@@ -1,19 +1,24 @@
 print("testing bitwise operations")
 
+local numbits = require'debug'.numbits'i'
+
+assert(~0 == -1)
+
 -- use variables to avoid constant folding
 local a, b, c, d
-a = 0xFFFFFFFF
+a = 0xFFFFFFFFFFFFFFFF
 assert(a & -1 == a)
-a = 0xF0F0F0F0
+a = 0xF0F0F0F0F0F0F0F0
 assert(a | -1 == -1)
 assert(a ~ a == 0)
+assert(a >> 4 == ~a)
 a = 0xF0; b = 0xCC; c = 0xAA; d = 0xFD
 assert(a | b ~ c & d == 0xF4)
 
 a = 0xF0.3; b = 0xCC.23; c = 0xAA.1; d = 0xFD.4
 assert(a | b ~ c & d == 0xF4)
 
-if 2^63 - 1 > 0 then
+if numbits >= 64 then
   a = 0xF000000000000000; b = 0xCC00000000000000;
   c = 0xAA00000000000000; d = 0xFD00000000000000
   assert(a | b ~ c & d == 0xF400000000000000)
@@ -23,9 +28,23 @@ else
   assert(a | b ~ c & d == 0xF4000000)
 end
 assert(a | b < 0)
+assert(~~a == a and ~a == -1 ~ a and -d == ~d + 1)
 
+assert(-1 >> 1 == 2^(numbits - 1) - 1 and 1 << 31 == 0x80000000)
+assert(-1 >> (numbits - 1) == 1)
+assert(-1 >> numbits == 0 and
+       -1 >> -numbits == 0 and
+       -1 << numbits == 0 and
+       -1 << -numbits == 0)
 
+for _, i in ipairs{0, 1, 2, 3, 4, 31, 32, 33,
+                   numbits - 1, numbits, numbits + 1, numbits * 2} do
+  assert(1 << i == 2^i and -1 << i == -2^i)
+end
 
+assert(1 >> -3 == 1 << 3 and 1000 >> 5 == 1000 << -5)
+
+print("testing bitwise library")
 
 assert(bit32.band() == bit32.bnot(0))
 assert(bit32.btest() == true)
@@ -76,6 +95,17 @@ assert(bit32.arshift(-1, 1) == 0xffffffff)
 assert(bit32.arshift(-1, 24) == 0xffffffff)
 assert(bit32.arshift(-1, 32) == 0xffffffff)
 assert(bit32.arshift(-1, -1) == bit32.band(-1 * 2, 0xffffffff))
+
+assert(0x12345678 << 4 == 0x123456780)
+assert(0x12345678 << 8 == 0x1234567800)
+assert(0x12345678 << -4 == 0x01234567)
+assert(0x12345678 << -8 == 0x00123456)
+assert(0x12345678 << 32 == 0x1234567800000000)
+assert(0x12345678 << -32 == 0)
+assert(0x12345678 >> 4 == 0x01234567)
+assert(0x12345678 >> 8 == 0x00123456)
+assert(0x12345678 >> 32 == 0)
+assert(0x12345678 >> -32 == 0x1234567800000000)
 
 print("+")
 -- some special cases

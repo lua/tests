@@ -1,5 +1,8 @@
 print('testing strings and string library')
 
+local numbits = require'debug'.numbits
+
+-- testing string comparisons
 assert('alo' < 'alo1')
 assert('' < 'a')
 assert('alo\0alo' < 'alo\0b')
@@ -17,8 +20,8 @@ assert(not('\0\0\0\0' <= '\0\0\0'))
 assert('\0\0\0' <= '\0\0\0')
 assert('\0\0\0' >= '\0\0\0')
 assert(not ('\0\0b' < '\0\0a\0'))
-print('+')
 
+-- testing string.sub
 assert(string.sub("123456789",2,4) == "234")
 assert(string.sub("123456789",7) == "789")
 assert(string.sub("123456789",7,6) == "")
@@ -35,8 +38,8 @@ assert(string.sub("123456789",-2^31, 2^31 - 1) == "123456789")
 assert(string.sub("123456789",-2^31, -2^31) == "")
 assert(string.sub("\000123456789",3,5) == "234")
 assert(("\000123456789"):sub(8) == "789")
-print('+')
 
+-- testing string.find
 assert(string.find("123456789", "345") == 3)
 a,b = string.find("123456789", "345")
 assert(string.sub("123456789", a, b) == "345")
@@ -50,7 +53,6 @@ assert(string.find("", "", 1) == 1)
 assert(not string.find("", "", 2))
 assert(string.find('', 'aaa', 1) == nil)
 assert(('alo(.)alo'):find('(.)', 1, 1) == 4)
-print('+')
 
 assert(string.len("") == 0)
 assert(string.len("\0\0\0") == 3)
@@ -60,6 +62,7 @@ assert(#"" == 0)
 assert(#"\0\0\0" == 3)
 assert(#"1234567890" == 10)
 
+-- testing string.byte/string.char
 assert(string.byte("a") == 97)
 assert(string.byte("\xe4") > 127)
 assert(string.byte(string.char(255)) == 255)
@@ -80,7 +83,6 @@ assert(string.char(0, string.byte("\xe4"), 0) == "\0\xe4\0")
 assert(string.char(string.byte("\xe4l\0óu", 1, -1)) == "\xe4l\0óu")
 assert(string.char(string.byte("\xe4l\0óu", 1, 0)) == "")
 assert(string.char(string.byte("\xe4l\0óu", -10, 100)) == "\xe4l\0óu")
-print('+')
 
 assert(string.upper("ab\0c") == "AB\0C")
 assert(string.lower("\0ABCc%$") == "\0abcc%$")
@@ -110,7 +112,6 @@ assert(string.find(tostring(print), 'function:'))
 assert(#tostring('\0') == 1)
 assert(tostring(true) == "true")
 assert(tostring(false) == "false")
-print('+')
 
 x = '"ílo"\n\\'
 assert(string.format('%q%s', x, x) == '"\\"ílo\\"\\\n\\\\""ílo"\n\\')
@@ -151,11 +152,11 @@ assert(string.format("%+08d", -2^31) == "-2147483648")
 
 
 -- longest number that can be formated
-local largefinite = (require'debug'.numbits("float") >= 64) and 1e308 or 1e38
+local largefinite = (numbits("float") >= 64) and 1e308 or 1e38
 assert(string.len(string.format('%99.99f', -largefinite)) >= 100)
 
 
-print("testing large numbers for format")
+-- testing large numbers for format
 
 assert(string.format("%08x", 2^22 - 1) == "003fffff")
 assert(string.format("%d", -1) == "-1")
@@ -272,6 +273,151 @@ if not _port then
 
 end
 
-print('OK')
 
+-- testing pack/unpack
+
+local numbytes = numbits'integer' // 8
+
+-- basic pack/unpack with default arguments
+for _, i in ipairs{0, 1, 2, 127, 128, 255, 0xffffffff, 0xffffffff} do
+  assert(string.unpackint(string.packint(i)) == i)
+  assert(string.unpackint(string.packint(-i)) == -i)
+end
+
+-- default size is the size of a Lua integer
+assert(#string.packint(0) == numbytes)
+
+-- endianess
+assert(string.packint(34, 4, 'l') == "\34\0\0\0")
+assert(string.packint(34, 4, 'b') == "\0\0\0\34")
+
+assert(string.packint(0x12345678, 4, 'l') == "\x78\x56\x34\x12")
+assert(string.packint(0x12345678, 4, 'b') == "\x12\x34\x56\x78")
+
+-- unsigned values
+assert(string.packint(255, 1, 'l') == "\255")
+assert(string.packint(0xffffff, 3) == "\255\255\255")
+assert(string.packint(0x8000, 2, 'b') == "\x80\0")
+
+-- for unsigned, we need to mask results (but there is no errors)
+assert(string.unpackint("\x80\0", 1, 2, 'b') & 0xFFFF == 0x8000)
+
+local m = 0xffffffff
+assert(string.unpackint('\0\0\0\0\xff\xff\xff\xff', 5, 4, 'b') & m == m)
+assert(string.unpackint('\0\0\0\0\xff\xff\xff\xff', 4, 5, 'b') == m)
+assert(string.unpackint('\0\0\0\0\xff\xff\xff\xff', 3, 6, 'b') == m)
+assert(string.unpackint('\0\0\0\0\xff\xff\xff\xff', 2, 7, 'b') == m)
+assert(string.unpackint('\0\0\0\0\xff\xff\xff\xff', 1, 8, 'b') == m)
+
+
+
+local function check (i, s, n)
+  assert(string.packint(n, i, 'l') == s)
+  assert(string.packint(n, i, 'b') == s:reverse())
+  assert(string.unpackint(s, 1, i, 'l') == n)
+  assert(string.unpackint(s:reverse(), 1, i, 'b') == n)
+end
+
+
+for i = 1, 8 do
+  check(i, string.rep("\255", i), -1)
+  check(i, "\127" .. string.rep("\0", i - 1), 127)
+  check(i, "\209" .. string.rep("\255", i - 1), 209 - 256)
+end
+
+for i = 2, numbytes do
+  -- unsigned numbers
+  assert(string.packint(256^i - 1, i) == string.rep("\255", i))
+  check(i, string.rep("\255", i - 1) .. "\0", 256^(i - 1) - 1)
+
+  check(i, "\220" .. string.rep("\0", i - 2) .. "\105",
+           105 * 256^(i - 1) + 220)
+  check(i, "\123" .. string.rep("\0", i - 2) .. "\160",
+           (160 * 256^(i - 1) + 123) - 256^i)
+end
+
+-- signal extension
+assert(string.unpackint("\x19\xff\0", 1, 3, 'l') == 0xff19)
+assert(string.unpackint("\19\xff\0", 1, 2, 'l') == -237)
+
+
+-- position
+local s = "\0\255\123\9\1\47\200"
+for i = 1, #s do
+  assert(string.unpackint(s, i, 1) % 256 == string.byte(s, i))
+end
+
+for i = 1, #s - 1 do
+  assert(string.unpackint(s, i, 2, 'b') % 256^2 ==
+  string.byte(s, i)*256 + string.byte(s, i + 1))
+end
+
+for i = 1, #s - 2 do
+  assert(string.unpackint(s, i, 3, 'l') % 256^3 ==
+  string.byte(s, i + 2)*256^2 + string.byte(s, i + 1)*256 + string.byte(s, i))
+end
+
+
+-- testing overflow in packing
+
+local function checkerror (n, size, endian)
+  local status, msg = pcall(string.packint, n, size, endian)
+  assert(not status and string.find(msg, "does not fit"))
+end
+
+for i = 1, numbytes - 1 do
+  local maxunsigned = 256^i - 1
+  local minsigned = -maxunsigned // 2
+
+  local s = string.packint(maxunsigned, i)
+  assert(string.unpackint(s, 1, i) % (maxunsigned + 1) == maxunsigned)
+  checkerror(maxunsigned + 1, i, 'l')
+  checkerror(maxunsigned + 1, i, 'b')
+
+  s = string.packint(minsigned, i)
+  assert(string.unpackint(s, 1, i) == minsigned)
+  checkerror(minsigned - 1, i, 'l')
+  checkerror(minsigned - 1, i, 'b')
+end
+
+
+-- testing overflow in unpacking (note that with an 64-bit integer
+-- overflows should be impossible)
+
+checkerror = function (s, size, endian)
+  if size > numbytes then
+    local status, msg = pcall(string.unpackint, s, 1, size, endian)
+    assert(not status and string.find(msg, "does not fit"))
+  else
+    assert(string.unpackint(s, 1, size, endian))
+  end
+end
+
+checkerror("\3\0\0\0\0", 5, 'b')
+checkerror("\200\0\0\0\0\0", 6, 'b')
+checkerror("\3\0\0\0\0\0\0", 7, 'b')
+checkerror("\0\0\0\0\0\0\0\3", 8, 'l')
+checkerror("\3\xff\xff\xff\xff", 5, 'b')
+checkerror("\3\xff\xff\xff\xff\xff", 6, 'b')
+checkerror("\200\xff\xff\xff\xff\xff\xff", 7, 'b')
+checkerror("\xff\xff\xff\xff\xff\xff\xff\200", 8, 'l')
+
+-- looks like a negative integer, but it is not (because of leading zero)
+checkerror("\0\xff\xff\xff\xff\x23", 6, 'b')
+checkerror("\0\xff\xff\xff\xff\xff\x23", 7, 'b')
+
+-- check errors in arguments
+function check (msg, f, ...)
+  local status, err = pcall(f, ...)
+  assert(not status and string.find(err, msg))
+end
+
+check("string too short", string.unpackint, "\1\2\3\4", 2^63 - 1)
+check("string too short", string.unpackint, "\1\2\3\4", 2^31 - 1)
+check("string too short", string.unpackint, "\1\2\3\4", 4, 2)
+check("endianess", string.unpackint, "\1\2\3\4", 1, 2, 'x')
+check("endianess", string.packint, -1, 2, 'x')
+check("out of valid range", string.packint, -1, 9)
+
+print('OK')
 

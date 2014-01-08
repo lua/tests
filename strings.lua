@@ -337,8 +337,8 @@ for i = 2, numbytes do
 end
 
 -- signal extension
-assert(string.unpackint("\x19\xff\0", 1, 3, 'l') == 0xff19)
-assert(string.unpackint("\19\xff\0", 1, 2, 'l') == -237)
+assert(string.unpackint("\x19\xff\0", -3, 3, 'l') == 0xff19)
+assert(string.unpackint("\19\xff\0", -3, 2, 'l') == -237)
 
 
 -- position
@@ -398,9 +398,12 @@ checkerror("\200\0\0\0\0\0", 6, 'b')
 checkerror("\3\0\0\0\0\0\0", 7, 'b')
 checkerror("\0\0\0\0\0\0\0\3", 8, 'l')
 checkerror("\3\xff\xff\xff\xff", 5, 'b')
-checkerror("\3\xff\xff\xff\xff\xff", 6, 'b')
+checkerror("\x7f\xff\xff\xff\xff", 5, 'b')
+checkerror("\x7f\xff\xff\xff\xff\xff", 6, 'b')
 checkerror("\200\xff\xff\xff\xff\xff\xff", 7, 'b')
 checkerror("\xff\xff\xff\xff\xff\xff\xff\200", 8, 'l')
+checkerror("\xff\xff\xff\xff\xff\xff\xff\x7f", 8, 'l')
+checkerror("\xff\xff\xff\xff\xff\xff\xff\1", 8, 'l')
 
 -- looks like a negative integer, but it is not (because of leading zero)
 checkerror("\0\xff\xff\xff\xff\x23", 6, 'b')
@@ -418,6 +421,39 @@ check("string too short", string.unpackint, "\1\2\3\4", 4, 2)
 check("endianess", string.unpackint, "\1\2\3\4", 1, 2, 'x')
 check("endianess", string.packint, -1, 2, 'x')
 check("out of valid range", string.packint, -1, 9)
+
+
+
+-- checking pack/unpack of floating numbers
+
+check("string too short", string.unpackfloat, "\1\2\3\4", 2, "f")
+check("string too short", string.unpackfloat, "\1\2\3\4\5\6\7", 2, "d")
+check("string too short", string.unpackfloat, "\1\2\3\4", 2^31 - 1)
+
+for _, n in ipairs{0, -1.1, 1.9, 1/0, -1/0, 1e20, -1e20, 0.1, 2000.7} do
+  assert(string.unpackfloat(string.packfloat(n)) == n)
+  assert(string.unpackfloat(string.packfloat(n, 'd'), 1, 'd') == n)
+  assert(string.packfloat(n, 'f', 'l') ==
+         string.packfloat(n, 'f', 'b'):reverse())
+  assert(string.packfloat(n, 'd', 'b') ==
+         string.packfloat(n, 'd', 'l'):reverse())
+end
+
+-- for single precision, test only with "round" numbers
+for _, n in ipairs{0, -1.5, 1/0, -1/0, 1e10, -1e9, 0.5, 2000.25} do
+  assert(string.unpackfloat(string.packfloat(n, 'f'), 1, 'f') == n)
+end
+
+-- position
+for i = 1, 11 do
+  local s = string.rep("0", i)  .. string.packfloat(3.125)
+  assert(string.unpackfloat(s, i + 1) == 3.125)
+end
+
+if not _port then
+  assert(#string.packfloat(0, 'f') == 4)
+  assert(#string.packfloat(0, 'd') == 8)
+end
 
 print('OK')
 

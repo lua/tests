@@ -286,10 +286,12 @@ end
 
 -- default size is the size of a Lua integer
 assert(#string.packint(0) == numbytes)
+assert(string.packint(-234, 0) == string.packint(-234))
 
 -- endianess
 assert(string.packint(34, 4, 'l') == "\34\0\0\0")
 assert(string.packint(34, 4, 'b') == "\0\0\0\34")
+assert(string.packint(0, 5, 'n') == "\0\0\0\0\0")
 
 assert(string.packint(0x12345678, 4, 'l') == "\x78\x56\x34\x12")
 assert(string.packint(0x12345678, 4, 'b') == "\x12\x34\x56\x78")
@@ -429,6 +431,9 @@ check("out of valid range", string.packint, -1, 9)
 check("string too short", string.unpackfloat, "\1\2\3\4", 2, "f")
 check("string too short", string.unpackfloat, "\1\2\3\4\5\6\7", 2, "d")
 check("string too short", string.unpackfloat, "\1\2\3\4", 2^31 - 1)
+
+assert(string.unpackfloat(string.packfloat(120.5, 'n', 'n'), 1, 'n', 'n')
+   == 120.5)
 
 for _, n in ipairs{0, -1.1, 1.9, 1/0, -1/0, 1e20, -1e20, 0.1, 2000.7} do
   assert(string.unpackfloat(string.packfloat(n)) == n)

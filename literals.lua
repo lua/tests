@@ -49,9 +49,9 @@ assert("abc\z
 
 -- Error in escape sequences
 local function lexerror (s, err)
-  local st, msg = load('return '..s)
-  if err ~= '<eof>' then err = "'"..err.."'" end
-  assert(not st and string.find(msg, "near "..err, 1, true))
+  local st, msg = load('return ' .. s)
+  if err ~= '<eof>' then err = err .. "'" end
+  assert(not st and string.find(msg, "near .-" .. err))
 end
 lexerror([["abc\x"]], [[\x"]])
 lexerror([["abc\x]], [[\x]])
@@ -61,15 +61,15 @@ lexerror([["\x5]], [[\x5]])
 lexerror([["\xr"]], [[\xr]])
 lexerror([["\xr]], [[\xr]])
 lexerror([["\x.]], [[\x.]])
-lexerror([["\x8%"]], [[\x8%]])
+lexerror([["\x8%"]], [[\x8%%]])
 lexerror([["\xAG]], [[\xAG]])
 lexerror([["\g"]], [[\g]])
 lexerror([["\g]], [[\g]])
-lexerror([["\."]], [[\.]])
+lexerror([["\."]], [[\%.]])
 
-lexerror([["\999"]], [[\999]])
-lexerror([["xyz\300"]], [[\300]])
-lexerror([["   \256"]], [[\256]])
+lexerror([["\999"]], [[\999"]])
+lexerror([["xyz\300"]], [[\300"]])
+lexerror([["   \256"]], [[\256"]])
 
 
 -- unfinished strings

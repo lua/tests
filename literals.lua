@@ -47,12 +47,30 @@ assert("abc\z
         ghi\z
        " == 'abcdefghi')
 
+
+-- UTF-8 sequences
+assert("\u0;\u00000000;\x00\0" == string.char(0, 0, 0, 0))
+
+-- limits for 1-byte sequences
+assert("\u0;\u7F;" == "\x00\z\x7F")
+
+-- limits for 2-byte sequences
+assert("\u80;\u7FF;" == "\xC2\x80\z\xDF\xBF")
+
+-- limits for 3-byte sequences
+assert("\u800;\uFFFF;" ==   "\xE0\xA0\x80\z\xEF\xBF\xBF")
+
+-- limits for 4-byte sequences
+assert("\u10000;\u10FFFF;" == "\xF0\x90\x80\x80\z\xF4\x8F\xBF\xBF")
+
+
 -- Error in escape sequences
 local function lexerror (s, err)
   local st, msg = load('return ' .. s)
   if err ~= '<eof>' then err = err .. "'" end
   assert(not st and string.find(msg, "near .-" .. err))
 end
+
 lexerror([["abc\x"]], [[\x"]])
 lexerror([["abc\x]], [[\x]])
 lexerror([["\x]], [[\x]])
@@ -71,6 +89,10 @@ lexerror([["\999"]], [[\999"]])
 lexerror([["xyz\300"]], [[\300"]])
 lexerror([["   \256"]], [[\256"]])
 
+-- errors in UTF-8 sequences
+lexerror([["abc\u110000;"]], [[abc\u110000]])   -- too large
+lexerror([["abc\u11r"]], [[abc\u11r]])    -- missing ';'
+lexerror([["abc\ur"]], [[abc\ur]])     -- no digits
 
 -- unfinished strings
 lexerror("[=[alo]]", "<eof>")
@@ -118,15 +140,15 @@ assert(string.len(b) == 960)
 prog = [=[
 print('+')
 
-a1 = [["isto e' um string com várias 'aspas'"]]
-a2 = "'aspas'"
+a1 = [["this is a 'string' with several 'quotes'"]]
+a2 = "'quotes'"
 
-assert(string.find(a1, a2) == 31)
+assert(string.find(a1, a2) == 34)
 print('+')
 
-a1 = [==[temp = [[um valor qualquer]]; ]==]
+a1 = [==[temp = [[an arbitrary value]]; ]==]
 assert(load(a1))()
-assert(temp == 'um valor qualquer')
+assert(temp == 'an arbitrary value')
 -- long strings --
 b = "001234567890123456789012345678901234567891234567890123456789012345678901234567890012345678901234567890123456789012345678912345678901234567890123456789012345678900123456789012345678901234567890123456789123456789012345678901234567890123456789001234567890123456789012345678901234567891234567890123456789012345678901234567890012345678901234567890123456789012345678912345678901234567890123456789012345678900123456789012345678901234567890123456789123456789012345678901234567890123456789001234567890123456789012345678901234567891234567890123456789012345678901234567890012345678901234567890123456789012345678912345678901234567890123456789012345678900123456789012345678901234567890123456789123456789012345678901234567890123456789001234567890123456789012345678901234567891234567890123456789012345678901234567890012345678901234567890123456789012345678912345678901234567890123456789012345678900123456789012345678901234567890123456789123456789012345678901234567890123456789"
 assert(string.len(b) == 960)
@@ -233,7 +255,7 @@ end
 
 -- testing decimal point locale
 if os.setlocale("pt_BR") or os.setlocale("ptb") then
-  assert(not load("á = 3"))  -- parser still works with C locale
+  assert(not load("\xE1 = 3"))  -- parser still works with C locale
   assert(not load("a = (3,4)"))
   assert(tonumber("3,4") == 3.4 and tonumber"3.4" == nil)
   assert(assert(load("return 3.4"))() == 3.4)

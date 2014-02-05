@@ -168,7 +168,7 @@ a]]
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
 checkprogout("6\n10\n10\n\n")
 
-prepfile("a = [[b\nc\nd\ne]]\na")
+prepfile("a = [[b\nc\nd\ne]]\n=a")
 print("temporary program file: "..prog)
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
 checkprogout("b\nc\nd\ne\n\n")

@@ -172,6 +172,7 @@ if not _G._soft then
 end
 dofile('nextvar.lua')
 dofile('pm.lua')
+dofile('utf8.lua')
 dofile('api.lua')
 assert(dofile('events.lua') == 12)
 dofile('vararg.lua')

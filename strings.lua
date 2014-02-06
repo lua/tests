@@ -106,12 +106,21 @@ for i=0,30 do assert(string.len(string.rep('a', i)) == i) end
 
 assert(type(tostring(nil)) == 'string')
 assert(type(tostring(12)) == 'string')
-assert(''..12 == '12' and type(12 .. '') == 'string')
+assert('' .. 12 == '12' and 12.0 .. '' == '12')
 assert(string.find(tostring{}, 'table:'))
 assert(string.find(tostring(print), 'function:'))
 assert(#tostring('\0') == 1)
 assert(tostring(true) == "true")
 assert(tostring(false) == "false")
+assert(tostring(-1203) == "-1203")
+assert(tostring(1203.125) == "1203.125")
+assert(tostring(0.0) == "0.0")
+assert(tostring(-0.0) == "-0.0")
+assert(tostring(-1203 + 0.0) == "-1203.0")
+assert(tostring(-(2^31 - 1)) == "-2147483647")
+if 2^62 > 0 then   -- long integers?
+  assert(tostring(2^62) == "4611686018427387904")
+end
 
 x = '"ílo"\n\\'
 assert(string.format('%q%s', x, x) == '"\\"ílo\\"\\\n\\\\""ílo"\n\\')
@@ -173,7 +182,7 @@ if max > 0 and min < 0 then
   assert(string.format("%d", -2^53) == "-9007199254740992")
   assert(string.format("%x", max) == "7fffffffffffffff")
   assert(string.format("%x", min) == "8000000000000000")
-  assert(string.format("%d", max) == "9223372036854775807")
+  assert(string.format("%d", max) ==  "9223372036854775807")
   assert(string.format("%d", min) == "-9223372036854775808")
   assert(tostring(1234567890123) == '1234567890123')
 else
@@ -183,7 +192,7 @@ else
   assert(string.format("%8x", -1) == "ffffffff")
   assert(string.format("%x", max) == "7fffffff")
   assert(string.format("%x", min) == "80000000")
-  assert(string.format("%d", max) == "2147483647")
+  assert(string.format("%d", max) ==  "2147483647")
   assert(string.format("%d", min) == "-2147483648")
 end
 
@@ -213,7 +222,7 @@ check("%"..aux.."d", "repeated flags")
 check("%d %d", "no value")
 
 
-assert(load("return 1\n--comentário sem EOL no final")() == 1)
+assert(load("return 1\n--comment without ending EOL")() == 1)
 
 
 assert(table.concat{} == "")

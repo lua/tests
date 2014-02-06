@@ -16,7 +16,7 @@ local function checksyntax (s, t)
   for i = 1, #t do ts[i + 1] = string.format("\\u%x;", t[i]) end
   ts[#t + 2] = "'"
   ts = table.concat(ts)
-  assert(assert(loadstring(ts))() == s)
+  assert(assert(load(ts))() == s)
 end
 
 

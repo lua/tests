@@ -103,19 +103,19 @@ end
 
 -- UTF-8 representation for 0x11ffff (value out of valid range)
 invalid("\xF4\x9F\xBF\xBF")
-invalid("\xF4\x9F\xBF\xBF")
 
 -- overlong sequences
 invalid("\xC0\x80")          -- zero
-invalid("\xC1\xBF")          -- 0x7F (1 -> 2)
-invalid("\xE0\x9F\xBF")      -- 0x7FF (2 -> 3)
-invalid("\xF0\x8F\xBF\xBF")  -- 0xFFFF (3 -> 4)
+invalid("\xC1\xBF")          -- 0x7F (should be coded in 1 byte)
+invalid("\xE0\x9F\xBF")      -- 0x7FF (should be coded in 2 bytes)
+invalid("\xF0\x8F\xBF\xBF")  -- 0xFFFF (should be coded in 3 bytes)
 
 
 -- invalid bytes
 invalid("\x80")  -- continuation byte
 invalid("\xBF")  -- continuation byte
-invalid("\xFF")
+invalid("\xFE")  -- invalid byte
+invalid("\xFF")  -- invalid byte
 
 
 -- minimum and maximum values for each sequence size

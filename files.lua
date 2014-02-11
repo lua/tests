@@ -18,6 +18,8 @@ assert(io.type(8) == nil)
 local a = {}; setmetatable(a, {})
 assert(io.type(a) == nil)
 
+assert(getmetatable(io.input()).__name == "FILE*")
+
 local a,b,c = io.open('xuxu_nao_existe')
 assert(not a and type(b) == "string" and type(c) == "number")
 

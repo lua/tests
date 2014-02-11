@@ -118,6 +118,12 @@ checkmessage([[
 ]], "light userdata")
 _G.D = nil
 
+do   -- named userdata
+  checkmessage("math.sin(io.input())", "(number expected, got FILE*)")
+  _ENV.XX = setmetatable({}, {__name = "My Type"})
+  checkmessage("io.input(XX)", "(FILE* expected, got My Type)")
+  _ENV.XX = nil
+end
 
 -- global functions
 checkmessage("(io.write or print){}", "io.write")

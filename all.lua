@@ -130,25 +130,15 @@ dofile('main.lua')
 
 do
   local next, setmetatable, stderr = next, setmetatable, io.stderr
-  -- track local collection
-  local mt1 = {}
+  -- track collections
+  local mt = {}
   -- each time a table is collected, create a new one to be
   -- collected next cycle
-  mt1.__gc = function (o)
+  mt.__gc = function (o)
      stderr:write'.'    -- mark progress
-     local n = setmetatable({}, mt1)   -- replicate object
+     local n = setmetatable({}, mt)   -- replicate object
    end
-   local n = setmetatable({}, mt1)   -- replicate object
-
-  -- track global collection
-  local mt2 = {}
-  mt2.__gc = function (o)
-    stderr:write':'    -- mark progress
-    local n = setmetatable({}, mt2)   -- replicate object
-    n = {n}    -- make it non local
-  end
-  local n = setmetatable({}, mt2)   -- replicate object
-  n = {n}    -- make it non local
+   local n = setmetatable({}, mt)    -- create first object
 end
 
 report"gc.lua"

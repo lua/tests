@@ -13,7 +13,7 @@ local justone = "^" .. utf8.charpatt .. "$"
 -- 't' is the list of codepoints of 's'
 local function checksyntax (s, t)
   local ts = {"return '"}
-  for i = 1, #t do ts[i + 1] = string.format("\\u%x;", t[i]) end
+  for i = 1, #t do ts[i + 1] = string.format("\\u{%x}", t[i]) end
   ts[#t + 2] = "'"
   ts = table.concat(ts)
   assert(assert(load(ts))() == s)

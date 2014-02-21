@@ -480,13 +480,44 @@ while thread_id < 1000 do
     thread_id = thread_id + 1
 end
 
+
+-- Create a closure (function inside 'f') with an upvalue ('param') that
+-- points (through a table) to the closure itself and to the thread
+-- ('co' and the initial value of 'param') where closure is running.
+-- Then, assert that table (and therefore everything else) will be
+-- collected.
+do
+  local collected = false   -- to detect collection
+  collectgarbage(); collectgarbage("stop")
+  do
+    local function f (param) 
+      ;(function ()
+        assert(type(f) == 'function' and type(param) == 'thread')
+        param = {param, f}
+        setmetatable(param, {__gc = function () collected = true end})
+        coroutine.yield(100)
+      end)()
+    end
+    local co = coroutine.create(f)
+    assert(coroutine.resume(co, co))
+  end
+  -- Now, thread and closure are not reacheable any more;
+  -- two collections are needed to break cycle
+  collectgarbage()
+  assert(not collected)
+  collectgarbage()
+  assert(collected)
+  collectgarbage("restart")
+end
+
+
 do
   collectgarbage()
   collectgarbage"stop"
   local x = gcinfo()
   repeat
     for i=1,1000 do _ENV.a = {} end
-    collectgarbage("step", 1)   -- steps should not unblock the collector
+    collectgarbage("step", 0)   -- steps should not unblock the collector
   until gcinfo() > 2 * x
   collectgarbage"restart"
 end

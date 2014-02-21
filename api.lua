@@ -461,21 +461,44 @@ end
   
 
 
+-- testing get/setuservalue
 -- bug in 5.1.2
 assert(not pcall(debug.setuservalue, 3, {}))
 assert(not pcall(debug.setuservalue, nil, {}))
 assert(not pcall(debug.setuservalue, T.pushuserdata(1), {}))
 
 local b = T.newuserdata(0)
-local a = {}
 assert(debug.getuservalue(b) == nil)
-assert(debug.setuservalue(b, a))
-assert(debug.getuservalue(b) == a)
-assert(debug.setuservalue(b, nil))
-assert(debug.getuservalue(b) == nil)
+for _, v in pairs{true, false, 4.56, print, {}, b, "XYZ"} do
+  assert(debug.setuservalue(b, v) == b)
+  assert(debug.getuservalue(b) == v)
+end
 
 assert(debug.getuservalue(4) == nil)
 
+debug.setuservalue(b, {x = 23.4})
+collectgarbage()   -- table should not be collected
+assert(debug.getuservalue(b).x == 23.4)
+
+-- test barrier for uservalues
+T.gcstate("atomic")
+assert(T.gccolor(b) == "black")
+debug.setuservalue(b, {x = 100})
+T.gcstate("pause")  -- complete collection
+assert(debug.getuservalue(b).x == 100)  -- uvalue should be there
+
+-- long chain of userdata
+for i = 1, 1000 do
+  local bb = T.newuserdata(0)
+  debug.setuservalue(bb, b)
+  b = bb
+end
+collectgarbage()     -- nothing should not be collected
+for i = 1, 1000 do
+  b = debug.getuservalue(b)
+end
+assert(debug.getuservalue(b).x == 100)
+b = nil
 
 
 -- testing locks (refs)

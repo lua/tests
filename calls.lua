@@ -302,6 +302,15 @@ assert(x() == 23)
 x("set")
 assert(x() == 24)
 
+-- test for dump/undump with many upvalues
+local prog = "local "
+for i = 1, 190 do prog = prog .. "a" .. i .. ", " end
+prog = prog .. "b = "
+for i = 1, 190 do prog = prog .. i .. ", " end
+prog = prog .. "0;"
+prog = prog .. "return function () return a187 end"
+local f = assert(load(prog))()
+assert(f() == 187)
 
 -- test for bug in parameter adjustment
 assert((function () return nil end)(4) == nil)

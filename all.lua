@@ -114,14 +114,15 @@ end
 --
 -- redefine dofile to run files through dump/undump
 --
+local keepdebuginfo = false    -- default is to remove debug info
 local function report (n) print("\n***** FILE '"..n.."'*****") end
 local olddofile = dofile
-dofile = function (n)
+dofile = function (n, keep)
   showmem()
   print("time :", os.clock() - c)
   report(n)
   local f = assert(loadfile(n))
-  local b = string.dump(f)
+  local b = string.dump(f, not (keepdebuginfo or keep))
   f = assert(load(b))
   return f()
 end
@@ -145,13 +146,13 @@ report"gc.lua"
 local f = assert(loadfile('gc.lua'))
 f()
 
-dofile('db.lua')
-assert(dofile('calls.lua') == deep and deep)
+dofile('db.lua', true)
+assert(dofile('calls.lua', true) == deep and deep)
 olddofile('strings.lua')
 olddofile('literals.lua')
 assert(dofile('attrib.lua') == 27)
 
-assert(dofile('locals.lua') == 5)
+assert(dofile('locals.lua', true) == 5)
 dofile('constructs.lua')
 dofile('code.lua')
 if not _G._soft then
@@ -163,13 +164,13 @@ end
 dofile('nextvar.lua')
 dofile('pm.lua')
 dofile('utf8.lua')
-dofile('api.lua')
+dofile('api.lua', true)
 assert(dofile('events.lua') == 12)
 dofile('vararg.lua')
 dofile('closure.lua')
-dofile('coroutine.lua')
+dofile('coroutine.lua', true)
 dofile('goto.lua')
-dofile('errors.lua')
+dofile('errors.lua', true)
 dofile('math.lua')
 dofile('sort.lua')
 dofile('bitwise.lua')

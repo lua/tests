@@ -627,5 +627,39 @@ assert (a>=b and a.op == "__le")
 assert (a>b and a.op == "__lt")
 
 
+print("testing debug functions on chunk without debug info")
+prog = [[-- program to be loaded without debug information
+local debug = require'debug'
+local a = 12  -- a local variable
+
+local n, v = debug.getlocal(1, 1)
+assert(n == "(*temporary)" and v == debug)   -- unkown name but known value
+n, v = debug.getlocal(1, 2)
+assert(n == "(*temporary)" and v == 12)   -- unkown name but known value
+
+-- a function with an upvalue
+local f = function () return a end
+n, v = debug.getupvalue(f, 1)
+assert(n == "(*no name)" and v == 12)
+assert(debug.setupvalue(f, 1, 13) == "(*no name)")
+assert(a == 13)
+
+local t = debug.getinfo(f)
+assert(t.name == nil and t.linedefined > 0 and
+       t.lastlinedefined == t.linedefined and
+       t.short_src == "?")
+assert(debug.getinfo(1).currentline == -1)
+
+t = debug.getinfo(f, "L").activelines
+assert(next(t) == nil)    -- active lines are empty
+
+return a
+]]
+
+local f = load(string.dump(load(prog), true))  -- load 'prog' without debug info
+
+assert(f() == 13)
+
+
 print"OK"
 

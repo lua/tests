@@ -476,9 +476,13 @@ end
 
 assert(debug.getuservalue(4) == nil)
 
-debug.setuservalue(b, {x = 23.4})
-collectgarbage()   -- table should not be collected
-assert(debug.getuservalue(b).x == 23.4)
+debug.setuservalue(b, function () return 10 end)
+collectgarbage()   -- function should not be collected
+assert(debug.getuservalue(b)() == 10)
+
+debug.setuservalue(b, 134)
+collectgarbage()   -- number should not be a problem for collector
+assert(debug.getuservalue(b) == 134)
 
 -- test barrier for uservalues
 T.gcstate("atomic")

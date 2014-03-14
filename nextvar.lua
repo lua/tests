@@ -379,19 +379,56 @@ a = nil; for i=1,1 do assert(not a); a=1 end; assert(a)
 a = nil; for i=1,1,-1 do assert(not a); a=1 end; assert(a)
 
 do
-  print("testing precision in numeric for")
+  print("testing floats in numeric for")
   local a
+  -- integer count
   a = 0; for i=0, 0.999999999, 0.1 do a=a+1 end; assert(a==10)
   a = 0; for i=1, 1, 1 do a=a+1 end; assert(a==1)
-  a = 0; for i=1e6, 1e6, -1 do a=a+1 end; assert(a==1)
+  a = 0; for i=1000000, 1e6, -1 do a=a+1 end; assert(a==1)
   a = 0; for i=1, 0.99999, 1 do a=a+1 end; assert(a==0)
   a = 0; for i=99999, 1e5, -1 do a=a+1 end; assert(a==0)
   a = 0; for i=1, 0.99999, -1 do a=a+1 end; assert(a==1)
+
+  -- float count
+  a = 0; for i=0.0, 0.999999999, 0.1 do a=a+1 end; assert(a==10)
+  a = 0; for i=1.0, 1, 1 do a=a+1 end; assert(a==1)
+  a = 0; for i=1e6, 1e6, -1 do a=a+1 end; assert(a==1)
+  a = 0; for i=1.0, 0.99999, 1 do a=a+1 end; assert(a==0)
+  a = 0; for i=99999, 1e5, -1.0 do a=a+1 end; assert(a==0)
+  a = 0; for i=1.0, 0.99999, -1 do a=a+1 end; assert(a==1)
 end
 
 -- conversion
 a = 0; for i="10","1","-2" do a=a+1 end; assert(a==5)
 
+do  -- checking types
+  local c
+  local function checkfloat (i)
+    assert(math.type(i) == "float")
+    c = c + 1
+  end
+
+  c = 0; for i = 1, 10.9 do checkfloat(i) end
+  assert(c == 10)
+
+  c = 0; for i = 1.0, 10 do checkfloat(i) end
+  assert(c == 10)
+
+  c = 0; for i = -1, -10, -1.0 do checkfloat(i) end
+  assert(c == 10)
+
+  c = 0; for i = 1, "10" do checkfloat(i) end
+  assert(c == 10)
+
+  local function checkint (i)
+    assert(math.type(i) == "integer")
+    c = c + 1
+  end
+
+  local m = ~0 >> 1
+  c = 0; for i = m - 1, m - 10, -1 do checkint(i) end
+  assert(c == 10)
+end
 
 collectgarbage()
 

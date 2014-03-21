@@ -446,16 +446,17 @@ assert(string.unpackfloat(string.packfloat(120.5, 'n', 'n'), 1, 'n', 'n')
 
 for _, n in ipairs{0, -1.1, 1.9, 1/0, -1/0, 1e20, -1e20, 0.1, 2000.7} do
   assert(string.unpackfloat(string.packfloat(n)) == n)
-  assert(string.unpackfloat(string.packfloat(n, 'd'), 1, 'd') == n)
+  assert(string.unpackfloat(string.packfloat(n, 'n'), 1, 'n') == n)
   assert(string.packfloat(n, 'f', 'l') ==
          string.packfloat(n, 'f', 'b'):reverse())
   assert(string.packfloat(n, 'd', 'b') ==
          string.packfloat(n, 'd', 'l'):reverse())
 end
 
--- for single precision, test only with "round" numbers
+-- for non-native precisions, test only with "round" numbers
 for _, n in ipairs{0, -1.5, 1/0, -1/0, 1e10, -1e9, 0.5, 2000.25} do
   assert(string.unpackfloat(string.packfloat(n, 'f'), 1, 'f') == n)
+  assert(string.unpackfloat(string.packfloat(n, 'd'), 1, 'd') == n)
 end
 
 -- position

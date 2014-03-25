@@ -115,7 +115,7 @@ assert(tostring(false) == "false")
 assert(tostring(-1203) == "-1203")
 assert(tostring(1203.125) == "1203.125")
 assert(tostring(0.0) == "0.0")
-assert(tostring(-0.0) == "-0.0")
+assert(tostring(-0.5) == "-0.5")
 assert(tostring(-1203 + 0.0) == "-1203.0")
 assert(tostring(-(2^31 - 1)) == "-2147483647")
 if 2^62 > 0 then   -- long integers?

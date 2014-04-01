@@ -345,7 +345,10 @@ assert(eq(math.sin(math.pi/2), 1) and eq(math.cos(math.pi/2), 0))
 assert(eq(math.atan(1), math.pi/4) and eq(math.acos(0), math.pi/2) and
        eq(math.asin(1), math.pi/2))
 assert(eq(math.deg(math.pi/2), 90) and eq(math.rad(90), math.pi/2))
-assert(math.abs(-10) == 10)
+assert(math.abs(-10.43) == 10.43)
+assert(math.abs(maxint) + 1 == minint)
+assert(math.abs(minint) == minint)
+assert(math.abs(minint + 1) == maxint)
 assert(eq(math.atan2(1,0), math.pi/2))
 assert(math.ceil(4.5) == 5.0)
 assert(math.floor(4.5) == 4.0)
@@ -385,6 +388,19 @@ do   -- testing ifloor
   assert(not pcall(math.ifloor, {}))
 end
 
+do    -- testing max/min
+  assert(math.max(3) == 3)
+  assert(math.max(3, 5, 9, 1) == 9)
+  assert(math.max(maxint, 10e60) == 10e60)
+  assert(math.max(minint, minint + 1) > minint)
+  assert(math.min(3) == 3)
+  assert(math.min(3, 5, 9, 1) == 1)
+  assert(math.min(3.2, 5.9, -9.2, 1.1) == -9.2)
+  assert(math.min(1.9, 1.7, 1.72) == 1.7)
+  assert(math.min(-10e60, minint) == -10e60)
+  assert(math.min(maxint, maxint - 1) < maxint)
+  assert(math.min(maxint - 2, maxint, maxint - 1) < maxint - 1)
+end
 -- testing implicit convertions
 
 local a,b = '10', '20'

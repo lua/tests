@@ -331,7 +331,16 @@ end
 
 
 for i = 1, 8 do
+  -- 1111111...111111
   check(i, string.rep("\255", i), -1)
+  local p = 2^(i*8 - 1)
+  if p ~= 0 then
+    -- 10000...00000000
+    check(i, string.rep("\0", i - 1) .. "\x80", -p)
+    -- 01111...1111111
+    check(i, string.rep("\255", i - 1) .. "\x7f", p - 1)
+  end
+  -- 000...0001111111
   check(i, "\127" .. string.rep("\0", i - 1), 127)
   check(i, "\209" .. string.rep("\255", i - 1), 209 - 256)
 end
@@ -429,8 +438,8 @@ end
 check("string too short", string.unpackint, "\1\2\3\4", 2^63 - 1)
 check("string too short", string.unpackint, "\1\2\3\4", 2^31 - 1)
 check("string too short", string.unpackint, "\1\2\3\4", 4, 2)
-check("endianess", string.unpackint, "\1\2\3\4", 1, 2, 'x')
-check("endianess", string.packint, -1, 2, 'x')
+check("endianness", string.unpackint, "\1\2\3\4", 1, 2, 'x')
+check("endianness", string.packint, -1, 2, 'x')
 check("out of valid range", string.packint, -1, 9)
 
 

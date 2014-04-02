@@ -44,6 +44,11 @@ local function check (s, t)
     for j = pi + 1, pi1 - 1 do
       assert(utf8.len(s, j) == nil)
     end
+   assert(utf8.len(s, pi, pi) == 1)
+   assert(utf8.len(s, pi, pi1 - 1) == 1)
+   assert(utf8.len(s, pi) == l - i + 1)
+   assert(utf8.len(s, pi1) == l - i)
+   assert(utf8.len(s, 1, pi) == i)
   end
 
   local i = 0
@@ -72,6 +77,18 @@ local function check (s, t)
     assert(utf8.offset(s, i) == utf8.offset(s, i - l - 1, #s + 1))
   end
 
+end
+
+
+do    -- error indication in utf8.len
+  local function check (s, p)
+    local a, b = utf8.len(s)
+    assert(not a and b == p)
+  end
+  check("abc\xE3def", 4)
+  check("汉字\x80", string.len("汉字") + 1)
+  check("\xF4\x9F\xBF", 1)
+  check("\xF4\x9F\xBF\xBF", 1)
 end
 
 local s = "hello World"
@@ -117,6 +134,9 @@ invalid("\xBF")  -- continuation byte
 invalid("\xFE")  -- invalid byte
 invalid("\xFF")  -- invalid byte
 
+
+-- empty string
+check("", {})
 
 -- minimum and maximum values for each sequence size
 s = "\0 \x7F\z

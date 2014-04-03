@@ -90,8 +90,10 @@ checkmessage("local a,b,c = 1,1,1; ((a and b) or c)()", "call a number value")
 assert(not string.find(doit"aaa={}; x=(aaa or aaa)+(aaa and aaa)", "'aaa'"))
 assert(not string.find(doit"aaa={}; (aaa or aaa)()", "'aaa'"))
 
-checkmessage("print(print < 10)", "function")
-checkmessage("print(print < print)", "two function")
+checkmessage("print(print < 10)", "function with number")
+checkmessage("print(print < print)", "two function values")
+checkmessage("print('10' < 10)", "string with number")
+checkmessage("print(10 < '23')", "number with string")
 
 -- integer division and conversion overflow
 checkmessage("local a = 2.0^100; x = a//2", "local a")

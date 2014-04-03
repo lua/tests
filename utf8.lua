@@ -26,6 +26,8 @@ local function check (s, t)
   assert(#t == l and len(s) == l)
   assert(utf8.char(table.unpack(t)) == s)
 
+  assert(utf8.offset(s, 0) == 1)
+
   checksyntax(s, t)
 
   local t1 = {utf8.codepoint(s, 1, -1)}
@@ -37,6 +39,7 @@ local function check (s, t)
     local pi1 = utf8.offset(s, 2, pi)   -- position of next char
     assert(string.find(string.sub(s, pi, pi1 - 1), justone))
     assert(utf8.offset(s, -1, pi1) == pi)
+    assert(utf8.offset(s, i - l - 1) == pi)
     assert(pi1 - pi == #utf8.char(utf8.codepoint(s, pi)))
     for j = pi, pi1 - 1 do 
       assert(utf8.offset(s, 0, j) == pi)
@@ -86,10 +89,21 @@ do    -- error indication in utf8.len
     assert(not a and b == p)
   end
   check("abc\xE3def", 4)
-  check("汉字\x80", string.len("汉字") + 1)
+  check("汉字\x80", #("汉字") + 1)
   check("\xF4\x9F\xBF", 1)
   check("\xF4\x9F\xBF\xBF", 1)
 end
+
+-- error in initial position for offset
+assert(not pcall(utf8.offset, "abc", 1, 5))
+assert(not pcall(utf8.offset, "abc", 1, -4))
+assert(not pcall(utf8.offset, "", 1, 2))
+assert(not pcall(utf8.offset, "", 1, -1))
+assert(not pcall(utf8.offset, "𦧺", 1, 2))   -- continuation byte
+assert(not pcall(utf8.offset, "𦧺", 1, 2))   -- continuation byte
+assert(not pcall(utf8.offset, "\x80", 1))    -- continuation byte
+
+
 
 local s = "hello World"
 local t = {string.byte(s, 1, -1)}

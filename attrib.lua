@@ -372,11 +372,10 @@ a[1].alo(a[2]==10 and b==10 and c==print)
 
 -- test of large float/integer indices 
 
-local maxint = 2^63 - 1      -- compute maximum "integer" that fits in a float
-if maxint <= 0 then maxint = 2^31 - 1 end
-assert(maxint > 0 and -maxint < 0 and math.type(maxint) == "integer")
+-- compute maximum integer where all bits fit in a float
+local maxint = math.maxinteger
 
-while maxint - 1.0 == maxint + 0.0 do   -- trim (if needed) to fit in a float
+while maxint - 1.0 == maxint do   -- trim (if needed) to fit in a float
   maxint = maxint // 2
 end
 

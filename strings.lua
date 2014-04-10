@@ -304,7 +304,7 @@ assert(string.dumpint(-234, 0) == string.dumpint(-234))
 -- endianess
 assert(string.dumpint(34, 4, 'l') == "\34\0\0\0")
 assert(string.dumpint(34, 4, 'b') == "\0\0\0\34")
-assert(string.dumpint(0, 5, 'n') == "\0\0\0\0\0")
+assert(string.dumpint(0, 3, 'n') == "\0\0\0")
 
 assert(string.dumpint(0x12345678, 4, 'l') == "\x78\x56\x34\x12")
 assert(string.dumpint(0x12345678, 4, 'b') == "\x12\x34\x56\x78")
@@ -317,12 +317,8 @@ assert(string.dumpint(0x8000, 2, 'b') == "\x80\0")
 -- for unsigned, we need to mask results (but there is no errors)
 assert(string.undumpint("\x80\0", 1, 2, 'b') & 0xFFFF == 0x8000)
 
-local m = 0xffffffff
-assert(string.undumpint('\0\0\0\0\xff\xff\xff\xff', 5, 4, 'b') & m == m)
-assert(string.undumpint('\0\0\0\0\xff\xff\xff\xff', 4, 5, 'b') == m)
-assert(string.undumpint('\0\0\0\0\xff\xff\xff\xff', 3, 6, 'b') == m)
-assert(string.undumpint('\0\0\0\0\xff\xff\xff\xff', 2, 7, 'b') == m)
-assert(string.undumpint('\0\0\0\0\xff\xff\xff\xff', 1, 8, 'b') == m)
+local m = 0xf1f2f3ff
+assert(string.undumpint('\0\0\0\0\xf1\xf2\xf3\xff', 5, 4, 'b') & m == m)
 
 
 
@@ -334,7 +330,7 @@ local function check (i, s, n)
 end
 
 
-for i = 1, 8 do
+for i = 1, numbytes do
   -- 1111111...111111
   check(i, string.rep("\255", i), -1)
   local p = 2^(i*8 - 1)
@@ -397,6 +393,9 @@ for i = 1, numbytes - 1 do
   assert(string.undumpint(s, 1, i) % (maxunsigned + 1) == maxunsigned)
   checkerror(maxunsigned + 1, i, 'l')
   checkerror(maxunsigned + 1, i, 'b')
+  if i > 1 then
+    checkerror(maxunsigned, i - 1)
+  end
 
   s = string.dumpint(minsigned, i)
   assert(string.undumpint(s, 1, i) == minsigned)
@@ -404,34 +403,6 @@ for i = 1, numbytes - 1 do
   checkerror(minsigned - 1, i, 'b')
 end
 
-
--- testing overflow in undumping (note that with an 64-bit integer
--- overflows should be impossible)
-
-checkerror = function (s, size, endian)
-  if size > numbytes then
-    local status, msg = pcall(string.undumpint, s, 1, size, endian)
-    assert(not status and string.find(msg, "does not fit"))
-  else
-    assert(string.undumpint(s, 1, size, endian))
-  end
-end
-
-checkerror("\3\0\0\0\0", 5, 'b')
-checkerror("\200\0\0\0\0\0", 6, 'b')
-checkerror("\3\0\0\0\0\0\0", 7, 'b')
-checkerror("\0\0\0\0\0\0\0\3", 8, 'l')
-checkerror("\3\xff\xff\xff\xff", 5, 'b')
-checkerror("\x7f\xff\xff\xff\xff", 5, 'b')
-checkerror("\x7f\xff\xff\xff\xff\xff", 6, 'b')
-checkerror("\200\xff\xff\xff\xff\xff\xff", 7, 'b')
-checkerror("\xff\xff\xff\xff\xff\xff\xff\200", 8, 'l')
-checkerror("\xff\xff\xff\xff\xff\xff\xff\x7f", 8, 'l')
-checkerror("\xff\xff\xff\xff\xff\xff\xff\1", 8, 'l')
-
--- looks like a negative integer, but it is not (because of leading zero)
-checkerror("\0\xff\xff\xff\xff\x23", 6, 'b')
-checkerror("\0\xff\xff\xff\xff\xff\x23", 7, 'b')
 
 -- check errors in arguments
 function check (msg, f, ...)

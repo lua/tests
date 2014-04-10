@@ -3,8 +3,11 @@ print("testing numbers and math lib")
 local intbits = 64
 if 2^(intbits - 1) - 1 <= 0 then intbits = 32 end
 
-local minint = 2^(intbits - 1)
-local maxint = minint - 1
+local minint = math.mininteger
+local maxint = math.maxinteger
+
+assert(minint == 2^(intbits - 1))
+assert(maxint == minint - 1)
 
 -- number of bits in the mantissa of a floating-point number
 local floatbits = 24
@@ -442,37 +445,87 @@ do
 end
 
 
-do
-  print("testing 'math.random'")
-  math.randomseed(0)
+print("testing 'math.random'")
+math.randomseed(0)
 
-  local function aux (x1, x2, p)
-    local Max = -math.huge
-    local Min = math.huge
-    for i = 0, 20000 do
+do   -- test random for floats
+  local max = -math.huge
+  local min = math.huge
+  for i = 0, 20000 do
+    local t = math.random()
+    assert(0 <= t and t < 1)
+    max = math.max(max, t)
+    min = math.min(min, t)
+    if eq(max, 1, 0.001) and eq(min, 0, 0.001) then
+      goto ok
+    end
+  end
+  -- loop ended without satisfing condition
+  assert(false)
+ ::ok::
+end
+
+do
+  local function aux (p, lim)
+    local x1, x2
+    if #p == 1 then x1 = 1; x2 = p[1]
+    else x1 = p[1]; x2 = p[2]
+    end
+    local mark = {}; local count = 0   -- to check that all values appeared
+    for i = 0, lim or 2000 do
       local t = math.random(table.unpack(p))
-      Max = math.max(Max, t)
-      Min = math.min(Min, t)
-      if eq(Max, x2, 0.001) and eq(Min, x1, 0.001) then
+      assert(x1 <= t and t <= x2)
+      if not mark[t] then  -- new value
+        mark[t] = true
+        count = count + 1
+      end
+      if count == x2 - x1 + 1 then   -- all values appeared; OK
         goto ok
       end
     end
     -- loop ended without satisfing condition
     assert(false)
    ::ok::
-    assert(x1 <= Min and Max<=x2)
   end
 
-  aux(0, 1, {})
-  aux(-10, 0, {-10,0})
-  aux(1, 6, {6})
+  aux({-10,0})
+  aux({6})
+  aux({-10, 10})
+  aux({minint, minint})
+  aux({maxint, maxint})
+  aux({minint, minint + 9})
+  aux({maxint - 3, maxint})
 end
 
-for i=1,10 do
-  local t = math.random(5)
-  assert(1 <= t and t <= 5)
+do   -- full range
+  local max = minint
+  local min = maxint
+  local n = 200
+  local mark = {}; local count = 0   -- to count how many different values
+  for _ = 1, n do
+    local t = math.random(minint, maxint)
+    max = math.max(max, t)
+    min = math.min(min, t)
+    if not mark[t] then  -- new value
+      mark[t] = true
+      count = count + 1
+    end
+  end
+  -- at least 80% of values are different
+  assert(count >= n * 0.8)
+  -- min and max not too far from formal min and max
+  assert(min < minint * 0.75 and max > maxint * 0.75)
 end
+
+for i=1,100 do
+  assert(math.random(maxint) > 0)
+  assert(math.random(minint, 0) <= 0)
+end
+
 assert(not pcall(math.random, 1, 2, 3))
+assert(not pcall(math.random, minint + 1, minint))
+assert(not pcall(math.random, maxint, maxint - 1))
+assert(not pcall(math.random, maxint, minint))
 
 
 print('OK')

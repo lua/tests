@@ -287,50 +287,50 @@ if not _port then
 end
 
 
--- testing pack/unpack
+-- testing dump/undump
 
 local numbytes = numbits'integer' // 8
 
--- basic pack/unpack with default arguments
+-- basic dump/undump with default arguments
 for _, i in ipairs{0, 1, 2, 127, 128, 255, 0xffffffff, 0xffffffff} do
-  assert(string.unpackint(string.packint(i)) == i)
-  assert(string.unpackint(string.packint(-i)) == -i)
+  assert(string.undumpint(string.dumpint(i)) == i)
+  assert(string.undumpint(string.dumpint(-i)) == -i)
 end
 
 -- default size is the size of a Lua integer
-assert(#string.packint(0) == numbytes)
-assert(string.packint(-234, 0) == string.packint(-234))
+assert(#string.dumpint(0) == numbytes)
+assert(string.dumpint(-234, 0) == string.dumpint(-234))
 
 -- endianess
-assert(string.packint(34, 4, 'l') == "\34\0\0\0")
-assert(string.packint(34, 4, 'b') == "\0\0\0\34")
-assert(string.packint(0, 5, 'n') == "\0\0\0\0\0")
+assert(string.dumpint(34, 4, 'l') == "\34\0\0\0")
+assert(string.dumpint(34, 4, 'b') == "\0\0\0\34")
+assert(string.dumpint(0, 5, 'n') == "\0\0\0\0\0")
 
-assert(string.packint(0x12345678, 4, 'l') == "\x78\x56\x34\x12")
-assert(string.packint(0x12345678, 4, 'b') == "\x12\x34\x56\x78")
+assert(string.dumpint(0x12345678, 4, 'l') == "\x78\x56\x34\x12")
+assert(string.dumpint(0x12345678, 4, 'b') == "\x12\x34\x56\x78")
 
 -- unsigned values
-assert(string.packint(255, 1, 'l') == "\255")
-assert(string.packint(0xffffff, 3) == "\255\255\255")
-assert(string.packint(0x8000, 2, 'b') == "\x80\0")
+assert(string.dumpint(255, 1, 'l') == "\255")
+assert(string.dumpint(0xffffff, 3) == "\255\255\255")
+assert(string.dumpint(0x8000, 2, 'b') == "\x80\0")
 
 -- for unsigned, we need to mask results (but there is no errors)
-assert(string.unpackint("\x80\0", 1, 2, 'b') & 0xFFFF == 0x8000)
+assert(string.undumpint("\x80\0", 1, 2, 'b') & 0xFFFF == 0x8000)
 
 local m = 0xffffffff
-assert(string.unpackint('\0\0\0\0\xff\xff\xff\xff', 5, 4, 'b') & m == m)
-assert(string.unpackint('\0\0\0\0\xff\xff\xff\xff', 4, 5, 'b') == m)
-assert(string.unpackint('\0\0\0\0\xff\xff\xff\xff', 3, 6, 'b') == m)
-assert(string.unpackint('\0\0\0\0\xff\xff\xff\xff', 2, 7, 'b') == m)
-assert(string.unpackint('\0\0\0\0\xff\xff\xff\xff', 1, 8, 'b') == m)
+assert(string.undumpint('\0\0\0\0\xff\xff\xff\xff', 5, 4, 'b') & m == m)
+assert(string.undumpint('\0\0\0\0\xff\xff\xff\xff', 4, 5, 'b') == m)
+assert(string.undumpint('\0\0\0\0\xff\xff\xff\xff', 3, 6, 'b') == m)
+assert(string.undumpint('\0\0\0\0\xff\xff\xff\xff', 2, 7, 'b') == m)
+assert(string.undumpint('\0\0\0\0\xff\xff\xff\xff', 1, 8, 'b') == m)
 
 
 
 local function check (i, s, n)
-  assert(string.packint(n, i, 'l') == s)
-  assert(string.packint(n, i, 'b') == s:reverse())
-  assert(string.unpackint(s, 1, i, 'l') == n)
-  assert(string.unpackint(s:reverse(), 1, i, 'b') == n)
+  assert(string.dumpint(n, i, 'l') == s)
+  assert(string.dumpint(n, i, 'b') == s:reverse())
+  assert(string.undumpint(s, 1, i, 'l') == n)
+  assert(string.undumpint(s:reverse(), 1, i, 'b') == n)
 end
 
 
@@ -351,7 +351,7 @@ end
 
 for i = 2, numbytes do
   -- unsigned numbers
-  assert(string.packint(256^i - 1, i) == string.rep("\255", i))
+  assert(string.dumpint(256^i - 1, i) == string.rep("\255", i))
   check(i, string.rep("\255", i - 1) .. "\0", 256^(i - 1) - 1)
 
   check(i, "\220" .. string.rep("\0", i - 2) .. "\105",
@@ -361,31 +361,31 @@ for i = 2, numbytes do
 end
 
 -- signal extension
-assert(string.unpackint("\x19\xff\0", -3, 3, 'l') == 0xff19)
-assert(string.unpackint("\19\xff\0", -3, 2, 'l') == -237)
+assert(string.undumpint("\x19\xff\0", -3, 3, 'l') == 0xff19)
+assert(string.undumpint("\19\xff\0", -3, 2, 'l') == -237)
 
 
 -- position
 local s = "\0\255\123\9\1\47\200"
 for i = 1, #s do
-  assert(string.unpackint(s, i, 1) % 256 == string.byte(s, i))
+  assert(string.undumpint(s, i, 1) % 256 == string.byte(s, i))
 end
 
 for i = 1, #s - 1 do
-  assert(string.unpackint(s, i, 2, 'b') % 256^2 ==
+  assert(string.undumpint(s, i, 2, 'b') % 256^2 ==
   string.byte(s, i)*256 + string.byte(s, i + 1))
 end
 
 for i = 1, #s - 2 do
-  assert(string.unpackint(s, i, 3, 'l') % 256^3 ==
+  assert(string.undumpint(s, i, 3, 'l') % 256^3 ==
   string.byte(s, i + 2)*256^2 + string.byte(s, i + 1)*256 + string.byte(s, i))
 end
 
 
--- testing overflow in packing
+-- testing overflow in dumping
 
 local function checkerror (n, size, endian)
-  local status, msg = pcall(string.packint, n, size, endian)
+  local status, msg = pcall(string.dumpint, n, size, endian)
   assert(not status and string.find(msg, "does not fit"))
 end
 
@@ -393,27 +393,27 @@ for i = 1, numbytes - 1 do
   local maxunsigned = 256^i - 1
   local minsigned = -maxunsigned // 2
 
-  local s = string.packint(maxunsigned, i)
-  assert(string.unpackint(s, 1, i) % (maxunsigned + 1) == maxunsigned)
+  local s = string.dumpint(maxunsigned, i)
+  assert(string.undumpint(s, 1, i) % (maxunsigned + 1) == maxunsigned)
   checkerror(maxunsigned + 1, i, 'l')
   checkerror(maxunsigned + 1, i, 'b')
 
-  s = string.packint(minsigned, i)
-  assert(string.unpackint(s, 1, i) == minsigned)
+  s = string.dumpint(minsigned, i)
+  assert(string.undumpint(s, 1, i) == minsigned)
   checkerror(minsigned - 1, i, 'l')
   checkerror(minsigned - 1, i, 'b')
 end
 
 
--- testing overflow in unpacking (note that with an 64-bit integer
+-- testing overflow in undumping (note that with an 64-bit integer
 -- overflows should be impossible)
 
 checkerror = function (s, size, endian)
   if size > numbytes then
-    local status, msg = pcall(string.unpackint, s, 1, size, endian)
+    local status, msg = pcall(string.undumpint, s, 1, size, endian)
     assert(not status and string.find(msg, "does not fit"))
   else
-    assert(string.unpackint(s, 1, size, endian))
+    assert(string.undumpint(s, 1, size, endian))
   end
 end
 
@@ -439,48 +439,48 @@ function check (msg, f, ...)
   assert(not status and string.find(err, msg))
 end
 
-check("string too short", string.unpackint, "\1\2\3\4", maxi)
-check("string too short", string.unpackint, "\1\2\3\4", 2^31 - 1)
-check("string too short", string.unpackint, "\1\2\3\4", 4, 2)
-check("endianness", string.unpackint, "\1\2\3\4", 1, 2, 'x')
-check("endianness", string.packint, -1, 2, 'x')
-check("out of valid range", string.packint, -1, 9)
+check("string too short", string.undumpint, "\1\2\3\4", maxi)
+check("string too short", string.undumpint, "\1\2\3\4", 2^31 - 1)
+check("string too short", string.undumpint, "\1\2\3\4", 4, 2)
+check("endianness", string.undumpint, "\1\2\3\4", 1, 2, 'x')
+check("endianness", string.dumpint, -1, 2, 'x')
+check("out of valid range", string.dumpint, -1, 9)
 
 
 
--- checking pack/unpack of floating numbers
+-- checking dump/undump of floating numbers
 
-check("string too short", string.unpackfloat, "\1\2\3\4", 2, "f")
-check("string too short", string.unpackfloat, "\1\2\3\4\5\6\7", 2, "d")
-check("string too short", string.unpackfloat, "\1\2\3\4", 2^31 - 1)
+check("string too short", string.undumpfloat, "\1\2\3\4", 2, "f")
+check("string too short", string.undumpfloat, "\1\2\3\4\5\6\7", 2, "d")
+check("string too short", string.undumpfloat, "\1\2\3\4", 2^31 - 1)
 
-assert(string.unpackfloat(string.packfloat(120.5, 'n', 'n'), 1, 'n', 'n')
+assert(string.undumpfloat(string.dumpfloat(120.5, 'n', 'n'), 1, 'n', 'n')
    == 120.5)
 
 for _, n in ipairs{0, -1.1, 1.9, 1/0, -1/0, 1e20, -1e20, 0.1, 2000.7} do
-  assert(string.unpackfloat(string.packfloat(n)) == n)
-  assert(string.unpackfloat(string.packfloat(n, 'n'), 1, 'n') == n)
-  assert(string.packfloat(n, 'f', 'l') ==
-         string.packfloat(n, 'f', 'b'):reverse())
-  assert(string.packfloat(n, 'd', 'b') ==
-         string.packfloat(n, 'd', 'l'):reverse())
+  assert(string.undumpfloat(string.dumpfloat(n)) == n)
+  assert(string.undumpfloat(string.dumpfloat(n, 'n'), 1, 'n') == n)
+  assert(string.dumpfloat(n, 'f', 'l') ==
+         string.dumpfloat(n, 'f', 'b'):reverse())
+  assert(string.dumpfloat(n, 'd', 'b') ==
+         string.dumpfloat(n, 'd', 'l'):reverse())
 end
 
 -- for non-native precisions, test only with "round" numbers
 for _, n in ipairs{0, -1.5, 1/0, -1/0, 1e10, -1e9, 0.5, 2000.25} do
-  assert(string.unpackfloat(string.packfloat(n, 'f'), 1, 'f') == n)
-  assert(string.unpackfloat(string.packfloat(n, 'd'), 1, 'd') == n)
+  assert(string.undumpfloat(string.dumpfloat(n, 'f'), 1, 'f') == n)
+  assert(string.undumpfloat(string.dumpfloat(n, 'd'), 1, 'd') == n)
 end
 
 -- position
 for i = 1, 11 do
-  local s = string.rep("0", i)  .. string.packfloat(3.125)
-  assert(string.unpackfloat(s, i + 1) == 3.125)
+  local s = string.rep("0", i)  .. string.dumpfloat(3.125)
+  assert(string.undumpfloat(s, i + 1) == 3.125)
 end
 
 if not _port then
-  assert(#string.packfloat(0, 'f') == 4)
-  assert(#string.packfloat(0, 'd') == 8)
+  assert(#string.dumpfloat(0, 'f') == 4)
+  assert(#string.dumpfloat(0, 'd') == 8)
 end
 
 print('OK')

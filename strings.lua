@@ -2,6 +2,8 @@ print('testing strings and string library')
 
 local numbits = require'debug'.numbits
 
+local maxi, mini = math.maxinteger, math.mininteger
+
 -- testing string comparisons
 assert('alo' < 'alo1')
 assert('' < 'a')
@@ -33,9 +35,9 @@ assert(string.sub("123456789",-10,-20) == "")
 assert(string.sub("123456789",-1) == "9")
 assert(string.sub("123456789",-4) == "6789")
 assert(string.sub("123456789",-6, -4) == "456")
-assert(string.sub("123456789",-2^31, -4) == "123456")
-assert(string.sub("123456789",-2^31, 2^31 - 1) == "123456789")
-assert(string.sub("123456789",-2^31, -2^31) == "")
+assert(string.sub("123456789", mini, -4) == "123456")
+assert(string.sub("123456789", mini, maxi) == "123456789")
+assert(string.sub("123456789", mini, mini) == "")
 assert(string.sub("\000123456789",3,5) == "234")
 assert(("\000123456789"):sub(8) == "789")
 
@@ -234,10 +236,12 @@ assert(table.concat(a, "b", 20, 20) == "xuxu")
 assert(table.concat(a, "", 20, 21) == "xuxuxuxu")
 assert(table.concat(a, "x", 22, 21) == "")
 assert(table.concat(a, "3", 2999) == "xuxu3xuxu")
-assert(table.concat({}, "x", 2^31-1, 2^31-2) == "")
-assert(table.concat({}, "x", -2^31+1, -2^31) == "")
-assert(table.concat({}, "x", 2^31-1, -2^31) == "")
-assert(table.concat({[2^31-1] = "alo"}, "x", 2^31-1, 2^31-1) == "alo")
+assert(table.concat({}, "x", maxi, maxi - 1) == "")
+assert(table.concat({}, "x", mini + 1, mini) == "")
+assert(table.concat({}, "x", maxi, mini) == "")
+assert(table.concat({[maxi] = "alo"}, "x", maxi, maxi) == "alo")
+assert(table.concat({[maxi] = "alo", [maxi - 1] = "y"}, "-", maxi - 1, maxi)
+       == "y-alo")
 
 assert(not pcall(table.concat, {"a", "b", {}}))
 
@@ -435,7 +439,7 @@ function check (msg, f, ...)
   assert(not status and string.find(err, msg))
 end
 
-check("string too short", string.unpackint, "\1\2\3\4", 2^63 - 1)
+check("string too short", string.unpackint, "\1\2\3\4", maxi)
 check("string too short", string.unpackint, "\1\2\3\4", 2^31 - 1)
 check("string too short", string.unpackint, "\1\2\3\4", 4, 2)
 check("endianness", string.unpackint, "\1\2\3\4", 1, 2, 'x')

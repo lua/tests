@@ -1,10 +1,10 @@
 print("testing numbers and math lib")
 
-local intbits = 64
-if 2^(intbits - 1) - 1 <= 0 then intbits = 32 end
-
 local minint = math.mininteger
 local maxint = math.maxinteger
+
+local intbits = math.ifloor(math.log(maxint, 2) + 0.5) + 1
+assert(2^intbits == 0)
 
 assert(minint == 2^(intbits - 1))
 assert(maxint == minint - 1)

@@ -35,8 +35,6 @@ if usertests then T = nil end
 
 T = rawget(_G, "T")  -- avoid problems with 'strict' module
 
-package.path = "?;./?.lua" .. package.path
-
 math.randomseed(0)
 
 

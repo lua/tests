@@ -305,7 +305,7 @@ assert(a(3) == math.deg(3) and a == math.deg)
 
 
 -- testing deep C stack
-do
+if not _soft then
   print("testing stack overflow")
   collectgarbage("stop")
   local s, msg = pcall(T.testC, "checkstack 1000023 XXXX")   -- too deep

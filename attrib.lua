@@ -18,7 +18,7 @@ print("package config: "..string.gsub(package.config, "\n", "|"))
 do
   -- create a path with 'max' templates,
   -- each with 1-10 repetitions of '?'
-  local max = 2000
+  local max = _soft and 100 or 2000
   local t = {}
   for i = 1,max do t[i] = string.rep("?", i%10 + 1) end
   t[#t + 1] = ";"    -- empty template
@@ -381,7 +381,7 @@ end
 
 maxintF = maxint + 0.0   -- float version
 
-assert(math.type(maxintF) == "float" and maxintF >= 2.0^16)
+assert(math.type(maxintF) == "float" and maxintF >= 2.0^14)
 
 -- floats and integers must index the same places
 a[maxintF] = 10; a[maxintF - 1.0] = 11;

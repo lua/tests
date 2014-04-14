@@ -178,8 +178,8 @@ assert(not pcall(io.read))
 assert(os.remove(file))
 
 local t = '0123456789'
-for i=1,12 do t = t..t; end
-assert(string.len(t) == 10*2^12)
+for i=1,10 do t = t..t; end
+assert(string.len(t) == 10*2^10)
 
 io.output(file)
 io.write("alo"):write("\n")

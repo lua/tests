@@ -145,12 +145,12 @@ x = "012345678901234567890123456789012345678901234567890123456789012345678901234
 assert(string.len(x)==80)
 s = ''
 n = 0
-k = 300
+k = math.min(300, (math.maxinteger // 80) // 2)
 while n < k do s = s..x; n=n+1; j=tostring(n)  end
 assert(string.len(s) == k*80)
-s = string.sub(s, 1, 20000)
-s, i = string.gsub(s, '(%d%d%d%d)', math.sin)
-assert(i==20000/4)
+s = string.sub(s, 1, 10000)
+s, i = string.gsub(s, '(%d%d%d%d)', math.ifloor)
+assert(i==10000 // 4)
 s = nil
 x = nil
 
@@ -193,9 +193,9 @@ if not _port then
 end
 
 -- collector should do a full collection with so many steps
-assert(dosteps(100000) == 1)
-assert(collectgarbage("step", 1000000) == true)
-assert(collectgarbage("step", 1000000) == true)
+assert(dosteps(20000) == 1)
+assert(collectgarbage("step", 20000) == true)
+assert(collectgarbage("step", 20000) == true)
 
 assert(not collectgarbage("isrunning"))
 collectgarbage"restart"
@@ -571,7 +571,7 @@ if T then
   collectgarbage()
   T.totalmem(T.totalmem() + 200)
   for i=1,200 do local a = {} end
-  T.totalmem(1000000000)
+  T.totalmem(math.maxinteger)
   collectgarbage()
   local t = T.totalmem("table")
   local a = {{}, {}, {}}   -- create 4 new tables

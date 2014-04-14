@@ -286,12 +286,12 @@ else
 
   local x = coroutine.create(function ()
     T.sethook("yield 0", "", 2)
-    A = fact("A", 10)
+    A = fact("A", 6)
   end)
 
   local y = coroutine.create(function ()
     T.sethook("yield 0", "", 3)
-    B = fact("B", 11)
+    B = fact("B", 7)
   end)
 
   while A==0 or B==0 do    -- A ~= 0 when 'x' finishes (similar for 'B','y')
@@ -299,7 +299,7 @@ else
     if B==0 then turn = "B"; assert(T.resume(y)) end
   end
 
-  assert(B // A == 11)    -- fact(11) // fact(10)
+  assert(B // A == 7)    -- fact(7) // fact(6)
 
   local line = debug.getinfo(1, "l").currentline + 2    -- get line number
   local function foo ()

@@ -97,8 +97,8 @@ assert(string.rep('teste', 0, 'xuxu') == '')
 assert(string.rep('teste', 1, 'xuxu') == 'teste')
 assert(string.rep('\1\0\1', 2, '\0\0') == '\1\0\1\0\0\1\0\1')
 assert(string.rep('', 10, '.') == string.rep('.', 9))
-assert(not pcall(string.rep, "aa", 2^30))
-assert(not pcall(string.rep, "", 2^30, "aa"))
+assert(not pcall(string.rep, "aa", maxi // 2))
+assert(not pcall(string.rep, "", maxi // 2, "aa"))
 
 assert(string.reverse"" == "")
 assert(string.reverse"\0\1\2\3" == "\3\2\1\0")
@@ -119,7 +119,10 @@ assert(tostring(1203.125) == "1203.125")
 assert(tostring(0.0) == "0.0")
 assert(tostring(-0.5) == "-0.5")
 assert(tostring(-1203 + 0.0) == "-1203.0")
-assert(tostring(-(2^31 - 1)) == "-2147483647")
+assert(tostring(-(2^15 - 1)) == "-32767")
+if 2^30 > 0 then
+  assert(tostring(-(2^31 - 1)) == "-2147483647")
+end
 if 2^62 > 0 then   -- long integers?
   assert(tostring(2^62) == "4611686018427387904")
 end
@@ -158,8 +161,8 @@ assert(string.format("%s %.10s", m, m) == "hello hello")
 assert(string.format("%x", 0.3) == "0")
 assert(string.format("%02x", 0.1) == "00")
 assert(string.format("%08X", 2^32 - 1) == "FFFFFFFF")
-assert(string.format("%+08d", 2^31 - 1) == "+2147483647")
-assert(string.format("%+08d", -2^31) == "-2147483648")
+assert(string.format("%+08d", 31501) == "+0031501")
+assert(string.format("%+08d", -30927) == "-0030927")
 
 
 -- longest number that can be formated
@@ -169,15 +172,9 @@ assert(string.len(string.format('%99.99f', -largefinite)) >= 100)
 
 -- testing large numbers for format
 
-assert(string.format("%08x", 2^22 - 1) == "003fffff")
-assert(string.format("%d", -1) == "-1")
-assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
-
-
 local max, min = 2^63 - 1, -2^63
 if max > 0 and min < 0 then
   -- "large" for 64 bits
-  assert(max + 1 == min)
   assert(string.format("%x", 2^52 - 1) == "fffffffffffff")
   assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
   assert(string.format("%d", 2^53) == "9007199254740992")
@@ -187,13 +184,14 @@ if max > 0 and min < 0 then
   assert(string.format("%d", max) ==  "9223372036854775807")
   assert(string.format("%d", min) == "-9223372036854775808")
   assert(tostring(1234567890123) == '1234567890123')
-else
+end
+
+max, min = 2^31 - 1, -2^31
+if max > 0 and min < 0 then
   -- "large" for 32 bits
-  max, min = 2^31 - 1, -2^31
-  assert(max + 1 == min)
-  assert(string.format("%8x", -1) == "ffffffff")
+  assert(string.sub(string.format("%8x", -1), -8) == "ffffffff")
   assert(string.format("%x", max) == "7fffffff")
-  assert(string.format("%x", min) == "80000000")
+  assert(string.sub(string.format("%x", min), -8) == "80000000")
   assert(string.format("%d", max) ==  "2147483647")
   assert(string.format("%d", min) == "-2147483648")
 end
@@ -230,12 +228,12 @@ assert(load("return 1\n--comment without ending EOL")() == 1)
 assert(table.concat{} == "")
 assert(table.concat({}, 'x') == "")
 assert(table.concat({'\0', '\0\1', '\0\1\2'}, '.\0.') == "\0.\0.\0\1.\0.\0\1\2")
-local a = {}; for i=1,3000 do a[i] = "xuxu" end
-assert(table.concat(a, "123").."123" == string.rep("xuxu123", 3000))
+local a = {}; for i=1,300 do a[i] = "xuxu" end
+assert(table.concat(a, "123").."123" == string.rep("xuxu123", 300))
 assert(table.concat(a, "b", 20, 20) == "xuxu")
 assert(table.concat(a, "", 20, 21) == "xuxuxuxu")
 assert(table.concat(a, "x", 22, 21) == "")
-assert(table.concat(a, "3", 2999) == "xuxu3xuxu")
+assert(table.concat(a, "3", 299) == "xuxu3xuxu")
 assert(table.concat({}, "x", maxi, maxi - 1) == "")
 assert(table.concat({}, "x", mini + 1, mini) == "")
 assert(table.concat({}, "x", maxi, mini) == "")

@@ -28,8 +28,8 @@ a,x = unpack({1,2}, 1, 1)
 assert(a==1 and x==nil)
 
 do
-  local maxI = ~0 >> 1           -- maximum value for a Lua integer
-  local minI = maxI + 1          -- minimum value for a Lua integer
+  local maxI = math.maxinteger
+  local minI = math.mininteger
   local maxi = 2^31 - 1          -- maximum value for an int (usually)
   local mini = -2^31             -- minimum value for an int (usually)
   assert(not pcall(unpack, {}, 0, maxi))

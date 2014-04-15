@@ -207,7 +207,7 @@ if not usertests then
   -- open file with time of last performed test
   local f = io.open(fname)
   if f then
-    lasttime = assert(tonumber(f:read'*a'))
+    lasttime = assert(tonumber(f:read'a'))
     f:close();
   else   -- no such file; assume it is recording time for first time
     lasttime = nil

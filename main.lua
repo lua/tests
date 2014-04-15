@@ -27,7 +27,7 @@ end
 
 function getoutput ()
   io.input(out)
-  local t = io.read("*a")
+  local t = io.read("a")
   io.input():close()
   assert(os.remove(out))
   return t

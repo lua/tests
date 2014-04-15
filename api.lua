@@ -81,6 +81,13 @@ t = pack(T.testC("copy -3 -1; gettop; return .", 2, 3, 4, 5))
 tcheck(t, {n=4,2,3,4,3})
 
 
+do   -- testing 'tounsigned'
+  local f = function (x) return T.testC("tounsigned 2; return 1", x) end
+  assert(f(-3) == -3)
+  assert(f(-3.0) == -3)
+  assert(f(2.0^100) == 0)
+  assert(f(2.0^20 + 1) == 2^20 + 1)
+end
 
 
 t = pack(T.testC("insert 3; pushvalue 3; remove 3; pushvalue 2; remove 2; \

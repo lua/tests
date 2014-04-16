@@ -285,14 +285,25 @@ if not _port then
 end
 
 
--- testing dump/undump
+print"testing dump/undump"
 
 local numbytes = numbits'integer' // 8
 
+local maxbytes = 12
+
 -- basic dump/undump with default arguments
-for _, i in ipairs{0, 1, 2, 127, 128, 255, 0xffffffff, 0xffffffff} do
+for _, i in ipairs{0, 1, 2, 127, 128, 255, -128, -1, -2} do
   assert(string.undumpint(string.dumpint(i)) == i)
-  assert(string.undumpint(string.dumpint(-i)) == -i)
+end
+
+-- basic dump/undump with non-default arguments
+for _, e in pairs{"l", "b"} do
+  for s = 2, maxbytes do
+    for _, i in ipairs{0, 1, 2, 127, 128, 255, 32767, -32768,
+                       -128, -1, -2, 0x5BCD} do
+      assert(string.undumpint(string.dumpint(i, s, e), 1, s, e) == i)
+    end
+  end
 end
 
 -- default size is the size of a Lua integer
@@ -304,8 +315,6 @@ assert(string.dumpint(34, 4, 'l') == "\34\0\0\0")
 assert(string.dumpint(34, 4, 'b') == "\0\0\0\34")
 assert(string.dumpint(0, 3, 'n') == "\0\0\0")
 
-assert(string.dumpint(0x12345678, 4, 'l') == "\x78\x56\x34\x12")
-assert(string.dumpint(0x12345678, 4, 'b') == "\x12\x34\x56\x78")
 
 -- unsigned values
 assert(string.dumpint(255, 1, 'l') == "\255")
@@ -328,7 +337,7 @@ local function check (i, s, n)
 end
 
 
-for i = 1, numbytes do
+for i = 1, maxbytes do
   -- 1111111...111111
   check(i, string.rep("\255", i), -1)
   local p = 2^(i*8 - 1)
@@ -343,16 +352,16 @@ for i = 1, numbytes do
   check(i, "\209" .. string.rep("\255", i - 1), 209 - 256)
 end
 
-for i = 2, numbytes do
-  -- unsigned numbers
-  assert(string.dumpint(256^i - 1, i) == string.rep("\255", i))
-  check(i, string.rep("\255", i - 1) .. "\0", 256^(i - 1) - 1)
 
-  check(i, "\220" .. string.rep("\0", i - 2) .. "\105",
-           105 * 256^(i - 1) + 220)
-  check(i, "\123" .. string.rep("\0", i - 2) .. "\160",
-           (160 * 256^(i - 1) + 123) - 256^i)
+for i = 0, maxbytes - numbytes do
+  -- largest allowed unsigned number with extra leading zeros
+  local s = string.rep("\0", i) .. string.rep("\255", numbytes)
+  assert(string.undumpint(s, 1, i + numbytes, "b") == ~0)
+  -- another large unsigned number
+  s = string.rep("\0", i) .. string.rep("\255", numbytes - 1) .. "\12"
+  assert(string.undumpint(s, 1, i + numbytes, "b") == ~0 - (255 - 12))
 end
+ 
 
 -- signal extension
 assert(string.undumpint("\x19\xff\0", -3, 3, 'l') == 0xff19)
@@ -362,16 +371,16 @@ assert(string.undumpint("\19\xff\0", -3, 2, 'l') == -237)
 -- position
 local s = "\0\255\123\9\1\47\200"
 for i = 1, #s do
-  assert(string.undumpint(s, i, 1) % 256 == string.byte(s, i))
+  assert(string.undumpint(s, i, 1) & 0xff == string.byte(s, i))
 end
 
 for i = 1, #s - 1 do
-  assert(string.undumpint(s, i, 2, 'b') % 256^2 ==
+  assert(string.undumpint(s, i, 2, 'b') & 0xffff ==
   string.byte(s, i)*256 + string.byte(s, i + 1))
 end
 
 for i = 1, #s - 2 do
-  assert(string.undumpint(s, i, 3, 'l') % 256^3 ==
+  assert(string.undumpint(s, i, 3, 'l') & 0xffffff ==
   string.byte(s, i + 2)*256^2 + string.byte(s, i + 1)*256 + string.byte(s, i))
 end
 
@@ -402,6 +411,26 @@ for i = 1, numbytes - 1 do
 end
 
 
+-- testing overflow in undumping
+
+checkerror = function (s, size, endian)
+    local status, msg = pcall(string.undumpint, s, 1, size, endian)
+    assert(not status and string.find(msg, "does not fit"))
+end
+
+checkerror("\3\0\0\0\0\0\0\0\0\0", 10, 'b')
+checkerror("\0\0\0\0\0\0\0\0\3", 9, 'l')
+checkerror("\x7f\xff\xff\xff\xff\xff\xff\xff\xff\xff", 10, 'b')
+checkerror("\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x7f", 12, 'l')
+
+-- looks like negative integers, but they are not (because of leading zero)
+checkerror("\0\xff\xff\xff\xff\xff\xff\xff\xff\x23", 10, 'b')
+checkerror("\0\0\xff\xff\xff\xff\xff\xff\xff\xff\xff\x23", 12, 'b')
+-- looks like positive integers, but they are not
+checkerror("\x01\0\0\0\0\0\0\0\0\x23", 10, 'b')
+checkerror("\x80\0\0\0\0\0\0\0\0\0\0\x23", 12, 'b')
+
+
 -- check errors in arguments
 function check (msg, f, ...)
   local status, err = pcall(f, ...)
@@ -413,7 +442,7 @@ check("string too short", string.undumpint, "\1\2\3\4", 2^31 - 1)
 check("string too short", string.undumpint, "\1\2\3\4", 4, 2)
 check("endianness", string.undumpint, "\1\2\3\4", 1, 2, 'x')
 check("endianness", string.dumpint, -1, 2, 'x')
-check("out of valid range", string.dumpint, -1, 9)
+check("out of valid range", string.dumpint, -1, maxbytes + 1)
 
 
 

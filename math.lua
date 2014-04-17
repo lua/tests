@@ -466,7 +466,7 @@ do   -- test random for floats
 end
 
 do
-  local function aux (p, lim)
+  local function aux (p, lim)   -- test random for small intervals
     local x1, x2
     if #p == 1 then x1 = 1; x2 = p[1]
     else x1 = p[1]; x2 = p[2]
@@ -497,35 +497,46 @@ do
   aux({maxint - 3, maxint})
 end
 
-do   -- full range
-  local max = minint
-  local min = maxint
-  local n = 200
-  local mark = {}; local count = 0   -- to count how many different values
-  for _ = 1, n do
-    local t = math.random(minint, maxint)
-    max = math.max(max, t)
-    min = math.min(min, t)
-    if not mark[t] then  -- new value
-      mark[t] = true
-      count = count + 1
+do
+  local function aux(p1, p2)       -- test random for large intervals
+    local max = minint
+    local min = maxint
+    local n = 200
+    local mark = {}; local count = 0   -- to count how many different values
+    for _ = 1, n do
+      local t = math.random(p1, p2)
+      max = math.max(max, t)
+      min = math.min(min, t)
+      if not mark[t] then  -- new value
+        mark[t] = true
+        count = count + 1
+      end
     end
+    -- at least 80% of values are different
+    assert(count >= n * 0.8)
+    -- min and max not too far from formal min and max
+    local diff = (p2 - p1) // 8
+    assert(min < p1 + diff and max > p2 - diff)
   end
-  -- at least 80% of values are different
-  assert(count >= n * 0.8)
-  -- min and max not too far from formal min and max
-  assert(min < minint * 0.75 and max > maxint * 0.75)
+  aux(0, maxint)
+  aux(1, maxint)
+  aux(minint, -1)
+  aux(minint // 2, maxint // 2)
 end
 
 for i=1,100 do
   assert(math.random(maxint) > 0)
-  assert(math.random(minint, 0) <= 0)
+  assert(math.random(minint, -1) < 0)
 end
 
 assert(not pcall(math.random, 1, 2, 3))
 assert(not pcall(math.random, minint + 1, minint))
 assert(not pcall(math.random, maxint, maxint - 1))
 assert(not pcall(math.random, maxint, minint))
+
+assert(not pcall(math.random, minint, 0))
+assert(not pcall(math.random, -1, maxint))
+assert(not pcall(math.random, minint // 2, maxint // 2 + 1))
 
 
 print('OK')

@@ -110,7 +110,6 @@ checkmessage("return ~-3e40", "out of range")
 checkmessage("return 34 >> {}", "table value")
 checkmessage("a = 24 // 0", "divide by zero")
 checkmessage("a = 1 % 0", "'n%0'")
-checkmessage("a = 1 ^ -4", "exponentiation")
 
 
 -- passing light userdata instead of full userdata

@@ -89,6 +89,19 @@ for _, i in pairs{-16, -15, -3, -2, -1, 0, 1, 2, 3, 15} do
   end
 end
 
+
+-- negative exponents
+do
+  assert(2^-3 == 1 / 2^3)
+  assert((-3)^-3 == 1 / (-3)^3)
+  for i = -3, 3 do    -- variables avoid constant folding
+    for j = -3, 3 do
+      assert(i^j == 1 / i^(-j))
+     end
+  end
+end
+
+
 assert(maxint + 0.0 == maxint)
 assert(maxint + 0.0 == 2.0^(intbits - 1) - 1.0)
 assert(minint + 0.0 == minint)

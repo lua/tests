@@ -408,16 +408,13 @@ do  -- checking types
     c = c + 1
   end
 
-  c = 0; for i = 1, 10.9 do checkfloat(i) end
-  assert(c == 10)
-
   c = 0; for i = 1.0, 10 do checkfloat(i) end
   assert(c == 10)
 
   c = 0; for i = -1, -10, -1.0 do checkfloat(i) end
   assert(c == 10)
 
-  c = 0; for i = 1, "10" do checkfloat(i) end
+  c = 0; for i = 1, math.huge do checkfloat(i); if i >= 10 then break end end
   assert(c == 10)
 
   local function checkint (i)
@@ -428,6 +425,19 @@ do  -- checking types
   local m = ~0 >> 1
   c = 0; for i = m - 1, m - 10, -1 do checkint(i) end
   assert(c == 10)
+
+  c = 0; for i = 1, 10.9 do checkint(i) end
+  assert(c == 10)
+
+  c = 0; for i = 10, 0.001, -1 do checkint(i) end
+  assert(c == 10)
+
+  c = 0; for i = 1, "10" do checkint(i) end
+  assert(c == 10)
+
+  c = 0; for i = 100, "96.3", -2 do checkint(i) end
+  assert(c == 2)
+
 end
 
 collectgarbage()

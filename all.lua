@@ -186,7 +186,7 @@ end
 local debug = require "debug"
 
 print(string.format("%d-bit integers, %d-bit floats",
-        debug.numbits'i', debug.numbits'f'))
+        debug.Csize'I' * debug.Csize'b', debug.Csize'F' * debug.Csize'b'))
 print("final OK !!!")
 
 debug.sethook(function (a) assert(type(a) == 'string') end, "cr")

@@ -432,8 +432,11 @@ do  -- checking types
   c = 0; for i = 10, 0.001, -1 do checkint(i) end
   assert(c == 10)
 
-  c = 0; for i = 1, "10" do checkint(i) end
+  c = 0; for i = 1, "10.8" do checkint(i) end
   assert(c == 10)
+
+  c = 0; for i = 9, "3.4", -1 do checkint(i) end
+  assert(c == 6)
 
   c = 0; for i = 100, "96.3", -2 do checkint(i) end
   assert(c == 2)

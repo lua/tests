@@ -1,8 +1,17 @@
 print("testing bitwise operations")
 
-local numbits = require'debug'.numbits'i'
+local Csize = require'debug'.Csize
+
+local numbits = Csize'I' * Csize'b'
 
 assert(~0 == -1)
+
+-- test 'Csize'
+assert(Csize'h' <= Csize'i')    -- ANSI C rules
+assert(Csize'i' <= Csize'l')    -- ANSI C rules
+assert(Csize'f' <= Csize'd')    -- ANSI C rules
+assert(type(Csize'z') == 'number')   -- no rules for size_t...
+assert(not pcall(Csize, 'x'))
 
 -- use variables to avoid constant folding
 local a, b, c, d
@@ -46,6 +55,14 @@ for _, i in ipairs{0, 1, 2, 3, 4, 31, 32, 33,
 end
 
 assert(1 >> -3 == 1 << 3 and 1000 >> 5 == 1000 << -5)
+
+
+-- coercion from strings to integers
+assert("0xffffffffffffffff" | 0 == -1)
+assert("0xfffffffffffffffe" & "-1" == -2)
+
+-- out of range number
+assert(not pcall(function () return "0xffffffffffffffff.0" | 0 end))
 
 print'+'
 

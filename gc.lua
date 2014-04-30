@@ -149,7 +149,7 @@ k = math.min(300, (math.maxinteger // 80) // 2)
 while n < k do s = s..x; n=n+1; j=tostring(n)  end
 assert(string.len(s) == k*80)
 s = string.sub(s, 1, 10000)
-s, i = string.gsub(s, '(%d%d%d%d)', math.ifloor)
+s, i = string.gsub(s, '(%d%d%d%d)', '')
 assert(i==10000 // 4)
 s = nil
 x = nil

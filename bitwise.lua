@@ -60,9 +60,14 @@ assert(1 >> -3 == 1 << 3 and 1000 >> 5 == 1000 << -5)
 -- coercion from strings to integers
 assert("0xffffffffffffffff" | 0 == -1)
 assert("0xfffffffffffffffe" & "-1" == -2)
+assert(" \t-0xfffffffffffffffe\n\t" & "-1" == 2)
+assert("   \n  -45  \t " >> "  -2  " == -45 * 4)
 
 -- out of range number
 assert(not pcall(function () return "0xffffffffffffffff.0" | 0 end))
+
+-- embedded zeros
+assert(not pcall(function () return "0xffffffffffffffff\0" | 0 end))
 
 print'+'
 

@@ -343,6 +343,12 @@ assert(4%-3.0 == -2.0)
 assert(math.pi - math.pi % 1 == 3)
 assert(math.pi - math.pi % 0.001 == 3.141)
 
+assert(minint % minint == 0)
+assert(maxint % maxint == 0)
+assert((minint + 1) % minint == minint + 1)
+assert((maxint - 1) % maxint == maxint - 1)
+assert(minint % maxint == maxint - 1)
+
 assert(minint % -1 == 0)
 assert(minint % -2 == 0)
 assert(maxint % -2 == -1)
@@ -403,6 +409,26 @@ do   -- testing ifloor
   assert(math.ifloor(0/0) == nil)
   assert(not pcall(math.ifloor, {}))
 end
+
+
+-- testing fmod for integers
+for i = -6, 6 do
+  for j = -6, 6 do
+    if j ~= 0 then
+      local mi = math.fmod(i, j)
+      local mf = math.fmod(i + 0.0, j)
+      assert(mi == mf)
+      assert(math.type(mi) == 'integer' and math.type(mf) == 'float')
+    end
+  end
+end
+assert(math.fmod(minint, minint) == 0)
+assert(math.fmod(maxint, maxint) == 0)
+assert(math.fmod(minint + 1, minint) == minint + 1)
+assert(math.fmod(maxint - 1, maxint) == maxint - 1)
+
+assert(not pcall(math.fmod, 3, 0))
+
 
 do    -- testing max/min
   assert(math.max(3) == 3)

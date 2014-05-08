@@ -320,4 +320,8 @@ for _, v in pairs(allcases(level)) do
 end
 ------------------------------------------------------------------
 
+-- testing some syntax errors (chosen through 'gcov')
+assert(string.find(select(2, load("for x do")), "expected"))
+assert(string.find(select(2, load("x:call")), "expected"))
+
 print'OK'

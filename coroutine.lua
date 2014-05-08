@@ -7,6 +7,7 @@ local f
 local main, ismain = coroutine.running()
 assert(type(main) == "thread" and ismain)
 assert(not coroutine.resume(main))
+assert(not coroutine.isyieldable())
 assert(not pcall(coroutine.yield))
 
 
@@ -30,6 +31,7 @@ function foo (a, ...)
   assert(coroutine.resume(f) == false)
   assert(coroutine.status(f) == "running")
   local arg = {...}
+  assert(coroutine.isyieldable())
   for i=1,#arg do
     _G.x = {coroutine.yield(table.unpack(arg[i]))}
   end
@@ -114,6 +116,7 @@ x, a = nil
 
 co = coroutine.wrap(function()
        assert(not pcall(table.sort,{1,2,3}, coroutine.yield))
+       assert(coroutine.isyieldable())
        coroutine.yield(20)
        return 30
      end)
@@ -149,6 +152,22 @@ co = coroutine.wrap(function ()
 assert(co() == 10)
 r, msg = co(100)
 assert(not r and msg == 240)
+
+
+-- unyieldable C call
+do
+  local function f (c)
+          assert(not coroutine.isyieldable())
+          return c .. c
+        end
+
+  local co = coroutine.wrap(function (c)
+               assert(coroutine.isyieldable())
+               local s = string.gsub("a", ".", f)
+               return s
+             end)
+  assert(co() == "aa")
+end
 
 
 -- errors in coroutines

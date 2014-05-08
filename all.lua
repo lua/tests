@@ -131,13 +131,13 @@ do
   local next, setmetatable, stderr = next, setmetatable, io.stderr
   -- track collections
   local mt = {}
-  -- each time a table is collected, create a new one to be
-  -- collected next cycle
+  -- each time a table is collected, remark it for finalization
+  -- on next cycle
   mt.__gc = function (o)
      stderr:write'.'    -- mark progress
-     local n = setmetatable({}, mt)   -- replicate object
+     local n = setmetatable(o, mt)   -- remark it
    end
-   local n = setmetatable({}, mt)    -- create first object
+   local n = setmetatable({}, mt)    -- create object
 end
 
 report"gc.lua"

@@ -119,12 +119,13 @@ assert(tostring(1203.125) == "1203.125")
 assert(tostring(0.0) == "0.0")
 assert(tostring(-0.5) == "-0.5")
 assert(tostring(-1203 + 0.0) == "-1203.0")
-assert(tostring(-(2^15 - 1)) == "-32767")
-if 2^30 > 0 then
-  assert(tostring(-(2^31 - 1)) == "-2147483647")
+assert(tostring(-32767) == "-32767")
+if 2147483647 > 0 then   -- no overflow? (32 bits)
+  assert(tostring(-2147483647) == "-2147483647")
 end
-if 2^62 > 0 then   -- long integers?
-  assert(tostring(2^62) == "4611686018427387904")
+if 4611686018427387904 > 0 then   -- no overflow? (64 bits)
+  assert(tostring(4611686018427387904) == "4611686018427387904")
+  assert(tostring(-4611686018427387904) == "-4611686018427387904")
 end
 
 x = '"ílo"\n\\'
@@ -172,7 +173,7 @@ assert(string.len(string.format('%99.99f', -largefinite)) >= 100)
 
 -- testing large numbers for format
 
-local max, min = 2^63 - 1, -2^63
+local max, min = math.maxinteger, math.mininteger
 if max > 0 and min < 0 then
   -- "large" for 64 bits
   assert(string.format("%x", 2^52 - 1) == "fffffffffffff")
@@ -340,7 +341,7 @@ end
 for i = 1, maxbytes do
   -- 1111111...111111
   check(i, string.rep("\255", i), -1)
-  local p = 2^(i*8 - 1)
+  local p = 1 << (i*8 - 1)
   if p ~= 0 then
     -- 10000...00000000
     check(i, string.rep("\0", i - 1) .. "\x80", -p)
@@ -393,7 +394,7 @@ local function checkerror (n, size, endian)
 end
 
 for i = 1, numbytes - 1 do
-  local maxunsigned = 256^i - 1
+  local maxunsigned = (1 << i*8) - 1
   local minsigned = -maxunsigned // 2
 
   local s = string.dumpint(maxunsigned, i)

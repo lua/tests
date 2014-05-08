@@ -209,6 +209,9 @@ assert(nofind==find("return"))
 _G["xxx"] = 1
 assert(xxx==find("xxx"))
 
+-- invalid key to 'next'
+assert(string.find(select(2, pcall(next, {10,20}, 3)), "invalid key"))
+
 print('+')
 
 a = {}

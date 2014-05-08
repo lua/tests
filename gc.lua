@@ -571,7 +571,7 @@ if T then
   collectgarbage()
   T.totalmem(T.totalmem() + 200)
   for i=1,200 do local a = {} end
-  T.totalmem(math.maxinteger)
+  T.totalmem(0)
   collectgarbage()
   local t = T.totalmem("table")
   local a = {{}, {}, {}}   -- create 4 new tables

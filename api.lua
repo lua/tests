@@ -848,11 +848,11 @@ print('+')
 -------------------------------------------------------------------------
 -- testing memory limits
 -------------------------------------------------------------------------
-assert(not pcall(T.newuserdata, 2^32-4))
+assert(not pcall(T.newuserdata, math.maxinteger))   -- object too big
 collectgarbage()
 T.totalmem(T.totalmem()+5000)   -- set low memory limit (+5k)
 assert(not pcall(load"local a={}; for i=1,100000 do a[i]=i end"))
-T.totalmem(1000000000)          -- restore high limit
+T.totalmem(0)          -- restore high limit
 
 -- test memory errors; increase memory limit in small steps, so that
 -- we get memory errors in different parts of a given task, up to there
@@ -866,7 +866,7 @@ function testamem (s, f)
     M = M+7   -- increase memory limit in small steps
     T.totalmem(M)
     a, b = pcall(f)
-    T.totalmem(1000000000)  -- restore high limit
+    T.totalmem(0)  -- restore high limit
     if a and b then break end       -- stop when no more errors
     collectgarbage()
     if not a and not    -- `real' error?

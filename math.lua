@@ -30,6 +30,19 @@ end
 
 assert(math.type(0) == "integer" and math.type(0.0) == "float")
 
+
+-- float equality
+function eq (a,b,limit)
+  if not limit then
+    if floatbits >= 50 then limit = 1E-11
+    else limit = 1E-5
+    end
+  end
+  -- a == b needed for +inf/-inf
+  return a == b or math.abs(a-b) <= limit
+end
+
+
 -- basic float notation
 assert(0e12 == 0 and .0 == 0 and 0. == 0 and .2e2 == 20 and 2.E-1 == 0.2)
 
@@ -93,10 +106,10 @@ end
 -- negative exponents
 do
   assert(2^-3 == 1 / 2^3)
-  assert((-3)^-3 == 1 / (-3)^3)
+  assert(eq((-3)^-3, 1 / (-3)^3))
   for i = -3, 3 do    -- variables avoid constant folding
     for j = -3, 3 do
-      assert(i^j == 1 / i^(-j))
+      assert(eq(i^j, 1 / i^(-j)))
      end
   end
 end
@@ -309,15 +322,6 @@ assert(1111111111111111-1111111111111110== 1000.00e-03)
 assert(1.1 == '1.'+'.1')
 assert(tonumber'1111111111111111'-tonumber'1111111111111110' ==
        tonumber"  +0.001e+3 \n\t")
-
-function eq (a,b,limit)
-  if not limit then
-    if floatbits >= 50 then limit = 1E-11
-    else limit = 1E-5
-    end
-  end
-  return math.abs(a-b) <= limit
-end
 
 assert(0.1e-30 > 0.9E-31 and 0.9E30 < 0.1e31)
 

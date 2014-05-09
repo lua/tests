@@ -172,29 +172,26 @@ assert(string.len(string.format('%99.99f', -largefinite)) >= 100)
 
 
 -- testing large numbers for format
-
-local max, min = math.maxinteger, math.mininteger
-if max > 0 and min < 0 then
-  -- "large" for 64 bits
-  assert(string.format("%x", 2^52 - 1) == "fffffffffffff")
-  assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
-  assert(string.format("%d", 2^53) == "9007199254740992")
-  assert(string.format("%d", -2^53) == "-9007199254740992")
-  assert(string.format("%x", max) == "7fffffffffffffff")
-  assert(string.format("%x", min) == "8000000000000000")
-  assert(string.format("%d", max) ==  "9223372036854775807")
-  assert(string.format("%d", min) == "-9223372036854775808")
-  assert(tostring(1234567890123) == '1234567890123')
-end
-
-max, min = 2^31 - 1, -2^31
-if max > 0 and min < 0 then
-  -- "large" for 32 bits
+do   -- assume at least 32 bits
+  local max, min = 0x7fffffff, -0x80000000    -- "large" for 32 bits
   assert(string.sub(string.format("%8x", -1), -8) == "ffffffff")
   assert(string.format("%x", max) == "7fffffff")
   assert(string.sub(string.format("%x", min), -8) == "80000000")
   assert(string.format("%d", max) ==  "2147483647")
   assert(string.format("%d", min) == "-2147483648")
+
+  max, min = math.maxinteger, math.mininteger
+  if max > 2.0^53 then  -- only for 64 bits
+    assert(string.format("%x", 2^52 - 1) == "fffffffffffff")
+    assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
+    assert(string.format("%d", 2^53) == "9007199254740992")
+    assert(string.format("%d", -2^53) == "-9007199254740992")
+    assert(string.format("%x", max) == "7fffffffffffffff")
+    assert(string.format("%x", min) == "8000000000000000")
+    assert(string.format("%d", max) ==  "9223372036854775807")
+    assert(string.format("%d", min) == "-9223372036854775808")
+    assert(tostring(1234567890123) == '1234567890123')
+  end
 end
 
 if not _noformatA then

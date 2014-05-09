@@ -385,7 +385,6 @@ do
   print("testing floats in numeric for")
   local a
   -- integer count
-  a = 0; for i=0, 0.999999999, 0.1 do a=a+1 end; assert(a==10)
   a = 0; for i=1, 1, 1 do a=a+1 end; assert(a==1)
   a = 0; for i=10000, 1e4, -1 do a=a+1 end; assert(a==1)
   a = 0; for i=1, 0.99999, 1 do a=a+1 end; assert(a==0)
@@ -393,8 +392,9 @@ do
   a = 0; for i=1, 0.99999, -1 do a=a+1 end; assert(a==1)
 
   -- float count
-  a = 0; for i=0.0, 0.999999999, 0.1 do a=a+1 end; assert(a==10)
+  a = 0; for i=0, 0.999999999, 0.1 do a=a+1 end; assert(a==10)
   a = 0; for i=1.0, 1, 1 do a=a+1 end; assert(a==1)
+  a = 0; for i=-1.5, -1.5, 1 do a=a+1 end; assert(a==1)
   a = 0; for i=1e6, 1e6, -1 do a=a+1 end; assert(a==1)
   a = 0; for i=1.0, 0.99999, 1 do a=a+1 end; assert(a==0)
   a = 0; for i=99999, 1e5, -1.0 do a=a+1 end; assert(a==0)
@@ -417,17 +417,14 @@ do  -- checking types
   c = 0; for i = -1, -10, -1.0 do checkfloat(i) end
   assert(c == 10)
 
-  c = 0; for i = 1, math.huge do checkfloat(i); if i >= 10 then break end end
-  assert(c == 10)
-
   local function checkint (i)
     assert(math.type(i) == "integer")
     c = c + 1
   end
 
-  local m = ~0 >> 1
-  c = 0; for i = m - 1, m - 10, -1 do checkint(i) end
-  assert(c == 10)
+  local m = math.maxinteger
+  c = 0; for i = m, m - 10, -1 do checkint(i) end
+  assert(c == 11)
 
   c = 0; for i = 1, 10.9 do checkint(i) end
   assert(c == 10)
@@ -441,8 +438,23 @@ do  -- checking types
   c = 0; for i = 9, "3.4", -1 do checkint(i) end
   assert(c == 6)
 
+  c = 0; for i = 0, " -3.4  ", -1 do checkint(i) end
+  assert(c == 4)
+
   c = 0; for i = 100, "96.3", -2 do checkint(i) end
   assert(c == 2)
+
+  c = 0; for i = 1, math.huge do if i > 10 then break end; checkint(i) end
+  assert(c == 10)
+
+  c = 0; for i = -1, -math.huge, -1 do
+           if i < -10 then break end; checkint(i)
+          end
+  assert(c == 10)
+
+
+  for i = math.mininteger, -10e100 do assert(false) end
+  for i = math.maxinteger, 10e100, -1 do assert(false) end
 
 end
 

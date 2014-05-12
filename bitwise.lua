@@ -49,11 +49,6 @@ assert(-1 >> numbits == 0 and
 assert((2^30 - 1) << 2^30 == 0)
 assert((2^30 - 1) >> 2^30 == 0)
 
-for _, i in ipairs{0, 1, 2, 3, 4, 31, 32, 33,
-                   numbits - 1, numbits, numbits + 1, numbits * 2} do
-  assert(1 << i == 2^i and -1 << i == -2^i)
-end
-
 assert(1 >> -3 == 1 << 3 and 1000 >> 5 == 1000 << -5)
 
 
@@ -195,14 +190,14 @@ assert(bit32.band(1,2) == 0)
 
 -- out-of-range numbers
 assert(bit32.band(-1) == 0xffffffff)
-assert(bit32.band(2^33 - 1) == 0xffffffff)
-assert(bit32.band(-2^33 - 1) == 0xffffffff)
-assert(bit32.band(2^33 + 1) == 1)
-assert(bit32.band(-2^33 + 1) == 1)
-assert(bit32.band(-2^40) == 0)
-assert(bit32.band(2^40) == 0)
-assert(bit32.band(-2^40 - 2) == 0xfffffffe)
-assert(bit32.band(2^40 - 4) == 0xfffffffc)
+assert(bit32.band((1 << 33) - 1) == 0xffffffff)
+assert(bit32.band(-(1 << 33) - 1) == 0xffffffff)
+assert(bit32.band((1 << 33) + 1) == 1)
+assert(bit32.band(-(1 << 33) + 1) == 1)
+assert(bit32.band(-(1 << 40)) == 0)
+assert(bit32.band(1 << 40) == 0)
+assert(bit32.band(-(1 << 40) - 2) == 0xfffffffe)
+assert(bit32.band((1 << 40) - 4) == 0xfffffffc)
 
 assert(bit32.lrotate(0, -1) == 0)
 assert(bit32.lrotate(0, 7) == 0)
@@ -271,7 +266,7 @@ for _, b in pairs(c) do
   assert(bit32.bxor(b, 0) == b)
   assert(bit32.bnot(b) ~= b)
   assert(bit32.bnot(bit32.bnot(b)) == b)
-  assert(bit32.bnot(b) == 2^32 - 1 - b)
+  assert(bit32.bnot(b) == (1 << 32) - 1 - b)
   assert(bit32.lrotate(b, 32) == b)
   assert(bit32.rrotate(b, 32) == b)
   assert(bit32.lshift(bit32.lshift(b, -4), 4) == bit32.band(b, bit32.bnot(0xf)))
@@ -315,8 +310,8 @@ assert(bit32.replace(0x12345678, 5, 28, 4) == 0x52345678)
 assert(bit32.replace(0x12345678, 0x87654321, 0, 32) == 0x87654321)
 assert(bit32.replace(0, 1, 2) == 2^2)
 assert(bit32.replace(0, -1, 4) == 2^4)
-assert(bit32.replace(-1, 0, 31) == 2^31 - 1)
-assert(bit32.replace(-1, 0, 1, 2) == 2^32 - 7)
+assert(bit32.replace(-1, 0, 31) == (1 << 31) - 1)
+assert(bit32.replace(-1, 0, 1, 2) == (1 << 32) - 7)
 
 
 -- testing conversion of floats

@@ -4,9 +4,9 @@ local minint = math.mininteger
 local maxint = math.maxinteger
 
 local intbits = math.ifloor(math.log(maxint, 2) + 0.5) + 1
-assert(2^intbits == 0)
+assert((1 << intbits) == 0)
 
-assert(minint == 2^(intbits - 1))
+assert(minint == 1 << (intbits - 1))
 assert(maxint == minint - 1)
 
 -- number of bits in the mantissa of a floating-point number
@@ -20,7 +20,6 @@ do
 end
 
 do
-  assert(minint < 0 and maxint > 0 and 2^intbits == 0)
   local x = 2.0^floatbits
   assert(x > x - 1.0 and x == x + 1.0)
 
@@ -88,7 +87,6 @@ assert(-math.huge < -10e30)
 assert(minint < minint + 1)
 assert(maxint - 1 < maxint)
 assert(0 - minint == minint)
-assert(2^intbits == 0)
 assert(minint * minint == 0)
 assert(maxint * maxint * maxint == maxint)
 
@@ -204,9 +202,9 @@ assert(tonumber'+ 0.01' == nil and tonumber'+.e1' == nil and
 assert(tonumber('-012') == -010-2)
 assert(tonumber('-1.2e2') == - - -120)
 
-assert(tonumber("0xffffffffffff") == 2^(4*12) - 1)
-assert(tonumber("0x"..string.rep("f", (intbits//4))) == 2^intbits - 1)
-assert(tonumber("-0x"..string.rep("f", (intbits//4))) == -(2^intbits - 1))
+assert(tonumber("0xffffffffffff") == (1 << (4*12)) - 1)
+assert(tonumber("0x"..string.rep("f", (intbits//4))) == -1)
+assert(tonumber("-0x"..string.rep("f", (intbits//4))) == 1)
 
 -- testing 'tonumber' with base
 assert(tonumber('  001010  ', 2) == 10)
@@ -218,11 +216,13 @@ assert(tonumber('  +1Z  ', 36) == 36 + 35)
 assert(tonumber('  -1z  ', 36) == -36 + -35)
 assert(tonumber('-fFfa', 16) == -(10+(16*(15+(16*(15+(16*15)))))))
 assert(tonumber(string.rep('1', (intbits - 2)), 2) + 1 == 2^(intbits - 2))
-assert(tonumber('ffffFFFF', 16)+1 == 2^32)
-assert(tonumber('0ffffFFFF', 16)+1 == 2^32)
-assert(tonumber('-0ffffffFFFF', 16) - 1 == -2^40)
+assert(tonumber('ffffFFFF', 16)+1 == (1 << 32))
+assert(tonumber('0ffffFFFF', 16)+1 == (1 << 32))
+assert(tonumber('-0ffffffFFFF', 16) - 1 == -(1 << 40))
 for i = 2,36 do
-  assert(tonumber('\t10000000000\t', i) == i^10)
+  local i2 = i * i
+  local i10 = i2 * i2 * i2 * i2 * i2      -- i^10
+  assert(tonumber('\t10000000000\t', i) == i10)
 end
 
 if not _soft then
@@ -292,10 +292,10 @@ assert(tonumber('- 0xaa') == nil)
 
 assert(0x10 == 16 and 0xfff == 2^12 - 1 and 0XFB == 251)
 assert(0x0p12 == 0 and 0x.0p-3 == 0)
-assert(0xFFFFFFFF == 2^32 - 1)
+assert(0xFFFFFFFF == (1 << 32) - 1)
 assert(tonumber('+0x2') == 2)
 assert(tonumber('-0xaA') == -170)
-assert(tonumber('-0xffFFFfff') == -2^32 + 1)
+assert(tonumber('-0xffFFFfff') == -(1 << 32) + 1)
 
 -- possible confusion with decimal exponent
 assert(0E+1 == 0 and 0xE+1 == 15 and 0xe-1 == 13)

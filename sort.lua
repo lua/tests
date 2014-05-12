@@ -30,8 +30,8 @@ assert(a==1 and x==nil)
 do
   local maxI = math.maxinteger
   local minI = math.mininteger
-  local maxi = 2^31 - 1          -- maximum value for an int (usually)
-  local mini = -2^31             -- minimum value for an int (usually)
+  local maxi = (1 << 31) - 1          -- maximum value for an int (usually)
+  local mini = -(1 << 31)             -- minimum value for an int (usually)
   assert(not pcall(unpack, {}, 0, maxi))
   assert(not pcall(unpack, {}, 1, maxi))
   assert(not pcall(unpack, {}, 0, maxI))

@@ -161,7 +161,7 @@ assert(string.format("%s %.10s", m, m) == "hello hello")
 
 assert(string.format("%x", 0.3) == "0")
 assert(string.format("%02x", 0.1) == "00")
-assert(string.format("%08X", 2^32 - 1) == "FFFFFFFF")
+assert(string.format("%08X", 4294967295) == "FFFFFFFF")
 assert(string.format("%+08d", 31501) == "+0031501")
 assert(string.format("%+08d", -30927) == "-0030927")
 
@@ -182,7 +182,7 @@ do   -- assume at least 32 bits
 
   max, min = math.maxinteger, math.mininteger
   if max > 2.0^53 then  -- only for 64 bits
-    assert(string.format("%x", 2^52 - 1) == "fffffffffffff")
+    assert(string.format("%x", 2^52 // 1 - 1) == "fffffffffffff")
     assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
     assert(string.format("%d", 2^53) == "9007199254740992")
     assert(string.format("%d", -2^53) == "-9007199254740992")
@@ -436,7 +436,7 @@ function check (msg, f, ...)
 end
 
 check("string too short", string.undumpint, "\1\2\3\4", maxi)
-check("string too short", string.undumpint, "\1\2\3\4", 2^31 - 1)
+check("string too short", string.undumpint, "\1\2\3\4", (1 << 31) - 1)
 check("string too short", string.undumpint, "\1\2\3\4", 4, 2)
 check("endianness", string.undumpint, "\1\2\3\4", 1, 2, 'x')
 check("endianness", string.dumpint, -1, 2, 'x')
@@ -448,7 +448,7 @@ check("out of valid range", string.dumpint, -1, maxbytes + 1)
 
 check("string too short", string.undumpfloat, "\1\2\3\4", 2, "f")
 check("string too short", string.undumpfloat, "\1\2\3\4\5\6\7", 2, "d")
-check("string too short", string.undumpfloat, "\1\2\3\4", 2^31 - 1)
+check("string too short", string.undumpfloat, "\1\2\3\4", (1 << 31) - 1)
 
 assert(string.undumpfloat(string.dumpfloat(120.5, 'n', 'n'), 1, 'n', 'n')
    == 120.5)

@@ -80,6 +80,28 @@ tcheck(t, {n=4,2,3,3,5})
 t = pack(T.testC("copy -3 -1; gettop; return .", 2, 3, 4, 5))
 tcheck(t, {n=4,2,3,4,3})
 
+do   -- testing 'rotate'
+  local t = {10, 20, 30, 40, 50, 60}
+  for i = -6, 6 do
+    local s = string.format("rotate 2 %d; return 7", i)
+    local t1 = pack(T.testC(s, 10, 20, 30, 40, 50, 60))
+    tcheck(t1, t)
+    table.insert(t, 1, table.remove(t))
+  end
+
+  t = pack(T.testC("rotate -2 1; gettop; return .", 10, 20, 30, 40))
+  tcheck(t, {10, 20, 40, 30})
+  t = pack(T.testC("rotate -2 -1; gettop; return .", 10, 20, 30, 40))
+  tcheck(t, {10, 20, 40, 30})
+
+  -- some corner cases
+  t = pack(T.testC("rotate -1 0; gettop; return .", 10, 20, 30, 40))
+  tcheck(t, {10, 20, 30, 40})
+  t = pack(T.testC("rotate -1 1; gettop; return .", 10, 20, 30, 40))
+  tcheck(t, {10, 20, 30, 40})
+  t = pack(T.testC("rotate 5 -1; gettop; return .", 10, 20, 30, 40))
+  tcheck(t, {10, 20, 30, 40})
+end
 
 do   -- testing 'tounsigned'
   local f = function (x) return T.testC("tounsigned 2; return 1", x) end

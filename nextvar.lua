@@ -285,7 +285,7 @@ table.maxn = nil
 
 -- int overflow
 a = {}
-for i=0,50 do a[math.pow(2,i)] = true end
+for i=0,50 do a[2^i] = true end
 assert(a[#a])
 
 print('+')

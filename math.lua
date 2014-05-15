@@ -42,6 +42,12 @@ function eq (a,b,limit)
 end
 
 
+-- equality with types
+function eqT (a,b)
+  return a == b and math.type(a) == math.type(b)
+end
+
+
 -- basic float notation
 assert(0e12 == 0 and .0 == 0 and 0. == 0 and .2e2 == 20 and 2.E-1 == 0.2)
 
@@ -340,15 +346,15 @@ assert((1>=1) and not(1>=2) and (2>=1))
 assert(('a'>='a') and not('a'>='b') and ('b'>='a'))
 
 -- testing mod operator
-assert(-4%3 == 2)
-assert(4%-3 == -2)
-assert(-4.0%3 == 2.0)
-assert(4%-3.0 == -2.0)
+assert(eqT(-4 % 3, 2))
+assert(eqT(4 % -3, -2))
+assert(eqT(-4.0 % 3, 2.0))
+assert(eqT(4 % -3.0, -2.0))
 assert(math.pi - math.pi % 1 == 3)
 assert(math.pi - math.pi % 0.001 == 3.141)
 
-assert(minint % minint == 0)
-assert(maxint % maxint == 0)
+assert(eqT(minint % minint, 0))
+assert(eqT(maxint % maxint, 0))
 assert((minint + 1) % minint == minint + 1)
 assert((maxint - 1) % maxint == maxint - 1)
 assert(minint % maxint == maxint - 1)
@@ -372,10 +378,10 @@ assert(eq(math.atan(1), math.pi/4) and eq(math.acos(0), math.pi/2) and
        eq(math.asin(1), math.pi/2))
 assert(eq(math.deg(math.pi/2), 90) and eq(math.rad(90), math.pi/2))
 assert(math.abs(-10.43) == 10.43)
-assert(math.abs(maxint) + 1 == minint)
-assert(math.abs(minint) == minint)
-assert(math.abs(minint + 1) == maxint)
-assert(eq(math.atan2(1,0), math.pi/2))
+assert(eqT(math.abs(minint), minint))
+assert(eqT(math.abs(maxint), maxint))
+assert(eqT(math.abs(-maxint), maxint))
+assert(eq(math.atan(1,0), math.pi/2))
 assert(math.ceil(4.5) == 5.0)
 assert(math.floor(4.5) == 4.0)
 assert(math.fmod(10,3) == 1)
@@ -385,10 +391,7 @@ assert(eq(math.log(2, 2), 1))
 assert(eq(math.log(9, 3), 2))
 assert(eq(math.exp(0), 1))
 assert(eq(math.sin(10), math.sin(10%(2*math.pi))))
-local v,e = math.frexp(math.pi)
-assert(eq(math.ldexp(v,e), math.pi))
 
-assert(eq(math.tanh(3.5), math.sinh(3.5)/math.cosh(3.5)))
 
 assert(tonumber(' 1.3e-2 ') == 1.3e-2)
 assert(tonumber(' -1.00000000000001 ') == -1.00000000000001)
@@ -402,12 +405,10 @@ assert(8388607 + -8388607 == 0)
 
 
 do   -- testing ifloor
-  local n = math.ifloor(3.4)
-  assert(n == 3 and math.type(n) == "integer")
-  n = math.ifloor(-3.4)
-  assert(n == -4 and math.type(n) == "integer")
-  assert(math.ifloor(maxint) == maxint)
-  assert(math.ifloor(minint) == minint)
+  assert(eqT(math.ifloor(3.4), 3))
+  assert(eqT(math.ifloor(-3.4), -4))
+  assert(eqT(math.ifloor(maxint), maxint))
+  assert(eqT(math.ifloor(minint), minint))
   assert(math.ifloor(1e50) == nil)
   assert(math.ifloor(-1e50) == nil)
   assert(math.ifloor(0/0) == nil)
@@ -423,29 +424,32 @@ for i = -6, 6 do
       local mf = math.fmod(i + 0.0, j)
       assert(mi == mf)
       assert(math.type(mi) == 'integer' and math.type(mf) == 'float')
+      if (i >= 0 and j >= 0) or (i <= 0 and j <= 0) or mi == 0 then
+        assert(eqT(mi, i % j))
+      end
     end
   end
 end
-assert(math.fmod(minint, minint) == 0)
-assert(math.fmod(maxint, maxint) == 0)
-assert(math.fmod(minint + 1, minint) == minint + 1)
-assert(math.fmod(maxint - 1, maxint) == maxint - 1)
+assert(eqT(math.fmod(minint, minint), 0))
+assert(eqT(math.fmod(maxint, maxint), 0))
+assert(eqT(math.fmod(minint + 1, minint), minint + 1))
+assert(eqT(math.fmod(maxint - 1, maxint), maxint - 1))
 
 assert(not pcall(math.fmod, 3, 0))
 
 
 do    -- testing max/min
-  assert(math.max(3) == 3)
-  assert(math.max(3, 5, 9, 1) == 9)
+  assert(eqT(math.max(3), 3))
+  assert(eqT(math.max(3, 5, 9, 1), 9))
   assert(math.max(maxint, 10e60) == 10e60)
-  assert(math.max(minint, minint + 1) > minint)
-  assert(math.min(3) == 3)
-  assert(math.min(3, 5, 9, 1) == 1)
+  assert(eqT(math.max(minint, minint + 1), minint + 1))
+  assert(eqT(math.min(3), 3))
+  assert(eqT(math.min(3, 5, 9, 1), 1))
   assert(math.min(3.2, 5.9, -9.2, 1.1) == -9.2)
   assert(math.min(1.9, 1.7, 1.72) == 1.7)
   assert(math.min(-10e60, minint) == -10e60)
-  assert(math.min(maxint, maxint - 1) < maxint)
-  assert(math.min(maxint - 2, maxint, maxint - 1) < maxint - 1)
+  assert(eqT(math.min(maxint, maxint - 1), maxint - 1))
+  assert(eqT(math.min(maxint - 2, maxint, maxint - 1), maxint - 2))
 end
 -- testing implicit convertions
 
@@ -461,6 +465,8 @@ do
   assert(1/mz < 0 and 0 < 1/z)
   local a = {[mz] = 1}
   assert(a[z] == 1 and a[mz] == 1)
+  a[z] = 2
+  assert(a[z] == 2 and a[mz] == 2)
   local inf = math.huge * 2 + 1
   mz, z = -1/inf, 1/inf
   assert(mz == z)
@@ -475,12 +481,12 @@ do
   local NaN1 = 0/0
   assert(NaN ~= NaN1 and not (NaN <= NaN1) and not (NaN1 <= NaN))
   local a = {}
-  assert(not pcall(function () a[NaN] = 1 end))
+  assert(not pcall(rawset, a, NaN, 1))
   assert(a[NaN] == nil)
   a[1] = 1
-  assert(not pcall(function () a[NaN] = 1 end))
+  assert(not pcall(rawset, a, NaN, 1))
   assert(a[NaN] == nil)
-  -- string with same binary representation as 0.0 (may create problems
+  -- strings with same binary representation as 0.0 (might create problems
   -- for constant manipulation in the pre-compiler)
   local a1, a2, a3, a4, a5 = 0, 0, "\0\0\0\0\0\0\0\0", 0, "\0\0\0\0\0\0\0\0"
   assert(a1 == a2 and a2 == a4 and a1 ~= a3)
@@ -572,11 +578,14 @@ for i=1,100 do
   assert(math.random(minint, -1) < 0)
 end
 
-assert(not pcall(math.random, 1, 2, 3))
+assert(not pcall(math.random, 1, 2, 3))    -- too many arguments
+
+-- empty interval
 assert(not pcall(math.random, minint + 1, minint))
 assert(not pcall(math.random, maxint, maxint - 1))
 assert(not pcall(math.random, maxint, minint))
 
+-- interval too large
 assert(not pcall(math.random, minint, 0))
 assert(not pcall(math.random, -1, maxint))
 assert(not pcall(math.random, minint // 2, maxint // 2 + 1))

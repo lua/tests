@@ -49,6 +49,7 @@ print("current path:\n****" .. package.path .. "****\n")
 
 
 local c = os.clock()
+local walltime = os.time()
 
 local collectgarbage = collectgarbage
 
@@ -195,8 +196,8 @@ _G.showmem = showmem
 
 end   --)
 
-local _G, showmem, print, format, clock, assert, open =
-      _G, showmem, print, string.format, os.clock, assert, io.open
+local _G, showmem, print, format, clock, time, assert, open =
+      _G, showmem, print, string.format, os.clock, os.time, assert, io.open
 
 -- file with time of last performed test
 local fname = T and "time-debug.txt" or "time.txt"
@@ -229,19 +230,20 @@ collectgarbage()
 collectgarbage()
 collectgarbage();showmem()
 
-local time = clock() - c
+local clocktime = clock() - c
+walltime = time() - walltime
 
-print(format("\n\ntotal time: %.2f\n", time))
+print(format("\n\ntotal time: %.2fs (wall time: %ds)\n", clocktime, walltime))
 
 if not usertests then
-  lasttime = lasttime or time    -- if there is no last time, ignore difference
+  lasttime = lasttime or clocktime    -- if no last time, ignore difference
   -- check whether current test time differs more than 5% from last time
-  local diff = (time - lasttime) / time
+  local diff = (clocktime - lasttime) / clocktime
   local tolerance = 0.05    -- 5%
   if (diff >= tolerance or diff <= -tolerance) then
     print(format("WARNING: time difference from previous test: %+.1f%%",
                   diff * 100))
   end
-  assert(open(fname, "w")):write(time):close()
+  assert(open(fname, "w")):write(clocktime):close()
 end
 

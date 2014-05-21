@@ -98,19 +98,62 @@ io.close()
 local largeint = math.maxinteger
 f = assert(io.open(file, "w"))
 f:write(largeint, '\n')
-f:write(0xABCp-3, '\n')
+f:write(string.format("0X%x\n", largeint))
+f:write("0xABCp-3", '\n')
 f:write(0, '\n')
 f:write(-largeint, '\n')
-f:write(-0xABCp-3, '\n')
+f:write(string.format("0x%X\n", -largeint))
+f:write("-0xABCp-3", '\n')
 assert(f:close())
 f = assert(io.open(file, "r"))
-assert(f:read("i") == largeint)
+assert(f:read("n") == largeint)
+assert(f:read("n") == largeint)
 assert(f:read("n") == 0xABCp-3)
-assert(f:read("i") == 0)
-assert(f:read("*i") == -largeint)            -- test old format (with '*')
+assert(f:read("n") == 0)
+assert(f:read("*n") == -largeint)            -- test old format (with '*')
+assert(f:read("n") == -largeint)
 assert(f:read("*n") == -0xABCp-3)            -- test old format (with '*')
 assert(f:close())
 assert(os.remove(file))
+
+
+f = assert(io.open(file, "w"))
+-- test number termination
+f:write[[
+-12.3-	-0xffff+  .3|5.E-3X  +234e+13E 0xDEADBEEFDEADBEEFx
+0x1.13Ap+3e
+]]
+-- very long number
+f:write("1"); for i = 1, 1000 do f:write("0") end;  f:write("\n")
+-- invalid sequences (read and discard valid prefixes)
+f:write[[
+.e+	0.e;	--;  0xX;
+]]
+assert(f:close())
+f = assert(io.open(file, "r"))
+assert(f:read("n") == -12.3); assert(f:read(1) == "-")
+assert(f:read("n") == -0xffff); assert(f:read(2) == "+ ")
+assert(f:read("n") == 0.3); assert(f:read(1) == "|")
+assert(f:read("n") == 5e-3); assert(f:read(1) == "X")
+assert(f:read("n") == 234e13); assert(f:read(1) == "E")
+assert(f:read("n") == 0Xdeadbeefdeadbeef); assert(f:read(2) == "x\n")
+assert(f:read("n") == 0x1.13aP3); assert(f:read(1) == "e")
+
+do   -- very long number will be truncated, but read
+  assert(f:read("n"))
+  local s = f:read("L")   -- read rest of line
+  assert(string.find(s, "^00*\n$"))  -- lots of 0's left
+end
+
+assert(not f:read("n")); assert(f:read(2) == "e+")
+assert(not f:read("n")); assert(f:read(1) == ";")
+assert(not f:read("n")); assert(f:read(2) == "-;")
+assert(not f:read("n")); assert(f:read(1) == "X")
+assert(not f:read("n")); assert(f:read(1) == ";")
+assert(not f:read("n")); assert(not f:read(0))   -- end of file
+assert(f:close())
+assert(os.remove(file))
+
 
 -- test line generators
 assert(not pcall(io.lines, "non-existent-file"))
@@ -158,7 +201,7 @@ assert(io.read(string.len"fourth_line") == "fourth_line")
 assert(io.input():seek("cur", -string.len"fourth_line"))
 assert(io.read() == "fourth_line")
 assert(io.read() == "")  -- empty line
-assert(io.read('i') == 3450)
+assert(io.read('n') == 3450)
 assert(io.read(1) == '\n')
 assert(io.read(0) == nil)  -- end of file
 assert(io.read(1) == nil)  -- end of file
@@ -287,7 +330,7 @@ end
 collectgarbage()   -- to close file in previous iteration
 
 io.output(file); io.write"00\n10\n20\n30\n40\n":close()
-for a, b in io.lines(file, "i", "n") do
+for a, b in io.lines(file, "n", "n") do
   if a == 40 then assert(b == nil)
   else assert(a == b - 10)
   end

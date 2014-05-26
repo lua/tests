@@ -3,7 +3,7 @@ print("testing numbers and math lib")
 local minint = math.mininteger
 local maxint = math.maxinteger
 
-local intbits = math.ifloor(math.log(maxint, 2) + 0.5) + 1
+local intbits = math.floor(math.log(maxint, 2) + 0.5) + 1
 assert((1 << intbits) == 0)
 
 assert(minint == 1 << (intbits - 1))
@@ -18,6 +18,7 @@ do
     floatbits = floatbits + 1
   end
 end
+
 
 do
   local x = 2.0^floatbits
@@ -102,7 +103,7 @@ assert(maxint * maxint * maxint == maxint)
 for _, i in pairs{-16, -15, -3, -2, -1, 0, 1, 2, 3, 15} do
   for _, j in pairs{-16, -15, -3, -2, -1, 1, 2, 3, 15} do
     local iq, fq = i // j, i / j
-    assert(iq == math.floor(fq) and iq == math.ifloor(fq))
+    assert(iq == math.floor(fq))
   end
 end
 
@@ -158,22 +159,29 @@ assert(not pcall(f2i, -math.huge))    -- -inf
 assert(not pcall(f2i, 0/0))           -- NaN
 
 if floatbits < intbits then
-  -- overflow tests when float cannot represent all integers
+  -- conversion tests when float cannot represent all integers
   assert(maxint + 1.0 == maxint)
   assert(minint - 1.0 == minint)
   assert(not pcall(f2i, maxint + 0.0))
-  assert(f2i(2.0^(intbits - 2)) == 2^(intbits - 2))
-  assert(f2i(-2.0^(intbits - 2)) == -2^(intbits - 2))
-  assert((2.0^(floatbits - 1) + 1.0) // 1 == 2^(floatbits - 1) + 1)
+  assert(f2i(2.0^(intbits - 2)) == 1 << (intbits - 2))
+  assert(f2i(-2.0^(intbits - 2)) == -(1 << (intbits - 2)))
+  assert((2.0^(floatbits - 1) + 1.0) // 1 == (1 << (floatbits - 1)) + 1)
+  -- maximum integer representable as a float
+  local mf = maxint - (1 << (floatbits - intbits)) + 1
+  assert(f2i(mf + 0.0) == mf)  -- OK up to here
+  mf = mf + 1
+  assert(f2i(mf + 0.0) ~= mf)   -- no more representable
 else
-  -- overflow tests when float can represent all integers
+  -- conversion tests when float can represent all integers
   assert(maxint + 1.0 > maxint)
   assert(minint - 1.0 < minint)
   assert(f2i(maxint + 0.0) == maxint)
   assert(not pcall(f2i, maxint + 1.0))
-  assert(f2i(minint + 0.0) == minint)
   assert(not pcall(f2i, minint - 1.0))
 end
+
+-- 'minint' should be representable as a float no matter the precision
+assert(f2i(minint + 0.0) == minint)
 
 
 -- testing numeric strings
@@ -382,8 +390,6 @@ assert(eqT(math.abs(minint), minint))
 assert(eqT(math.abs(maxint), maxint))
 assert(eqT(math.abs(-maxint), maxint))
 assert(eq(math.atan(1,0), math.pi/2))
-assert(math.ceil(4.5) == 5.0)
-assert(math.floor(4.5) == 4.0)
 assert(math.fmod(10,3) == 1)
 assert(eq(math.sqrt(10)^2, 10))
 assert(eq(math.log(2, 10), math.log(2)/math.log(10)))
@@ -404,15 +410,29 @@ assert(8388607 + -8388607 == 0)
 
 
 
-do   -- testing ifloor
-  assert(eqT(math.ifloor(3.4), 3))
-  assert(eqT(math.ifloor(-3.4), -4))
-  assert(eqT(math.ifloor(maxint), maxint))
-  assert(eqT(math.ifloor(minint), minint))
-  assert(math.ifloor(1e50) == nil)
-  assert(math.ifloor(-1e50) == nil)
-  assert(math.ifloor(0/0) == nil)
-  assert(not pcall(math.ifloor, {}))
+do   -- testing floor & ceil
+  assert(eqT(math.floor(3.4), 3))
+  assert(eqT(math.ceil(3.4), 4))
+  assert(eqT(math.floor(-3.4), -4))
+  assert(eqT(math.ceil(-3.4), -3))
+  assert(eqT(math.floor(maxint), maxint))
+  assert(eqT(math.ceil(maxint), maxint))
+  assert(eqT(math.floor(minint), minint))
+  assert(eqT(math.floor(minint + 0.0), minint))
+  assert(eqT(math.ceil(minint), minint))
+  assert(eqT(math.ceil(minint + 0.0), minint))
+  assert(math.floor(1e50) == 1e50)
+  assert(math.ceil(1e50) == 1e50)
+  assert(math.floor(-1e50) == -1e50)
+  assert(math.ceil(-1e50) == -1e50)
+  for _, p in pairs{31,32,63,64} do
+    assert(math.floor(2^p) == 2^p)
+    assert(math.floor(2^p + 0.5) == 2^p)
+    assert(math.ceil(2^p) == 2^p)
+    assert(math.ceil(2^p - 0.5) == 2^p)
+  end
+  assert(not pcall(math.floor, {}))
+  assert(not pcall(math.ceil, print))
 end
 
 

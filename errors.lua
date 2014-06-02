@@ -364,10 +364,35 @@ if not _soft then
 end
 
 
--- non string messages
-function f() error{msg='x'} end
-res, msg = xpcall(f, function (r) return {msg=r.msg..'y'} end)
-assert(msg.msg == 'xy')
+do
+  -- non string messages
+  local t = {}
+  local res, msg = pcall(function () error(t) end)
+  assert(not res and msg == t)
+
+  res, msg = pcall(function () error(nil) end)
+  assert(not res and msg == nil)
+
+  local function f() error{msg='x'} end
+  res, msg = xpcall(f, function (r) return {msg=r.msg..'y'} end)
+  assert(msg.msg == 'xy')
+ 
+  -- 'assert' with no message
+  res, msg = pcall(function () assert(false) end)
+  local line = string.match(msg, "%w+%.lua:(%d+): assertion failed!$")
+  assert(tonumber(line) == debug.getinfo(1, "l").currentline - 2)
+
+  -- 'assert' with non-string messages
+  res, msg = pcall(function () assert(false, t) end)
+  assert(not res and msg == t)
+
+  res, msg = pcall(function () assert(nil, nil) end)
+  assert(not res and msg == nil)
+
+  -- 'assert' without arguments (behavior not specified, but must give
+  -- some kind of error)
+  assert(not pcall(assert))
+end
 
 -- xpcall with arguments
 a, b, c = xpcall(string.find, error, "alo", "al")

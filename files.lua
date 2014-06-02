@@ -124,8 +124,8 @@ f:write[[
 0x1.13Ap+3e
 ]]
 -- very long number
-f:write("1"); for i = 1, 1000 do f:write("0") end;  f:write("\n")
--- invalid sequences (read and discard valid prefixes)
+f:write("1234"); for i = 1, 1000 do f:write("0") end;  f:write("\n")
+-- invalid sequences (must read and discard valid prefixes)
 f:write[[
 .e+	0.e;	--;  0xX;
 ]]
@@ -139,8 +139,8 @@ assert(f:read("n") == 234e13); assert(f:read(1) == "E")
 assert(f:read("n") == 0Xdeadbeefdeadbeef); assert(f:read(2) == "x\n")
 assert(f:read("n") == 0x1.13aP3); assert(f:read(1) == "e")
 
-do   -- very long number will be truncated, but read
-  assert(f:read("n"))
+do   -- attempt to read too long number
+  assert(f:read("n") == nil)  -- fails
   local s = f:read("L")   -- read rest of line
   assert(string.find(s, "^00*\n$"))  -- lots of 0's left
 end

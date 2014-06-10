@@ -69,7 +69,7 @@ do
   assert(t[mz] == t[0] and t[-0] == t[0])
 end
 
-do   -- extra tests for 'modf' (problematic in C because of extra return)
+do   -- tests for 'modf'
   local a,b = math.modf(3.5)
   assert(a == 3.0 and b == 0.5)
   a,b = math.modf(-2.5)
@@ -84,6 +84,10 @@ do   -- extra tests for 'modf' (problematic in C because of extra return)
   assert(a == 1/0 and b == 0.0)
   a,b = math.modf(0/0)   -- NaN
   assert(a ~= a and b ~= b)
+  a,b = math.modf(3)  -- integer argument
+  assert(eqT(a, 3) and eqT(b, 0.0))
+  a,b = math.modf(minint)
+  assert(eqT(a, minint) and eqT(b, 0.0))
 end
 
 assert(math.huge > 10e30)

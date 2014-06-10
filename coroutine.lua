@@ -613,21 +613,21 @@ local a = {apico(
   pcallk 1 0 2;
   invalid command (should not arrive here)
 ]],
-[[getctx; gettop; return .]],
+[[gettop; return .]],
 "stackmark",
 error
 )()}
-assert(#a == 6 and
+assert(#a == 4 and
        a[3] == "stackmark" and
        a[4] == "errorcode" and
-       a[5] == "ERRRUN" and
-       a[6] == 2)       -- 'ctx' to pcallk
+       _G.status == "ERRRUN" and
+       _G.ctx == 2)       -- 'ctx' to pcallk
 
 local co = apico(
   "pushvalue 2; pushnum 10; pcallk 1 2 3; invalid command;",
   coroutine.yield,
-  "getctx; pushvalue 2; pushstring a; pcallk 1 0 4; invalid command",
-  "getctx; gettop; return .")
+  "getglobal status; getglobal ctx; pushvalue 2; pushstring a; pcallk 1 0 4; invalid command",
+  "getglobal status; getglobal ctx; gettop; return .")
 
 assert(co() == 10)
 assert(co(20, 30) == 'a')
@@ -653,17 +653,18 @@ assert(co(23,16) == 10)
 f = T.makeCfunc([[
         pushnum 102
 	yieldk	1 U2
-	return 2
+	cannot be here!
 ]],
-[[
-	pushnum 23   # continuation
+[[      # continuation
+	pushvalue U3   # accessing upvalues inside a continuation
+        pushvalue U4
 	gettop
 	return .
-]])
+]], 23, "huu")
 
 x = coroutine.wrap(f)
 assert(x() == 102)
-assert(x() == 23)
+eqtab({x()}, {23, "huu"})
 
 
 f = T.makeCfunc[[pushstring 'a'; pushnum 102; yield 2; ]]
@@ -712,40 +713,42 @@ assert(#a == 3 and a[1] == a[2] and a[2] == a[3] and a[3] == 34)
 -- testing yields with continuations
 
 co = coroutine.wrap(function (...) return
-       T.testC([[
-          getctx
-          yieldk 3 2
-          nonexec error
+       T.testC([[ # initial function
+          yieldk 1 2
+          cannot be here!
        ]],
-       [[  # continuation
-         getctx
-         yieldk 2 3 
+       [[  # 1st continuation
+         yieldk 0 3 
+         cannot be here!
        ]],
-       [[  # continuation
-         getctx
-         yieldk 2 4 
+       [[  # 2nd continuation
+         yieldk 0 4 
+         cannot be here!
        ]],
-       [[  # continuation
-          pushvalue 6; pushnum 10; pushnum 20;
-          pcall 2 0     # call should throw an error and execution continues
+       [[  # 3th continuation
+          pushvalue 6   # function which is last arg. to 'testC' here
+          pushnum 10; pushnum 20;
+          pcall 2 0     # call should throw an error and return to next line
           pop 1		# remove error message
           pushvalue 6
-          getctx
+          getglobal status; getglobal ctx
           pcallk 2 2 5  # call should throw an error and jump to continuation
           cannot be here!
        ]],
-       [[  # continuation
+       [[  # 4th (and last) continuation
          gettop
          return .
        ]],
-       function (a,b)  x=a; y=b; error("errmsg") end,
+       -- function called by 3th continuation
+       function (a,b) x=a; y=b; error("errmsg") end,
        ...
 )
 end)
 
-local a = {co(3,4,6)}; assert(a[1] == 6 and a[2] == "OK" and a[3] == 0)
-a = {co()}; assert(a[1] == "YIELD" and a[2] == 2)
-a = {co()}; assert(a[1] == "YIELD" and a[2] == 3)
+local a = {co(3,4,6)}
+assert(a[1] == 6 and a[2] == nil)
+a = {co()}; assert(a[1] == nil and _G.status == "YIELD" and _G.ctx == 2)
+a = {co()}; assert(a[1] == nil and _G.status == "YIELD" and _G.ctx == 3)
 a = {co(7,8)};
 -- original arguments
 assert(type(a[1]) == 'string' and type(a[2]) == 'string' and
@@ -761,13 +764,6 @@ assert(a[11]:find("errmsg") and #a == 11)
 assert(x == "YIELD" and y == 4)
 
 assert(not pcall(co))   -- coroutine should be dead
-
--- testing ctx
-
-a,b = T.testC(
-       [[ pushstring print; pcallk 0 0 12    # error
-          getctx; return 2 ]])
-assert(a == "OK" and b == 0)   -- no ctx outside continuations
 
 
 -- bug in nCcalls

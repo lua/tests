@@ -84,8 +84,8 @@ RUN("env LUA_INIT= LUA_CPATH_5_3=yacc LUA_CPATH=x lua %s > %s", prog, out)
 checkout("yacc\n")
 
 prepfile("print(X)")
-RUN('env LUA_INIT="X=3" lua %s > %s', prog, out)
-checkout("3\n")
+RUN('env LUA_INIT="X=tonumber(arg[1])" lua %s 3.2 > %s', prog, out)
+checkout("3.2\n")
 
 prepfile("print(X)")
 RUN('env LUA_INIT_5_3="X=10" LUA_INIT="X=3" lua %s > %s', prog, out)
@@ -135,7 +135,7 @@ a = string.format(a, progname)
 prepfile(a)
 RUN('lua "-e " -- %s a b c', prog)
 
-prepfile"assert(arg==nil)"
+prepfile"assert(arg)"
 prepfile("assert(arg)", otherprog)
 RUN('env LUA_PATH="?;;" lua -l%s - < %s', prog, otherprog)
 

@@ -216,10 +216,14 @@ test()  -- retest comparisons, now using both `lt' and `le'
 
 -- test `partial order'
 
-local function Set(x)
+local function rawSet(x)
   local y = {}
   for _,k in pairs(x) do y[k] = 1 end
-  return setmetatable(y, t)
+  return y
+end
+
+local function Set(x)
+  return setmetatable(rawSet(x), t)
 end
 
 t.__lt = function (a,b)
@@ -261,10 +265,36 @@ local s = Set{1,3,5}
 assert(s == Set{3,5,1})
 assert(not rawequal(s, Set{3,5,1}))
 assert(rawequal(s, s))
-assert(Set{1,3,5,1} == Set{3,5,1})
+assert(Set{1,3,5,1} == rawSet{3,5,1})
+assert(rawSet{1,3,5,1} == Set{3,5,1})
 assert(Set{1,3,5} ~= Set{3,5,1,6})
+
+-- '__eq' is not used for table accesses
 t[Set{1,3,5}] = 1
-assert(t[Set{1,3,5}] == nil)   -- `__eq' is not valid for table accesses
+assert(t[Set{1,3,5}] == nil)
+
+
+if not T then
+  (Message or print)('\n >>> testC not active: zkipping tests for \z
+userdata equality <<<\n')
+else
+  local u1 = T.newuserdata(0)
+  local u2 = T.newuserdata(0)
+  local u3 = T.newuserdata(0)
+  assert(u1 ~= u2 and u1 ~= u3)
+  debug.setuservalue(u1, 1);
+  debug.setuservalue(u2, 2);
+  debug.setuservalue(u3, 1);
+  debug.setmetatable(u1, {__eq = function (a, b)
+    return debug.getuservalue(a) == debug.getuservalue(b)
+  end})
+  debug.setmetatable(u2, {__eq = function (a, b)
+    return true
+  end})
+  assert(u1 == u3 and u3 == u1 and u1 ~= u2)
+  assert(u2 == u1 and u2 == u3 and u3 == u2)
+  assert(u2 ~= {})   -- different types cannot be equal
+end
 
 
 t.__concat = function (a,b,c)

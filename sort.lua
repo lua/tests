@@ -5,7 +5,7 @@ print "testing unpack"
 local unpack = table.unpack
 
 local x,y,z,a,n
-a = {}; lim = 2000
+a = {}; lim = _soft and 200 or 2000
 for i=1, lim do a[i]=i end
 assert(select(lim, unpack(a)) == lim and select('#', unpack(a)) == lim)
 x = unpack(a)

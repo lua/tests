@@ -203,7 +203,7 @@ foo()
 foo(print)
 foo(200, 3, 4)
 local a = {}
-for i = 1,1000 do a[i] = i end
+for i = 1, (_soft and 100 or 1000) do a[i] = i end
 foo(table.unpack(a))
 a = nil
 
@@ -435,8 +435,7 @@ h(false)
 debug.sethook()
 assert(b == 2)   -- two tail calls
 
-lim = 30000
-if _soft then limit = 3000 end
+lim = _soft and 3000 or 30000
 local function foo (x)
   if x==0 then
     assert(debug.getinfo(2).what == "main")

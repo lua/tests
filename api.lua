@@ -346,17 +346,18 @@ if not _soft then
   print'+'
 end
 
-local prog = {"checkstack 30000 msg", "newtable"}
-for i = 1,12000 do
+local lim = _soft and 500 or 12000
+local prog = {"checkstack " .. (lim * 2 + 100) .. "msg", "newtable"}
+for i = 1,lim do
   prog[#prog + 1] = "pushnum " .. i
   prog[#prog + 1] = "pushnum " .. i * 10
 end
 
 prog[#prog + 1] = "rawgeti R 2"   -- get global table in registry
-prog[#prog + 1] = "insert " .. -(2*12000 + 2)
+prog[#prog + 1] = "insert " .. -(2*lim + 2)
 
-for i = 1,12000 do
-  prog[#prog + 1] = "settable " .. -(2*(12000 - i + 1) + 1)
+for i = 1,lim do
+  prog[#prog + 1] = "settable " .. -(2*(lim - i + 1) + 1)
 end
 
 prog[#prog + 1] = "return 2"
@@ -364,7 +365,7 @@ prog[#prog + 1] = "return 2"
 prog = table.concat(prog, ";")
 local g, t = T.testC(prog)
 assert(g == _G)
-for i = 1,12000 do assert(t[i] == i*10); t[i] = nil end
+for i = 1,lim do assert(t[i] == i*10); t[i] = nil end
 assert(next(t) == nil)
 prog, g, t = nil
 

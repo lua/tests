@@ -108,7 +108,6 @@ for i=0,30 do assert(string.len(string.rep('a', i)) == i) end
 
 assert(type(tostring(nil)) == 'string')
 assert(type(tostring(12)) == 'string')
-assert('' .. 12 == '12' and 12.0 .. '' == '12.0')
 assert(string.find(tostring{}, 'table:'))
 assert(string.find(tostring(print), 'function:'))
 assert(#tostring('\0') == 1)
@@ -116,9 +115,7 @@ assert(tostring(true) == "true")
 assert(tostring(false) == "false")
 assert(tostring(-1203) == "-1203")
 assert(tostring(1203.125) == "1203.125")
-assert(tostring(0.0) == "0.0")
 assert(tostring(-0.5) == "-0.5")
-assert(tostring(-1203 + 0.0) == "-1203.0")
 assert(tostring(-32767) == "-32767")
 if 2147483647 > 0 then   -- no overflow? (32 bits)
   assert(tostring(-2147483647) == "-2147483647")
@@ -127,6 +124,16 @@ if 4611686018427387904 > 0 then   -- no overflow? (64 bits)
   assert(tostring(4611686018427387904) == "4611686018427387904")
   assert(tostring(-4611686018427387904) == "-4611686018427387904")
 end
+
+if tostring(0.0) == "0.0" then   -- "standard" coercion float->string
+  assert('' .. 12 == '12' and 12.0 .. '' == '12.0')
+  assert(tostring(-1203 + 0.0) == "-1203.0")
+else   -- compatible coercion
+  assert(tostring(0.0) == "0")
+  assert('' .. 12 == '12' and 12.0 .. '' == '12')
+  assert(tostring(-1203 + 0.0) == "-1203")
+end
+
 
 x = '"ílo"\n\\'
 assert(string.format('%q%s', x, x) == '"\\"ílo\\"\\\n\\\\""ílo"\n\\')

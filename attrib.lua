@@ -229,7 +229,7 @@ else
   assert(a == 25 and b == 15)
 
   f = assert(package.loadlib(D"lib1.so", p.."anotherfunc"))
-  assert(f(10, 20) == "10.020.0\n")
+  assert(f(10, 20) == "10%20\n")
 
   -- check error messages
   local f, err, when = package.loadlib(D"lib1.so", p.."xuxu")

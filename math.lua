@@ -437,6 +437,18 @@ do   -- testing floor & ceil
   end
   assert(not pcall(math.floor, {}))
   assert(not pcall(math.ceil, print))
+  assert(eqT(math.ifloor(minint), minint))
+  assert(eqT(math.ifloor(maxint), maxint))
+  assert(eqT(math.ifloor(minint + 0.0), minint))
+  assert(math.ifloor(0.0 - minint) == nil)
+  assert(math.ifloor(math.pi) == 3)
+  assert(math.ifloor(-math.pi) == -4)
+  assert(math.floor(math.huge) == math.huge)
+  assert(math.ceil(math.huge) == math.huge)
+  assert(math.ifloor(math.huge) == nil)
+  assert(math.floor(-math.huge) == -math.huge)
+  assert(math.ceil(-math.huge) == -math.huge)
+  assert(math.ifloor(-math.huge) == nil)
 end
 
 

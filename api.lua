@@ -104,9 +104,15 @@ do   -- testing 'rotate'
 end
 
 do   -- testing 'tounsigned'
+  local n = debug.Csize'I' * debug.Csize'b'
   local f = function (x) return T.testC("tounsigned 2; return 1", x) end
   assert(f(-3) == -3)
   assert(f(-3.0) == -3)
+  assert(f(2^n) == 0)
+  assert(f(-2^n) == 0)
+  assert(f(2^n + 2^(n - 1)) == (1 << (n - 1)))
+  assert(f(-10 * 2^n + 2^(n - 3)) == (1 << (n - 3)))
+  assert(f(10 * 2^n - 2^(n - 2)) == -(1 << (n - 2)))
   assert(f(2.0^100) == 0)
   assert(f(2.0^20 + 1) == 2^20 + 1)
 end

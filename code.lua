@@ -148,14 +148,14 @@ end
 checkK(function () return 3^-1 end, 1/3)
 checkK(function () return (1 + 1)^(50 + 50) end, 2^100)
 checkK(function () return (-2)^(31 - 2) end, -0x20000000 + 0.0)
-checkK(function () return (-3^0 + 5) // 3.2 end, 1)
+checkK(function () return (-3^0 + 5) // 3.0 end, 1)
 checkK(function () return -3 / 0 end, -1/0)
 checkK(function () return -3 % 5 end, 2)
 checkK(function () return -((2.0^8 + -(-1)) % 8)/2 * 4 - 3 end, -5.0)
 checkK(function () return -((2^8 + -(-1)) % 8)//2 * 4 - 3 end, -7)
-checkK(function () return 0xF0.0 | 0xCC.3 ~ 0xAA & 0xFD end, 0xF4)
+checkK(function () return 0xF0.0 | 0xCC.0 ~ 0xAA & 0xFD end, 0xF4)
 checkK(function () return ~(~0xFF0 | 0xFF0) end, 0)
-checkK(function () return ~~-100023.8 end, -100024)
+checkK(function () return ~~-100024.0 end, -100024)
 checkK(function () return ((100 << 6) << -4) >> 2 end, 100)
 
 -- bug in constant folding for 5.1

@@ -129,8 +129,6 @@ assert(maxint + 0.0 == 2.0^(intbits - 1) - 1.0)
 assert(minint + 0.0 == minint)
 assert(minint + 0.0 == -2.0^(intbits - 1))
 
-assert(math.pi // 1 == 3)
-assert(-math.pi // 1 == -4)
 
 assert(maxint // maxint == 1)
 assert(maxint // 1 == maxint)
@@ -437,18 +435,24 @@ do   -- testing floor & ceil
   end
   assert(not pcall(math.floor, {}))
   assert(not pcall(math.ceil, print))
-  assert(eqT(math.ifloor(minint), minint))
-  assert(eqT(math.ifloor(maxint), maxint))
-  assert(eqT(math.ifloor(minint + 0.0), minint))
-  assert(math.ifloor(0.0 - minint) == nil)
-  assert(math.ifloor(math.pi) == 3)
-  assert(math.ifloor(-math.pi) == -4)
+  assert(eqT(math.tointeger(minint), minint))
+  assert(eqT(math.tointeger(minint .. ""), minint))
+  assert(eqT(math.tointeger(maxint), maxint))
+  assert(eqT(math.tointeger(maxint .. ""), maxint))
+  assert(eqT(math.tointeger(minint + 0.0), minint))
+  assert(math.tointeger(0.0 - minint) == nil)
+  assert(math.tointeger(math.pi) == nil)
+  assert(math.tointeger(-math.pi) == nil)
   assert(math.floor(math.huge) == math.huge)
   assert(math.ceil(math.huge) == math.huge)
-  assert(math.ifloor(math.huge) == nil)
+  assert(math.tointeger(math.huge) == nil)
   assert(math.floor(-math.huge) == -math.huge)
   assert(math.ceil(-math.huge) == -math.huge)
-  assert(math.ifloor(-math.huge) == nil)
+  assert(math.tointeger(-math.huge) == nil)
+  assert(math.tointeger("34.0") == 34)
+  assert(math.tointeger("34.3") == nil)
+  assert(math.tointeger({}) == nil)
+  assert(math.tointeger(0/0) == nil)    -- NaN
 end
 
 

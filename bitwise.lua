@@ -24,7 +24,7 @@ assert(a >> 4 == ~a)
 a = 0xF0; b = 0xCC; c = 0xAA; d = 0xFD
 assert(a | b ~ c & d == 0xF4)
 
-a = 0xF0.3; b = 0xCC.23; c = 0xAA.1; d = 0xFD.4
+a = 0xF0.0; b = 0xCC.0; c = "0xAA.0"; d = "0xFD.0"
 assert(a | b ~ c & d == 0xF4)
 
 a = 0xF0000000; b = 0xCC000000;
@@ -316,15 +316,15 @@ assert(bit32.replace(-1, 0, 1, 2) == (1 << 32) - 7)
 
 -- testing conversion of floats
 
-assert(bit32.bor(3.9) == 3)
-assert(bit32.bor(-3.9) == 0xfffffffc)
+assert(bit32.bor(3.0) == 3)
+assert(bit32.bor(-4.0) == 0xfffffffc)
 
 -- large floats and large-enough integers?
 if 2.0^50 < 2.0^50 + 1.0 and 2.0^50 < (-1 >> 1) then
-  assert(bit32.bor(2.0^32 - 4.9) == 0xfffffffb)
-  assert(bit32.bor(-2.0^32 - 5.8) == 0xfffffffa)
-  assert(bit32.bor(2.0^48 - 4.5) == 0xfffffffb)
-  assert(bit32.bor(-2.0^48 - 5.5) == 0xfffffffa)
+  assert(bit32.bor(2.0^32 - 5.0) == 0xfffffffb)
+  assert(bit32.bor(-2.0^32 - 6.0) == 0xfffffffa)
+  assert(bit32.bor(2.0^48 - 5.0) == 0xfffffffb)
+  assert(bit32.bor(-2.0^48 - 6.0) == 0xfffffffa)
 end
 
 print'OK'

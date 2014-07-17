@@ -166,8 +166,8 @@ local m = setmetatable({}, {__tostring = function () return "hello" end})
 assert(string.format("%s %.10s", m, m) == "hello hello")
 
 
-assert(string.format("%x", 0.3) == "0")
-assert(string.format("%02x", 0.1) == "00")
+assert(string.format("%x", 0.0) == "0")
+assert(string.format("%02x", 0.0) == "00")
 assert(string.format("%08X", 4294967295) == "FFFFFFFF")
 assert(string.format("%+08d", 31501) == "+0031501")
 assert(string.format("%+08d", -30927) == "-0030927")

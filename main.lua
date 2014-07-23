@@ -255,6 +255,6 @@ RUN("lua -v")
 NoRunMsg("lua -h")
 NoRunMsg("lua -e")
 NoRunMsg("lua -e a")
-NoRunMsg("lua -f")
+NoRunMsg("lua -l")
 
 print("OK")

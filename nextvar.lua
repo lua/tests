@@ -586,15 +586,14 @@ end
 a.n = 5
 a[3] = 30
 
+-- testing ipairs with metamethods
 a = {n=10}
 setmetatable(a, {__len = function (x) return x.n end,
-                 __ipairs = function (x) return function (e,i)
-                             if i < #e then return i+1 end
-                           end, x, 0 end})
+                 __index = function (t,k) return k * 10 end})
 i = 0
 for k,v in ipairs(a) do
   i = i + 1
-  assert(k == i and v == nil)
+  assert(k == i and v == i * 10)
 end
 assert(i == a.n)
 

@@ -243,10 +243,10 @@ else
 
   -- test C modules with prefixes in names
   package.cpath = D"?.so"
-  local lib2 = require"v-lib2"
+  local lib2 = require"lib2-v2"
   -- check correct access to global environment and correct
   -- parameters
-  assert(_ENV.x == "v-lib2" and _ENV.y == D"v-lib2.so")
+  assert(_ENV.x == "lib2-v2" and _ENV.y == D"lib2-v2.so")
   assert(lib2.id("x") == "x")
 
   -- test C submodules

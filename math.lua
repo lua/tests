@@ -380,6 +380,15 @@ do
   assert(x ~= x)    -- Not a Number
 end
 
+-- testing unsigned comparisons
+assert(math.ult(3, 4))
+assert(not math.ult(4, 4))
+assert(math.ult(-2, -1))
+assert(math.ult(2, -1))
+assert(not math.ult(-2, -2))
+assert(math.ult(maxint, minint))
+assert(not math.ult(minint, maxint))
+
 
 assert(eq(math.sin(-9.8)^2 + math.cos(-9.8)^2, 1))
 assert(eq(math.tan(math.pi/4), 1))

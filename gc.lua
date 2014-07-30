@@ -48,7 +48,7 @@ local function GC1 ()
 
   finish = false; local i = 1
   u = setmetatable({}, {__gc = function () finish = true end})
-  repeat i = i + 1; u = i .. i until finish
+  repeat i = i + 1; u = tostring(i) .. tostring(i) until finish
   assert(b[1] == 34)   -- 'u' was collected, but 'b' was not
 
   finish = false
@@ -67,7 +67,7 @@ local function GC2 ()
 
   finish = false; local i = 1
   u = {setmetatable({}, {__gc = function () finish = true end})}
-  repeat i = i + 1; u = {i .. i} until finish
+  repeat i = i + 1; u = {tostring(i) .. tostring(i)} until finish
   assert(b[1] == 34)   -- 'u' was collected, but 'b' was not
 
   finish = false

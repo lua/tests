@@ -315,7 +315,7 @@ assert(t.a == -((10 + 34) * 2))
 io.output(file); io.write"0123456789\n":close()
 for a,b in io.lines(file, 1, 1) do
   if a == "\n" then assert(b == nil)
-  else assert(tonumber(a) == b - 1)
+  else assert(tonumber(a) == tonumber(b) - 1)
   end
 end
 
@@ -664,13 +664,13 @@ local t2 = os.time{year=2000, month=10, day=1, hour=23, min=10, sec=19}
 assert(os.difftime(t1,t2) == 60*2-19)
 
 io.output(io.stdout)
-local d = os.date('%d')
-local m = os.date('%m')
-local a = os.date('%Y')
-local ds = os.date('%w') + 1
-local h = os.date('%H')
-local min = os.date('%M')
-local s = os.date('%S')
+local d = tonumber(os.date('%d'))
+local m = tonumber(os.date('%m'))
+local a = tonumber(os.date('%Y'))
+local ds = tonumber(os.date('%w')) + 1
+local h = tonumber(os.date('%H'))
+local min = tonumber(os.date('%M'))
+local s = tonumber(os.date('%S'))
 io.write(string.format('test done on %2.2d/%2.2d/%d', d, m, a))
 io.write(string.format(', at %2.2d:%2.2d:%2.2d\n', h, min, s))
 io.write(string.format('%s\n', _VERSION))

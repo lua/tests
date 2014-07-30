@@ -152,7 +152,7 @@ end
 ]], {1,2,1,2,1,2,1,3})
 
 test([[for i,v in pairs{'a','b'} do
-  a=i..v
+  a=tostring(i) .. v
 end
 ]], {1,2,1,2,1,3})
 

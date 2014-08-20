@@ -301,7 +301,7 @@ local maxbytes = 12
 
 -- basic dump/undump with default arguments
 for _, i in ipairs{0, 1, 2, 127, 128, 255, -128, -1, -2} do
-  assert(string.undumpint(string.dumpint(i)) == i)
+  assert(string.undumpinteger(string.dumpinteger(i)) == i)
 end
 
 -- basic dump/undump with non-default arguments
@@ -309,39 +309,39 @@ for _, e in pairs{"l", "b"} do
   for s = 2, maxbytes do
     for _, i in ipairs{0, 1, 2, 127, 128, 255, 32767, -32768,
                        -128, -1, -2, 0x5BCD} do
-      assert(string.undumpint(string.dumpint(i, s, e), 1, s, e) == i)
+      assert(string.undumpinteger(string.dumpinteger(i, s, e), 1, s, e) == i)
     end
   end
 end
 
 -- default size is the size of a Lua integer
-assert(#string.dumpint(0) == numbytes)
-assert(string.dumpint(-234, 0) == string.dumpint(-234))
+assert(#string.dumpinteger(0) == numbytes)
+assert(string.dumpinteger(-234, 0) == string.dumpinteger(-234))
 
 -- endianess
-assert(string.dumpint(34, 4, 'l') == "\34\0\0\0")
-assert(string.dumpint(34, 4, 'b') == "\0\0\0\34")
-assert(string.dumpint(0, 3, 'n') == "\0\0\0")
+assert(string.dumpinteger(34, 4, 'l') == "\34\0\0\0")
+assert(string.dumpinteger(34, 4, 'b') == "\0\0\0\34")
+assert(string.dumpinteger(0, 3, 'n') == "\0\0\0")
 
 
 -- unsigned values
-assert(string.dumpint(255, 1, 'l') == "\255")
-assert(string.dumpint(0xffffff, 3) == "\255\255\255")
-assert(string.dumpint(0x8000, 2, 'b') == "\x80\0")
+assert(string.dumpinteger(255, 1, 'l') == "\255")
+assert(string.dumpinteger(0xffffff, 3) == "\255\255\255")
+assert(string.dumpinteger(0x8000, 2, 'b') == "\x80\0")
 
 -- for unsigned, we need to mask results (but there is no errors)
-assert(string.undumpint("\x80\0", 1, 2, 'b') & 0xFFFF == 0x8000)
+assert(string.undumpinteger("\x80\0", 1, 2, 'b') & 0xFFFF == 0x8000)
 
 local m = 0xf1f2f3ff
-assert(string.undumpint('\0\0\0\0\xf1\xf2\xf3\xff', 5, 4, 'b') & m == m)
+assert(string.undumpinteger('\0\0\0\0\xf1\xf2\xf3\xff', 5, 4, 'b') & m == m)
 
 
 
 local function check (i, s, n)
-  assert(string.dumpint(n, i, 'l') == s)
-  assert(string.dumpint(n, i, 'b') == s:reverse())
-  assert(string.undumpint(s, 1, i, 'l') == n)
-  assert(string.undumpint(s:reverse(), 1, i, 'b') == n)
+  assert(string.dumpinteger(n, i, 'l') == s)
+  assert(string.dumpinteger(n, i, 'b') == s:reverse())
+  assert(string.undumpinteger(s, 1, i, 'l') == n)
+  assert(string.undumpinteger(s:reverse(), 1, i, 'b') == n)
 end
 
 
@@ -364,31 +364,31 @@ end
 for i = 0, maxbytes - numbytes do
   -- largest allowed unsigned number with extra leading zeros
   local s = string.rep("\0", i) .. string.rep("\255", numbytes)
-  assert(string.undumpint(s, 1, i + numbytes, "b") == ~0)
+  assert(string.undumpinteger(s, 1, i + numbytes, "b") == ~0)
   -- another large unsigned number
   s = string.rep("\0", i) .. string.rep("\255", numbytes - 1) .. "\12"
-  assert(string.undumpint(s, 1, i + numbytes, "b") == ~0 - (255 - 12))
+  assert(string.undumpinteger(s, 1, i + numbytes, "b") == ~0 - (255 - 12))
 end
  
 
 -- signal extension
-assert(string.undumpint("\x19\xff\0", -3, 3, 'l') == 0xff19)
-assert(string.undumpint("\19\xff\0", -3, 2, 'l') == -237)
+assert(string.undumpinteger("\x19\xff\0", -3, 3, 'l') == 0xff19)
+assert(string.undumpinteger("\19\xff\0", -3, 2, 'l') == -237)
 
 
 -- position
 local s = "\0\255\123\9\1\47\200"
 for i = 1, #s do
-  assert(string.undumpint(s, i, 1) & 0xff == string.byte(s, i))
+  assert(string.undumpinteger(s, i, 1) & 0xff == string.byte(s, i))
 end
 
 for i = 1, #s - 1 do
-  assert(string.undumpint(s, i, 2, 'b') & 0xffff ==
+  assert(string.undumpinteger(s, i, 2, 'b') & 0xffff ==
   string.byte(s, i)*256 + string.byte(s, i + 1))
 end
 
 for i = 1, #s - 2 do
-  assert(string.undumpint(s, i, 3, 'l') & 0xffffff ==
+  assert(string.undumpinteger(s, i, 3, 'l') & 0xffffff ==
   string.byte(s, i + 2)*256^2 + string.byte(s, i + 1)*256 + string.byte(s, i))
 end
 
@@ -396,7 +396,7 @@ end
 -- testing overflow in dumping
 
 local function checkerror (n, size, endian)
-  local status, msg = pcall(string.dumpint, n, size, endian)
+  local status, msg = pcall(string.dumpinteger, n, size, endian)
   assert(not status and string.find(msg, "does not fit"))
 end
 
@@ -404,16 +404,16 @@ for i = 1, numbytes - 1 do
   local maxunsigned = (1 << i*8) - 1
   local minsigned = -maxunsigned // 2
 
-  local s = string.dumpint(maxunsigned, i)
-  assert(string.undumpint(s, 1, i) % (maxunsigned + 1) == maxunsigned)
+  local s = string.dumpinteger(maxunsigned, i)
+  assert(string.undumpinteger(s, 1, i) % (maxunsigned + 1) == maxunsigned)
   checkerror(maxunsigned + 1, i, 'l')
   checkerror(maxunsigned + 1, i, 'b')
   if i > 1 then
     checkerror(maxunsigned, i - 1)
   end
 
-  s = string.dumpint(minsigned, i)
-  assert(string.undumpint(s, 1, i) == minsigned)
+  s = string.dumpinteger(minsigned, i)
+  assert(string.undumpinteger(s, 1, i) == minsigned)
   checkerror(minsigned - 1, i, 'l')
   checkerror(minsigned - 1, i, 'b')
 end
@@ -422,7 +422,7 @@ end
 -- testing overflow in undumping
 
 checkerror = function (s, size, endian)
-    local status, msg = pcall(string.undumpint, s, 1, size, endian)
+    local status, msg = pcall(string.undumpinteger, s, 1, size, endian)
     assert(not status and string.find(msg, "does not fit"))
 end
 
@@ -445,12 +445,12 @@ function check (msg, f, ...)
   assert(not status and string.find(err, msg))
 end
 
-check("string too short", string.undumpint, "\1\2\3\4", maxi)
-check("string too short", string.undumpint, "\1\2\3\4", (1 << 31) - 1)
-check("string too short", string.undumpint, "\1\2\3\4", 4, 2)
-check("endianness", string.undumpint, "\1\2\3\4", 1, 2, 'x')
-check("endianness", string.dumpint, -1, 2, 'x')
-check("out of valid range", string.dumpint, -1, maxbytes + 1)
+check("string too short", string.undumpinteger, "\1\2\3\4", maxi)
+check("string too short", string.undumpinteger, "\1\2\3\4", (1 << 31) - 1)
+check("string too short", string.undumpinteger, "\1\2\3\4", 4, 2)
+check("endianness", string.undumpinteger, "\1\2\3\4", 1, 2, 'x')
+check("endianness", string.dumpinteger, -1, 2, 'x')
+check("out of valid range", string.dumpinteger, -1, maxbytes + 1)
 
 
 

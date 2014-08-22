@@ -1,6 +1,6 @@
 print('testing strings and string library')
 
-local Csize = require'debug'.Csize
+local sizeof = require'debug'.sizeof
 
 local maxi, mini = math.maxinteger, math.mininteger
 
@@ -174,7 +174,7 @@ assert(string.format("%+08d", -30927) == "-0030927")
 
 
 -- longest number that can be formated
-local largefinite = (Csize("F") >= 8) and 1e308 or 1e38
+local largefinite = (sizeof("F") >= 8) and 1e308 or 1e38
 assert(string.len(string.format('%99.99f', -largefinite)) >= 100)
 
 
@@ -295,7 +295,7 @@ end
 
 print"testing dump/undump"
 
-local numbytes = Csize'I'
+local numbytes = sizeof'I'
 
 local maxbytes = 12
 

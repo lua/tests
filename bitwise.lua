@@ -1,18 +1,22 @@
 print("testing bitwise operations")
 
-local Csize = require'debug'.Csize
+local sizeof = require'debug'.sizeof
 
-local numbits = Csize'I' * Csize'b'
+local numbits = sizeof'I' * 8
 
 assert(~0 == -1)
 
--- test 'Csize'
-assert(Csize'h' <= Csize'i')    -- ANSI C rules
-assert(Csize'i' <= Csize'l')    -- ANSI C rules
-assert(Csize'f' <= Csize'd')    -- ANSI C rules
-assert(type(Csize'z') == 'number')   -- no rules for size_t...
-assert(not pcall(Csize, 'x'))
+-- test 'sizeof'
+assert(sizeof'h' <= sizeof'i')    -- ANSI C rules
+assert(sizeof'i' <= sizeof'l')    -- ANSI C rules
+assert(sizeof'f' <= sizeof'd')    -- ANSI C rules
+assert(sizeof'z' >= 1)            -- no rules for size_t...
+assert(sizeof'p' >= 1)            -- nor for pointers
+assert(not pcall(sizeof, 'x'))
 
+assert((1 << (numbits - 1)) == math.mininteger)
+
+-- basic tests for bitwise operators;
 -- use variables to avoid constant folding
 local a, b, c, d
 a = 0xFFFFFFFFFFFFFFFF

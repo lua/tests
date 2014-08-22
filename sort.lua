@@ -69,34 +69,34 @@ a = table.pack(nil, nil, nil, nil)
 assert(a[1] == nil and a.n == 4)
 
 
--- testing copy
+-- testing move
 do
   local function eqT (a, b)
     for k, v in pairs(a) do assert(b[k] == v) end 
     for k, v in pairs(b) do assert(a[k] == v) end 
   end
 
-  local a = table.copy({10,20,30}, 1, 3, 2)  -- move forward
+  local a = table.move({10,20,30}, 1, 3, 2)  -- move forward
   eqT(a, {10,10,20,30})
 
-  a = table.copy({10,20,30}, 2, 3, 1)   -- move backward
+  a = table.move({10,20,30}, 2, 3, 1)   -- move backward
   eqT(a, {20,30,30})
 
-  a = table.copy({10,20,30}, 1, 3, {}, 1)   -- copy
+  a = table.move({10,20,30}, 1, 3, 1, {})   -- move
   eqT(a, {10,20,30})
 
-  a = table.copy({10,20,30}, 1, 0, 3)   -- do not move
+  a = table.move({10,20,30}, 1, 0, 3)   -- do not move
   eqT(a, {10,20,30})
 
   local max = math.maxinteger
-  a = table.copy({[max - 2] = 1, [max - 1] = 2, [max] = 3},
-        max - 2, max, {}, -10)
+  a = table.move({[max - 2] = 1, [max - 1] = 2, [max] = 3},
+        max - 2, max, -10, {})
   eqT(a, {[-10] = 1, [-9] = 2, [-8] = 3})
 
   a = setmetatable({}, {
         __index = function (_,k) return k * 10 end,
         __newindex = error})
-  local b = table.copy(a, 1, 10, {}, 3)
+  local b = table.move(a, 1, 10, 3, {})
   eqT(a, {})
   eqT(b, {nil,nil,10,20,30,40,50,60,70,80,90,100})
 
@@ -105,9 +105,9 @@ do
         __newindex = function (t,k,v)
           t[1] = string.format("%s(%d,%d)", t[1], k, v)
       end})
-  table.copy(a, 10, 13, b, 3)
+  table.move(a, 10, 13, 3, b)
   assert(b[1] == "(3,100)(4,110)(5,120)(6,130)")
-  local stat, msg = pcall(table.copy, b, 10, 13, b, 3)
+  local stat, msg = pcall(table.move, b, 10, 13, 3, b)
   assert(not stat and msg == b)
 end
 

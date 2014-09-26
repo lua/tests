@@ -33,7 +33,11 @@ assert(i == 4)
 -- iterator function is always the same
 assert(type(ipairs{}) == 'function' and ipairs{} == ipairs{})
 
-if T then  --[
+
+if not T then
+  (Message or print)
+    ('\n >>> testC not active: skipping tests for table sizes <<<\n')
+else --[
 -- testing table sizes
 
 local function log2 (x) return math.log(x, 2) end

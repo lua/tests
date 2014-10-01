@@ -25,8 +25,8 @@ end
 
 do
   assert(not pcall(debug.getinfo, print, "X"))   -- invalid option
-  assert(debug.getinfo(1000) == nil)   -- out of range level
-  assert(debug.getinfo(-1) == nil)     -- out of range level
+  assert(not debug.getinfo(1000))   -- out of range level
+  assert(not debug.getinfo(-1))     -- out of range level
   local a = debug.getinfo(print)
   assert(a.what == "C" and a.short_src == "[C]")
   a = debug.getinfo(print, "L")
@@ -173,12 +173,12 @@ local co = coroutine.create(foo)
 
 assert(debug.getlocal(foo, 1) == 'a')
 assert(debug.getlocal(foo, 2) == 'b')
-assert(debug.getlocal(foo, 3) == nil)
+assert(not debug.getlocal(foo, 3))
 assert(debug.getlocal(co, foo, 1) == 'a')
 assert(debug.getlocal(co, foo, 2) == 'b')
-assert(debug.getlocal(co, foo, 3) == nil)
+assert(not debug.getlocal(co, foo, 3))
 
-assert(debug.getlocal(print, 1) == nil)
+assert(not debug.getlocal(print, 1))
 
 
 -- varargs
@@ -209,7 +209,7 @@ a = nil
 
 -- access to vararg in non-vararg function
 local function foo () return debug.getlocal(1, -1) end
-assert(foo(10) == nil)
+assert(not foo(10))
 
 
 a = {}; L = nil
@@ -358,9 +358,9 @@ end
 local a,b,c = 1,2,3
 local function foo1 (a) b = a; return c end
 local function foo2 (x) a = x; return c+b end
-assert(debug.getupvalue(foo1, 3) == nil)
-assert(debug.getupvalue(foo1, 0) == nil)
-assert(debug.setupvalue(foo1, 3, "xuxu") == nil)
+assert(not debug.getupvalue(foo1, 3))
+assert(not debug.getupvalue(foo1, 0))
+assert(not debug.setupvalue(foo1, 3, "xuxu"))
 local t = getupvalues(foo1)
 assert(t.a == nil and t.b == 2 and t.c == 3)
 t = getupvalues(foo2)
@@ -543,7 +543,7 @@ for i=x.linedefined + 1, x.lastlinedefined do
   x.activelines[i] = nil
 end
 assert(next(x.activelines) == nil)   -- no 'extra' elements
-assert(debug.getinfo(co, 2) == nil)
+assert(not debug.getinfo(co, 2))
 local a,b = debug.getlocal(co, 1, 1)
 assert(a == "x" and b == 10)
 a,b = debug.getlocal(co, 1, 2)
@@ -561,7 +561,7 @@ a,b = coroutine.resume(co)
 assert(a and b == "hi")
 assert(#tr == 4 and tr[4] == l.currentline+2)
 assert(debug.gethook(co) == foo)
-assert(debug.gethook() == nil)
+assert(not debug.gethook())
 checktraceback(co, {})
 
 

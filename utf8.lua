@@ -45,7 +45,7 @@ local function check (s, t)
       assert(utf8.offset(s, 0, j) == pi)
     end
     for j = pi + 1, pi1 - 1 do
-      assert(utf8.len(s, j) == nil)
+      assert(not utf8.len(s, j))
     end
    assert(utf8.len(s, pi, pi) == 1)
    assert(utf8.len(s, pi, pi1 - 1) == 1)
@@ -124,12 +124,12 @@ assert(utf8.char(97, 98, 99) == "abc")
 
 assert(utf8.codepoint(utf8.char(0x10FFFF)) == 0x10FFFF)
 
--- value out fo valid range
+-- value out of valid range
 assert(not pcall(utf8.char, 0x10FFFF + 1))
 
 local function invalid (s)
   assert(not pcall(utf8.codepoint, s))
-  assert(utf8.len(s) == nil)
+  assert(not utf8.len(s))
 end
 
 -- UTF-8 representation for 0x11ffff (value out of valid range)

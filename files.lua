@@ -14,9 +14,9 @@ assert(not io.close(io.stdin) and
 
 assert(type(io.input()) == "userdata" and io.type(io.output()) == "file")
 assert(type(io.stdin) == "userdata" and io.type(io.stderr) == "file")
-assert(io.type(8) == nil)
+assert(not io.type(8))
 local a = {}; setmetatable(a, {})
-assert(io.type(a) == nil)
+assert(not io.type(a))
 
 assert(getmetatable(io.input()).__name == "FILE*")
 
@@ -53,8 +53,8 @@ assert(os.setlocale('C', 'all'))
 io.input(io.stdin); io.output(io.stdout);
 
 os.remove(file)
-assert(loadfile(file) == nil)
-assert(io.open(file) == nil)
+assert(not loadfile(file))
+assert(not io.open(file))
 io.output(file)
 assert(io.output() ~= io.stdout)
 
@@ -88,7 +88,7 @@ io.input():close()
 io.close()
 
 assert(os.rename(file, otherfile))
-assert(os.rename(file, otherfile) == nil)
+assert(not os.rename(file, otherfile))
 
 io.output(io.open(otherfile, "ab"))
 assert(io.write("\n\n\t\t  ", 3450, "\n"));
@@ -159,28 +159,36 @@ assert(os.remove(file))
 assert(not pcall(io.lines, "non-existent-file"))
 assert(os.rename(otherfile, file))
 io.output(otherfile)
+local n = 0
 local f = io.lines(file)
-while f() do end;
+while f() do n = n + 1 end;
+assert(n == 6)   -- number of lines in the file
 assert(not pcall(f))  -- read lines after EOF
 assert(not pcall(f))  -- read lines after EOF
 -- copy from file to otherfile
-for l in io.lines(file) do io.write(l, "\n") end
+n = 0
+for l in io.lines(file) do io.write(l, "\n"); n = n + 1 end
 io.close()
+assert(n == 6)
 -- copy from otherfile back to file
 local f = assert(io.open(otherfile))
 assert(io.type(f) == "file")
 io.output(file)
-assert(io.output():read() == nil)
-for l in f:lines() do io.write(l, "\n") end
+assert(not io.output():read())
+n = 0
+for l in f:lines() do io.write(l, "\n"); n = n + 1 end
 assert(tostring(f):sub(1, 5) == "file ")
 assert(f:close()); io.close()
+assert(n == 6)
 assert(not pcall(io.close, f))   -- error trying to close again
 assert(tostring(f) == "file (closed)")
 assert(io.type(f) == "closed file")
 io.input(file)
 f = io.open(otherfile):lines()
-for l in io.lines() do assert(l == f()) end
+n = 0
+for l in io.lines() do assert(l == f()); n = n + 1 end
 f = nil; collectgarbage()
+assert(n == 6)
 assert(os.remove(otherfile))
 
 io.input(file)
@@ -259,12 +267,12 @@ do
   -- read
   local f = io.open(file, "w")
   local r, m, c = f:read()
-  assert(r == nil and ismsg(m) and type(c) == "number")
+  assert(not r and ismsg(m) and type(c) == "number")
   assert(f:close())
   -- write
   f = io.open(file, "r")
   r, m, c = f:write("whatever")
-  assert(r == nil and ismsg(m) and type(c) == "number")
+  assert(not r and ismsg(m) and type(c) == "number")
   assert(f:close())
   -- lines
   f = io.open(file, "w")
@@ -370,8 +378,8 @@ assert(loadfile(file))()
 assert(x1 == x2)
 print('+')
 assert(os.remove(file))
-assert(os.remove(file) == nil)
-assert(os.remove(otherfile) == nil)
+assert(not os.remove(file))
+assert(not os.remove(otherfile))
 
 -- testing loadfile
 local function testloadfile (s, expres)
@@ -583,9 +591,9 @@ if not _noposix then
     local x1, y1, z1 = os.execute(v[1])
     assert(x == x1 and y == y1 and z == z1)
     if v[2] == "ok" then
-      assert(x == true and y == 'exit' and z == 0)
+      assert(x and y == 'exit' and z == 0)
     else
-      assert(x == nil and y == v[2])   -- correct status and 'what'
+      assert(not x and y == v[2])   -- correct status and 'what'
       -- correct code if known (but always different from 0)
       assert((v[3] == nil and z > 0) or v[3] == z)
     end

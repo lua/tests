@@ -592,8 +592,9 @@ a[3] = 30
 
 -- testing ipairs with metamethods
 a = {n=10}
-setmetatable(a, {__len = function (x) return x.n end,
-                 __index = function (t,k) return k * 10 end})
+setmetatable(a, { __index = function (t,k)
+                     if k <= t.n then return k * 10 end 
+                  end})
 i = 0
 for k,v in ipairs(a) do
   i = i + 1

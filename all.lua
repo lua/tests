@@ -11,12 +11,16 @@ end
 -- next variables control the execution of some tests
 -- true means no test (so an undefined variable does not skip a test)
 -- defaults are for Linux; test everything
-
-_soft = false      -- true to avoid long or memory consuming tests
-_port = false      -- true to avoid non-portable tests
-_nomsg = false     -- true to avoid messages about tests not performed
-_noposix = false   -- false assumes LUA_USE_POSIX
-_noformatA = false   -- false assumes LUA_USE_AFORMAT
+-- true to avoid long or memory consuming tests
+_soft = rawget(_G, "_soft") or false
+-- true to avoid non-portable tests
+_port = rawget(_G, "_port") or false
+-- true to avoid messages about tests not performed
+_nomsg = rawget(_G, "_nomsg") or false
+-- false assumes LUA_USE_POSIX
+_noposix = rawget(_G, "_noposix") or false
+-- false assumes LUA_USE_AFORMAT
+_noformatA = rawget(_G, "_noformatA") or false
 
 
 local usertests = rawget(_G, "_U")

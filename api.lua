@@ -388,10 +388,12 @@ function checkerrnopro (code, msg)
   assert(not stt and string.find(err, msg))
 end
 
-checkerrnopro("pushnum 3; call 0 0", "attempt to call")
-print"stack overflow in unprotected thread"
-function f () f() end
-checkerrnopro("getglobal 'f'; call 0 0;", "stack overflow")
+if not _soft then
+  checkerrnopro("pushnum 3; call 0 0", "attempt to call")
+  print"stack overflow in unprotected thread"
+  function f () f() end
+  checkerrnopro("getglobal 'f'; call 0 0;", "stack overflow")
+end
 print"+"
 
 

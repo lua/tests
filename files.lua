@@ -572,7 +572,7 @@ if not _soft then
   x = nil; y = nil
 end
 
-if not _noposix then
+if not _port then
   print("testing popen/pclose and execute")
   local tests = {
     -- command,   what,  code
@@ -635,7 +635,7 @@ assert(not pcall(os.date, "%O"))   -- invalid conversion specifier
 assert(not pcall(os.date, "%E"))   -- invalid conversion specifier
 assert(not pcall(os.date, "%Ea"))   -- invalid conversion specifier
 
-if not _noposix then
+if not _port then
   assert(type(os.date("%Ex")) == 'string')
   assert(type(os.date("%Oy")) == 'string')
 end

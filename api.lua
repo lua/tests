@@ -27,9 +27,9 @@ assert(T.testC("settop 5; absindex -5; return 1") == 1)
 assert(T.testC("settop 10; absindex 1; return 1") == 1)
 assert(T.testC("settop 10; absindex R; return 1") < -10)
 
--- testing allignment
+-- testing alignment
 a = T.d2s(12458954321123)
-assert(string.len(a) == 8)   -- sizeof(double)
+assert(a == string.pack("d", 12458954321123))
 assert(T.s2d(a) == 12458954321123)
 
 a,b,c = T.testC("pushnum 1; pushnum 2; pushnum 3; return 2")

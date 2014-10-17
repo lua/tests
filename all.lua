@@ -186,7 +186,7 @@ end
 local debug = require "debug"
 
 print(string.format("%d-bit integers, %d-bit floats",
-        debug.sizeof'I' * 8, debug.sizeof'F' * 8))
+        #string.pack("j", 0) * 8, #string.pack("n", 0) * 8))
 print("final OK !!!")
 
 debug.sethook(function (a) assert(type(a) == 'string') end, "cr")

@@ -1,18 +1,8 @@
 print("testing bitwise operations")
 
-local sizeof = require'debug'.sizeof
-
-local numbits = sizeof'I' * 8
+local numbits = #string.pack('I', 0) * 8
 
 assert(~0 == -1)
-
--- test 'sizeof'
-assert(sizeof'h' <= sizeof'i')    -- ANSI C rules
-assert(sizeof'i' <= sizeof'l')    -- ANSI C rules
-assert(sizeof'f' <= sizeof'd')    -- ANSI C rules
-assert(sizeof'z' >= 1)            -- no rules for size_t...
-assert(sizeof'p' >= 1)            -- nor for pointers
-assert(not pcall(sizeof, 'x'))
 
 assert((1 << (numbits - 1)) == math.mininteger)
 

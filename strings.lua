@@ -1,7 +1,5 @@
 print('testing strings and string library')
 
-local sizeof = require'debug'.sizeof
-
 local maxi, mini = math.maxinteger, math.mininteger
 
 -- testing string comparisons
@@ -174,7 +172,7 @@ assert(string.format("%+08d", -30927) == "-0030927")
 
 
 -- longest number that can be formated
-local largefinite = (sizeof("F") >= 8) and 1e308 or 1e38
+local largefinite = (#string.pack("n", 0) >= 8) and 1e308 or 1e38
 assert(string.len(string.format('%99.99f', -largefinite)) >= 100)
 
 

@@ -1,6 +1,6 @@
 print("testing bitwise operations")
 
-local numbits = #string.pack('I', 0) * 8
+local numbits = #string.pack('j', 0) * 8
 
 assert(~0 == -1)
 

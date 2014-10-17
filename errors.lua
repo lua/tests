@@ -412,8 +412,11 @@ checksyntax("'aa'", "", "'aa'", 1)
 checksyntax("while << do end", "", "<<", 1)
 checksyntax("for >> do end", "", ">>", 1)
 
+-- test invalid non-printable char in a chunk
+checksyntax("a\1a = 1", "", "<\\1>", 1)
+
 -- test 255 as first char in a chunk
-checksyntax("\255a = 1", "", "char(255)", 1)
+checksyntax("\255a = 1", "", "<\\255>", 1)
 
 doit('I = load("a=9+"); a=3')
 assert(a==3 and I == nil)

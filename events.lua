@@ -275,7 +275,7 @@ assert(t[Set{1,3,5}] == nil)
 
 
 if not T then
-  (Message or print)('\n >>> testC not active: zkipping tests for \z
+  (Message or print)('\n >>> testC not active: skipping tests for \z
 userdata equality <<<\n')
 else
   local u1 = T.newuserdata(0)

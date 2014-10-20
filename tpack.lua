@@ -106,6 +106,13 @@ do
   end
 end
 
+-- mixed endianness
+do
+  assert(pack(">i2 <i2", 10, 20) == "\0\10\20\0")
+  local a, b = unpack("<i2 >i2", "\10\0\0\20")
+  assert(a == 10 and b == 20)
+end
+
 print("testing invalid formats")
 
 checkerror("out of limits", pack, "i0", 0)
@@ -208,6 +215,7 @@ end
 
 print "testing alignment"
 do
+  assert(pack(" < i1 i2 ", 2, 3) == "\2\3\0")   -- no alignment by default
   local x = pack(">!8 b Xh i4 i8 c Xi8", -12, 100, 200, "\xEC")
   assert(x == "\xf4" .. "\0\0\0" ..
               "\0\0\0\100" ..

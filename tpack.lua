@@ -142,6 +142,7 @@ end
 -- Lua integer size
 assert(unpack(">j", pack(">j", math.maxinteger)) == math.maxinteger)
 assert(unpack("<j", pack("<j", math.mininteger)) == math.mininteger)
+assert(unpack("<J", pack("<j", -1)) == -1)   -- maximum unsigned integer
 
 if little then
   assert(pack("f", 24) == pack("<f", 24))

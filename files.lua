@@ -6,6 +6,12 @@ assert(io.input(io.stdin) == io.stdin)
 assert(not pcall(io.input, "non-existent-file"))
 assert(io.output(io.stdout) == io.stdout)
 
+local function checkerr (msg, f, ...)
+  local stat, err = pcall(f, ...)
+  assert(not stat and string.find(err, msg))
+end
+
+
 -- cannot close standard files
 assert(not io.close(io.stdin) and
        not io.stdout:close() and
@@ -38,12 +44,12 @@ print('testing i/o')
 
 local otherfile = os.tmpname()
 
-assert(not pcall(io.open, file, "rw"))     -- invalid mode
-assert(not pcall(io.open, file, "rb+"))    -- invalid mode
-assert(not pcall(io.open, file, "r+bk"))   -- invalid mode
-assert(not pcall(io.open, file, ""))       -- invalid mode
-assert(not pcall(io.open, file, "+"))      -- invalid mode
-assert(not pcall(io.open, file, "b"))      -- invalid mode
+checkerr("invalid mode", io.open, file, "rw")
+checkerr("invalid mode", io.open, file, "rb+")
+checkerr("invalid mode", io.open, file, "r+bk")
+checkerr("invalid mode", io.open, file, "")
+checkerr("invalid mode", io.open, file, "+")
+checkerr("invalid mode", io.open, file, "b")
 assert(io.open(file, "r+b")):close()
 assert(io.open(file, "r+")):close()
 assert(io.open(file, "rb")):close()
@@ -163,8 +169,8 @@ local n = 0
 local f = io.lines(file)
 while f() do n = n + 1 end;
 assert(n == 6)   -- number of lines in the file
-assert(not pcall(f))  -- read lines after EOF
-assert(not pcall(f))  -- read lines after EOF
+checkerr("file is already closed", f)
+checkerr("file is already closed", f)
 -- copy from file to otherfile
 n = 0
 for l in io.lines(file) do io.write(l, "\n"); n = n + 1 end
@@ -180,7 +186,7 @@ for l in f:lines() do io.write(l, "\n"); n = n + 1 end
 assert(tostring(f):sub(1, 5) == "file ")
 assert(f:close()); io.close()
 assert(n == 6)
-assert(not pcall(io.close, f))   -- error trying to close again
+checkerr("closed file", io.close, f)
 assert(tostring(f) == "file (closed)")
 assert(io.type(f) == "closed file")
 io.input(file)
@@ -224,7 +230,7 @@ assert(io.read('a') == '')  -- end of file (OK for 'a')
 collectgarbage()
 print('+')
 io.close(io.input())
-assert(not pcall(io.read))
+checkerr(" input file is closed", io.read)
 
 assert(os.remove(file))
 
@@ -235,7 +241,7 @@ assert(string.len(t) == 10*2^10)
 io.output(file)
 io.write("alo"):write("\n")
 io.close()
-assert(not pcall(io.write))
+checkerr(" output file is closed", io.write)
 local f = io.open(file, "a+b")
 io.output(f)
 collectgarbage()

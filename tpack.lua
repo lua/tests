@@ -14,7 +14,7 @@ local sizeLI = #pack("j", 0)
 local sizefloat = #pack("f", 0)
 local sizedouble = #pack("d", 0)
 local sizenumber = #pack("n", 0)
-local little = (pack("h", 1) == "\1\0")
+local little = (pack("i2", 1) == "\1\0")
 local align = #pack("!xXi16")
 
 assert(1 <= sizeshort and sizeshort <= sizeint and sizeint <= sizelong and

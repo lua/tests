@@ -47,7 +47,8 @@ math.randomseed(0)
 print("current path:\n****" .. package.path .. "****\n")
 
 
-local c = os.clock()
+local initclock = os.clock()
+local lastclock = initclock
 local walltime = os.time()
 
 local collectgarbage = collectgarbage
@@ -116,7 +117,9 @@ local function report (n) print("\n***** FILE '"..n.."'*****") end
 local olddofile = dofile
 dofile = function (n, strip)
   showmem()
-  print("time :", os.clock() - c)
+  local c = os.clock()
+  print(string.format("time: %g (+%g)", c - initclock, c - lastclock))
+  lastclock = c
   report(n)
   local f = assert(loadfile(n))
   local b = string.dump(f, strip)
@@ -230,7 +233,7 @@ collectgarbage()
 collectgarbage()
 collectgarbage();showmem()
 
-local clocktime = clock() - c
+local clocktime = clock() - initclock
 walltime = time() - walltime
 
 print(format("\n\ntotal time: %.2fs (wall time: %ds)\n", clocktime, walltime))

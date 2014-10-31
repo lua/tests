@@ -642,6 +642,7 @@ assert(not pcall(os.date, "%E"))   -- invalid conversion specifier
 assert(not pcall(os.date, "%Ea"))   -- invalid conversion specifier
 
 if not _port then
+  -- test Posix-specific modifiers
   assert(type(os.date("%Ex")) == 'string')
   assert(type(os.date("%Oy")) == 'string')
 end

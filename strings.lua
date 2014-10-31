@@ -202,7 +202,9 @@ do   -- assume at least 32 bits
   end
 end
 
-if not _port then
+if not pcall(string.format, "%a", 0) then
+  (Message or print)("\n >>> format '%a' not available <<<\n")
+else
   print("testing 'format %a %A'")
   assert(tonumber(string.format("%.2a", 0.5)) == 0x1.00p-1)
   assert(tonumber(string.format("%A", 0x1fffff.0)) == 0X1.FFFFFP+20)

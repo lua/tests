@@ -291,7 +291,7 @@ x = load(string.dump(function (x)
   if x == "set" then a = 10+b; b = b+1 else
   return a
   end
-end))
+end), "", "b", nil)
 assert(x() == nil)
 assert(debug.setupvalue(x, 1, "hi") == "a")
 assert(x() == "hi")

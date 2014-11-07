@@ -278,8 +278,6 @@ if not _port then
   if not trylocale("ctype") then
     print("locale not supported")
   else
-    assert(load("a = 3.4"));  -- parser should not change outside locale
-    assert(not load("á = 3.4"));  -- even with errors
     assert(string.gsub("áéíóú", "%a", "x") == "xxxxx")
     assert(string.gsub("áÁéÉ", "%l", "x") == "xÁxÉ")
     assert(string.gsub("áÁéÉ", "%u", "x") == "áxéx")

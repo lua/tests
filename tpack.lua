@@ -119,8 +119,10 @@ print("testing invalid formats")
 checkerror("out of limits", pack, "i0", 0)
 checkerror("out of limits", pack, "i" .. NB + 1, 0)
 checkerror("out of limits", pack, "!" .. NB + 1, 0)
-checkerror("out of limits", pack, "Xi" .. NB + 1)
+checkerror("%(17%) out of limits %[1,16%]", pack, "Xi" .. NB + 1)
 checkerror("invalid format option 'r'", pack, "i3r", 0)
+checkerror("16%-byte integer", unpack, "i16", string.rep('\3', 16))
+checkerror("not power of 2", pack, "!4i3", 0);
 
 -- overflow in packing
 for i = 1, sizeLI - 1 do

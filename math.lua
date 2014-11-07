@@ -297,11 +297,15 @@ assert(f(tonumber(' 3.4.5 ')) == nil)
 assert(tonumber('0x') == nil)
 assert(tonumber('x') == nil)
 assert(tonumber('x3') == nil)
+assert(tonumber('0x3.3.3') == nil)   -- two decimal points
 assert(tonumber('00x2') == nil)
 assert(tonumber('0x 2') == nil)
 assert(tonumber('0 x2') == nil)
 assert(tonumber('23x') == nil)
 assert(tonumber('- 0xaa') == nil)
+assert(tonumber('-0xaaP ') == nil)   -- no exponent
+assert(tonumber('0x0.51p') == nil)
+assert(tonumber('0x5p+-2') == nil)
 
 
 -- testing hexadecimal numerals
@@ -322,13 +326,12 @@ assert(0E+1 == 0 and 0xE+1 == 15 and 0xe-1 == 13)
 assert(tonumber('  0x2.5  ') == 0x25/16)
 assert(tonumber('  -0x2.5  ') == -0x25/16)
 assert(tonumber('  +0x0.51p+8  ') == 0x51)
-assert(tonumber('0x0.51p') == nil)
-assert(tonumber('0x5p+-2') == nil)
 assert(0x.FfffFFFF == 1 - '0x.00000001')
 assert('0xA.a' + 0 == 10 + 10/16)
 assert(0xa.aP4 == 0XAA)
 assert(0x4P-2 == 1)
 assert(0x1.1 == '0x1.' + '+0x.1')
+assert(0Xabcdef.0 == 0x.ABCDEFp+24)
 
 
 assert(1.1 == 1.+.1)

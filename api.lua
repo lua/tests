@@ -15,6 +15,12 @@ function tcheck (t1, t2)
 end
 
 
+local function checkerr (msg, f, ...)
+  local stat, err = pcall(f, ...)
+  assert(not stat and string.find(err, msg))
+end
+
+
 print('testing C API')
 
 a = T.testC("pushvalue R; return 1")
@@ -173,9 +179,9 @@ assert(T.testC("arith _; arith +; arith %; return 1", b, a, c)[1] ==
                8 % (4 + (-3)*2))
 
 -- errors in arithmetic
-assert(not pcall(T.testC, "arith \\", 10, 0))
-assert(not pcall(T.testC, "arith \\", 10, 2.0^90))   -- integer overflow
-assert(not pcall(T.testC, "arith %", 10, 0))
+checkerr("divide by zero", T.testC, "arith \\", 10, 0)
+checkerr("no integer representation", T.testC, "arith \\", 10, 2.0^90)
+checkerr("%%0", T.testC, "arith %", 10, 0)
 
 
 -- testing compare
@@ -316,24 +322,43 @@ assert(to("tonumber", 1, 20) == 0)
 assert(to("topointer", 10) == 0)
 assert(to("topointer", true) == 0)
 assert(to("topointer", T.pushuserdata(20)) == 20)
-assert(to("topointer", io.read) ~= 0)
+assert(to("topointer", io.read) ~= 0)           -- light C function
+assert(to("topointer", type) ~= 0)        -- "heavy" C function
+assert(to("topointer", function () end) ~= 0)   -- Lua function
 assert(to("func2num", 20) == 0)
 assert(to("func2num", T.pushuserdata(10)) == 0)
-assert(to("func2num", io.read) ~= 0)
+assert(to("func2num", io.read) ~= 0)     -- light C function
+assert(to("func2num", type) ~= 0)  -- "heavy" C function (with upvalue)
 a = to("tocfunction", math.deg)
 assert(a(3) == math.deg(3) and a == math.deg)
 
 
+print("testing panic function")
+do
+  -- trivial error
+  assert(T.checkpanic("pushstring hi; error") == "hi")
+  -- memory error
+  T.totalmem(T.totalmem()+5000)   -- set low memory limit (+5k)
+  assert(T.checkpanic("newuserdata 10000") == "not enough memory")
+  T.totalmem(0)          -- restore high limit
+  -- stack error
+  local msg = T.checkpanic[[
+    pushstring "function f() f() end"
+    loadstring -1; call 0 0
+    getglobal f; call 0 0
+  ]]
+  assert(string.find(msg, "stack overflow"))
+
+
+end
 
 -- testing deep C stack
 if not _soft then
   print("testing stack overflow")
   collectgarbage("stop")
-  local s, msg = pcall(T.testC, "checkstack 1000023 XXXX")   -- too deep
-  assert(not s and string.find(msg, "XXXX"))
-  s = string.rep("pushnil;checkstack 1 XX;", 1000000)
-  s, msg = pcall(T.testC, s)
-  assert(not s and string.find(msg, "XX"))
+  checkerr("XXXX", T.testC, "checkstack 1000023 XXXX")   -- too deep
+  local s = string.rep("pushnil;checkstack 1 XX;", 1000000)
+  checkerr("XX", T.testC, s)
   collectgarbage("restart")
   print'+'
 end
@@ -398,6 +423,13 @@ print"+"
 
 
 -- testing table access
+
+do   -- getp/setp
+  local a = {}
+  T.testC("rawsetp 2 1", a, 20)
+  assert(a[T.pushuserdata(1)] == 20)
+  assert(T.testC("rawgetp 2 1; return 1", a) == 20)
+end
 
 a = {x=0, y=12}
 x, y = T.testC("gettable 2; pushvalue 4; gettable 2; return 2",
@@ -482,14 +514,14 @@ do
   assert(A("isnull U256; return 1"))
   assert(not A("isnil U256; return 1"))
 end
-  
+
 
 
 -- testing get/setuservalue
 -- bug in 5.1.2
-assert(not pcall(debug.setuservalue, 3, {}))
-assert(not pcall(debug.setuservalue, nil, {}))
-assert(not pcall(debug.setuservalue, T.pushuserdata(1), {}))
+checkerr("got number", debug.setuservalue, 3, {})
+checkerr("got nil", debug.setuservalue, nil, {})
+checkerr("got light userdata", debug.setuservalue, T.pushuserdata(1), {})
 
 local b = T.newuserdata(0)
 assert(debug.getuservalue(b) == nil)
@@ -613,7 +645,7 @@ do
   local x = collectgarbage("count");
   local a = T.newuserdata(5001)
   assert(T.testC("objsize 2; return 1", a) == 5001)
-  assert(collectgarbage("count") >= x+4) 
+  assert(collectgarbage("count") >= x+4)
   a = nil
   collectgarbage();
   assert(collectgarbage("count") <= x+1)
@@ -650,8 +682,8 @@ c = T.newuserdata(0); debug.setmetatable(c, tt); nc = T.udataval(c)
 x = T.newuserdata(4)
 y = T.newuserdata(0)
 
-assert(not pcall(io.input, a))
-assert(not pcall(io.input, x))
+checkerr("FILE%* expected, got userdata", io.input, a)
+checkerr("FILE%* expected, got userdata", io.input, x)
 
 assert(debug.getmetatable(x) == nil and debug.getmetatable(y) == nil)
 
@@ -865,10 +897,10 @@ print('+')
 -------------------------------------------------------------------------
 -- testing memory limits
 -------------------------------------------------------------------------
-assert(not pcall(T.newuserdata, math.maxinteger))   -- object too big
+checkerr("block too big", T.newuserdata, math.maxinteger)
 collectgarbage()
 T.totalmem(T.totalmem()+5000)   -- set low memory limit (+5k)
-assert(not pcall(load"local a={}; for i=1,100000 do a[i]=i end"))
+checkerr("not enough memory", load"local a={}; for i=1,100000 do a[i]=i end")
 T.totalmem(0)          -- restore high limit
 
 -- test memory errors; increase memory limit in small steps, so that

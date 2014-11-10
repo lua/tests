@@ -11,6 +11,10 @@ assert(not coroutine.isyieldable())
 assert(not pcall(coroutine.yield))
 
 
+-- trivial errors
+assert(not pcall(coroutine.resume, 0))
+assert(not pcall(coroutine.status, 0))
+
 
 -- tests for multiple yield/resume arguments
 

@@ -313,7 +313,7 @@ C, C1 = nil
 
 -- ephemerons
 local mt = {__mode = 'k'}
-a = {10,20,30,40}; setmetatable(a, mt)
+a = {{10},{20},{30},{40}}; setmetatable(a, mt)
 x = nil
 for i = 1, 100 do local n = {}; a[n] = {k = {x}}; x = n end
 GC()
@@ -323,7 +323,7 @@ while n do n = a[n].k[1]; i = i + 1 end
 assert(i == 100)
 x = nil
 GC()
-for i = 1, 4 do assert(a[i] == i * 10); a[i] = nil end
+for i = 1, 4 do assert(a[i][1] == i * 10); a[i] = nil end
 assert(next(a) == nil)
 
 local K = {}

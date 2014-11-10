@@ -480,6 +480,11 @@ assert(not string.find(debug.traceback("hi"), "'traceback'"))
 assert(string.find(debug.traceback("hi", 0), "'traceback'"))
 assert(string.find(debug.traceback(), "^stack traceback:\n"))
 
+do  -- C-function names in traceback
+  local st, msg = (function () return pcall end)()(debug.traceback)
+  assert(st == true and string.find(msg, "pcall"))
+end
+
 
 -- testing nparams, nups e isvararg
 local t = debug.getinfo(print, "u")
@@ -614,16 +619,30 @@ local function f (t)
 end
 setmetatable(a, {
   __index = f; __add = f; __div = f; __mod = f; __concat = f; __pow = f;
-  __eq = f; __le = f; __lt = f;
+  __mul = f; __idiv = f; __unm = f; __len = f; __sub = f;
+  __shl = f; __shr = f; __bor = f; __bxor = f;
+  __eq = f; __le = f; __lt = f; __unm = f; __len = f; __band = f;
 })
 
 local b = setmetatable({}, getmetatable(a))
 
 assert(a[3] == "__index" and a^3 == "__pow" and a..a == "__concat")
 assert(a/3 == "__div" and 3%a == "__mod")
+assert(a+3 == "__add" and 3-a == "__sub" and a*3 == "__mul" and
+       -a == "__unm" and #a == "__len" and a&3 == "__band")
+assert(a|3 == "__bor" and 3~a == "__bxor" and a<<3 == "__shl" and
+       a>>1 == "__shr")
 assert (a==b and a.op == "__eq")
 assert (a>=b and a.op == "__le")
 assert (a>b and a.op == "__lt")
+
+do   -- testing for-iterator name
+  local function f()
+    assert(debug.getinfo(1).name == "for iterator")
+  end
+
+  for i in f do end
+end
 
 
 print("testing debug functions on chunk without debug info")

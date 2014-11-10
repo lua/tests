@@ -60,6 +60,11 @@ checksyntax([[
 
 -- tests for better error messages
 
+checkmessage("a = {} + 1", "arithmetic")
+checkmessage("a = {} | 1", "bitwise operation")
+checkmessage("a = {} < 1", "attempt to compare")
+checkmessage("a = {} <= 1", "attempt to compare")
+
 checkmessage("a=1; bbbb=2; a=math.sin(3)+bbbb(3)", "global 'bbbb'")
 checkmessage("a={}; do local a=1 end a:bbbb(3)", "method 'bbbb'")
 checkmessage("local a={}; a.bbbb(3)", "field 'bbbb'")
@@ -75,6 +80,10 @@ checkmessage("local aaa={bbb=1}; aaa.bbb:ddd(9)", "field 'bbb'")
 checkmessage("local aaa={bbb={}}; aaa.bbb:ddd(9)", "method 'ddd'")
 checkmessage("local a,b,c; (function () a = b+1 end)()", "upvalue 'b'")
 assert(not doit"local aaa={bbb={ddd=next}}; aaa.bbb:ddd(nil)")
+
+-- upvalues being indexed do not go to the stack
+checkmessage("local a,b,cc; (function () a = cc[1] end)()", "upvalue 'cc'")
+checkmessage("local a,b,cc; (function () a.x = 1 end)()", "upvalue 'a'")
 
 checkmessage("local _ENV = {x={}}; a = a + 1", "global 'a'")
 

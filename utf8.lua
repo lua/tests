@@ -19,6 +19,8 @@ local function checksyntax (s, t)
   assert(assert(load(ts))() == s)
 end
 
+assert(utf8.offset("alo", 5) == nil)
+assert(utf8.offset("alo", -4) == nil)
 
 -- 't' is the list of codepoints of 's'
 local function check (s, t)

@@ -64,6 +64,11 @@ assert(not io.open(file))
 io.output(file)
 assert(io.output() ~= io.stdout)
 
+do   -- invalid seek
+  local status, msg, code = io.stdin.seek(io.stdin, "set", 1000)
+  assert(not status and type(msg) == "string" and type(code) == "number")
+end
+
 assert(io.output():seek() == 0)
 assert(io.write("alo alo"):seek() == string.len("alo alo"))
 assert(io.output():seek("cur", -3) == string.len("alo alo")-3)
@@ -202,6 +207,7 @@ do  -- test error returns
   local a,b,c = io.input():write("xuxu")
   assert(not a and type(b) == "string" and type(c) == "number")
 end
+checkerr("invalid format", io.read, "x")
 assert(io.read(0) == "")   -- not eof
 assert(io.read(5, 'l') == '"álo"')
 assert(io.read(0) == "")

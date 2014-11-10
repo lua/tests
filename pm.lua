@@ -1,5 +1,11 @@
 print('testing pattern matching')
 
+local function checkerror (msg, f, ...)
+  local s, err = pcall(f, ...)
+  assert(not s and string.find(err, msg))
+end
+
+
 function f(s, p)
   local i,e = string.find(s, p)
   if i then return string.sub(s, i, e) end
@@ -206,12 +212,12 @@ assert(string.gsub("first second word", "%w+",
          function (w) t.n=t.n+1; t[t.n] = w end, 2) == "first second word")
 assert(t[1] == "first" and t[2] == "second" and t[3] == nil)
 
-assert(not pcall(string.gsub, "alo", "(.", print))
-assert(not pcall(string.gsub, "alo", ".)", print))
-assert(not pcall(string.gsub, "alo", "(.", {}))
-assert(not pcall(string.gsub, "alo", "(.)", "%2"))
-assert(not pcall(string.gsub, "alo", "(%1)", "a"))
-assert(not pcall(string.gsub, "alo", "(%0)", "a"))
+checkerror("invalid replacement value %(a table%)",
+            string.gsub, "alo", ".", {a = {}})
+checkerror("invalid capture index %%2", string.gsub, "alo", ".", "%2")
+checkerror("invalid capture index %%0", string.gsub, "alo", "(%0)", "a")
+checkerror("invalid capture index %%1", string.gsub, "alo", "(%1)", "a")
+checkerror("invalid use of '%%'", string.gsub, "alo", ".", "%x")
 
 -- bug since 2.5 (C-stack overflow)
 do
@@ -321,6 +327,8 @@ local function malform (p, m)
   assert(not r and string.find(msg, m))
 end
 
+malform("(.", "unfinished capture")
+malform(".)", "invalid pattern capture")
 malform("[a")
 malform("[]")
 malform("[^]")

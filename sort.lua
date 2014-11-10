@@ -4,6 +4,15 @@ print "testing unpack"
 
 local unpack = table.unpack
 
+
+local function checkerror (msg, f, ...)
+  local s, err = pcall(f, ...)
+  assert(not s and string.find(err, msg))
+end
+
+
+checkerror("wrong number of arguments", table.insert, {}, 2, 3, 4)
+
 local x,y,z,a,n
 a = {}; lim = _soft and 200 or 2000
 for i=1, lim do a[i]=i end
@@ -32,16 +41,16 @@ do
   local minI = math.mininteger
   local maxi = (1 << 31) - 1          -- maximum value for an int (usually)
   local mini = -(1 << 31)             -- minimum value for an int (usually)
-  assert(not pcall(unpack, {}, 0, maxi))
-  assert(not pcall(unpack, {}, 1, maxi))
-  assert(not pcall(unpack, {}, 0, maxI))
-  assert(not pcall(unpack, {}, 1, maxI))
-  assert(not pcall(unpack, {}, mini, maxi))
-  assert(not pcall(unpack, {}, -maxi, maxi))
-  assert(not pcall(unpack, {}, minI, maxI))
-  assert(pcall(unpack, {}, maxi, 0))
-  assert(pcall(unpack, {}, maxi, 1))
-  assert(pcall(unpack, {}, maxI, minI))
+  checkerror("too many results", unpack, {}, 0, maxi)
+  checkerror("too many results", unpack, {}, 1, maxi)
+  checkerror("too many results", unpack, {}, 0, maxI)
+  checkerror("too many results", unpack, {}, 1, maxI)
+  checkerror("too many results", unpack, {}, mini, maxi)
+  checkerror("too many results", unpack, {}, -maxi, maxi)
+  checkerror("too many results", unpack, {}, minI, maxI)
+  unpack({}, maxi, 0)
+  unpack({}, maxi, 1)
+  unpack({}, maxI, minI)
   pcall(unpack, {}, 1, maxi + 1)
   local a, b = unpack({[maxi] = 20}, maxi, maxi)
   assert(a == 20 and b == nil)
@@ -111,6 +120,7 @@ do
   assert(not stat and msg == b)
 end
 
+checkerror("must be positive", table.move, {}, -1, 1, 1)
 
 print"testing sort"
 
@@ -118,8 +128,7 @@ print"testing sort"
 -- test checks for invalid order functions
 local function check (t)
   local function f(a, b) assert(a and b); return true end
-  local s, e = pcall(table.sort, t, f)
-  assert(not s and e:find("invalid order function"))
+  checkerror("invalid order function", table.sort, t, f)
 end
 
 check{1,2,3,4}

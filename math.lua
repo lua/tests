@@ -28,8 +28,16 @@ do
                        intbits, floatbits))
 end
 
-assert(math.type(0) == "integer" and math.type(0.0) == "float")
+assert(math.type(0) == "integer" and math.type(0.0) == "float"
+       and math.type("10") == nil)
 
+
+local function checkerror (msg, f, ...)
+  local s, err = pcall(f, ...)
+  assert(not s and string.find(err, msg))
+end
+
+local msgf2i = "number.* has no integer representation"
 
 -- float equality
 function eq (a,b,limit)
@@ -146,25 +154,29 @@ assert(maxint // -1 == -maxint)
 
 
 -- avoiding errors at compile time
-assert(not pcall(assert(load"return 2 // 0")))
-assert(not pcall(assert(load"return 2.3 // 0")))
-assert(not pcall(assert(load("return 2.0^" .. (intbits - 1) .. " // 1"))))
-assert(not pcall(assert(load("return math.huge // 1"))))
-assert(not pcall(assert(load("return 1 // 2.0^" .. (intbits - 1)))))
-assert(not pcall(assert(load"return 2.3 // '0.0'")))
+local function checkcompt (msg, code)
+  checkerror(msg, assert(load(code)))
+end
+checkcompt("divide by zero", "return 2 // 0")
+checkcompt(msgf2i, "return 2.3 // 0")
+checkcompt(msgf2i,
+           ("return 2.0^" .. (intbits - 1) .. " // 1"))
+checkcompt("field 'huge'", "return math.huge // 1")
+checkcompt(msgf2i, "return 1 // 2.0^" .. (intbits - 1))
+checkcompt(msgf2i, "return 2.3 // '0.0'")
 
 
 -- testing overflow errors when converting from float to integer
 local function f2i (x) return x // 1 end
-assert(not pcall(f2i, math.huge))     -- +inf
-assert(not pcall(f2i, -math.huge))    -- -inf
-assert(not pcall(f2i, 0/0))           -- NaN
+checkerror(msgf2i, f2i, math.huge)     -- +inf
+checkerror(msgf2i, f2i, -math.huge)    -- -inf
+checkerror(msgf2i, f2i, 0/0)           -- NaN
 
 if floatbits < intbits then
   -- conversion tests when float cannot represent all integers
   assert(maxint + 1.0 == maxint)
   assert(minint - 1.0 == minint)
-  assert(not pcall(f2i, maxint + 0.0))
+  checkerror(msgf2i, f2i, maxint + 0.0)
   assert(f2i(2.0^(intbits - 2)) == 1 << (intbits - 2))
   assert(f2i(-2.0^(intbits - 2)) == -(1 << (intbits - 2)))
   assert((2.0^(floatbits - 1) + 1.0) // 1 == (1 << (floatbits - 1)) + 1)
@@ -178,8 +190,8 @@ else
   assert(maxint + 1.0 > maxint)
   assert(minint - 1.0 < minint)
   assert(f2i(maxint + 0.0) == maxint)
-  assert(not pcall(f2i, maxint + 1.0))
-  assert(not pcall(f2i, minint - 1.0))
+  checkerror("no integer rep", f2i, maxint + 1.0)
+  checkerror("no integer rep", f2i, minint - 1.0)
 end
 
 -- 'minint' should be representable as a float no matter the precision
@@ -284,6 +296,7 @@ assert(f(tonumber('nan')) == nil)
 assert(f(tonumber('  ')) == nil)
 assert(f(tonumber('')) == nil)
 assert(f(tonumber('1  a')) == nil)
+assert(f(tonumber('1  a', 2)) == nil)
 assert(f(tonumber('1\0')) == nil)
 assert(f(tonumber('1 \0')) == nil)
 assert(f(tonumber('1\0 ')) == nil)
@@ -445,8 +458,8 @@ do   -- testing floor & ceil
     assert(math.ceil(2^p) == 2^p)
     assert(math.ceil(2^p - 0.5) == 2^p)
   end
-  assert(not pcall(math.floor, {}))
-  assert(not pcall(math.ceil, print))
+  checkerror("number expected", math.floor, {})
+  checkerror("number expected", math.ceil, print)
   assert(eqT(math.tointeger(minint), minint))
   assert(eqT(math.tointeger(minint .. ""), minint))
   assert(eqT(math.tointeger(maxint), maxint))
@@ -487,10 +500,12 @@ assert(eqT(math.fmod(maxint, maxint), 0))
 assert(eqT(math.fmod(minint + 1, minint), minint + 1))
 assert(eqT(math.fmod(maxint - 1, maxint), maxint - 1))
 
-assert(not pcall(math.fmod, 3, 0))
+checkerror("zero", math.fmod, 3, 0)
 
 
 do    -- testing max/min
+  checkerror("value expected", math.max)
+  checkerror("value expected", math.min)
   assert(eqT(math.max(3), 3))
   assert(eqT(math.max(3, 5, 9, 1), 9))
   assert(math.max(maxint, 10e60) == 10e60)

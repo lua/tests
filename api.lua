@@ -414,8 +414,8 @@ check3("cannot open xxxx", T.testC("loadfile 2; gettop; return .", "xxxx"))
 
 -- test errors in non protected threads
 function checkerrnopro (code, msg)
-  L = coroutine.create(function () end)
-  local stt, err = pcall(T.testC, code)
+  local th = coroutine.create(function () end)  -- create new thread
+  local stt, err = pcall(T.testC, th, code)   -- run code there
   assert(not stt and string.find(err, msg))
 end
 

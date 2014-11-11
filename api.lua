@@ -337,6 +337,12 @@ print("testing panic function")
 do
   -- trivial error
   assert(T.checkpanic("pushstring hi; error") == "hi")
+  -- using the stack inside panic
+  assert(T.checkpanic("pushstring hi; error;",
+    [[checkstack 5 XX
+      pushstring 'alo'
+      pushstring ' mundo'
+      concat 2]]) == "alo mundo")
   -- memory error
   T.totalmem(T.totalmem()+5000)   -- set low memory limit (+5k)
   assert(T.checkpanic("newuserdata 10000") == "not enough memory")

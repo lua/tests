@@ -7,7 +7,7 @@ local mt = getmetatable(_G) or {}
 local oldmm = mt.__index
 mt.__index = nil
 
-function doit (s)
+local function doit (s)
   local f, msg = load(s)
   if f == nil then return msg end
   local cond, msg = pcall(f)
@@ -15,12 +15,12 @@ function doit (s)
 end
 
 
-function checkmessage (prog, msg)
+local function checkmessage (prog, msg)
   local m = doit(prog)
   assert(string.find(m, msg, 1, true))
 end
 
-function checksyntax (prog, extra, token, line)
+local function checksyntax (prog, extra, token, line)
   local msg = doit(prog)
   if not string.find(token, "^<%a") and not string.find(token, "^char%(")
     then token = "'"..token.."'" end
@@ -215,7 +215,7 @@ checkmessage("string.gsub('s', 's', setmetatable)", "setmetatable'")
 
 -- tests for errors in coroutines
 
-function f (n)
+local function f (n)
   local c = coroutine.create(f)
   local a,b = coroutine.resume(c)
   return b
@@ -292,8 +292,8 @@ x
 ]], 6)
 
 local p = [[
-function g() f() end
-function f(x) error('a', X) end
+  function g() f() end
+  function f(x) error('a', X) end
 g()
 ]]
 X=3;lineerror((p), 3)
@@ -440,27 +440,34 @@ end
 
 
 -- testing syntax limits
-local function testrep (init, rep)
-  local s = "local a; "..init .. string.rep(rep, 400)
-  local a,b = load(s)
-  assert(not a and string.find(b, "levels"))
-end
-testrep("a=", "{")
-testrep("a=", "(")
-testrep("", "a(")
-testrep("", "do ")
-testrep("", "while a do ")
-testrep("", "if a then else ")
-testrep("", "function foo () ")
-testrep("a=", "a..")
-testrep("a=", "a^")
 
-local s = ("a,"):rep(200).."a=nil"
-local a,b = load(s)
-assert(not a and string.find(b, "levels"))
+local maxClevel = 200    -- LUAI_MAXCCALLS (in llimits.h)
+
+local function testrep (init, rep, close, repc)
+  local s = "local a; "..init .. string.rep(rep, maxClevel - 10) .. close ..
+               string.rep(repc, maxClevel - 10)
+  assert(load(s))   -- 190 levels is OK
+  s = "local a; "..init .. string.rep(rep, maxClevel + 1)
+  checkmessage(s, "too many C levels")
+end
+
+testrep("a", ",a", "= 1", ",1")    -- multiple assignment
+testrep("a=", "{", "0", "}")
+testrep("a=", "(", "2", ")")
+testrep("", "a(", "2", ")")
+testrep("", "do ", "", " end")
+testrep("", "while a do ", "", " end")
+testrep("", "if a then else ", "", " end")
+testrep("", "function foo () ", "", " end")
+testrep("a=", "a..", "a", "")
+testrep("a=", "a^", "a", "")
+
+checkmessage("a = f(x" .. string.rep(",x", 260) .. ")",
+             "expression too complex")
 
 
 -- testing other limits
+
 -- upvalues
 local lim = 127
 local  s = "local function fooA ()\n  local "
@@ -491,7 +498,7 @@ for j = 1,300 do
 end
 s = s.."b\n"
 local a,b = load(s)
-assert(string.find(b, "line 2"))
+assert(string.find(b, "line 2") and string.find(b, "too many local variables"))
 
 mt.__index = oldmm
 

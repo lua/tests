@@ -3,7 +3,7 @@
 -- most (all?) tests here assume a reasonable "Unix-like" shell
 if _port then return end
 
-print ("testing lua.c options")
+print ("testing stand-alone interpreter")
 
 assert(os.execute())   -- machine has a system command
 
@@ -66,6 +66,8 @@ function NoRunMsg (...)
   return NoRun(...)
 end
 
+RUN("@lua -v")
+
 -- running stdin as a file
 RUN("@lua > %s << eof\nprint(10)\nprint(2)\neof\n", out)
 checkout("10\n2\n")
@@ -96,7 +98,6 @@ RUN('env LUA_INIT_5_3="X=10" LUA_INIT="X=3" @lua %s > %s', prog, out)
 checkout("10\n")
 
 prepfile("x = x or 10; print(x); x = x + 1")
-print(prog)
 RUN("env LUA_INIT='@%s' @lua %s > %s", prog, prog, out)
 checkout("10\n11\n")
 
@@ -263,7 +264,26 @@ assert(os.remove(prog))
 assert(os.remove(otherprog))
 assert(not os.remove(out))
 
-RUN("@lua -v")
+print('testing Ctrl C')
+do
+  -- Lua script that runs protected infinite loop and then prints '42'
+  local luaprg = 'pcall(function () while true do end end); print(42)'
+
+  -- shell script to run 'luaprg' in background and echo its pid
+  local shellprg = string.format("%s -e '%s' & echo $!", progname, luaprg)
+
+  local f = io.popen(shellprg, "r")   -- run shell script
+  local pid = f:read()   -- get pid for Lua script
+  print("(if this test fails, it may leave an infinite Lua script [pid "
+          .. pid .. "] running in your system)")
+  -- waits a little, so script can reach the pcall loop
+  assert(os.execute("sleep 1"))
+  -- send INT signal to Lua script
+  assert(os.execute(string.format("kill -INT %d", pid)))
+  assert(f:read() == "42")  -- expected output
+  assert(f:close())
+end
+print('+')
 
 NoRunMsg("@lua -h")
 NoRunMsg("@lua -e")

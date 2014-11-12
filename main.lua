@@ -7,10 +7,11 @@ print ("testing stand-alone interpreter")
 
 assert(os.execute())   -- machine has a system command
 
-prog = os.tmpname()
-otherprog = os.tmpname()
-out = os.tmpname()
+local prog = os.tmpname()
+local otherprog = os.tmpname()
+local out = os.tmpname()
 
+local progname
 do
   local i = 0
   while arg[i] do i=i-1 end
@@ -25,7 +26,7 @@ local prepfile = function (s, p)
   assert(io.close())
 end
 
-function getoutput ()
+local function getoutput ()
   io.input(out)
   local t = io.read("a")
   io.input():close()
@@ -33,35 +34,35 @@ function getoutput ()
   return t
 end
 
-function checkprogout (s)
+local function checkprogout (s)
   local t = getoutput()
   for line in string.gmatch(s, ".-\n") do
     assert(string.find(t, line, 1, true))
   end
 end
 
-function checkout (s)
+local function checkout (s)
   local t = getoutput()
   if s ~= t then print(string.format("'%s' - '%s'\n", s, t)) end
   assert(s == t)
   return t
 end
 
-function auxrun (...)
+local function auxrun (...)
   local s = string.format(...)
   s = string.gsub(s, "@lua", '"'..progname..'"', 1)
   return os.execute(s)
 end
 
-function RUN (...)
+local function RUN (...)
   assert(auxrun(...))
 end
 
-function NoRun (...)
+local function NoRun (...)
   assert(not auxrun(...))
 end
 
-function NoRunMsg (...)
+local function NoRunMsg (...)
   print("\n(the next error is expected by the test)")
   return NoRun(...)
 end
@@ -82,7 +83,6 @@ RUN("env LUA_INIT= LUA_PATH_5_3=y LUA_PATH=x @lua %s > %s", prog, out)
 checkout("y\n")
 
 prepfile("print(package.cpath)")
-
 RUN("env LUA_INIT= LUA_CPATH=xuxu @lua %s > %s", prog, out)
 checkout("xuxu\n")
 
@@ -102,12 +102,22 @@ RUN("env LUA_INIT='@%s' @lua %s > %s", prog, prog, out)
 checkout("10\n11\n")
 
 -- test option '-E'
-prepfile("print(package.path, package.cpath)")
-RUN('env LUA_INIT="error(10)" LUA_PATH=xxx LUA_CPATH=xxx @lua -E %s > %s',
-     prog, out)
-local defaultpath = getoutput()
-defaultpath = string.match(defaultpath, "^(.-)\t")   -- remove tab
-assert(not string.find(defaultpath, "xxx") and string.find(defaultpath, "lua"))
+local defaultpath, defaultCpath
+
+do
+  prepfile("print(package.path, package.cpath)")
+  RUN('env LUA_INIT="error(10)" LUA_PATH=xxx LUA_CPATH=xxx @lua -E %s > %s',
+       prog, out)
+  local out = getoutput()
+  defaultpath = string.match(out, "^(.-)\t")
+  defaultCpath = string.match(out, "\t(.-)$")
+end
+
+-- paths did not changed
+assert(not string.find(defaultpath, "xxx") and
+       string.find(defaultpath, "lua") and
+       not string.find(defaultCpath, "xxx") and
+       string.find(defaultCpath, "lua"))
 
 
 -- test replacement of ';;' to default path

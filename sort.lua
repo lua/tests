@@ -66,6 +66,12 @@ do
   a, b = unpack(t, minI + 1, minI); assert(a == nil and b == nil)
 end
 
+do   -- length is not an integer
+  local t = setmetatable({}, {__len = function () return 'abc' end})
+  assert(#t == 'abc')
+  checkerror("object length is not an integer", table.insert, t, 1)
+end
+
 print "testing pack"
 
 a = table.pack()

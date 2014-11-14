@@ -548,6 +548,19 @@ if T then   -- tests for weird cases collecting upvalues
 
   collectgarbage("restart")
 
+  -- test barrier in sweep phase (advance cleaning of upvalue to white)
+  local u = T.newuserdata(0)   -- create a userdata
+  collectgarbage()
+  collectgarbage"stop"
+  T.gcstate"atomic"
+  local x = {}
+  T.gcstate"sweepallgc"
+  assert(T.gccolor(u) == "black")   -- upvalue is "old" (black)
+  assert(T.gccolor(x) == "white")   -- table is "new" (white)
+  debug.setuservalue(u, x)          -- trigger barrier
+  assert(T.gccolor(u) == "white")   -- upvalue changed to white
+  collectgarbage"restart"
+
   print"+"
 end
 

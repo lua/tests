@@ -197,6 +197,13 @@ for t in string.gmatch(package.path..";"..package.cpath, "[^;]+") do
   assert(string.find(err, t, 1, true))
 end
 
+do  -- testing 'package.searchers' not being a table
+  local searchers = package.searchers
+  package.searchers = 3
+  local st, msg = pcall(require, 'a')
+  assert(not st and string.find(msg, "must be a table"))
+  package.searchers = searchers
+end
 
 local function import(...)
   local f = {...}

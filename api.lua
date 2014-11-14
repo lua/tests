@@ -337,16 +337,24 @@ print("testing panic function")
 do
   -- trivial error
   assert(T.checkpanic("pushstring hi; error") == "hi")
+
   -- using the stack inside panic
   assert(T.checkpanic("pushstring hi; error;",
     [[checkstack 5 XX
       pushstring 'alo'
       pushstring ' mundo'
       concat 2]]) == "alo mundo")
+
+  -- "argerror" without frames
+  assert(T.checkpanic("loadstring 4") ==
+      "bad argument #4 (string expected, got no value)")
+  
+
   -- memory error
   T.totalmem(T.totalmem()+5000)   -- set low memory limit (+5k)
   assert(T.checkpanic("newuserdata 10000") == "not enough memory")
   T.totalmem(0)          -- restore high limit
+
   -- stack error
   local msg = T.checkpanic[[
     pushstring "function f() f() end"
@@ -355,7 +363,6 @@ do
   ]]
   assert(string.find(msg, "stack overflow"))
 
-
 end
 
 -- testing deep C stack
@@ -363,6 +370,8 @@ if not _soft then
   print("testing stack overflow")
   collectgarbage("stop")
   checkerr("XXXX", T.testC, "checkstack 1000023 XXXX")   -- too deep
+  -- too deep (with no message)
+  checkerr("^stack overflow$", T.testC, "checkstack 1000023 ''")
   local s = string.rep("pushnil;checkstack 1 XX;", 1000000)
   checkerr("XX", T.testC, s)
   collectgarbage("restart")

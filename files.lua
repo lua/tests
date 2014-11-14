@@ -60,6 +60,7 @@ io.input(io.stdin); io.output(io.stdout);
 
 os.remove(file)
 assert(not loadfile(file))
+checkerr("", dofile, file)
 assert(not io.open(file))
 io.output(file)
 assert(io.output() ~= io.stdout)

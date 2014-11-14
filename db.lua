@@ -622,6 +622,7 @@ setmetatable(a, {
   __mul = f; __idiv = f; __unm = f; __len = f; __sub = f;
   __shl = f; __shr = f; __bor = f; __bxor = f;
   __eq = f; __le = f; __lt = f; __unm = f; __len = f; __band = f;
+  __bnot = f;
 })
 
 local b = setmetatable({}, getmetatable(a))
@@ -635,6 +636,7 @@ assert(a|3 == "__bor" and 3~a == "__bxor" and a<<3 == "__shl" and
 assert (a==b and a.op == "__eq")
 assert (a>=b and a.op == "__le")
 assert (a>b and a.op == "__lt")
+assert(~a == "__bnot")
 
 do   -- testing for-iterator name
   local function f()

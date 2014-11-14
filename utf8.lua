@@ -3,6 +3,12 @@ print "testing UTF-8 library"
 local utf8 = require'utf8'
 
 
+local function checkerror (msg, f, ...)
+  local s, err = pcall(f, ...)
+  assert(not s and string.find(err, msg))
+end
+
+
 local function len (s)
   return #string.gsub(s, "[\x80-\xBF]", "")
 end
@@ -96,14 +102,22 @@ do    -- error indication in utf8.len
   check("\xF4\x9F\xBF\xBF", 1)
 end
 
+-- error in utf8.codes
+checkerror("invalid UTF%-8 code",
+  function ()
+    local s = "ab\xff"
+    for c in utf8.codes(s) do assert(c) end
+  end)
+
+
 -- error in initial position for offset
-assert(not pcall(utf8.offset, "abc", 1, 5))
-assert(not pcall(utf8.offset, "abc", 1, -4))
-assert(not pcall(utf8.offset, "", 1, 2))
-assert(not pcall(utf8.offset, "", 1, -1))
-assert(not pcall(utf8.offset, "𦧺", 1, 2))   -- continuation byte
-assert(not pcall(utf8.offset, "𦧺", 1, 2))   -- continuation byte
-assert(not pcall(utf8.offset, "\x80", 1))    -- continuation byte
+checkerror("position out of range", utf8.offset, "abc", 1, 5)
+checkerror("position out of range", utf8.offset, "abc", 1, -4)
+checkerror("position out of range", utf8.offset, "", 1, 2)
+checkerror("position out of range", utf8.offset, "", 1, -1)
+checkerror("continuation byte", utf8.offset, "𦧺", 1, 2)
+checkerror("continuation byte", utf8.offset, "𦧺", 1, 2)
+checkerror("continuation byte", utf8.offset, "\x80", 1)
 
 
 
@@ -118,7 +132,12 @@ do
   local s = "áéí\128"
   local t = {utf8.codepoint(s,1,#s - 1)}
   assert(#t == 3 and t[1] == 225 and t[2] == 233 and t[3] == 237)
-  assert(not pcall(utf8.codepoint, s, 1, #s))
+  checkerror("invalid UTF%-8 code", utf8.codepoint, s, 1, #s)
+  checkerror("out of range", utf8.codepoint, s, #s + 1)
+  t = {utf8.codepoint(s, 4, 3)}
+  assert(#t == 0)
+  checkerror("out of range", utf8.codepoint, s, -(#s + 1), 1)
+  checkerror("out of range", utf8.codepoint, s, 1, #s + 1)
 end
 
 assert(utf8.char() == "")
@@ -126,11 +145,10 @@ assert(utf8.char(97, 98, 99) == "abc")
 
 assert(utf8.codepoint(utf8.char(0x10FFFF)) == 0x10FFFF)
 
--- value out of valid range
-assert(not pcall(utf8.char, 0x10FFFF + 1))
+checkerror("value out of range", utf8.char, 0x10FFFF + 1)
 
 local function invalid (s)
-  assert(not pcall(utf8.codepoint, s))
+  checkerror("invalid UTF%-8 code", utf8.codepoint, s)
   assert(not utf8.len(s))
 end
 

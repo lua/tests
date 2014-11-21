@@ -318,6 +318,11 @@ print('+')
 
 print('testing Ctrl C')
 do
+  -- interrupt a script
+  local function kill (pid)
+    return os.execute(string.format('kill -INT %d 2> /dev/null', pid))
+  end
+
   -- function to run a script in background, returning its output file
   -- descriptor and its pid
   local function runback (luaprg)
@@ -325,28 +330,41 @@ do
     local shellprg = string.format('%s -e "%s" & echo $!', progname, luaprg)
     local f = io.popen(shellprg, "r")   -- run shell script
     local pid = f:read()   -- get pid for Lua script
-    print("(if this test fails, it may leave an infinite Lua script [pid "
-            .. pid .. "] running in your system)")
-    -- waits a little, so script can start properly
-    assert(os.execute("sleep 1"))
+    print("(if test fails now, it may leave a Lua script running in \z
+            background, pid " .. pid .. ")")
     return f, pid
   end
 
   -- Lua script that runs protected infinite loop and then prints '42'
-  local f, pid = runback"pcall(function () while true do end end); print(42)"
-  -- send INT signal to Lua script
-  assert(os.execute(string.format('kill -INT %d', pid)))
+  local f, pid = runback[[
+    pcall(function () print(12); while true do end end); print(42)]]
+  -- wait until script is inside 'pcall'
+  assert(f:read() == "12")
+  kill(pid)  -- send INT signal to Lua script
+  -- check that 'pcall' captured the exception and script continued running
   assert(f:read() == "42")  -- expected output
   assert(f:close())
+  assert(not kill(pid))  -- process must be dead now
   print("done")
 
   -- Lua script in a looooog unbreakable search
-  local f, pid = runback"string.find(string.rep('a', 1000), '.*.*.*.*.*b')"
-  -- must send two INT signals to stop this Lua script
-  assert(os.execute(string.format('kill -INT %d', pid)))
-  assert(os.execute(string.format('kill -INT %d', pid)))
+  local f, pid = runback[[
+    print(15); string.find(string.rep('a', 1000), '.*.*.*.*.*b')]]
+  -- wait (so script can reach the loop)
+  assert(f:read() == "15")
+  assert(os.execute("sleep 1"))
+  -- must send at least two INT signals to stop this Lua script
+  local n = 100
+  for i = 0, 100 do   -- keep sending signals
+    if not kill(pid) then   -- until it fails
+      n = i   -- number of non-failed kills
+      break
+    end
+  end
   assert(f:close())
-  print("done")
+  assert(not kill(pid))   -- it should be dead now
+  assert(n >= 2)
+  print(string.format("done (with %d kills)", n))
 
 end
 

@@ -106,10 +106,10 @@ checkmessage("print(print < print)", "two function values")
 checkmessage("print('10' < 10)", "string with number")
 checkmessage("print(10 < '23')", "number with string")
 
--- integer division and float->integer conversions
-checkmessage("local a = 2.0^100; x = a//2", "local a")
-checkmessage("local a = 1 // 2.0^100", "has no integer representation")
-checkmessage("local a = '10' // 2.0^100", "has no integer representation")
+-- float->integer conversions
+checkmessage("local a = 2.0^100; x = a << 2", "local a")
+checkmessage("local a = 1 >> 2.0^100", "has no integer representation")
+checkmessage("local a = '10' << 2.0^100", "has no integer representation")
 checkmessage("local a = 2.0^100 & 1", "has no integer representation")
 checkmessage("local a = 2.0^100 & '1'", "has no integer representation")
 checkmessage("local a = 2.0 | 1e40", "has no integer representation")

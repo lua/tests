@@ -189,7 +189,7 @@ do   -- assume at least 32 bits
 
   max, min = 0x7fffffffffffffff, -0x8000000000000000
   if max > 2.0^53 then  -- only for 64 bits
-    assert(string.format("%x", 2^52 // 1 - 1) == "fffffffffffff")
+    assert(string.format("%x", (2^52 | 0) - 1) == "fffffffffffff")
     assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
     assert(string.format("%d", 2^53) == "9007199254740992")
     assert(string.format("%i", -2^53) == "-9007199254740992")

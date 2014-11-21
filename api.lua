@@ -156,7 +156,9 @@ assert(T.testC("pushstring 10; pushnum 20; arith -; return 1") == -10)
 assert(T.testC("pushstring 10; pushstring -20; arith *; return 1") == -200)
 assert(T.testC("pushstring 10; pushstring 3; arith ^; return 1") == 1000)
 assert(T.testC("arith /; return 1", 2, 0) == 10.0/0)
-a = T.testC("pushnum 10; pushnum 3; arith \\; return 1")
+a = T.testC("pushnum 10; pushint 3; arith \\; return 1")
+assert(a == 3.0 and math.type(a) == "float")
+a = T.testC("pushint 10; pushint 3; arith \\; return 1")
 assert(a == 3 and math.type(a) == "integer")
 a = assert(T.testC("pushint 10; pushint 3; arith +; return 1"))
 assert(a == 13 and math.type(a) == "integer")
@@ -180,7 +182,6 @@ assert(T.testC("arith _; arith +; arith %; return 1", b, a, c)[1] ==
 
 -- errors in arithmetic
 checkerr("divide by zero", T.testC, "arith \\", 10, 0)
-checkerr("no integer representation", T.testC, "arith \\", 10, 2.0^90)
 checkerr("%%0", T.testC, "arith %", 10, 0)
 
 

@@ -110,14 +110,38 @@ assert(minint * minint == 0)
 assert(maxint * maxint * maxint == maxint)
 
 
--- testing integer division and conversions
+-- testing floor division and conversions
 
 for _, i in pairs{-16, -15, -3, -2, -1, 0, 1, 2, 3, 15} do
   for _, j in pairs{-16, -15, -3, -2, -1, 1, 2, 3, 15} do
-    local iq, fq = i // j, i / j
-    assert(iq == math.floor(fq))
+    for _, ti in pairs{0, 0.0} do     -- try 'i' as integer and as float
+      for _, tj in pairs{0, 0.0} do   -- try 'j' as integer and as float
+        local x = i + ti
+        local y = j + tj
+          assert(i//j == math.floor(i/j))
+      end
+    end
   end
 end
+
+assert(1//0.0 == 1/0)
+assert(-1 // 0.0 == -1/0)
+assert(eqT(3.5 // 1.5, 2.0))
+assert(eqT(3.5 // -1.5, -3.0))
+
+assert(maxint // maxint == 1)
+assert(maxint // 1 == maxint)
+assert((maxint - 1) // maxint == 0)
+assert(maxint // (maxint - 1) == 1)
+assert(minint // minint == 1)
+assert(minint // minint == 1)
+assert((minint + 1) // minint == 0)
+assert(minint // (minint + 1) == 1)
+assert(minint // 1 == minint)
+
+assert(minint // -1 == -minint)
+assert(minint // -2 == 2^(intbits - 2))
+assert(maxint // -1 == -maxint)
 
 
 -- negative exponents
@@ -138,36 +162,20 @@ assert(minint + 0.0 == minint)
 assert(minint + 0.0 == -2.0^(intbits - 1))
 
 
-assert(maxint // maxint == 1)
-assert(maxint // 1 == maxint)
-assert((maxint - 1) // maxint == 0)
-assert(maxint // (maxint - 1) == 1)
-assert(minint // minint == 1)
-assert(minint // minint == 1)
-assert((minint + 1) // minint == 0)
-assert(minint // (minint + 1) == 1)
-assert(minint // 1 == minint)
-
-assert(minint // -1 == -minint)
-assert(minint // -2 == 2^(intbits - 2))
-assert(maxint // -1 == -maxint)
-
-
 -- avoiding errors at compile time
 local function checkcompt (msg, code)
   checkerror(msg, assert(load(code)))
 end
 checkcompt("divide by zero", "return 2 // 0")
-checkcompt(msgf2i, "return 2.3 // 0")
-checkcompt(msgf2i,
-           ("return 2.0^" .. (intbits - 1) .. " // 1"))
-checkcompt("field 'huge'", "return math.huge // 1")
-checkcompt(msgf2i, "return 1 // 2.0^" .. (intbits - 1))
-checkcompt(msgf2i, "return 2.3 // '0.0'")
+checkcompt(msgf2i, "return 2.3 >> 0")
+checkcompt(msgf2i, ("return 2.0^%d & 1"):format(intbits - 1))
+checkcompt("field 'huge'", "return math.huge << 1")
+checkcompt(msgf2i, ("return 1 | 2.0^%d"):format(intbits - 1))
+checkcompt(msgf2i, "return 2.3 ~ '0.0'")
 
 
--- testing overflow errors when converting from float to integer
-local function f2i (x) return x // 1 end
+-- testing overflow errors when converting from float to integer (runtime)
+local function f2i (x) return x | x end
 checkerror(msgf2i, f2i, math.huge)     -- +inf
 checkerror(msgf2i, f2i, -math.huge)    -- -inf
 checkerror(msgf2i, f2i, 0/0)           -- NaN
@@ -390,11 +398,20 @@ assert(minint % -2 == 0)
 assert(maxint % -2 == -1)
 
 do
-  local x = 0.0 % 0
-  assert(x ~= x)    -- Not a Number
-  x = 1.3 % 0
-  assert(x ~= x)    -- Not a Number
+  local function anan (x) assert(x ~= x) end   -- assert Not a Number
+  anan(0.0 % 0)
+  anan(1.3 % 0)
+  anan(math.huge % 1)
+  anan(math.huge % 1e30)
+  anan(-math.huge % 1e30)
+  anan(-math.huge % -1e30)
+  assert(1 % math.huge == 1)
+  assert(1e30 % math.huge == 1e30)
+  assert(1e30 % -math.huge == -math.huge)
+  assert(-1 % math.huge == math.huge)
+  assert(-1 % -math.huge == -1)
 end
+
 
 -- testing unsigned comparisons
 assert(math.ult(3, 4))

@@ -73,6 +73,7 @@ checkmessage("a={13}; local bbbb=1; a[bbbb](3)", "number")
 checkmessage("a=(1)..{}", "a table value")
 
 checkmessage("a = #print", "length of a function value")
+checkmessage("a = #3", "length of a number value")
 
 aaa = nil
 checkmessage("aaa.bbb:ddd(9)", "global 'aaa'")

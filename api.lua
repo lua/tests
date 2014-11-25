@@ -185,35 +185,32 @@ checkerr("divide by zero", T.testC, "arith \\", 10, 0)
 checkerr("%%0", T.testC, "arith %", 10, 0)
 
 
--- testing compare
--- EQ = 0; LT = 1; LE = 2
-
 -- testing lessthan and lessequal
-assert(T.testC("compare 2 5 1, return 1", 3, 2, 2, 4, 2, 2))
-assert(T.testC("compare 2 5 2, return 1", 3, 2, 2, 4, 2, 2))
-assert(not T.testC("compare 3 4 1, return 1", 3, 2, 2, 4, 2, 2))
-assert(T.testC("compare 3 4 2, return 1", 3, 2, 2, 4, 2, 2))
-assert(T.testC("compare 5 2 1, return 1", 4, 2, 2, 3, 2, 2))
-assert(not T.testC("compare 2 -3 1, return 1", "4", "2", "2", "3", "2", "2"))
-assert(not T.testC("compare -3 2 1, return 1", "3", "2", "2", "4", "2", "2"))
+assert(T.testC("compare LT 2 5, return 1", 3, 2, 2, 4, 2, 2))
+assert(T.testC("compare LE 2 5, return 1", 3, 2, 2, 4, 2, 2))
+assert(not T.testC("compare LT 3 4, return 1", 3, 2, 2, 4, 2, 2))
+assert(T.testC("compare LE 3 4, return 1", 3, 2, 2, 4, 2, 2))
+assert(T.testC("compare LT 5 2, return 1", 4, 2, 2, 3, 2, 2))
+assert(not T.testC("compare LT 2 -3, return 1", "4", "2", "2", "3", "2", "2"))
+assert(not T.testC("compare LT -3 2, return 1", "3", "2", "2", "4", "2", "2"))
 
 -- non-valid indices produce false
-assert(not T.testC("compare 1 4 1, return 1"))
-assert(not T.testC("compare 9 1 2, return 1"))
-assert(not T.testC("compare 9 9 0, return 1"))
+assert(not T.testC("compare LT 1 4, return 1"))
+assert(not T.testC("compare LE 9 1, return 1"))
+assert(not T.testC("compare EQ 9 9, return 1"))
 
 local b = {__lt = function (a,b) return a[1] < b[1] end}
 local a1,a3,a4 = setmetatable({1}, b),
                  setmetatable({3}, b),
                  setmetatable({4}, b)
-assert(T.testC("compare 2 5 1, return 1", a3, 2, 2, a4, 2, 2))
-assert(T.testC("compare 2 5 2, return 1", a3, 2, 2, a4, 2, 2))
-assert(T.testC("compare 5 -6 1, return 1", a4, 2, 2, a3, 2, 2))
-a,b = T.testC("compare 5 -6 1, return 2", a1, 2, 2, a3, 2, 20)
+assert(T.testC("compare LT 2 5, return 1", a3, 2, 2, a4, 2, 2))
+assert(T.testC("compare LE 2 5, return 1", a3, 2, 2, a4, 2, 2))
+assert(T.testC("compare LT 5 -6, return 1", a4, 2, 2, a3, 2, 2))
+a,b = T.testC("compare LT 5 -6, return 2", a1, 2, 2, a3, 2, 20)
 assert(a == 20 and b == false)
-a,b = T.testC("compare 5 -6 2, return 2", a1, 2, 2, a3, 2, 20)
+a,b = T.testC("compare LE 5 -6, return 2", a1, 2, 2, a3, 2, 20)
 assert(a == 20 and b == false)
-a,b = T.testC("compare 5 -6 2, return 2", a1, 2, 2, a1, 2, 20)
+a,b = T.testC("compare LE 5 -6, return 2", a1, 2, 2, a1, 2, 20)
 assert(a == 20 and b == true)
 
 -- testing length
@@ -766,12 +763,12 @@ collectgarbage()
 assert(#cl == 1 and cl[1] == x)   -- old `x' must be collected
 
 -- testing lua_equal
-assert(T.testC("compare 2 4 0; return 1", print, 1, print, 20))
-assert(T.testC("compare 3 2 0; return 1", 'alo', "alo"))
-assert(T.testC("compare 2 3 0; return 1", nil, nil))
-assert(not T.testC("compare 2 3 0; return 1", {}, {}))
-assert(not T.testC("compare 2 3 0; return 1"))
-assert(not T.testC("compare 2 3 0; return 1", 3))
+assert(T.testC("compare EQ 2 4; return 1", print, 1, print, 20))
+assert(T.testC("compare EQ 3 2; return 1", 'alo', "alo"))
+assert(T.testC("compare EQ 2 3; return 1", nil, nil))
+assert(not T.testC("compare EQ 2 3; return 1", {}, {}))
+assert(not T.testC("compare EQ 2 3; return 1"))
+assert(not T.testC("compare EQ 2 3; return 1", 3))
 
 -- testing lua_equal with fallbacks
 do
@@ -785,8 +782,8 @@ do
   end
   assert(f(10) == f(10))
   assert(f(10) ~= f(11))
-  assert(T.testC("compare 2 3 0; return 1", f(10), f(10)))
-  assert(not T.testC("compare 2 3 0; return 1", f(10), f(20)))
+  assert(T.testC("compare EQ 2 3; return 1", f(10), f(10)))
+  assert(not T.testC("compare EQ 2 3; return 1", f(10), f(20)))
   t.__eq = nil
   assert(f(10) ~= f(10))
 end

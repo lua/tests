@@ -115,27 +115,65 @@ end
 -- testing closing of upvalues
 
 local function foo ()
-  local a = {}
+  local t = {}
   do
   local i = 1
-  local k = 0
-  a[0] = function (y) k = y end
-  ::l1:: do
-    local x
+  local a, b, c, d
+  t[1] = function () return a, b, c, d end
+  ::l1::
+  local b
+  do
+    local c
+    t[#t + 1] = function () return a, b, c, d end    -- t[2], t[4], t[6]
     if i > 2 then goto l2 end
-    a[i] = function (y) if y then x = y else return x + k end end
-    i = i + 1
-    goto l1
+    do
+      local d
+      t[#t + 1] = function () return a, b, c, d end   -- t[3], t[5]
+      i = i + 1
+      local a
+      goto l1
+    end
   end
   end
-  ::l2:: return a
+  ::l2:: return t
 end
 
 local a = foo()
-a[1](10); a[2](20)
-assert(a[1]() == 10 and a[2]() == 20 and a[3] == nil)
-a[0](13)
-assert(a[1]() == 23 and a[2]() == 33)
+assert(#a == 6)
+
+-- all functions share same 'a'
+for i = 2, 6 do
+  assert(debug.upvalueid(a[1], 1) == debug.upvalueid(a[i], 1))
+end
+
+-- 'b' and 'c' are shared among some of them
+for i = 2, 6 do
+  -- only a[1] uses external 'b'/'b'
+  assert(debug.upvalueid(a[1], 2) ~= debug.upvalueid(a[i], 2))
+  assert(debug.upvalueid(a[1], 3) ~= debug.upvalueid(a[i], 3))
+end
+
+for i = 3, 5, 2 do
+  -- inner functions share 'b'/'c' with previous ones
+  assert(debug.upvalueid(a[i], 2) == debug.upvalueid(a[i - 1], 2))
+  assert(debug.upvalueid(a[i], 3) == debug.upvalueid(a[i - 1], 3))
+  -- but not with next ones
+  assert(debug.upvalueid(a[i], 2) ~= debug.upvalueid(a[i + 1], 2))
+  assert(debug.upvalueid(a[i], 3) ~= debug.upvalueid(a[i + 1], 3))
+end
+
+-- only external 'd' is shared
+for i = 2, 6, 2 do
+  assert(debug.upvalueid(a[1], 4) == debug.upvalueid(a[i], 4))
+end
+
+-- internal 'd's are all different
+for i = 3, 5, 2 do
+  for j = 1, 6 do
+    assert((debug.upvalueid(a[i], 4) == debug.upvalueid(a[j], 4))
+      == (i == j))
+  end
+end
 
 --------------------------------------------------------------------------------
 -- testing if x goto optimizations

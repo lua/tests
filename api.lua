@@ -339,9 +339,9 @@ do
   -- using the stack inside panic
   assert(T.checkpanic("pushstring hi; error;",
     [[checkstack 5 XX
-      pushstring 'alo'
+      pushstring ' alo'
       pushstring ' mundo'
-      concat 2]]) == "alo mundo")
+      concat 3]]) == "hi alo mundo")
 
   -- "argerror" without frames
   assert(T.checkpanic("loadstring 4") ==

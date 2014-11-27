@@ -159,14 +159,6 @@ assert(_G["while"] == 234)
 
 print("steps")
 
-local bytes = gcinfo()
-while 1 do
-  local nbytes = gcinfo()
-  if nbytes < bytes then break end   -- run until gc
-  bytes = nbytes
-  a = {}
-end
-
 print("steps (2)")
 
 local function dosteps (siz)

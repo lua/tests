@@ -219,104 +219,71 @@ a,b = F(1)~=nil; assert(a == true and b == nil);
 a,b = F(nil)==nil; assert(a == true and b == nil)
 
 ----------------------------------------------------------------
--- creates all combinations of 
--- [not] ([not] arg op [not] (arg op [not] arg ))
--- and tests each one
-
-function ID(x) return x end
-
-function f(t, i)
-  local b = t.n
-  local res = math.fmod(math.floor(i/c), b)+1
-  c = c*b
-  return t[res]
-end
-
-local arg = {" ( 1 < 2 ) ", " ( 1 >= 2 ) ", " F ( ) ", "  nil "; n=4}
-
-local op = {" and ", " or ", " == ", " ~= "; n=4}
-
-local neg = {" ", " not "; n=2}
-
-local i = 0
-repeat
-  c = 1
-  local s = f(neg, i)..'ID('..f(neg, i)..f(arg, i)..f(op, i)..
-            f(neg, i)..'ID('..f(arg, i)..f(op, i)..f(neg, i)..f(arg, i)..'))'
-  local s1 = string.gsub(s, 'ID', '')
-  K,X,NX,WX1,WX2 = nil
-  s = string.format([[
-      local a = %s
-      local b = not %s
-      K = b
-      local xxx; 
-      if %s then X = a  else X = b end
-      if %s then NX = b  else NX = a end
-      while %s do WX1 = a; break end
-      while %s do WX2 = a; break end
-      repeat if (%s) then break end; assert(b)  until not(%s)
-  ]], s1, s, s1, s, s1, s, s1, s, s)
-  assert(load(s))()
-  assert(X and not NX and not WX1 == K and not WX2 == K)
-  if math.fmod(i,4000) == 0 then print('+') end
-  i = i+1
-until i==c
-
-print '+'
-
 ------------------------------------------------------------------
-print 'testing short-circuit optimizations'
 
-_ENV.GLOB1 = 1
-_ENV.GLOB2 = 2
+-- sometimes will be 0, sometimes will not...
+_ENV.GLOB1 = os.time() % 2
 
+-- basic expressions with their respective values
 local basiccases = {
   {"nil", nil},
   {"false", false},
   {"true", true},
   {"10", 10},
-  {"(_ENV.GLOB1 < _ENV.GLOB2)", true},
-  {"(_ENV.GLOB2 < _ENV.GLOB1)", false},
+  {"(0==_ENV.GLOB1)", 0 == _ENV.GLOB1},
 }
 
+print('testing short-circuit optimizations (' .. _ENV.GLOB1 .. ')')
 
+
+-- operators with their respective values
 local binops = {
   {" and ", function (a,b) if not a then return a else return b end end},
   {" or ", function (a,b) if a then return a else return b end end},
 }
 
-local mem = {basiccases}    -- for memoization
+local cases = {}
 
-local function allcases (n)
-  if mem[n] then return mem[n] end
+-- creates all combinations of '(cases[i] op cases[n-i])' plus
+-- 'not(cases[i] op cases[n-i])' (syntax + value)
+local function createcases (n)
   local res = {}
-  -- include all smaller cases
-  for _, v in ipairs(allcases(n - 1)) do
-    res[#res + 1] = v
-  end
   for i = 1, n - 1 do
-    for _, v1 in ipairs(allcases(i)) do
-      for _, v2 in ipairs(allcases(n - i)) do
+    for _, v1 in ipairs(cases[i]) do
+      for _, v2 in ipairs(cases[n - i]) do
         for _, op in ipairs(binops) do
-            res[#res + 1] = {
+            local t = {
               "(" .. v1[1] .. op[1] .. v2[1] .. ")",
               op[2](v1[2], v2[2])
             }
+            res[#res + 1] = t
+            res[#res + 1] = {"not" .. t[1], not t[2]}
         end
       end
     end
-    print('+')
   end
-  mem[n] = res   -- memoize
   return res
 end
 
 -- do not do too many combinations for soft tests
 local level = _soft and 3 or 4
 
-for _, v in pairs(allcases(level)) do
-  local res = load("return " .. v[1])()
-  assert(res == v[2])
+cases[1] = basiccases
+for i = 2, level do cases[i] = createcases(i) end
+print("+")
+
+local prog = [[if %s then IX = true end; return %s]]
+
+local i = 0
+for n = 1, level do
+  for _, v in pairs(cases[n]) do
+    local s = v[1]
+    local p = load(string.format(prog, s, s))
+    IX = false
+    assert(p() == v[2] and IX == not not v[2])
+    i = i + 1
+    if i % 60000 == 0 then print('+') end
+  end
 end
 ------------------------------------------------------------------
 

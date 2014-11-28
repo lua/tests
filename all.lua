@@ -190,7 +190,6 @@ local debug = require "debug"
 
 print(string.format("%d-bit integers, %d-bit floats",
         #string.pack("j", 0) * 8, #string.pack("n", 0) * 8))
-print("final OK !!!")
 
 debug.sethook(function (a) assert(type(a) == 'string') end, "cr")
 
@@ -249,4 +248,6 @@ if not usertests then
   end
   assert(open(fname, "w")):write(clocktime):close()
 end
+
+print("final OK !!!")
 

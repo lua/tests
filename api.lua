@@ -416,8 +416,8 @@ function check3(p, ...)
   assert(string.find(arg[3], p))
 end
 check3(":1:", T.testC("loadstring 2; gettop; return .", "x="))
-check3("cannot read", T.testC("loadfile 2; gettop; return .", "."))
-check3("cannot open xxxx", T.testC("loadfile 2; gettop; return .", "xxxx"))
+check3("%.", T.testC("loadfile 2; gettop; return .", "."))
+check3("xxxx", T.testC("loadfile 2; gettop; return .", "xxxx"))
 
 -- test errors in non protected threads
 function checkerrnopro (code, msg)

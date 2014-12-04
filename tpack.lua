@@ -123,6 +123,7 @@ checkerror("%(17%) out of limits %[1,16%]", pack, "Xi" .. NB + 1)
 checkerror("invalid format option 'r'", pack, "i3r", 0)
 checkerror("16%-byte integer", unpack, "i16", string.rep('\3', 16))
 checkerror("not power of 2", pack, "!4i3", 0);
+checkerror("missing size", pack, "c", "")
 
 -- overflow in packing
 for i = 1, sizeLI - 1 do
@@ -220,12 +221,12 @@ end
 print "testing alignment"
 do
   assert(pack(" < i1 i2 ", 2, 3) == "\2\3\0")   -- no alignment by default
-  local x = pack(">!8 b Xh i4 i8 c Xi8", -12, 100, 200, "\xEC")
+  local x = pack(">!8 b Xh i4 i8 c1 Xi8", -12, 100, 200, "\xEC")
   assert(x == "\xf4" .. "\0\0\0" ..
               "\0\0\0\100" ..
               "\0\0\0\0\0\0\0\xC8" .. 
               "\xEC" .. "\0\0\0\0\0\0\0")
-  local a, b, c, d, pos = unpack(">!8 c Xh i4 i8 b Xi8 XI XH", x)
+  local a, b, c, d, pos = unpack(">!8 c1 Xh i4 i8 b Xi8 XI XH", x)
   assert(a == "\xF4" and b == 100 and c == 200 and d == -20 and (pos - 1) == #x)
 
   x = pack(">!4 c3 c4 c2 z i4 c5 c2 Xi4",
@@ -255,7 +256,7 @@ do
   checkerror("invalid next option", pack, "X")
   checkerror("invalid next option", unpack, "XXi", "")
   checkerror("invalid next option", unpack, "X i", "")
-  checkerror("invalid next option", pack, "Xc")
+  checkerror("invalid next option", pack, "Xc1")
 end
 
 do    -- testing initial position

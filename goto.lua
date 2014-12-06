@@ -114,6 +114,8 @@ end
 --------------------------------------------------------------------------------
 -- testing closing of upvalues
 
+local debug = require 'debug'
+
 local function foo ()
   local t = {}
   do

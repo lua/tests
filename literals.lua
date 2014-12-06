@@ -28,7 +28,8 @@ assert(010 .. 020 .. -030 == "1020-30")
 assert("\x00\x05\x10\x1f\x3C\xfF\xe8" == "\0\5\16\31\60\255\232")
 
 local function lexstring (x, y, n)
-  local f = assert(load('return '..x..', debug.getinfo(1).currentline'))
+  local f = assert(load('return ' .. x ..
+            ', require"debug".getinfo(1).currentline'))
   local s, l = f()
   assert(s == y and l == n)
 end
@@ -209,7 +210,7 @@ hi
 y = "\
 hello\r\n\
 "
-return debug.getinfo(1).currentline
+return require"debug".getinfo(1).currentline
 ]]
 
 for _, n in pairs{"\n", "\r", "\n\r", "\r\n"} do

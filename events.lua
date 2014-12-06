@@ -1,5 +1,7 @@
 print('testing metatables')
 
+local debug = require'debug'
+
 X = 20; B = 30
 
 _ENV = setmetatable({}, {__index=_G})
@@ -384,13 +386,13 @@ assert(a.x == 1 and rawget(a, "x", 3) == 1)
 print '+'
 
 -- testing metatables for basic types
-local debug = require'debug'
-mt = {}
+mt = {__index = function (a,b) return a+b end,
+      __len = function (x) return math.floor(x) end}
 debug.setmetatable(10, mt)
 assert(getmetatable(-2) == mt)
-mt.__index = function (a,b) return a+b end
 assert((10)[3] == 13)
 assert((10)["3"] == 13)
+assert(#3.45 == 3)
 debug.setmetatable(23, nil)
 assert(getmetatable(-2) == nil)
 

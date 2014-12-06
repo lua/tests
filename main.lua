@@ -196,6 +196,14 @@ RUN('echo "print(...)" | lua -e "arg[1] = 100" - > %s', out)
 checkout("100\n")
 NoRun("'arg' is not a table", 'echo "" | lua -e "arg = 1" -')
 
+-- test error in 'print'
+RUN('echo 10 | lua -e "print=nil" -i > /dev/null 2> %s', out)
+assert(string.find(getoutput(), "error calling 'print'"))
+
+-- test 'debug.debug'
+RUN('echo "io.stderr:write(1000)\ncont" | lua -e "require\'debug\'.debug()" 2> %s', out)
+checkout("lua_debug> 1000lua_debug> ")
+
 -- test many arguments
 prepfile[[print(({...})[30])]]
 RUN('lua %s %s > %s', prog, string.rep(" a", 30), out)

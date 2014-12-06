@@ -37,6 +37,8 @@ T = rawget(_G, "T")  -- avoid problems with 'strict' module
 math.randomseed(0)
 
 
+-- 'debug' defined only if not in "test" mode
+assert((T == nil) == (debug ~= nil))
 
 --[=[
   example of a long [comment],
@@ -185,6 +187,9 @@ if #msgs > 0 then
   end
   print()
 end
+
+-- no test module should define 'debug'
+assert((T == nil) == (debug ~= nil))
 
 local debug = require "debug"
 

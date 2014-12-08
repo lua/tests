@@ -52,11 +52,22 @@ print('+')
 
 if not _port then --[
 
--- auxiliary directory with C modules and temporary files
-local DIR = "libs/"
+local dirsep = string.match(package.config, "^([^\n]+)\n")
 
--- prepend DIR to a name
-local function D (x) return DIR .. x end
+-- auxiliary directory with C modules and temporary files
+local DIR = "libs" .. dirsep
+
+-- prepend DIR to a name and correct directory separators
+local function D (x)
+  x = string.gsub(x, "/", dirsep)
+  return DIR .. x
+end
+
+-- prepend DIR and pospend proper C lib. extension to a name
+local function DC (x)
+  local ext = (dirsep == '\\') and ".dll" or ".so"
+  return D(x .. ext)
+end
 
 
 local function createfiles (files, preextras, posextras)
@@ -100,7 +111,7 @@ assert(package.searchpath("C.lua", D"?", "", "") == D"C.lua")
 assert(package.searchpath("C.lua", D"?", ".", ".") == D"C.lua")
 assert(package.searchpath("--x-", D"?", "-", "X") == D"XXxX")
 assert(package.searchpath("---xX", D"?", "---", "XX") == D"XXxX")
-assert(package.searchpath(D"C.lua", "?", "/") == D"C.lua")
+assert(package.searchpath(D"C.lua", "?", dirsep) == D"C.lua")
 assert(package.searchpath(".\\C.lua", D"?", "\\") == D"./C.lua")
 
 local oldpath = package.path
@@ -223,7 +234,7 @@ assert(not pcall(module, 'XUXU'))
 local p = ""   -- On Mac OS X, redefine this to "_"
 
 -- check whether loadlib works in this system
-local st, err, when = package.loadlib(D"lib1.so", "*")
+local st, err, when = package.loadlib(DC"lib1", "*")
 if not st then
   local f, err, when = package.loadlib("donotexist", p.."xuxu")
   assert(not f and type(err) == "string" and when == "absent")
@@ -231,34 +242,34 @@ if not st then
   print(err, when)
 else
   -- tests for loadlib
-  local f = assert(package.loadlib(D"lib1.so", p.."onefunction"))
+  local f = assert(package.loadlib(DC"lib1", p.."onefunction"))
   local a, b = f(15, 25)
   assert(a == 25 and b == 15)
 
-  f = assert(package.loadlib(D"lib1.so", p.."anotherfunc"))
+  f = assert(package.loadlib(DC"lib1", p.."anotherfunc"))
   assert(f(10, 20) == "10%20\n")
 
   -- check error messages
-  local f, err, when = package.loadlib(D"lib1.so", p.."xuxu")
+  local f, err, when = package.loadlib(DC"lib1", p.."xuxu")
   assert(not f and type(err) == "string" and when == "init")
   f, err, when = package.loadlib("donotexist", p.."xuxu")
   assert(not f and type(err) == "string" and when == "open")
 
   -- symbols from 'lib1' must be visible to other libraries
-  f = assert(package.loadlib(D"lib11.so", p.."luaopen_lib11"))
+  f = assert(package.loadlib(DC"lib11", p.."luaopen_lib11"))
   assert(f() == "exported")
 
   -- test C modules with prefixes in names
-  package.cpath = D"?.so"
+  package.cpath = DC"?"
   local lib2 = require"lib2-v2"
   -- check correct access to global environment and correct
   -- parameters
-  assert(_ENV.x == "lib2-v2" and _ENV.y == D"lib2-v2.so")
+  assert(_ENV.x == "lib2-v2" and _ENV.y == DC"lib2-v2")
   assert(lib2.id("x") == "x")
 
   -- test C submodules
   local fs = require"lib1.sub"
-  assert(_ENV.x == "lib1.sub" and _ENV.y == D"lib1.so")
+  assert(_ENV.x == "lib1.sub" and _ENV.y == DC"lib1")
   assert(fs.id(45) == 45)
 end
 

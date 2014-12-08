@@ -7,6 +7,12 @@ local mt = getmetatable(_G) or {}
 local oldmm = mt.__index
 mt.__index = nil
 
+local function checkerr (msg, f, ...)
+  local st, err = pcall(f, ...)
+  assert(not st and string.find(err, msg))
+end
+
+
 local function doit (s)
   local f, msg = load(s)
   if f == nil then return msg end
@@ -147,6 +153,22 @@ end
 checkmessage("(io.write or print){}", "io.write")
 checkmessage("(collectgarbage or print){}", "collectgarbage")
 
+-- errors in functions without debug info
+do
+  local f = function (a) return a + 1 end
+  f = assert(load(string.dump(f, true)))
+  assert(f(3) == 4)
+  checkerr("^%?:%-1:", f, {})
+
+  -- code with a move to a local var ('OP_MOV A B' with A<B)
+  f = function () local a; a = {}; return a + 2 end
+  -- no debug info (so that 'a' is unknown)
+  f = assert(load(string.dump(f, true)))
+  -- symbolic execution should not get lost
+  checkerr("^%?:%-1:.*table value", f)
+end
+
+
 -- tests for field accesses after RK limit
 local t = {}
 for i = 1, 1000 do
@@ -225,9 +247,8 @@ assert(string.find(f(), "C stack overflow"))
 
 checkmessage("coroutine.yield()", "outside a coroutine")
 
-f1 = function () table.sort({1,2,3}, coroutine.yield) end
-f = coroutine.wrap(function () return pcall(f1) end)
-assert(string.find(select(2, f()), "yield across"))
+f = coroutine.wrap(function () table.sort({1,2,3}, coroutine.yield) end)
+checkerr("yield across", f)
 
 
 -- testing size of 'source' info; size of buffer for that info is
@@ -362,17 +383,16 @@ if not _soft then
  
   local res, msg = xpcall(loop, function (m)
     assert(string.find(m, "stack overflow"))
-    local res, msg = pcall(loop)
-    assert(string.find(msg, "error handling"))
+    checkerr("error handling", loop)
     assert(math.sin(0) == 0)
     return 15
   end)
   assert(msg == 15)
 
-  res, msg = pcall(function ()
+  local f = function ()
     for i = 999900, 1000000, 1 do table.unpack({}, 1, i) end
-  end)
-  assert(string.find(msg, "too many results"))
+  end
+  checkerr("too many results", f)
 
 end
 
@@ -389,6 +409,10 @@ do
   local function f() error{msg='x'} end
   res, msg = xpcall(f, function (r) return {msg=r.msg..'y'} end)
   assert(msg.msg == 'xy')
+
+  -- 'assert' with extra arguments
+  res, msg = pcall(assert, false, "X", t)
+  assert(not res and msg == "X")
  
   -- 'assert' with no message
   res, msg = pcall(function () assert(false) end)
@@ -396,15 +420,15 @@ do
   assert(tonumber(line) == debug.getinfo(1, "l").currentline - 2)
 
   -- 'assert' with non-string messages
-  res, msg = pcall(function () assert(false, t) end)
+  res, msg = pcall(assert, false, t)
   assert(not res and msg == t)
 
-  res, msg = pcall(function () assert(nil, nil) end)
+  res, msg = pcall(assert, nil, nil)
   assert(not res and msg == nil)
 
-  -- 'assert' without arguments (behavior not specified, but must give
-  -- some kind of error)
-  assert(not pcall(assert))
+  -- 'assert' without arguments
+  res, msg = pcall(assert)
+  assert(not res and string.find(msg, "value expected"))
 end
 
 -- xpcall with arguments

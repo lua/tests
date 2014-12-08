@@ -1,6 +1,6 @@
 -- testing debug library
 
-debug = require "debug"
+local debug = require "debug"
 
 local function dostring(s) return assert(load(s))() end
 
@@ -9,6 +9,8 @@ print"testing debug library and debug information"
 do
 local a=1
 end
+
+assert(not debug.gethook())
 
 function test (s, l, p)
   collectgarbage()   -- avoid gc during trace
@@ -32,7 +34,7 @@ do
   a = debug.getinfo(print, "L")
   assert(a.activelines == nil)
   local b = debug.getinfo(test, "SfL")
-  assert(b.name == nil and b.what == "Lua" and b.linedefined == 13 and
+  assert(b.name == nil and b.what == "Lua" and b.linedefined == 15 and
          b.lastlinedefined == b.linedefined + 10 and
          b.func == test and not string.find(b.short_src, "%["))
   assert(b.activelines[b.linedefined + 1] and
@@ -212,6 +214,24 @@ local function foo () return debug.getlocal(1, -1) end
 assert(not foo(10))
 
 
+do   -- test hook presence in debug info
+  assert(not debug.gethook())
+  local count = 0
+  local function f ()
+    assert(debug.getinfo(1).namewhat == "hook")
+    local sndline = string.match(debug.traceback(), "\n(.-)\n")
+    assert(string.find(sndline, "hook"))
+    count = count + 1
+  end
+  debug.sethook(f, "l")
+  local a = 0
+  _ENV.a = a
+  a = 1
+  debug.sethook()
+  assert(count == 4)
+end
+
+
 a = {}; L = nil
 local glob = 1
 local oldglob = glob
@@ -241,7 +261,7 @@ function f(a,b)
   assert(debug.setlocal(2, 4, "maçã") == "B")
   x = debug.getinfo(2)
   assert(x.func == g and x.what == "Lua" and x.name == 'g' and
-         x.nups == 1 and string.find(x.source, "^@.*db%.lua$"))
+         x.nups == 2 and string.find(x.source, "^@.*db%.lua$"))
   glob = glob+1
   assert(debug.getinfo(1, "l").currentline == L+1)
   assert(debug.getinfo(1, "l").currentline == L+2)

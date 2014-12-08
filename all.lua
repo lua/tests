@@ -29,16 +29,18 @@ if usertests then
 end
 
 
--- no "internal" tests for user tests
-if usertests then T = nil end
+local olddebug = debug
+
+if usertests then
+  T = nil    -- no "internal" tests for user tests
+else
+  -- 'debug' defined only if not in "test" mode
+  assert((T == nil) == (debug ~= nil))
+end
 
 T = rawget(_G, "T")  -- avoid problems with 'strict' module
 
 math.randomseed(0)
-
-
--- 'debug' defined only if not in "test" mode
-assert((T == nil) == (debug ~= nil))
 
 --[=[
   example of a long [comment],
@@ -117,7 +119,7 @@ end
 --
 local function report (n) print("\n***** FILE '"..n.."'*****") end
 local olddofile = dofile
-dofile = function (n, strip)
+local dofile = function (n, strip)
   showmem()
   local c = os.clock()
   print(string.format("time: %g (+%g)", c - initclock, c - lastclock))
@@ -189,7 +191,7 @@ if #msgs > 0 then
 end
 
 -- no test module should define 'debug'
-assert((T == nil) == (debug ~= nil))
+assert(debug == olddebug)
 
 local debug = require "debug"
 

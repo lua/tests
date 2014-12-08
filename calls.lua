@@ -346,5 +346,42 @@ assert((function () return nil end)(4) == nil)
 assert((function () local a; return a end)(4) == nil)
 assert((function (a) return a end)() == nil)
 
+
+print("testing binary chunks")
+do
+  local header = string.pack("c4BBc6BBBBBjn",
+    "\27Lua",               -- signature
+    5*16 + 3,                -- version 5.3
+    0,                       -- format
+    "\x19\x93\r\n\x1a\n",    -- data
+    #string.pack("i", 0),    -- sizeof(int)
+    #string.pack("s", ""),   -- sizeof(size_t)
+    4,                       -- size of instruction
+    #string.pack("j", 0),   -- sizeof(lua integer)
+    #string.pack("n", 0),   -- sizeof(lua number)
+    0x5678,                 -- LUAC_INT
+    370.5                   -- LUAC_NUM
+  )
+  local c = string.dump(function () local a = 1; local b = 3; return a+b*3 end)
+
+  assert(string.sub(c, 1, #header) == header)
+
+  -- corrupted header
+  for i = 1, #header do
+    local s = string.sub(c, 1, i - 1) ..
+              string.char(string.byte(string.sub(c, i, i)) + 1) ..
+              string.sub(c, i + 1, -1)
+    assert(#s == #c)
+    assert(not load(s))
+  end
+
+  -- loading truncated binary chunks
+  for i = 1, #c - 1 do
+    local st, msg = load(string.sub(c, 1, i))
+    assert(not st and string.find(msg, "truncated"))
+  end
+  assert(assert(load(c))() == 10)
+end
+
 print('OK')
 return deep

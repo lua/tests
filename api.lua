@@ -354,12 +354,14 @@ do
   T.totalmem(0)          -- restore high limit
 
   -- stack error
-  local msg = T.checkpanic[[
-    pushstring "function f() f() end"
-    loadstring -1; call 0 0
-    getglobal f; call 0 0
-  ]]
-  assert(string.find(msg, "stack overflow"))
+  if not _soft then
+    local msg = T.checkpanic[[
+      pushstring "function f() f() end"
+      loadstring -1; call 0 0
+      getglobal f; call 0 0
+    ]]
+    assert(string.find(msg, "stack overflow"))
+  end
 
 end
 

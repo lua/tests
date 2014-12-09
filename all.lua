@@ -28,17 +28,14 @@ if usertests then
   _nomsg = true
 end
 
-
-local olddebug = debug
+-- tests should require debug when needed
+debug = nil
 
 if usertests then
   T = nil    -- no "internal" tests for user tests
 else
-  -- 'debug' defined only if not in "test" mode
-  assert((T == nil) == (debug ~= nil))
+  T = rawget(_G, "T")  -- avoid problems with 'strict' module
 end
-
-T = rawget(_G, "T")  -- avoid problems with 'strict' module
 
 math.randomseed(0)
 
@@ -191,7 +188,7 @@ if #msgs > 0 then
 end
 
 -- no test module should define 'debug'
-assert(debug == olddebug)
+assert(debug == nil)
 
 local debug = require "debug"
 

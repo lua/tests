@@ -496,8 +496,8 @@ assert(debug.traceback(print) == print)
 assert(debug.traceback(print, 4) == print)
 assert(string.find(debug.traceback("hi", 4), "^hi\n"))
 assert(string.find(debug.traceback("hi"), "^hi\n"))
-assert(not string.find(debug.traceback("hi"), "'traceback'"))
-assert(string.find(debug.traceback("hi", 0), "'traceback'"))
+assert(not string.find(debug.traceback("hi"), "[.']traceback'"))
+assert(string.find(debug.traceback("hi", 0), "[.']traceback'"))
 assert(string.find(debug.traceback(), "^stack traceback:\n"))
 
 do  -- C-function names in traceback
@@ -596,13 +596,13 @@ function f(i) if i==0 then error(i) else coroutine.yield(); f(i-1) end end
 
 co = coroutine.create(function (x) f(x) end)
 a, b = coroutine.resume(co, 3)
-t = {"'yield'", "'f'", "in function <"}
+t = {"[.']yield'", "[.']f'", "in function <"}
 while coroutine.status(co) == "suspended" do
   checktraceback(co, t)
   a, b = coroutine.resume(co)
   table.insert(t, 2, "'f'")   -- one more recursive call to 'f'
 end
-t[1] = "'error'"
+t[1] = "[.']error'"
 checktraceback(co, t)
 
 

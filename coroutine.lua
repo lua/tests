@@ -732,7 +732,7 @@ co = coroutine.wrap(function (...) return
        [[  # 3th continuation
           pushvalue 6   # function which is last arg. to 'testC' here
           pushnum 10; pushnum 20;
-          pcall 2 0     # call should throw an error and return to next line
+          pcall 2 0 0   # call should throw an error and return to next line
           pop 1		# remove error message
           pushvalue 6
           getglobal status; getglobal ctx

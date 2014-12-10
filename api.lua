@@ -109,6 +109,25 @@ do   -- testing 'rotate'
   tcheck(t, {10, 20, 30, 40})
 end
 
+-- testing non-function message handlers
+do
+  local f = T.makeCfunc[[
+    getglobal error
+    pushstring bola
+    pcall 1 1 1   # call 'error' with given handler
+    pushstatus
+    return 2     # return error message and status
+  ]]
+
+  local msg, st = f({})     -- invalid handler
+  assert(st == "ERRERR" and string.find(msg, "error handling"))
+  local msg, st = f(nil)     -- invalid handler
+  assert(st == "ERRERR" and string.find(msg, "error handling"))
+
+  local a = setmetatable({}, {__call = function (_, x) return x:upper() end})
+  local msg, st = f(a)   -- callable handler
+  assert(st == "ERRRUN" and msg == "BOLA")
+end
 
 t = pack(T.testC("insert 3; pushvalue 3; remove 3; pushvalue 2; remove 2; \
                   insert 2; pushvalue 1; remove 1; insert 1; \
@@ -127,7 +146,7 @@ tcheck(t, {n=6,1,2,3,4,"alo", "joao"})
 do  -- test returning more results than fit in the caller stack
   local a = {}
   for i=1,1000 do a[i] = true end; a[999] = 10
-  local b = T.testC([[pcall 1 -1; pop 1; tostring -1; return 1]],
+  local b = T.testC([[pcall 1 -1 0; pop 1; tostring -1; return 1]],
                     table.unpack, a)
   assert(b == "10")
 end
@@ -404,9 +423,9 @@ prog, g, t = nil
 -- testing errors
 
 a = T.testC([[
-  loadstring 2; pcall 0,1;
-  pushvalue 3; insert -2; pcall 1, 1;
-  pcall 0, 0;
+  loadstring 2; pcall 0 1 0;
+  pushvalue 3; insert -2; pcall 1 1 0;
+  pcall 0 0 0;
   return 1
 ]], "x=150", function (a) assert(a==nil); return 3 end)
 
@@ -430,7 +449,7 @@ end
 
 if not _soft then
   checkerrnopro("pushnum 3; call 0 0", "attempt to call")
-  print"stack overflow in unprotected thread"
+  print"testing stack overflow in unprotected thread"
   function f () f() end
   checkerrnopro("getglobal 'f'; call 0 0;", "stack overflow")
 end

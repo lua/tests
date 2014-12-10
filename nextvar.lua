@@ -216,6 +216,10 @@ assert(xxx==find("xxx"))
 -- invalid key to 'next'
 assert(string.find(select(2, pcall(next, {10,20}, 3)), "invalid key"))
 
+-- both 'pairs' and 'ipairs' need an argument
+assert(string.find(select(2, pcall(pairs)), "bad argument"))
+assert(string.find(select(2, pcall(ipairs)), "bad argument"))
+
 print('+')
 
 a = {}

@@ -355,7 +355,7 @@ do
     0,                       -- format
     "\x19\x93\r\n\x1a\n",    -- data
     string.packsize("i"),    -- sizeof(int)
-    #string.pack("s", "") ,  -- sizeof(size_t)
+    string.packsize("T"),    -- sizeof(size_t)
     4,                       -- size of instruction
     string.packsize("j"),    -- sizeof(lua integer)
     string.packsize("n"),    -- sizeof(lua number)

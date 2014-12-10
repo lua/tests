@@ -193,7 +193,7 @@ assert(debug == nil)
 local debug = require "debug"
 
 print(string.format("%d-bit integers, %d-bit floats",
-        #string.pack("j", 0) * 8, #string.pack("n", 0) * 8))
+        string.packsize("j") * 8, string.packsize("n") * 8))
 
 debug.sethook(function (a) assert(type(a) == 'string') end, "cr")
 

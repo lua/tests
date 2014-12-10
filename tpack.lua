@@ -1,4 +1,5 @@
 local pack = string.pack
+local packsize = string.packsize
 local unpack = string.unpack
 
 print "testing pack/unpack"
@@ -6,16 +7,16 @@ print "testing pack/unpack"
 -- maximum size for integers
 local NB = 16
 
-local sizeshort = #pack("h", 0)
-local sizeint = #pack("i", 0)
-local sizelong = #pack("l", 0)
-local sizesize_t = #pack("T", 0)
-local sizeLI = #pack("j", 0)
-local sizefloat = #pack("f", 0)
-local sizedouble = #pack("d", 0)
-local sizenumber = #pack("n", 0)
+local sizeshort = packsize("h")
+local sizeint = packsize("i")
+local sizelong = packsize("l")
+local sizesize_t = packsize("T")
+local sizeLI = packsize("j")
+local sizefloat = packsize("f")
+local sizedouble = packsize("d")
+local sizenumber = packsize("n")
 local little = (pack("i2", 1) == "\1\0")
-local align = #pack("!xXi16")
+local align = packsize("!xXi16")
 
 assert(1 <= sizeshort and sizeshort <= sizeint and sizeint <= sizelong and
        sizefloat <= sizedouble)
@@ -55,6 +56,7 @@ for i = 1, NB do
   -- small numbers with signal extension ("\xFF...")
   local s = string.rep("\xff", i)
   assert(pack("i" .. i, -1) == s)
+  assert(packsize("i" .. i) == #s)
   assert(unpack("i" .. i, s) == -1)
 
   -- small unsigned number ("\0...\xAA")
@@ -124,6 +126,8 @@ checkerror("invalid format option 'r'", pack, "i3r", 0)
 checkerror("16%-byte integer", unpack, "i16", string.rep('\3', 16))
 checkerror("not power of 2", pack, "!4i3", 0);
 checkerror("missing size", pack, "c", "")
+checkerror("variable%-length format", packsize, "s")
+checkerror("variable%-length format", packsize, "z")
 
 -- overflow in packing
 for i = 1, sizeLI - 1 do
@@ -200,8 +204,10 @@ end
 
 do
   assert(pack("c0", "") == "")
+  assert(packsize("c0") == 0)
   assert(unpack("c0", "") == "")
   assert(pack("<! c3", "abc") == "abc")
+  assert(packsize("<! c3") == 3)
   assert(pack(">!4 c6", "abcdef") == "abcdef")
   checkerror("wrong length", pack, "c3", "ab")
   checkerror("2", pack, "c5", "123456")
@@ -213,6 +219,7 @@ end
 -- testing multiple types and sequence
 do
   local x = pack("<b h b f d f n i", 1, 2, 3, 4, 5, 6, 7, 8)
+  assert(#x == packsize("<b h b f d f n i"))
   local a, b, c, d, e, f, g, h = unpack("<b h b f d f n i", x)
   assert(a == 1 and b == 2 and c == 3 and d == 4 and e == 5 and f == 6 and
          g == 7 and h == 8) 
@@ -222,6 +229,7 @@ print "testing alignment"
 do
   assert(pack(" < i1 i2 ", 2, 3) == "\2\3\0")   -- no alignment by default
   local x = pack(">!8 b Xh i4 i8 c1 Xi8", -12, 100, 200, "\xEC")
+  assert(#x == packsize(">!8 b Xh i4 i8 c1 Xi8"))
   assert(x == "\xf4" .. "\0\0\0" ..
               "\0\0\0\100" ..
               "\0\0\0\0\0\0\0\xC8" .. 
@@ -237,20 +245,21 @@ do
          e == 5 and f == "world" and g == "xy" and (pos - 1) % 4 == 0)
 
   x = pack(" b b Xd b Xb x", 1, 2, 3)
+  assert(packsize(" b b Xd b Xb x") == 4)
   assert(x == "\1\2\3\0")
   a, b, c, pos = unpack("bbXdb", x)
   assert(a == 1 and b == 2 and c == 3 and pos == #x)
 
   -- only alignment
-  assert(#pack("!8 xXi8") == 8)
+  assert(packsize("!8 xXi8") == 8)
   local pos = unpack("!8 xXi8", "0123456701234567"); assert(pos == 9)
-  assert(#pack("!8 xXi2") == 2)
+  assert(packsize("!8 xXi2") == 2)
   local pos = unpack("!8 xXi2", "0123456701234567"); assert(pos == 3)
-  assert(#pack("!2 xXi2") == 2)
+  assert(packsize("!2 xXi2") == 2)
   local pos = unpack("!2 xXi2", "0123456701234567"); assert(pos == 3)
-  assert(#pack("!2 xXi8") == 2)
+  assert(packsize("!2 xXi8") == 2)
   local pos = unpack("!2 xXi8", "0123456701234567"); assert(pos == 3)
-  assert(#pack("!16 xXi16") == 16)
+  assert(packsize("!16 xXi16") == 16)
   local pos = unpack("!16 xXi16", "0123456701234567"); assert(pos == 17)
 
   checkerror("invalid next option", pack, "X")

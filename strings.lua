@@ -2,6 +2,13 @@ print('testing strings and string library')
 
 local maxi, mini = math.maxinteger, math.mininteger
 
+
+local function checkerror (msg, f, ...)
+  local s, err = pcall(f, ...)
+  assert(not s and string.find(err, msg))
+end
+
+
 -- testing string comparisons
 assert('alo' < 'alo1')
 assert('' < 'a')
@@ -89,6 +96,12 @@ assert(string.lower("\0ABCc%$") == "\0abcc%$")
 assert(string.rep('teste', 0) == '')
 assert(string.rep('tés\00tê', 2) == 'tés\0têtés\000tê')
 assert(string.rep('', 10) == '')
+
+if string.packsize("i") == 4 then
+  -- result length would be 2^31
+  checkerror("too large", string.rep, 'a', (1 << 31))
+  checkerror("too large", string.rep, 'a', (1 << 30), ',')
+end
 
 -- repetitions with separator
 assert(string.rep('teste', 0, 'xuxu') == '')
@@ -217,8 +230,7 @@ end
 -- errors in format
 
 local function check (fmt, msg)
-  local s, err = pcall(string.format, fmt, 10)
-  assert(not s and string.find(err, msg))
+  checkerror(msg, string.format, fmt, 10)
 end
 
 local aux = string.rep('0', 600)

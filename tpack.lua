@@ -129,6 +129,18 @@ checkerror("missing size", pack, "c", "")
 checkerror("variable%-length format", packsize, "s")
 checkerror("variable%-length format", packsize, "z")
 
+-- overflow in option size  (error will be in digit after limit)
+checkerror("invalid format", packsize, "c1" .. string.rep("0", 40))
+
+if packsize("i") == 4 then
+  -- result would be 2^31  (2^3 repetitions of 2^28 strings)
+  local s = string.rep("c268435456", 2^3)
+  checkerror("too large", packsize, s)
+  -- one less is OK
+  s = string.rep("c268435456", 2^3 - 1) .. "c268435455"
+  assert(packsize(s) == 0x7fffffff)
+end
+
 -- overflow in packing
 for i = 1, sizeLI - 1 do
   local umax = (1 << (i * 8)) - 1

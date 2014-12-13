@@ -98,8 +98,8 @@ assert(string.rep('tés\00tê', 2) == 'tés\0têtés\000tê')
 assert(string.rep('', 10) == '')
 
 if string.packsize("i") == 4 then
-  -- result length would be 2^31
-  checkerror("too large", string.rep, 'a', (1 << 31))
+  -- result length would be 2^31 (int overflow)
+  checkerror("too large", string.rep, 'aa', (1 << 30))
   checkerror("too large", string.rep, 'a', (1 << 30), ',')
 end
 
@@ -219,8 +219,13 @@ if not pcall(string.format, "%a", 0) then
   (Message or print)("\n >>> format '%a' not available <<<\n")
 else
   print("testing 'format %a %A'")
-  assert(string.format("%.2a", 0.5) == "0x1.00p-1")
-  assert(string.format("%.4A", -3) == "-0X1.8000P+1")
+  local s = string.format("%.2a", 0.5)
+  -- ISO C does not enforce a unique format...
+  assert(string.find(s, "^0x%x%.%x%xp[-+]%d$"))
+  assert(tonumber(s) == 0.5)
+  s = string.format("%.4A", -3)
+  assert(string.find(s, "^%-0X%x%.%x%x%x%xP[-+]%d$"))
+  assert(tonumber(s) == -3.0)
   assert(tonumber(string.format("%A", 0x1fffff.0)) == 0X1.FFFFFP+20)
   assert(tonumber(string.format("%.30a", -0.1)) == -0.1)
   assert(tonumber(string.format("%a", -3^12)) == -3^12)

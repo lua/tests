@@ -233,8 +233,7 @@ checkmessage("string.sub('a', {})", "#2")
 checkmessage("('a'):sub{}", "#1")
 
 checkmessage("table.sort({1,2,3}, table.sort)", "'table.sort'")
--- next message may be 'setmetatable' or '_G.setmetatable'
-checkmessage("string.gsub('s', 's', setmetatable)", "setmetatable'")
+checkmessage("string.gsub('s', 's', setmetatable)", "'setmetatable'")
 
 -- tests for errors in coroutines
 

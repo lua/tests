@@ -349,7 +349,7 @@ assert((function (a) return a end)() == nil)
 
 print("testing binary chunks")
 do
-  local header = string.pack("c4BBc6BBBBBjn",
+  local header = string.pack("c4BBc6BBBBBj",
     "\27Lua",                -- signature
     5*16 + 3,                -- version 5.3
     0,                       -- format
@@ -359,8 +359,8 @@ do
     4,                       -- size of instruction
     string.packsize("j"),    -- sizeof(lua integer)
     string.packsize("n"),    -- sizeof(lua number)
-    0x5678,                  -- LUAC_INT
-    370.5                    -- LUAC_NUM
+    0x5678                   -- LUAC_INT
+    -- LUAC_NUM may not have a unique binary representation (padding...)
   )
   local c = string.dump(function () local a = 1; local b = 3; return a+b*3 end)
 

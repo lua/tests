@@ -496,8 +496,8 @@ assert(debug.traceback(print) == print)
 assert(debug.traceback(print, 4) == print)
 assert(string.find(debug.traceback("hi", 4), "^hi\n"))
 assert(string.find(debug.traceback("hi"), "^hi\n"))
-assert(not string.find(debug.traceback("hi"), "[.']traceback'"))
-assert(string.find(debug.traceback("hi", 0), "[.']traceback'"))
+assert(not string.find(debug.traceback("hi"), "'debug.traceback'"))
+assert(string.find(debug.traceback("hi", 0), "'debug.traceback'"))
 assert(string.find(debug.traceback(), "^stack traceback:\n"))
 
 do  -- C-function names in traceback

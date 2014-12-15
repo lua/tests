@@ -352,7 +352,6 @@ do
   -- check that 'pcall' captured the exception and script continued running
   assert(f:read() == "42")  -- expected output
   assert(f:close())
-  assert(not kill(pid))  -- process must be dead now
   print("done")
 
   -- Lua script in a looooog unbreakable search
@@ -370,7 +369,6 @@ do
     end
   end
   assert(f:close())
-  assert(not kill(pid))   -- it should be dead now
   assert(n >= 2)
   print(string.format("done (with %d kills)", n))
 

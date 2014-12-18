@@ -65,8 +65,8 @@ assert(not io.open(file))
 io.output(file)
 assert(io.output() ~= io.stdout)
 
-do   -- invalid seek
-  local status, msg, code = io.stdin.seek(io.stdin, "set", 1000)
+if not _port then   -- invalid seek
+  local status, msg, code = io.stdin:seek("set", 1000)
   assert(not status and type(msg) == "string" and type(code) == "number")
 end
 

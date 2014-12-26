@@ -134,9 +134,7 @@ end
 function bit.lrotate (a ,b)
   b = b & 31
   a = a & 0xFFFFFFFF
-  if b ~= 0 then
-    a = (a << b) | (a >> (32 - b))
-  end
+  a = (a << b) | (a >> (32 - b))
   return a & 0xFFFFFFFF
 end
 
@@ -195,6 +193,8 @@ assert(bit32.band((1 << 40) - 4) == 0xfffffffc)
 
 assert(bit32.lrotate(0, -1) == 0)
 assert(bit32.lrotate(0, 7) == 0)
+assert(bit32.lrotate(0x12345678, 0) == 0x12345678)
+assert(bit32.lrotate(0x12345678, 32) == 0x12345678)
 assert(bit32.lrotate(0x12345678, 4) == 0x23456781)
 assert(bit32.rrotate(0x12345678, -4) == 0x23456781)
 assert(bit32.lrotate(0x12345678, -8) == 0x78123456)

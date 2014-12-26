@@ -1,3 +1,5 @@
+-- $Id$
+
 if T==nil then
   (Message or print)('\n >>> testC not active: skipping opcode tests <<<\n')
   return
@@ -25,10 +27,10 @@ end
 local function foo ()
   local a
   a = 3;
-  a = 0; a = 0.0; a = 3.0 - 3
+  a = 0; a = 0.0; a = -7 + 7
   a = 3.78/4; a = 3.78/4
   a = -3.78/4; a = 3.78/4; a = -3.78/4
-  a = -3.79/4; a = 0.0; a = 0;
+  a = -3.79/4; a = 0.0; a = -0;
   a = 3; a = 3.0; a = 3; a = 3.0
 end
 
@@ -145,11 +147,13 @@ local function checkK (func, val)
   assert(#k == 1 and k[1] == val and math.type(k[1]) == math.type(val))
   assert(func() == val)
 end
+checkK(function () return 0.0 end, 0.0)
+checkK(function () return 0 end, 0)
+checkK(function () return -0//1 end, 0)
 checkK(function () return 3^-1 end, 1/3)
 checkK(function () return (1 + 1)^(50 + 50) end, 2^100)
 checkK(function () return (-2)^(31 - 2) end, -0x20000000 + 0.0)
 checkK(function () return (-3^0 + 5) // 3.0 end, 1.0)
-checkK(function () return -3 / 0 end, -1/0)
 checkK(function () return -3 % 5 end, 2)
 checkK(function () return -((2.0^8 + -(-1)) % 8)/2 * 4 - 3 end, -5.0)
 checkK(function () return -((2^8 + -(-1)) % 8)//2 * 4 - 3 end, -7.0)
@@ -157,6 +161,13 @@ checkK(function () return 0xF0.0 | 0xCC.0 ~ 0xAA & 0xFD end, 0xF4)
 checkK(function () return ~(~0xFF0 | 0xFF0) end, 0)
 checkK(function () return ~~-100024.0 end, -100024)
 checkK(function () return ((100 << 6) << -4) >> 2 end, 100)
+
+
+-- no foldings
+check(function () return -0.0 end, 'LOADK', 'UNM', 'RETURN')
+check(function () return 3/0 end, 'DIV', 'RETURN')
+check(function () return 0%0 end, 'MOD', 'RETURN')
+check(function () return -4//0 end, 'IDIV', 'RETURN')
 
 -- bug in constant folding for 5.1
 check(function () return -nil end, 'LOADNIL', 'UNM', 'RETURN')

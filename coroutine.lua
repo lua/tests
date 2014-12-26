@@ -1,3 +1,5 @@
+-- $Id$
+
 print "testing coroutines"
 
 local debug = require'debug'

@@ -1,3 +1,5 @@
+-- $Id$
+
 print "testing RK"
 
 -- testing opcodes with RK arguments larger than K limit

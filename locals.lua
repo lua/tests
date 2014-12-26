@@ -1,3 +1,5 @@
+-- $Id$
+
 print('testing local variables and environments')
 
 local debug = require"debug"

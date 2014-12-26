@@ -1,3 +1,5 @@
+-- $Id$
+
 -- testing debug library
 
 local debug = require "debug"
@@ -34,7 +36,7 @@ do
   a = debug.getinfo(print, "L")
   assert(a.activelines == nil)
   local b = debug.getinfo(test, "SfL")
-  assert(b.name == nil and b.what == "Lua" and b.linedefined == 15 and
+  assert(b.name == nil and b.what == "Lua" and b.linedefined == 17 and
          b.lastlinedefined == b.linedefined + 10 and
          b.func == test and not string.find(b.short_src, "%["))
   assert(b.activelines[b.linedefined + 1] and

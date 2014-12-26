@@ -1,3 +1,5 @@
+-- $Id$
+
 print("testing numbers and math lib")
 
 local minint = math.mininteger

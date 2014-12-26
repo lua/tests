@@ -1,3 +1,4 @@
+-- $Id$
 
 if T==nil then
   (Message or print)('\n >>> testC not active: skipping API tests <<<\n')

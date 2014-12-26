@@ -1,3 +1,5 @@
+-- $Id$
+
 print('testing vararg')
 
 _G.arg = nil

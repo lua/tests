@@ -1,3 +1,5 @@
+-- $Id$
+
 print "testing require"
 
 assert(require"string" == string)

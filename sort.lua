@@ -1,3 +1,5 @@
+-- $Id$
+
 print "testing (parts of) table library"
 
 print "testing unpack"

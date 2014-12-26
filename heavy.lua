@@ -1,3 +1,5 @@
+-- $Id$
+
 print("creating a string too long")
 do
   local st, msg = pcall(function ()

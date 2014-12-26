@@ -1,3 +1,5 @@
+-- $Id$
+
 print('testing pattern matching')
 
 local function checkerror (msg, f, ...)

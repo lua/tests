@@ -1,3 +1,5 @@
+-- $Id$
+
 print('testing tables, next, and for')
 
 local a = {}

@@ -1,3 +1,5 @@
+-- $Id$
+
 local pack = string.pack
 local packsize = string.packsize
 local unpack = string.unpack

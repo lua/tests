@@ -1,3 +1,5 @@
+-- $Id$
+
 if _soft then
   return 'a'
 end

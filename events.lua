@@ -1,3 +1,5 @@
+-- $Id$
+
 print('testing metatables')
 
 local debug = require'debug'

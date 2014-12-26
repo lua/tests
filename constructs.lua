@@ -1,3 +1,5 @@
+-- $Id$
+
 ;;print "testing syntax";;
 
 local debug = require "debug"
@@ -6,6 +8,10 @@ local debug = require "debug"
 do ;;; end
 ; do ; a = 3; assert(a == 3) end;
 ;
+
+
+-- invalid operations should not raise errors when not executed
+if false then a = 3 // 0; a = 0 % 0 end
 
 
 -- testing priorities

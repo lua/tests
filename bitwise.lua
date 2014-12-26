@@ -1,3 +1,5 @@
+-- $Id$
+
 print("testing bitwise operations")
 
 local numbits = string.packsize('j') * 8

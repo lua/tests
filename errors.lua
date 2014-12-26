@@ -1,3 +1,5 @@
+-- $Id$
+
 print("testing errors")
 
 local debug = require"debug"

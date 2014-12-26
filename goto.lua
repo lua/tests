@@ -1,3 +1,5 @@
+-- $Id$
+
 collectgarbage()
 
 local function errmsg (code, m)

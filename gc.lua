@@ -1,3 +1,5 @@
+-- $Id$
+
 print('testing garbage collection')
 
 local debug = require"debug"

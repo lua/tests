@@ -1,3 +1,5 @@
+-- $Id$
+
 print("testing functions and calls")
 
 local debug = require "debug"

@@ -1,3 +1,5 @@
+-- $Id$
+
 print('testing strings and string library')
 
 local maxi, mini = math.maxinteger, math.mininteger

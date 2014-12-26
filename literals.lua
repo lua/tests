@@ -1,3 +1,5 @@
+-- $Id$
+
 print('testing scanner')
 
 local debug = require "debug"

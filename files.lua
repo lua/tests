@@ -1,3 +1,5 @@
+-- $Id$
+
 local debug = require "debug"
 
 assert(type(os.getenv"PATH") == "string")

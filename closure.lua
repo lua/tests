@@ -1,3 +1,5 @@
+-- $Id$
+
 print "testing closures"
 
 local A,B = 0,{g=10}

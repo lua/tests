@@ -1,4 +1,5 @@
 #!../lua
+-- $Id: all.lua,v 1.91 2014/12/26 17:14:17 roberto Exp roberto $
 
 local version = "Lua 5.3"
 if _VERSION ~= version then

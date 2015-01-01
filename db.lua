@@ -1,4 +1,4 @@
--- $Id$
+-- $Id: db.lua,v 1.75 2014/12/26 17:20:53 roberto Exp roberto $
 
 -- testing debug library
 
@@ -590,6 +590,23 @@ assert(#tr == 4 and tr[4] == l.currentline+2)
 assert(debug.gethook(co) == foo)
 assert(not debug.gethook())
 checktraceback(co, {})
+
+
+-- check get/setlocal in coroutines
+co = coroutine.create(function (x)
+  local a, b = coroutine.yield(x)
+  assert(a == 100 and b == nil)
+  return x
+end)
+a, b = coroutine.resume(co, 10)
+assert(a and b == 10)
+a, b = debug.getlocal(co, 1, 1)
+assert(a == "x" and b == 10)
+assert(not debug.getlocal(co, 1, 5))
+assert(debug.setlocal(co, 1, 1, 30) == "x")
+assert(not debug.setlocal(co, 1, 5, 40))
+a, b = coroutine.resume(co, 100)
+assert(a and b == 30)
 
 
 -- check traceback of suspended (or dead with error) coroutines

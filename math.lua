@@ -1,4 +1,4 @@
--- $Id$
+-- $Id: math.lua,v 1.67 2014/12/26 17:20:53 roberto Exp roberto $
 
 print("testing numbers and math lib")
 
@@ -151,9 +151,11 @@ do
   assert(2^-3 == 1 / 2^3)
   assert(eq((-3)^-3, 1 / (-3)^3))
   for i = -3, 3 do    -- variables avoid constant folding
-    for j = -3, 3 do
-      assert(eq(i^j, 1 / i^(-j)))
-     end
+      for j = -3, 3 do
+        if not (i == 0 and j <= 0) then   -- avoid 0^(-n) (domain error)
+          assert(eq(i^j, 1 / i^(-j)))
+       end
+    end
   end
 end
 

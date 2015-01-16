@@ -1,4 +1,4 @@
--- $Id$
+-- $Id: files.lua,v 1.84 2014/12/26 17:20:53 roberto Exp roberto $
 
 local debug = require "debug"
 
@@ -627,6 +627,7 @@ end --}
 
 print'+'
 
+print("testing date/time")
 
 assert(os.date("") == "")
 assert(os.date("!") == "")
@@ -656,8 +657,10 @@ if not _port then
   assert(type(os.date("%Oy")) == 'string')
 end
 
-assert(os.time(D) == t)
-assert(not pcall(os.time, {hour = 12}))
+-- assume that time has at least 1-second precision
+assert(math.abs(os.difftime(os.time(D), t)) < 1)
+
+assert(not pcall(os.time, {hour = 12}))   -- missing date
 
 D = os.date("!*t", t)
 load(os.date([[!assert(D.year==%Y and D.month==%m and D.day==%d and
@@ -679,6 +682,7 @@ local t1 = os.time(D)
 -- allow for leap years
 assert(math.abs(os.difftime(t,t1)/(24*3600) - 365) < 2)
 
+-- should not take more than 2 second to execute these two lines
 t = os.time()
 t1 = os.time(os.date("*t"))
 assert(os.difftime(t1,t) <= 2)

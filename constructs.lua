@@ -1,4 +1,4 @@
--- $Id$
+-- $Id: constructs.lua,v 1.37 2014/12/26 17:20:53 roberto Exp roberto $
 
 ;;print "testing syntax";;
 
@@ -228,7 +228,7 @@ a,b = F(nil)==nil; assert(a == true and b == nil)
 ------------------------------------------------------------------
 
 -- sometimes will be 0, sometimes will not...
-_ENV.GLOB1 = os.time() % 2
+_ENV.GLOB1 = math.floor(os.time()) % 2
 
 -- basic expressions with their respective values
 local basiccases = {

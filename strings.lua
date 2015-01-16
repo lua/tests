@@ -1,4 +1,4 @@
--- $Id$
+-- $Id: strings.lua,v 1.77 2014/12/26 17:20:53 roberto Exp roberto $
 
 print('testing strings and string library')
 
@@ -186,9 +186,16 @@ assert(string.format("%+08d", 31501) == "+0031501")
 assert(string.format("%+08d", -30927) == "-0030927")
 
 
--- longest number that can be formated
-local largefinite = (string.packsize("n") >= 8) and 1e308 or 1e38
-assert(string.len(string.format('%99.99f', -largefinite)) >= 100)
+do    -- longest number that can be formatted
+  local i = 1
+  local j = 10000
+  while i + 1 < j do   -- binary search for maximum finite float
+    local m = (i + j) // 2
+    if 10^m < math.huge then i = m else j = m end
+  end
+  assert(10^i < math.huge and 10^j == math.huge)
+  assert(string.len(string.format('%.99f', -(10^i))) > i)
+end
 
 
 -- testing large numbers for format

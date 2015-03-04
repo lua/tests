@@ -1,4 +1,4 @@
--- $Id: files.lua,v 1.84 2014/12/26 17:20:53 roberto Exp roberto $
+-- $Id: files.lua,v 1.85 2015/01/16 17:31:43 roberto Exp roberto $
 
 local debug = require "debug"
 
@@ -685,7 +685,8 @@ assert(math.abs(os.difftime(t,t1)/(24*3600) - 365) < 2)
 -- should not take more than 2 second to execute these two lines
 t = os.time()
 t1 = os.time(os.date("*t"))
-assert(os.difftime(t1,t) <= 2)
+t1 = os.difftime(t1,t)
+assert(0 <= t1 and t1 <= 2)
 
 local t1 = os.time{year=2000, month=10, day=1, hour=23, min=12}
 local t2 = os.time{year=2000, month=10, day=1, hour=23, min=10, sec=19}

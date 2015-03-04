@@ -1,4 +1,4 @@
--- $Id: constructs.lua,v 1.37 2014/12/26 17:20:53 roberto Exp roberto $
+-- $Id: constructs.lua,v 1.38 2015/01/16 17:31:43 roberto Exp roberto $
 
 ;;print "testing syntax";;
 
@@ -284,7 +284,7 @@ local i = 0
 for n = 1, level do
   for _, v in pairs(cases[n]) do
     local s = v[1]
-    local p = load(string.format(prog, s, s))
+    local p = load(string.format(prog, s, s), "")
     IX = false
     assert(p() == v[2] and IX == not not v[2])
     i = i + 1

@@ -1,4 +1,4 @@
--- $Id$
+-- $Id: nextvar.lua,v 1.75 2014/12/26 17:20:53 roberto Exp roberto $
 
 print('testing tables, next, and for')
 
@@ -90,7 +90,7 @@ for i=1,lim do
   s = s..i..','
   local s = s
   for k=0,lim do 
-    local t = load(s..'}')()
+    local t = load(s..'}', '')()
     assert(#t == i)
     check(t, fb(i), mp2(k))
     s = string.format('%sa%d=%d,', s, k, k)

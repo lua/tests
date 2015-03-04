@@ -1,11 +1,11 @@
--- $Id$
+-- $Id: literals.lua,v 1.33 2014/12/26 17:20:53 roberto Exp roberto $
 
 print('testing scanner')
 
 local debug = require "debug"
 
 
-local function dostring (x) return assert(load(x))() end
+local function dostring (x) return assert(load(x), "")() end
 
 dostring("x \v\f = \t\r 'a\0a' \v\f\f")
 assert(x == 'a\0a' and string.len(x) == 3)
@@ -31,7 +31,7 @@ assert("\x00\x05\x10\x1f\x3C\xfF\xe8" == "\0\5\16\31\60\255\232")
 
 local function lexstring (x, y, n)
   local f = assert(load('return ' .. x ..
-            ', require"debug".getinfo(1).currentline'))
+            ', require"debug".getinfo(1).currentline', ''))
   local s, l = f()
   assert(s == y and l == n)
 end
@@ -69,7 +69,7 @@ assert("\u{10000}\u{10FFFF}" == "\xF0\x90\x80\x80\z\xF4\x8F\xBF\xBF")
 
 -- Error in escape sequences
 local function lexerror (s, err)
-  local st, msg = load('return ' .. s)
+  local st, msg = load('return ' .. s, '')
   if err ~= '<eof>' then err = err .. "'" end
   assert(not st and string.find(msg, "near .-" .. err))
 end
@@ -113,9 +113,9 @@ lexerror([['alo \98]], "<eof>")
 -- valid characters in variable names
 for i = 0, 255 do
   local s = string.char(i)
-  assert(not string.find(s, "[a-zA-Z_]") == not load(s .. "=1"))
+  assert(not string.find(s, "[a-zA-Z_]") == not load(s .. "=1", ""))
   assert(not string.find(s, "[a-zA-Z_0-9]") ==
-         not load("a" .. s .. "1 = 1"))
+         not load("a" .. s .. "1 = 1", ""))
 end
 
 
@@ -256,7 +256,7 @@ local function gen (c, n)
 end
 
 for s in coroutine.wrap(function () gen("", len) end) do
-  assert(s == load("return [====[\n"..s.."]====]")())
+  assert(s == load("return [====[\n"..s.."]====]", "")())
 end
 
 

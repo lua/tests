@@ -1,4 +1,4 @@
--- $Id: sort.lua,v 1.30 2014/12/26 17:20:53 roberto Exp roberto $
+-- $Id: sort.lua,v 1.31 2015/01/16 17:34:19 roberto Exp roberto $
 
 print "testing (parts of) table library"
 
@@ -267,7 +267,7 @@ table.sort(A)
 check(A)
 
 table.sort(A, function (x, y)
-          load(string.format("A[%q] = ''", x))()
+          load(string.format("A[%q] = ''", x), "")()
           collectgarbage()
           return x<y
         end)

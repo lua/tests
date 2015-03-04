@@ -1,4 +1,4 @@
--- $Id$
+-- $Id: gc.lua,v 1.69 2014/12/26 17:20:53 roberto Exp roberto $
 
 print('testing garbage collection')
 
@@ -108,7 +108,7 @@ a = {}
 print('functions')
 function a:test ()
   while contCreate <= limit do
-    load(string.format("function temp(a) return 'a%d' end", contCreate))()
+    load(string.format("function temp(a) return 'a%d' end", contCreate), "")()
     assert(temp() == string.format('a%d', contCreate))
     contCreate = contCreate+1
   end
@@ -136,7 +136,7 @@ do
   if _soft then step = 13 end
   for i=1, string.len(prog), step do
     for j=i, string.len(prog), step do
-      pcall(load(string.sub(prog, i, j)))
+      pcall(load(string.sub(prog, i, j), ""))
     end
   end
 end

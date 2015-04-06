@@ -1,4 +1,4 @@
--- $Id: files.lua,v 1.85 2015/01/16 17:31:43 roberto Exp roberto $
+-- $Id: files.lua,v 1.86 2015/03/04 13:33:35 roberto Exp roberto $
 
 local debug = require "debug"
 
@@ -655,6 +655,9 @@ if not _port then
   -- test Posix-specific modifiers
   assert(type(os.date("%Ex")) == 'string')
   assert(type(os.date("%Oy")) == 'string')
+
+  -- test out-of-range dates (at least for Unix)
+  assert(not os.time{year=4000, month=1, day=1})
 end
 
 -- assume that time has at least 1-second precision

@@ -1,4 +1,4 @@
--- $Id: coroutine.lua,v 1.37 2014/12/26 17:20:53 roberto Exp roberto $
+-- $Id: coroutine.lua,v 1.38 2015/03/04 13:32:37 roberto Exp roberto $
 
 print "testing coroutines"
 
@@ -604,6 +604,47 @@ assert(run(function() return a .. b .. c .. a end,
 
 assert(run(function() return "a" .. "b" .. a .. "c" .. c .. b .. "x" end,
        {"concat", "concat", "concat"}) == "ab10chello12x")
+
+
+do   -- a few more tests for comparsion operators
+  local mt1 = {
+    __le = function (a,b)
+      coroutine.yield(10)
+      return
+        (type(a) == "table" and a.x or a) <= (type(b) == "table" and b.x or b)
+    end,
+    __lt = function (a,b)
+      coroutine.yield(10)
+      return
+        (type(a) == "table" and a.x or a) < (type(b) == "table" and b.x or b)
+    end,
+  }
+  local mt2 = { __lt = mt1.__lt }   -- no __le
+
+  local function run (f)
+    local co = coroutine.wrap(f)
+    local res
+    repeat
+      res = co()
+    until res ~= 10
+    return res
+  end
+  
+  local function test ()
+    local a1 = setmetatable({x=1}, mt1)
+    local a2 = setmetatable({x=2}, mt2)
+    assert(a1 < a2)
+    assert(a1 <= a2)
+    assert(1 < a2)
+    assert(1 <= a2)
+    assert(2 > a1)
+    assert(2 >= a2)
+    return true
+  end
+  
+  run(test)
+
+end
 
 assert(run(function ()
              a.BB = print

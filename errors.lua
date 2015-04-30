@@ -1,4 +1,4 @@
--- $Id$
+-- $Id: errors.lua,v 1.89 2014/12/26 17:20:53 roberto Exp roberto $
 
 print("testing errors")
 
@@ -488,8 +488,7 @@ testrep("", "function foo () ", "", " end")
 testrep("a=", "a..", "a", "")
 testrep("a=", "a^", "a", "")
 
-checkmessage("a = f(x" .. string.rep(",x", 260) .. ")",
-             "expression too complex")
+checkmessage("a = f(x" .. string.rep(",x", 260) .. ")", "too many registers")
 
 
 -- testing other limits

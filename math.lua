@@ -1,4 +1,4 @@
--- $Id: math.lua,v 1.68 2015/01/05 17:16:34 roberto Exp roberto $
+-- $Id: math.lua,v 1.69 2015/01/05 18:41:54 roberto Exp roberto $
 
 print("testing numbers and math lib")
 
@@ -160,8 +160,19 @@ do
   end
 end
 
-
-assert(maxint + 0.0 == maxint)
+-- comparison between floats and integers (border cases)
+if floatbits < intbits then
+  assert(2.0^floatbits == (1 << floatbits))
+  assert(2.0^floatbits - 1.0 == (1 << floatbits) - 1.0)
+  assert(2.0^floatbits - 1.0 ~= (1 << floatbits))
+  -- float is rounded, int is not
+  assert(2.0^floatbits + 1.0 ~= (1 << floatbits) + 1)
+else   -- floats can express all integers with full accuracy
+  assert(maxint == maxint + 0.0)
+  assert(maxint - 1 == maxint - 1.0)
+  assert(minint + 1 == minint + 1.0)
+  assert(maxint ~= maxint - 1.0)
+end
 assert(maxint + 0.0 == 2.0^(intbits - 1) - 1.0)
 assert(minint + 0.0 == minint)
 assert(minint + 0.0 == -2.0^(intbits - 1))
@@ -187,8 +198,8 @@ checkerror(msgf2i, f2i, 0/0)           -- NaN
 
 if floatbits < intbits then
   -- conversion tests when float cannot represent all integers
-  assert(maxint + 1.0 == maxint)
-  assert(minint - 1.0 == minint)
+  assert(maxint + 1.0 == maxint + 0.0)
+  assert(minint - 1.0 == minint + 0.0)
   checkerror(msgf2i, f2i, maxint + 0.0)
   assert(f2i(2.0^(intbits - 2)) == 1 << (intbits - 2))
   assert(f2i(-2.0^(intbits - 2)) == -(1 << (intbits - 2)))

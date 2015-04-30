@@ -1,4 +1,4 @@
--- $Id$
+-- $Id: api.lua,v 1.139 2014/12/26 17:20:53 roberto Exp roberto $
 
 if T==nil then
   (Message or print)('\n >>> testC not active: skipping API tests <<<\n')
@@ -35,9 +35,9 @@ assert(T.testC("settop 10; absindex 1; return 1") == 1)
 assert(T.testC("settop 10; absindex R; return 1") < -10)
 
 -- testing alignment
-a = T.d2s(12458954321123)
-assert(a == string.pack("d", 12458954321123))
-assert(T.s2d(a) == 12458954321123)
+a = T.d2s(12458954321123.0)
+assert(a == string.pack("d", 12458954321123.0))
+assert(T.s2d(a) == 12458954321123.0)
 
 a,b,c = T.testC("pushnum 1; pushnum 2; pushnum 3; return 2")
 assert(a == 2 and b == 3 and not c)

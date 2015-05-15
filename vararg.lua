@@ -1,8 +1,6 @@
--- $Id$
+-- $Id: vararg.lua,v 1.22 2014/12/26 17:20:53 roberto Exp roberto $
 
 print('testing vararg')
-
-_G.arg = nil
 
 function f(a, ...)
   local arg = {n = select('#', ...), ...}

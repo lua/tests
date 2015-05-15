@@ -1,5 +1,5 @@
 #!../lua
--- $Id: all.lua,v 1.91 2014/12/26 17:20:53 roberto Exp roberto $
+-- $Id: all.lua,v 1.92 2015/01/16 17:30:20 roberto Exp roberto $
 
 local version = "Lua 5.3"
 if _VERSION ~= version then
@@ -7,6 +7,9 @@ if _VERSION ~= version then
     "\nExiting tests\n")
   return
 end
+
+
+_G._ARG = arg   -- save arg for other tests
 
 
 -- next variables control the execution of some tests

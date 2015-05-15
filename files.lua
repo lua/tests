@@ -1,4 +1,4 @@
--- $Id: files.lua,v 1.86 2015/03/04 13:33:35 roberto Exp roberto $
+-- $Id: files.lua,v 1.87 2015/04/06 21:13:32 roberto Exp roberto $
 
 local debug = require "debug"
 
@@ -588,6 +588,13 @@ if not _soft then
 end
 
 if not _port then
+  local progname
+  do  -- get name of running executable
+    local arg = arg or _ARG
+    local i = 0
+    while arg[i] do i = i - 1 end
+    progname = '"' .. arg[i + 1] .. '"'
+  end
   print("testing popen/pclose and execute")
   local tests = {
     -- command,   what,  code
@@ -598,7 +605,9 @@ if not _port then
     {"kill -s HUP $$", "signal", 1},
     {"kill -s KILL $$", "signal", 9},
     {"sh -c 'kill -s HUP $$'", "exit"},
-    {'lua -e "os.exit(20, true)"', "exit", 20},
+    {progname .. ' -e " "', "ok"},
+    {progname .. ' -e "os.exit(0, true)"', "ok"},
+    {progname .. ' -e "os.exit(20, true)"', "exit", 20},
   }
   print("\n(some error messages are expected now)")
   for _, v in ipairs(tests) do
@@ -657,7 +666,9 @@ if not _port then
   assert(type(os.date("%Oy")) == 'string')
 
   -- test out-of-range dates (at least for Unix)
-  assert(not os.time{year=4000, month=1, day=1})
+  -- either time_t cannot represent year 4000 (if time_t is 4 bytes) or
+  -- year cannot represent time_t 2^60 (if time_t is 8 bytes)
+  assert(not os.time{year=4000, month=1, day=1} or not os.date("%Y", 2^60))
 end
 
 -- assume that time has at least 1-second precision

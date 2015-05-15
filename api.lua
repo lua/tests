@@ -1,4 +1,4 @@
--- $Id: api.lua,v 1.139 2014/12/26 17:20:53 roberto Exp roberto $
+-- $Id: api.lua,v 1.140 2015/04/30 14:15:57 roberto Exp roberto $
 
 if T==nil then
   (Message or print)('\n >>> testC not active: skipping API tests <<<\n')
@@ -369,8 +369,8 @@ do
   
 
   -- memory error
-  T.totalmem(T.totalmem()+5000)   -- set low memory limit (+5k)
-  assert(T.checkpanic("newuserdata 10000") == "not enough memory")
+  T.totalmem(T.totalmem()+10000)   -- set low memory limit (+10k)
+  assert(T.checkpanic("newuserdata 20000") == "not enough memory")
   T.totalmem(0)          -- restore high limit
 
   -- stack error

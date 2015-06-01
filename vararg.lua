@@ -1,4 +1,4 @@
--- $Id: vararg.lua,v 1.22 2014/12/26 17:20:53 roberto Exp roberto $
+-- $Id: vararg.lua,v 1.23 2015/05/15 12:28:08 roberto Exp roberto $
 
 print('testing vararg')
 
@@ -9,7 +9,7 @@ function f(a, ...)
 end
 
 function c12 (...)
-  assert(arg == nil)
+  assert(arg == _G.arg)    -- no local 'arg'
   local x = {...}; x.n = #x
   local res = (x.n==2 and x[1] == 1 and x[2] == 2)
   if res then res = 55 end
@@ -76,7 +76,7 @@ function oneless (a, ...) return ... end
 
 function f (n, a, ...)
   local b
-  assert(arg == nil)
+  assert(arg == _G.arg)   -- no local 'arg'
   if n == 0 then
     local b, c, d = ...
     return a, b, c, d, oneless(oneless(oneless(...)))

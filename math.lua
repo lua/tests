@@ -1,4 +1,4 @@
--- $Id: math.lua,v 1.69 2015/01/05 18:41:54 roberto Exp roberto $
+-- $Id: math.lua,v 1.70 2015/04/30 14:17:05 roberto Exp roberto $
 
 print("testing numbers and math lib")
 
@@ -176,6 +176,87 @@ end
 assert(maxint + 0.0 == 2.0^(intbits - 1) - 1.0)
 assert(minint + 0.0 == minint)
 assert(minint + 0.0 == -2.0^(intbits - 1))
+
+
+-- order between floats and integers
+assert(1 < 1.1); assert(not (1 < 0.9))
+assert(1 <= 1.1); assert(not (1 <= 0.9))
+assert(-1 < -0.9); assert(not (-1 < -1.1))
+assert(1 <= 1.1); assert(not (-1 <= -1.1))
+assert(-1 < -0.9); assert(not (-1 < -1.1))
+assert(-1 <= -0.9); assert(not (-1 <= -1.1))
+assert(minint <= minint + 0.0)
+assert(minint + 0.0 <= minint)
+assert(not (minint < minint + 0.0))
+assert(not (minint + 0.0 < minint))
+assert(maxint < minint * -1.0)
+assert(maxint <= minint * -1.0)
+
+do
+  local fmaxi1 = 2^(intbits - 1)
+  assert(maxint < fmaxi1)
+  assert(maxint <= fmaxi1)
+  assert(not (fmaxi1 <= maxint))
+  assert(minint <= -2^(intbits - 1))
+  assert(-2^(intbits - 1) <= minint)
+end
+
+if floatbits < intbits then
+  print("testing order (floats cannot represent all integers)")
+  local fmax = 2^floatbits
+  local ifmax = fmax | 0
+  assert(fmax < ifmax + 1)
+  assert(fmax - 1 < ifmax)
+  assert(-(fmax - 1) > -ifmax)
+  assert(not (fmax <= ifmax - 1))
+  assert(-fmax > -(ifmax + 1))
+  assert(not (-fmax >= -(ifmax - 1)))
+
+  assert(fmax/2 - 0.5 < ifmax//2)
+  assert(-(fmax/2 - 0.5) > -ifmax//2)
+
+  assert(maxint < 2^intbits)
+  assert(minint > -2^intbits)
+  assert(maxint <= 2^intbits)
+  assert(minint >= -2^intbits)
+else
+  print("testing order (floats can represent all integers)")
+  assert(maxint < maxint + 1.0)
+  assert(maxint < maxint + 0.5)
+  assert(maxint - 1.0 < maxint)
+  assert(maxint - 0.5 < maxint)
+  assert(not (maxint + 0.0 < maxint))
+  assert(maxint + 0.0 <= maxint)
+  assert(not (maxint < maxint + 0.0))
+  assert(maxint + 0.0 <= maxint)
+  assert(maxint <= maxint + 0.0)
+  assert(not (maxint + 1.0 <= maxint))
+  assert(not (maxint + 0.5 <= maxint))
+  assert(not (maxint <= maxint - 1.0))
+  assert(not (maxint <= maxint - 0.5))
+
+  assert(minint < minint + 1.0)
+  assert(minint < minint + 0.5)
+  assert(minint <= minint + 0.5)
+  assert(minint - 1.0 < minint)
+  assert(minint - 1.0 <= minint)
+  assert(not (minint + 0.0 < minint))
+  assert(not (minint + 0.5 < minint))
+  assert(not (minint < minint + 0.0))
+  assert(minint + 0.0 <= minint)
+  assert(minint <= minint + 0.0)
+  assert(not (minint + 1.0 <= minint))
+  assert(not (minint + 0.5 <= minint))
+  assert(not (minint <= minint - 1.0))
+end
+
+do
+  local NaN = 0/0
+  assert(not (NaN < 0))
+  assert(not (NaN > minint))
+  assert(not (NaN <= -9))
+  assert(not (NaN <= maxint))
+end
 
 
 -- avoiding errors at compile time
@@ -394,6 +475,7 @@ assert(not(1>1) and not(1>2) and (2>1))
 assert(not('a'>'a') and not('a'>'b') and ('b'>'a'))
 assert((1>=1) and not(1>=2) and (2>=1))
 assert(('a'>='a') and not('a'>='b') and ('b'>='a'))
+assert(1.3 < 1.4 and 1.3 <= 1.4 and not (1.3 < 1.3) and 1.3 <= 1.3)
 
 -- testing mod operator
 assert(eqT(-4 % 3, 2))

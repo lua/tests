@@ -1,4 +1,4 @@
--- $Id: math.lua,v 1.70 2015/04/30 14:17:05 roberto Exp roberto $
+-- $Id: math.lua,v 1.71 2015/06/01 16:37:34 roberto Exp roberto $
 
 print("testing numbers and math lib")
 
@@ -256,6 +256,9 @@ do
   assert(not (NaN > minint))
   assert(not (NaN <= -9))
   assert(not (NaN <= maxint))
+  assert(not (NaN < maxint))
+  assert(not (minint <= NaN))
+  assert(not (minint < NaN))
 end
 
 

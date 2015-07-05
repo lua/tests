@@ -1,4 +1,4 @@
--- $Id: api.lua,v 1.140 2015/04/30 14:15:57 roberto Exp roberto $
+-- $Id: api.lua,v 1.141 2015/05/15 12:25:38 roberto Exp roberto $
 
 if T==nil then
   (Message or print)('\n >>> testC not active: skipping API tests <<<\n')
@@ -1073,6 +1073,14 @@ testamem("coroutines", function ()
   assert(string.len(a()) == 10)
   return a()
 end)
+
+do   -- auxiliary buffer
+  local lim = 100
+  local a = {}; for i = 1, lim do a[i] = "01234567890123456789" end
+  testamem("auxiliary buffer", function ()
+    return (#table.concat(a, ",") == 20*lim + lim - 1)
+  end)
+end
 
 print'+'
 

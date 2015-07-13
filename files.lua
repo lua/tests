@@ -1,6 +1,8 @@
--- $Id: files.lua,v 1.87 2015/04/06 21:13:32 roberto Exp roberto $
+-- $Id: files.lua,v 1.88 2015/05/15 12:29:29 roberto Exp roberto $
 
 local debug = require "debug"
+
+local maxint = math.maxinteger
 
 assert(type(os.getenv"PATH") == "string")
 
@@ -8,9 +10,15 @@ assert(io.input(io.stdin) == io.stdin)
 assert(not pcall(io.input, "non-existent-file"))
 assert(io.output(io.stdout) == io.stdout)
 
-local function checkerr (msg, f, ...)
+
+local function testerr (msg, f, ...)
   local stat, err = pcall(f, ...)
-  assert(not stat and string.find(err, msg))
+  return (not stat and string.find(err, msg, 1, true))
+end
+
+
+local function checkerr (msg, f, ...)
+  assert(testerr(msg, f, ...))
 end
 
 
@@ -109,23 +117,22 @@ assert(io.write("\n\n\t\t  ", 3450, "\n"));
 io.close()
 
 -- test writing/reading numbers
-local largeint = math.maxinteger
 f = assert(io.open(file, "w"))
-f:write(largeint, '\n')
-f:write(string.format("0X%x\n", largeint))
+f:write(maxint, '\n')
+f:write(string.format("0X%x\n", maxint))
 f:write("0xABCp-3", '\n')
 f:write(0, '\n')
-f:write(-largeint, '\n')
-f:write(string.format("0x%X\n", -largeint))
+f:write(-maxint, '\n')
+f:write(string.format("0x%X\n", -maxint))
 f:write("-0xABCp-3", '\n')
 assert(f:close())
 f = assert(io.open(file, "r"))
-assert(f:read("n") == largeint)
-assert(f:read("n") == largeint)
+assert(f:read("n") == maxint)
+assert(f:read("n") == maxint)
 assert(f:read("n") == 0xABCp-3)
 assert(f:read("n") == 0)
-assert(f:read("*n") == -largeint)            -- test old format (with '*')
-assert(f:read("n") == -largeint)
+assert(f:read("*n") == -maxint)            -- test old format (with '*')
+assert(f:read("n") == -maxint)
 assert(f:read("*n") == -0xABCp-3)            -- test old format (with '*')
 assert(f:close())
 assert(os.remove(file))
@@ -654,22 +661,48 @@ load(os.date([[assert(D.year==%Y and D.month==%m and D.day==%d and
   D.hour==%H and D.min==%M and D.sec==%S and
   D.wday==%w+1 and D.yday==%j and type(D.isdst) == 'boolean')]], t))()
 
-assert(not pcall(os.date, "%9"))   -- invalid conversion specifier
-assert(not pcall(os.date, "%"))   -- invalid conversion specifier
-assert(not pcall(os.date, "%O"))   -- invalid conversion specifier
-assert(not pcall(os.date, "%E"))   -- invalid conversion specifier
-assert(not pcall(os.date, "%Ea"))   -- invalid conversion specifier
+checkerr("invalid conversion specifier", os.date, "%")
+checkerr("invalid conversion specifier", os.date, "%9")
+checkerr("invalid conversion specifier", os.date, "%")
+checkerr("invalid conversion specifier", os.date, "%O")
+checkerr("invalid conversion specifier", os.date, "%E")
+checkerr("invalid conversion specifier", os.date, "%Ea")
+
+checkerr("not an integer", os.time, {year=1000, month=1, day=1, hour='x'})
+checkerr("not an integer", os.time, {year=1000, month=1, day=1, hour=1.5})
 
 if not _port then
   -- test Posix-specific modifiers
   assert(type(os.date("%Ex")) == 'string')
   assert(type(os.date("%Oy")) == 'string')
 
+
   -- test out-of-range dates (at least for Unix)
-  -- either time_t cannot represent year 4000 (if time_t is 4 bytes) or
-  -- year cannot represent time_t 2^60 (if time_t is 8 bytes)
-  assert(not os.time{year=4000, month=1, day=1} or not os.date("%Y", 2^60))
+  if maxint >= 2^62 then  -- cannot do these tests in Small Lua
+    -- no arith overflows
+    checkerr("out-of-bounds", os.time, {year = -maxint, month = 1, day = 1})
+    if string.packsize("i") == 4 then   -- 4-byte ints
+      if testerr("out-of-bounds", os.date, "%Y", 2^40) then
+        -- time_t has 4 bytes and therefore cannot represent year 4000
+        print("  4-byte time_t")
+        checkerr("cannot be represented", os.time, {year=4000, month=1, day=1})
+      else
+        -- time_t has 8 bytes; an int year cannot represent a huge time
+        print("  8-byte time_t")
+        checkerr("cannot be represented", os.date, "%Y", 2^60)
+        -- it should have no problems with year 4000
+        assert(tonumber(os.time{year=4000, month=1, day=1}))
+      end
+    else    -- 8-byte ints
+      -- assume time_t has 8 bytes too
+      print("  8-byte time_t")
+      assert(tonumber(os.date("%Y", 2^60)))
+      -- but still cannot represent a huge year
+      checkerr("cannot be represented", os.time, {year=2^60, month=1, day=1})
+    end
+  end
 end
+
 
 -- assume that time has at least 1-second precision
 assert(math.abs(os.difftime(os.time(D), t)) < 1)

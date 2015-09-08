@@ -1,4 +1,4 @@
--- $Id: files.lua,v 1.88 2015/05/15 12:29:29 roberto Exp roberto $
+-- $Id: files.lua,v 1.89 2015/07/13 13:33:32 roberto Exp roberto $
 
 local debug = require "debug"
 
@@ -211,6 +211,20 @@ for l in io.lines() do assert(l == f()); n = n + 1 end
 f = nil; collectgarbage()
 assert(n == 6)
 assert(os.remove(otherfile))
+
+do  -- bug in 5.3.1
+  io.output(otherfile)
+  io.write(string.rep("a", 300), "\n")
+  io.close()
+  local t ={}; for i = 1, 250 do t[i] = 1 end
+  t = {io.lines(otherfile, table.unpack(t))()}
+  -- everything ok here
+  assert(#t == 250 and t[1] == 'a' and t[#t] == 'a')
+  t[#t + 1] = 1    -- one too many
+  checkerr("too many arguments", io.lines, otherfile, table.unpack(t))
+  collectgarbage()   -- ensure 'otherfile' is closed
+  assert(os.remove(otherfile))
+end
 
 io.input(file)
 do  -- test error returns

@@ -1,4 +1,4 @@
--- $Id: sort.lua,v 1.31 2015/01/16 17:34:19 roberto Exp roberto $
+-- $Id: sort.lua,v 1.32 2015/03/04 13:09:38 roberto Exp roberto $
 
 print "testing (parts of) table library"
 
@@ -89,6 +89,9 @@ assert(a[1] == nil and a.n == 4)
 
 -- testing move
 do
+
+  checkerror("table expected", table.move, 1, 2, 3, 4)
+
   local function eqT (a, b)
     for k, v in pairs(a) do assert(b[k] == v) end 
     for k, v in pairs(b) do assert(a[k] == v) end 

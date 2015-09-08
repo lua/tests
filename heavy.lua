@@ -1,4 +1,4 @@
--- $Id$
+-- $Id: heavy.lua,v 1.2 2014/12/26 17:20:53 roberto Exp $
 
 print("creating a string too long")
 do
@@ -18,7 +18,9 @@ do
        print(string.format("string with %d bytes", #a))
     end
   end)
-  assert(not st and string.find(msg, "string length overflow"))
+  assert(not st and
+    (string.find(msg, "string length overflow") or
+     string.find(msg, "not enough memory")))
 end
 print('+')
 
@@ -29,13 +31,13 @@ local function loadrep (x, what)
   local count = 0
   local function f()
     count = count + p
-    if count % (100*p) == 0 then
-      io.stderr:write("(", count, ")")
+    if count % (0x80*p) == 0 then
+      io.stderr:write("(", string.format("0x%x", count), ")")
     end
     return s
   end
   local st, msg = load(f, "=big")
-  print(string.format("\ntotal: %d %s", count, what))
+  print(string.format("\ntotal: 0x%x %s", count, what))
   return st, msg
 end
 

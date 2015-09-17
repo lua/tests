@@ -1,5 +1,5 @@
 #!../lua
--- $Id: all.lua,v 1.92 2015/01/16 17:30:20 roberto Exp roberto $
+-- $Id: all.lua,v 1.93 2015/05/15 12:28:08 roberto Exp roberto $
 
 local version = "Lua 5.3"
 if _VERSION ~= version then
@@ -249,7 +249,7 @@ print(format("\n\ntotal time: %.2fs (wall time: %gs)\n", clocktime, walltime))
 if not usertests then
   lasttime = lasttime or clocktime    -- if no last time, ignore difference
   -- check whether current test time differs more than 5% from last time
-  local diff = (clocktime - lasttime) / clocktime
+  local diff = (clocktime - lasttime) / lasttime
   local tolerance = 0.05    -- 5%
   if (diff >= tolerance or diff <= -tolerance) then
     print(format("WARNING: time difference from previous test: %+.1f%%",

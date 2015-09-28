@@ -1,4 +1,4 @@
--- $Id: sort.lua,v 1.32 2015/03/04 13:09:38 roberto Exp roberto $
+-- $Id: sort.lua,v 1.33 2015/09/08 17:17:10 roberto Exp roberto $
 
 print "testing (parts of) table library"
 
@@ -100,18 +100,23 @@ do
   local a = table.move({10,20,30}, 1, 3, 2)  -- move forward
   eqT(a, {10,10,20,30})
 
+  -- move forward with overlap of 1
+  a = table.move({10, 20, 30}, 1, 3, 3)
+  eqT(a, {10, 20, 10, 20, 30})
+
   a = table.move({10,20,30}, 2, 3, 1)   -- move backward
   eqT(a, {20,30,30})
 
-  a = table.move({10,20,30}, 1, 3, 1, {})   -- move
+  a = table.move({10,20,30}, 1, 3, 1, {})   -- move to new table
   eqT(a, {10,20,30})
 
-  a = table.move({10,20,30}, 1, 0, 3, {})   -- do not move
+  a = table.move({10,20,30}, 1, 0, 3, {})   -- empty move (no move)
   eqT(a, {})
 
   a = table.move({10,20,30}, 1, 10, 1)   -- move to the same place
   eqT(a, {10,20,30})
 
+  -- moving on the fringes
   a = table.move({[maxI - 2] = 1, [maxI - 1] = 2, [maxI] = 3},
                  maxI - 2, maxI, -10, {})
   eqT(a, {[-10] = 1, [-9] = 2, [-8] = 3})
@@ -160,8 +165,10 @@ do
   end
   checkmove(1, maxI, 0, 1, 0)
   checkmove(0, maxI - 1, 1, maxI - 1, maxI)
-  checkmove(minI, -2, 0, -2, maxI - 1)
-  checkmove(minI + 1, -1, 1, -1, maxI)
+  checkmove(minI, -2, -5, -2, maxI - 6)
+  checkmove(minI + 1, -1, -2, -1, maxI - 3)
+  checkmove(minI, -2, 0, minI, 0)  -- non overlapping
+  checkmove(minI + 1, -1, 1, minI + 1, 1)  -- non overlapping
 end
 
 checkerror("too many", table.move, {}, 0, maxI, 1)

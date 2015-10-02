@@ -1,4 +1,4 @@
--- $Id: db.lua,v 1.76 2015/01/01 13:52:01 roberto Exp roberto $
+-- $Id: db.lua,v 1.77 2015/06/01 16:39:11 roberto Exp roberto $
 
 -- testing debug library
 
@@ -553,6 +553,8 @@ assert(t.isvararg == true and t.nparams == 0 and t.nups == 1 and
        debug.getupvalue(t.func, 1) == "_ENV")
 
 
+
+
 -- testing debugging of coroutines
 
 local function checktraceback (co, p, level)
@@ -713,6 +715,47 @@ do   -- testing for-iterator name
   end
 
   for i in f do end
+end
+
+
+do
+  print("testing traceback sizes")
+
+  local function countlines (s)
+    return select(2, string.gsub(s, "\n", ""))
+  end
+
+  local function deep (lvl, n)
+    if lvl == 0 then
+      return (debug.traceback("message", n))
+    else
+      return (deep(lvl-1, n))
+    end
+  end
+
+  local function checkdeep (total, start)
+    local s = deep(total, start)
+    local rest = string.match(s, "^message\nstack traceback:\n(.*)$")
+    local cl = countlines(rest)
+    -- at most 10 lines in first part, 11 in second, plus '...'
+    assert(cl <= 10 + 11 + 1)
+    local brk = string.find(rest, "%.%.%.")
+    if brk then   -- does message have '...'?
+      local rest1 = string.sub(rest, 1, brk)
+      local rest2 = string.sub(rest, brk, #rest)
+      assert(countlines(rest1) == 10 and countlines(rest2) == 11)
+    else
+      assert(cl == total - start + 2)
+    end
+  end
+
+  for d = 1, 51, 10 do
+    for l = 1, d do
+      -- use coroutines to ensure complete control of the stack
+      coroutine.wrap(checkdeep)(d, l)
+    end
+  end
+
 end
 
 

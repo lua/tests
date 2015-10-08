@@ -1,4 +1,4 @@
--- $Id: pm.lua,v 1.43 2014/12/26 17:20:53 roberto Exp roberto $
+-- $Id: pm.lua,v 1.44 2015/03/04 13:09:38 roberto Exp roberto $
 
 print('testing pattern matching')
 
@@ -233,6 +233,9 @@ do
   r, m = f(200000)
   assert(not r and string.find(m, "too complex"))
 end
+
+checkerror("too complex", string.find, "01234567890123456789",
+                                       ".*.*.*.*.*.*.*.*a")
 
 if not _soft then
   -- big strings

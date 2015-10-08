@@ -1,4 +1,4 @@
--- $Id: api.lua,v 1.141 2015/05/15 12:25:38 roberto Exp roberto $
+-- $Id: api.lua,v 1.142 2015/07/05 20:59:44 roberto Exp roberto $
 
 if T==nil then
   (Message or print)('\n >>> testC not active: skipping API tests <<<\n')
@@ -322,6 +322,8 @@ function to (s, x, n)
   return T.testC(string.format("%s %d; return 1", s, n), x)
 end
 
+local hfunc = string.gmatch("", "")    -- a "heavy C function" (with upvalues)
+assert(debug.getupvalue(hfunc, 1))
 assert(to("tostring", {}) == nil)
 assert(to("tostring", "alo") == "alo")
 assert(to("tostring", 12) == "12")
@@ -341,12 +343,13 @@ assert(to("topointer", 10) == 0)
 assert(to("topointer", true) == 0)
 assert(to("topointer", T.pushuserdata(20)) == 20)
 assert(to("topointer", io.read) ~= 0)           -- light C function
-assert(to("topointer", type) ~= 0)        -- "heavy" C function
+assert(to("topointer", hfunc) ~= 0)        -- "heavy" C function
 assert(to("topointer", function () end) ~= 0)   -- Lua function
+assert(to("topointer", io.stdin) ~= 0)   -- full userdata
 assert(to("func2num", 20) == 0)
 assert(to("func2num", T.pushuserdata(10)) == 0)
 assert(to("func2num", io.read) ~= 0)     -- light C function
-assert(to("func2num", type) ~= 0)  -- "heavy" C function (with upvalue)
+assert(to("func2num", hfunc) ~= 0)  -- "heavy" C function (with upvalue)
 a = to("tocfunction", math.deg)
 assert(a(3) == math.deg(3) and a == math.deg)
 
@@ -482,6 +485,8 @@ b = setmetatable({p = a}, {})
 getmetatable(b).__index = function (t, i) return t.p[i] end
 k, x = T.testC("gettable 3, return 2", 4, b, 20, 35, "x")
 assert(x == 15 and k == 35)
+k = T.testC("getfield 2 y, return 1", b)
+assert(k == 12)
 getmetatable(b).__index = function (t, i) return a[i] end
 getmetatable(b).__newindex = function (t, i,v ) a[i] = v end
 y = T.testC("insert 2; gettable -5; return 1", 2, 3, 4, "y", b)

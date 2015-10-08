@@ -1,4 +1,4 @@
--- $Id: files.lua,v 1.89 2015/07/13 13:33:32 roberto Exp roberto $
+-- $Id: files.lua,v 1.90 2015/09/08 17:15:24 roberto Exp roberto $
 
 local debug = require "debug"
 
@@ -135,6 +135,20 @@ assert(f:read("*n") == -maxint)            -- test old format (with '*')
 assert(f:read("n") == -maxint)
 assert(f:read("*n") == -0xABCp-3)            -- test old format (with '*')
 assert(f:close())
+assert(os.remove(file))
+
+-- test yielding during 'dofile'
+f = assert(io.open(file, "w"))
+f:write[[
+local x, z = coroutine.yield(10)
+local y = coroutine.yield(20)
+return x + y * z
+]]
+assert(f:close())
+f = coroutine.wrap(dofile)
+assert(f(file) == 10)
+print(f(100, 101) == 20)
+assert(f(200) == 100 + 200 * 101)
 assert(os.remove(file))
 
 

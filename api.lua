@@ -1,4 +1,4 @@
--- $Id: api.lua,v 1.142 2015/07/05 20:59:44 roberto Exp roberto $
+-- $Id: api.lua,v 1.143 2015/10/08 16:00:08 roberto Exp roberto $
 
 if T==nil then
   (Message or print)('\n >>> testC not active: skipping API tests <<<\n')
@@ -57,34 +57,34 @@ assert(a==false and b==true and c==false)
 a,b,c = T.testC("gettop; return 2", 10, 20, 30, 40)
 assert(a == 40 and b == 5 and not c)
 
-t = pack(T.testC("settop 5; gettop; return .", 2, 3))
+t = pack(T.testC("settop 5; return *", 2, 3))
 tcheck(t, {n=4,2,3})
 
 t = pack(T.testC("settop 0; settop 15; return 10", 3, 1, 23))
 assert(t.n == 10 and t[1] == nil and t[10] == nil)
 
-t = pack(T.testC("remove -2; gettop; return .", 2, 3, 4))
+t = pack(T.testC("remove -2; return *", 2, 3, 4))
 tcheck(t, {n=2,2,4})
 
-t = pack(T.testC("insert -1; gettop; return .", 2, 3))
+t = pack(T.testC("insert -1; return *", 2, 3))
 tcheck(t, {n=2,2,3})
 
-t = pack(T.testC("insert 3; gettop; return .", 2, 3, 4, 5))
+t = pack(T.testC("insert 3; return *", 2, 3, 4, 5))
 tcheck(t, {n=4,2,5,3,4})
 
-t = pack(T.testC("replace 2; gettop; return .", 2, 3, 4, 5))
+t = pack(T.testC("replace 2; return *", 2, 3, 4, 5))
 tcheck(t, {n=3,5,3,4})
 
-t = pack(T.testC("replace -2; gettop; return .", 2, 3, 4, 5))
+t = pack(T.testC("replace -2; return *", 2, 3, 4, 5))
 tcheck(t, {n=3,2,3,5})
 
-t = pack(T.testC("remove 3; gettop; return .", 2, 3, 4, 5))
+t = pack(T.testC("remove 3; return *", 2, 3, 4, 5))
 tcheck(t, {n=3,2,4,5})
 
-t = pack(T.testC("copy 3 4; gettop; return .", 2, 3, 4, 5))
+t = pack(T.testC("copy 3 4; return *", 2, 3, 4, 5))
 tcheck(t, {n=4,2,3,3,5})
 
-t = pack(T.testC("copy -3 -1; gettop; return .", 2, 3, 4, 5))
+t = pack(T.testC("copy -3 -1; return *", 2, 3, 4, 5))
 tcheck(t, {n=4,2,3,4,3})
 
 do   -- testing 'rotate'
@@ -96,17 +96,17 @@ do   -- testing 'rotate'
     table.insert(t, 1, table.remove(t))
   end
 
-  t = pack(T.testC("rotate -2 1; gettop; return .", 10, 20, 30, 40))
+  t = pack(T.testC("rotate -2 1; return *", 10, 20, 30, 40))
   tcheck(t, {10, 20, 40, 30})
-  t = pack(T.testC("rotate -2 -1; gettop; return .", 10, 20, 30, 40))
+  t = pack(T.testC("rotate -2 -1; return *", 10, 20, 30, 40))
   tcheck(t, {10, 20, 40, 30})
 
   -- some corner cases
-  t = pack(T.testC("rotate -1 0; gettop; return .", 10, 20, 30, 40))
+  t = pack(T.testC("rotate -1 0; return *", 10, 20, 30, 40))
   tcheck(t, {10, 20, 30, 40})
-  t = pack(T.testC("rotate -1 1; gettop; return .", 10, 20, 30, 40))
+  t = pack(T.testC("rotate -1 1; return *", 10, 20, 30, 40))
   tcheck(t, {10, 20, 30, 40})
-  t = pack(T.testC("rotate 5 -1; gettop; return .", 10, 20, 30, 40))
+  t = pack(T.testC("rotate 5 -1; return *", 10, 20, 30, 40))
   tcheck(t, {10, 20, 30, 40})
 end
 
@@ -132,15 +132,15 @@ end
 
 t = pack(T.testC("insert 3; pushvalue 3; remove 3; pushvalue 2; remove 2; \
                   insert 2; pushvalue 1; remove 1; insert 1; \
-      insert -2; pushvalue -2; remove -3; gettop; return .",
+      insert -2; pushvalue -2; remove -3; return *",
       2, 3, 4, 5, 10, 40, 90))
 tcheck(t, {n=7,2,3,4,5,10,40,90})
 
-t = pack(T.testC("concat 5; gettop; return .", "alo", 2, 3, "joao", 12))
+t = pack(T.testC("concat 5; return *", "alo", 2, 3, "joao", 12))
 tcheck(t, {n=1,"alo23joao12"})
 
 -- testing MULTRET
-t = pack(T.testC("call 2,-1; gettop; return .",
+t = pack(T.testC("call 2,-1; return *",
      function (a,b) return 1,2,3,4,a,b end, "alo", "joao"))
 tcheck(t, {n=6,1,2,3,4,"alo", "joao"})
 
@@ -160,8 +160,7 @@ local a = {T.testC[[
   getglobal b;
   getglobal b;
   setglobal a;
-  gettop;
-  return .
+  return *
 ]]}
 assert(a[2] == 14 and a[3] == "a31" and a[4] == nil and _G.a == "a31")
 
@@ -440,9 +439,9 @@ function check3(p, ...)
   assert(#arg == 3)
   assert(string.find(arg[3], p))
 end
-check3(":1:", T.testC("loadstring 2; gettop; return .", "x="))
-check3("%.", T.testC("loadfile 2; gettop; return .", "."))
-check3("xxxx", T.testC("loadfile 2; gettop; return .", "xxxx"))
+check3(":1:", T.testC("loadstring 2; return *", "x="))
+check3("%.", T.testC("loadfile 2; return *", "."))
+check3("xxxx", T.testC("loadfile 2; return *", "xxxx"))
 
 -- test errors in non protected threads
 function checkerrnopro (code, msg)
@@ -501,12 +500,12 @@ assert(a[b] == 19)
 
 -- testing next
 a = {}
-t = pack(T.testC("next; gettop; return .", a, nil))
+t = pack(T.testC("next; return *", a, nil))
 tcheck(t, {n=1,a})
 a = {a=3}
-t = pack(T.testC("next; gettop; return .", a, nil))
+t = pack(T.testC("next; return *", a, nil))
 tcheck(t, {n=3,a,'a',3})
-t = pack(T.testC("next; pop 1; next; gettop; return .", a, nil))
+t = pack(T.testC("next; pop 1; next; return *", a, nil))
 tcheck(t, {n=1,a})
 
 

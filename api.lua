@@ -1,4 +1,4 @@
--- $Id: api.lua,v 1.143 2015/10/08 16:00:08 roberto Exp roberto $
+-- $Id: api.lua,v 1.144 2015/10/12 16:38:57 roberto Exp roberto $
 
 if T==nil then
   (Message or print)('\n >>> testC not active: skipping API tests <<<\n')
@@ -497,6 +497,22 @@ y = T.testC("gettable 2, return 1", b)
 assert(y == 'xuxu')
 T.testC("settable 2", b, 19)
 assert(a[b] == 19)
+
+--
+do   -- testing getfield/setfield with long keys
+  local t = {_012345678901234567890123456789012345678901234567890123456789 = 32}
+  local a = T.testC([[
+    getfield 2 _012345678901234567890123456789012345678901234567890123456789
+    return 1
+  ]], t)
+  assert(a == 32)
+  local a = T.testC([[
+    pushnum 33
+    setglobal _012345678901234567890123456789012345678901234567890123456789
+  ]])
+  assert(_012345678901234567890123456789012345678901234567890123456789 == 33)
+  _012345678901234567890123456789012345678901234567890123456789 = nil
+end
 
 -- testing next
 a = {}

@@ -1,4 +1,4 @@
--- $Id: sort.lua,v 1.33 2015/09/08 17:17:10 roberto Exp roberto $
+-- $Id: sort.lua,v 1.34 2015/09/28 15:36:07 roberto Exp roberto $
 
 print "testing (parts of) table library"
 
@@ -233,7 +233,16 @@ perm{1,2,3,3,5}
 perm{1,2,3,4,5,6}
 perm{2,2,3,3,5,6}
 
-limit = 30000
+function timesort (a, n, func, msg, pre)
+  local x = os.clock()
+  table.sort(a, func)
+  x = (os.clock() - x) * 1000
+  pre = pre or ""
+  print(string.format("%ssorting %d %s elements in %.2f msec.", pre, n, msg, x))
+  check(a, func)
+end
+
+limit = 50000
 if _soft then limit = 5000 end
 
 a = {}
@@ -241,15 +250,9 @@ for i=1,limit do
   a[i] = math.random()
 end
 
-local x = os.clock()
-table.sort(a)
-print(string.format("Sorting %d elements in %.2f sec.", limit, os.clock()-x))
-check(a)
+timesort(a, limit, nil, "random")
 
-x = os.clock()
-table.sort(a)
-print(string.format("Re-sorting %d elements in %.2f sec.", limit, os.clock()-x))
-check(a)
+timesort(a, limit, nil, "sorted", "re-")
 
 a = {}
 for i=1,limit do
@@ -258,19 +261,18 @@ end
 
 x = os.clock(); i=0
 table.sort(a, function(x,y) i=i+1; return y<x end)
-print(string.format("Invert-sorting other %d elements in %.2f sec., with %i comparisons",
-      limit, os.clock()-x, i))
+x = (os.clock() - x) * 1000
+print(string.format("Invert-sorting other %d elements in %.2f msec., with %i comparisons",
+      limit, x, i))
 check(a, function(x,y) return y<x end)
 
 
 table.sort{}  -- empty array
 
 for i=1,limit do a[i] = false end
-x = os.clock();
-table.sort(a, function(x,y) return nil end)
-print(string.format("Sorting %d equal elements in %.2f sec.", limit, os.clock()-x))
-check(a, function(x,y) return nil end)
-for i,v in pairs(a) do assert(not v or i=='n' and v==limit) end
+timesort(a, limit,  function(x,y) return nil end, "equal")
+
+for i,v in pairs(a) do assert(v == false) end
 
 A = {"álo", "\0first :-)", "alo", "then this one", "45", "and a new"}
 table.sort(A)

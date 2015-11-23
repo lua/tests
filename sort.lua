@@ -1,4 +1,4 @@
--- $Id: sort.lua,v 1.34 2015/09/28 15:36:07 roberto Exp roberto $
+-- $Id: sort.lua,v 1.35 2015/11/13 13:48:02 roberto Exp roberto $
 
 print "testing (parts of) table library"
 
@@ -182,6 +182,13 @@ checkerror("wrap around", table.move, {}, minI, -2, 2)
 
 print"testing sort"
 
+
+-- strange lengths
+local a = setmetatable({}, {__len = function () return -1 end})
+assert(#a == -1)
+table.sort(a, error)    -- should not compare anything
+a = setmetatable({}, {__len = function () return maxI end})
+checkerror("too big", table.sort, a)
 
 -- test checks for invalid order functions
 local function check (t)

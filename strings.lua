@@ -1,4 +1,4 @@
--- $Id: strings.lua,v 1.79 2015/02/05 17:52:25 roberto Exp roberto $
+-- $Id: strings.lua,v 1.80 2015/09/17 16:46:18 roberto Exp roberto $
 
 print('testing strings and string library')
 
@@ -170,6 +170,9 @@ assert(string.format("-%.20s.20s", string.rep("%", 2000)) ==
                      "-"..string.rep("%", 20)..".20s")
 assert(string.format('"-%20s.20s"', string.rep("%", 2000)) ==
        string.format("%q", "-"..string.rep("%", 2000)..".20s"))
+
+assert(string.format("\0%s\0", "\0\0\1") == "\0\0\0\1\0")
+checkerror("contains zeros", string.format, "%10s", "\0")
 
 -- format x tostring
 assert(string.format("%s %s", nil, true) == "nil true")

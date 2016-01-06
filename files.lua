@@ -1,4 +1,4 @@
--- $Id: files.lua,v 1.90 2015/09/08 17:15:24 roberto Exp roberto $
+-- $Id: files.lua,v 1.91 2015/10/08 15:58:59 roberto Exp roberto $
 
 local debug = require "debug"
 
@@ -708,9 +708,9 @@ if not _port then
   -- test out-of-range dates (at least for Unix)
   if maxint >= 2^62 then  -- cannot do these tests in Small Lua
     -- no arith overflows
-    checkerr("out-of-bounds", os.time, {year = -maxint, month = 1, day = 1})
+    checkerr("out-of-bound", os.time, {year = -maxint, month = 1, day = 1})
     if string.packsize("i") == 4 then   -- 4-byte ints
-      if testerr("out-of-bounds", os.date, "%Y", 2^40) then
+      if testerr("out-of-bound", os.date, "%Y", 2^40) then
         -- time_t has 4 bytes and therefore cannot represent year 4000
         print("  4-byte time_t")
         checkerr("cannot be represented", os.time, {year=4000, month=1, day=1})

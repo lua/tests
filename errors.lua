@@ -1,4 +1,4 @@
--- $Id: errors.lua,v 1.90 2015/04/30 14:16:36 roberto Exp roberto $
+-- $Id: errors.lua,v 1.91 2015/10/12 16:39:56 roberto Exp roberto $
 
 print("testing errors")
 
@@ -144,11 +144,16 @@ checkmessage([[
 ]], "light userdata")
 _G.D = nil
 
-do   -- named userdata
+do   -- named objects (field '__name')
   checkmessage("math.sin(io.input())", "(number expected, got FILE*)")
-  _ENV.XX = setmetatable({}, {__name = "My Type"})
+  _G.XX = setmetatable({}, {__name = "My Type"})
   checkmessage("io.input(XX)", "(FILE* expected, got My Type)")
-  _ENV.XX = nil
+  checkmessage("return XX + 1", "on a My Type value")
+  checkmessage("return ~io.stdin", "on a FILE* value")
+  checkmessage("return XX < XX", "two My Type values")
+  checkmessage("return {} < XX", "table with My Type")
+  checkmessage("return XX < io.stdin", "My Type with FILE*")
+  _G.XX = nil
 end
 
 -- global functions

@@ -1,4 +1,4 @@
--- $Id: strings.lua,v 1.80 2015/09/17 16:46:18 roberto Exp roberto $
+-- $Id: strings.lua,v 1.81 2015/11/25 16:56:54 roberto Exp roberto $
 
 print('testing strings and string library')
 
@@ -339,6 +339,16 @@ if not _port then
   assert(os.setlocale() == 'C')
   assert(os.setlocale(nil, "numeric") == 'C')
 
+end
+
+
+-- bug in Lua 5.3.2
+-- 'gmatch' iterator does not work across coroutines
+do
+  local f = string.gmatch("1 2 3 4 5", "%d+")
+  assert(f() == "1")
+  co = coroutine.wrap(f)
+  assert(co() == "2")
 end
 
 print('OK')

@@ -1,4 +1,4 @@
--- $Id: pm.lua,v 1.44 2015/03/04 13:09:38 roberto Exp roberto $
+-- $Id: pm.lua,v 1.45 2015/10/08 15:59:24 roberto Exp roberto $
 
 print('testing pattern matching')
 
@@ -160,6 +160,21 @@ assert(string.gsub('αιν', '$', '\0σϊ') == 'αιν\0σϊ')
 assert(string.gsub('', '^', 'r') == 'r')
 assert(string.gsub('', '$', 'r') == 'r')
 print('+')
+
+
+do   -- new (5.3.3) semantics for empty matches
+  assert(string.gsub("a b cd", " *", "-") == "-a-b-c-d-")
+
+  local res = ""
+  local sub = "a  \nbc\t\td"
+  local i = 1
+  for p, e in string.gmatch(sub, "()%s*()") do
+    res = res .. string.sub(sub, i, p - 1) .. "-"
+    i = e
+  end
+  assert(res == "-a-b-c-d-")
+end
+
 
 assert(string.gsub("um (dois) tres (quatro)", "(%(%w+%))", string.upper) ==
             "um (DOIS) tres (QUATRO)")

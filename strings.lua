@@ -1,4 +1,4 @@
--- $Id: strings.lua,v 1.81 2015/11/25 16:56:54 roberto Exp roberto $
+-- $Id: strings.lua,v 1.82 2016/03/23 17:12:51 roberto Exp roberto $
 
 print('testing strings and string library')
 
@@ -170,6 +170,23 @@ assert(string.format("-%.20s.20s", string.rep("%", 2000)) ==
                      "-"..string.rep("%", 20)..".20s")
 assert(string.format('"-%20s.20s"', string.rep("%", 2000)) ==
        string.format("%q", "-"..string.rep("%", 2000)..".20s"))
+
+do
+  local function checkQ (v)
+    local s = string.format("%q", v)
+    local nv = load("return " .. s)()
+    assert(v == nv)
+  end
+  checkQ("\0\0\1\255\u{234}")
+  checkQ(math.maxinteger)
+  checkQ(math.mininteger)
+  checkQ(math.pi)
+  checkQ(0.1)
+  checkQ(true)
+  checkQ(nil)
+  checkQ(false)
+  checkerror("no literal", string.format, "%q", {})
+end
 
 assert(string.format("\0%s\0", "\0\0\1") == "\0\0\0\1\0")
 checkerror("contains zeros", string.format, "%10s", "\0")

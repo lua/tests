@@ -1,4 +1,4 @@
--- $Id: pm.lua,v 1.45 2015/10/08 15:59:24 roberto Exp roberto $
+-- $Id: pm.lua,v 1.46 2016/04/04 16:25:38 roberto Exp roberto $
 
 print('testing pattern matching')
 
@@ -249,11 +249,8 @@ do
   assert(not r and string.find(m, "too complex"))
 end
 
-checkerror("too complex", string.find, "01234567890123456789",
-                                       ".*.*.*.*.*.*.*.*a")
-
 if not _soft then
-  -- big strings
+  print("big strings")
   local a = string.rep('a', 300000)
   assert(string.find(a, '^a*.?$'))
   assert(not string.find(a, '^a*.?b$'))

@@ -1,4 +1,4 @@
--- $Id: strings.lua,v 1.82 2016/03/23 17:12:51 roberto Exp roberto $
+-- $Id: strings.lua,v 1.83 2016/04/13 16:26:25 roberto Exp roberto $
 
 print('testing strings and string library')
 
@@ -329,23 +329,23 @@ assert(table.concat(a, ",", 4) == "")
 
 if not _port then
 
-  local locales = { "ptb", "ISO-8859-1", "pt_BR" }
+  local locales = { "ptb", "pt_BR.iso88591", "ISO-8859-1" }
   local function trylocale (w)
     for i = 1, #locales do
-      if os.setlocale(locales[i], w) then return true end
+      if os.setlocale(locales[i], w) then
+        print(string.format("'%s' locale set to '%s'", w, locales[i]))
+        return locales[i]
+      end
     end
+    print(string.format("'%s' locale not found", w))
     return false
   end
 
-  if not trylocale("collate")  then
-    print("locale not supported")
-  else
+  if trylocale("collate")  then
     assert("alo" < "álo" and "álo" < "amo")
   end
 
-  if not trylocale("ctype") then
-    print("locale not supported")
-  else
+  if trylocale("ctype") then
     assert(string.gsub("áéíóú", "%a", "x") == "xxxxx")
     assert(string.gsub("áÁéÉ", "%l", "x") == "xÁxÉ")
     assert(string.gsub("áÁéÉ", "%u", "x") == "áxéx")

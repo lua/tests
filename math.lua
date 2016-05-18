@@ -1,4 +1,4 @@
--- $Id: math.lua,v 1.72 2015/06/09 15:55:13 roberto Exp roberto $
+-- $Id: math.lua,v 1.73 2016/01/07 16:45:13 roberto Exp roberto $
 
 print("testing numbers and math lib")
 
@@ -319,12 +319,23 @@ assert(" -2 " + 1 == -1)
 assert(" -0xa " + 1 == -9)
 
 
+-- Literal integer limits
+do
+  local function aux (n)
+    local code = string.format("return %d", n)
+    return assert(load(code))()
+  end
+  assert(eqT(minint, aux(minint)))
+  assert(eqT(maxint, aux(maxint)))
+end
+
+
 -- testing 'tonumber'
 
 -- 'tonumber' with numbers
 assert(tonumber(3.4) == 3.4)
-assert(tonumber(3) == 3 and math.type(tonumber(3)) == "integer")
-assert(tonumber(maxint) == maxint and tonumber(minint) == minint)
+assert(eqT(tonumber(3), 3))
+assert(eqT(tonumber(maxint), maxint) and eqT(tonumber(minint), minint))
 assert(tonumber(1/0) == 1/0)
 
 -- 'tonumber' with strings
@@ -462,10 +473,9 @@ assert(0Xabcdef.0 == 0x.ABCDEFp+24)
 
 assert(1.1 == 1.+.1)
 assert(100.0 == 1E2 and .01 == 1e-2)
-assert(1111111111111111-1111111111111110== 1000.00e-03)
---     1234567890123456
+assert(1111111111 - 1111111110 == 1000.00e-03)
 assert(1.1 == '1.'+'.1')
-assert(tonumber'1111111111111111'-tonumber'1111111111111110' ==
+assert(tonumber'1111111111' - tonumber'1111111110' ==
        tonumber"  +0.001e+3 \n\t")
 
 assert(0.1e-30 > 0.9E-31 and 0.9E30 < 0.1e31)

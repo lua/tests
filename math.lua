@@ -1,4 +1,4 @@
--- $Id: math.lua,v 1.73 2016/01/07 16:45:13 roberto Exp roberto $
+-- $Id: math.lua,v 1.74 2016/05/18 18:21:41 roberto Exp roberto $
 
 print("testing numbers and math lib")
 
@@ -319,14 +319,32 @@ assert(" -2 " + 1 == -1)
 assert(" -0xa " + 1 == -9)
 
 
--- Literal integer limits
+-- Literal integer Overflows (new behavior in 5.3.3)
 do
-  local function aux (n)
-    local code = string.format("return %d", n)
-    return assert(load(code))()
+  -- no overflows
+  assert(eqT(tonumber(tostring(maxint)), maxint))
+  assert(eqT(tonumber(tostring(minint)), minint))
+
+  -- add 1 to last digit as a string (it cannot be 9...)
+  local function incd (n)
+    local s = string.format("%d", n)
+    s = string.gsub(s, "%d$", function (d)
+          assert(d ~= '9')
+          return string.char(string.byte(d) + 1)
+        end)
+    return s
   end
-  assert(eqT(minint, aux(minint)))
-  assert(eqT(maxint, aux(maxint)))
+
+  -- 'tonumber' with overflow by 1
+  assert(eqT(tonumber(incd(maxint)), maxint + 1.0))
+  assert(eqT(tonumber(incd(minint)), minint - 1.0))
+
+  -- lexer in the limits
+  assert(minint == load("return " .. minint)())
+  assert(eqT(maxint, load("return " .. maxint)()))
+
+  assert(eqT(10000000000000000000000.0, 10000000000000000000000))
+  assert(eqT(-10000000000000000000000.0, -10000000000000000000000))
 end
 
 

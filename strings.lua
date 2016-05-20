@@ -1,4 +1,4 @@
--- $Id: strings.lua,v 1.83 2016/04/13 16:26:25 roberto Exp roberto $
+-- $Id: strings.lua,v 1.84 2016/05/03 15:37:24 roberto Exp roberto $
 
 print('testing strings and string library')
 
@@ -130,10 +130,10 @@ assert(tostring(-1203) == "-1203")
 assert(tostring(1203.125) == "1203.125")
 assert(tostring(-0.5) == "-0.5")
 assert(tostring(-32767) == "-32767")
-if 2147483647 > 0 then   -- no overflow? (32 bits)
+if math.tointeger(2147483647) then   -- no overflow? (32 bits)
   assert(tostring(-2147483647) == "-2147483647")
 end
-if 4611686018427387904 > 0 then   -- no overflow? (64 bits)
+if math.tointeger(4611686018427387904) then   -- no overflow? (64 bits)
   assert(tostring(4611686018427387904) == "4611686018427387904")
   assert(tostring(-4611686018427387904) == "-4611686018427387904")
 end
@@ -175,7 +175,7 @@ do
   local function checkQ (v)
     local s = string.format("%q", v)
     local nv = load("return " .. s)()
-    assert(v == nv)
+    assert(v == nv and math.type(v) == math.type(nv))
   end
   checkQ("\0\0\1\255\u{234}")
   checkQ(math.maxinteger)
@@ -201,7 +201,7 @@ assert(string.format("%s %.10s", m, m) == "hello hello")
 
 assert(string.format("%x", 0.0) == "0")
 assert(string.format("%02x", 0.0) == "00")
-assert(string.format("%08X", 4294967295) == "FFFFFFFF")
+assert(string.format("%08X", 0xFFFFFFFF) == "FFFFFFFF")
 assert(string.format("%+08d", 31501) == "+0031501")
 assert(string.format("%+08d", -30927) == "-0030927")
 

@@ -1,4 +1,4 @@
--- $Id: math.lua,v 1.74 2016/05/18 18:21:41 roberto Exp roberto $
+-- $Id: math.lua,v 1.75 2016/05/20 14:15:57 roberto Exp roberto $
 
 print("testing numbers and math lib")
 
@@ -338,6 +338,13 @@ do
   -- 'tonumber' with overflow by 1
   assert(eqT(tonumber(incd(maxint)), maxint + 1.0))
   assert(eqT(tonumber(incd(minint)), minint - 1.0))
+
+  -- large numbers
+  assert(eqT(tonumber("1"..string.rep("0", 30)), 1e30))
+  assert(eqT(tonumber("-1"..string.rep("0", 30)), -1e30))
+
+  -- hexa format still wraps around
+  assert(eqT(tonumber("0x1"..string.rep("0", 30)), 0))
 
   -- lexer in the limits
   assert(minint == load("return " .. minint)())

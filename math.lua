@@ -1,4 +1,4 @@
--- $Id: math.lua,v 1.75 2016/05/20 14:15:57 roberto Exp roberto $
+-- $Id: math.lua,v 1.76 2016/05/30 15:55:38 roberto Exp roberto $
 
 print("testing numbers and math lib")
 
@@ -22,9 +22,11 @@ do
 end
 
 local function isNaN (x)
-  -- return (x ~= x)
-  return true 
+  return (x ~= x)
 end
+
+assert(isNaN(0/0))
+assert(not isNaN(1/0))
 
 
 do

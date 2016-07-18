@@ -1,4 +1,4 @@
--- $Id: coroutine.lua,v 1.39 2015/04/14 18:05:03 roberto Exp roberto $
+-- $Id: coroutine.lua,v 1.40 2015/10/12 16:38:57 roberto Exp roberto $
 
 print "testing coroutines"
 
@@ -351,7 +351,7 @@ else
   _G.XX = nil;
   local c = 0
   repeat c = c + 1; local a = co() until a == 10
-  assert(_G.XX == 20 and c == 10)
+  assert(_G.XX == 20 and c >= 5)
 
   co = coroutine.wrap(function ()
     T.sethook("yield 0", "", 2); foo(); return 10 end)
@@ -359,7 +359,7 @@ else
   _G.XX = nil;
   local c = 0
   repeat c = c + 1; local a = co() until a == 10
-  assert(_G.XX == 20 and c == 5)
+  assert(_G.XX == 20 and c >= 5)
   _G.X = nil; _G.XX = nil
 
   do

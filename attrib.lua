@@ -1,4 +1,5 @@
--- $Id: attrib.lua,v 1.63 2015/10/08 15:57:22 roberto Exp roberto $
+-- $Id: attrib.lua,v 1.64 2016/01/07 16:46:37 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 print "testing require"
 

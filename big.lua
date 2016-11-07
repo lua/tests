@@ -1,4 +1,5 @@
--- $Id$
+-- $Id: big.lua,v 1.31 2014/12/26 17:20:53 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 if _soft then
   return 'a'

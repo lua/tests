@@ -1,4 +1,5 @@
--- $Id: strings.lua,v 1.84 2016/05/03 15:37:24 roberto Exp roberto $
+-- $Id: strings.lua,v 1.85 2016/05/20 14:15:57 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 print('testing strings and string library')
 

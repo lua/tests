@@ -1,4 +1,5 @@
--- $Id: math.lua,v 1.76 2016/05/30 15:55:38 roberto Exp roberto $
+-- $Id: math.lua,v 1.77 2016/06/23 15:17:20 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 print("testing numbers and math lib")
 

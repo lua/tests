@@ -1,4 +1,5 @@
--- $Id$
+-- $Id: utf8.lua,v 1.11 2014/12/26 17:20:53 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 print "testing UTF-8 library"
 

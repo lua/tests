@@ -1,4 +1,5 @@
--- $Id: tpack.lua,v 1.11 2015/11/13 13:49:37 roberto Exp roberto $
+-- $Id: tpack.lua,v 1.12 2016/05/18 18:22:45 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 local pack = string.pack
 local packsize = string.packsize

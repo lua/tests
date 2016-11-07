@@ -1,4 +1,5 @@
--- $Id$
+-- $Id: closure.lua,v 1.58 2014/12/26 17:20:53 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 print "testing closures"
 

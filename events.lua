@@ -1,4 +1,5 @@
--- $Id: events.lua,v 1.42 2015/10/08 15:58:34 roberto Exp roberto $
+-- $Id: events.lua,v 1.43 2016/01/14 16:27:25 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 print('testing metatables')
 

@@ -1,4 +1,5 @@
--- $Id: literals.lua,v 1.34 2015/03/04 13:09:38 roberto Exp roberto $
+-- $Id: literals.lua,v 1.35 2016/05/03 15:35:29 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 print('testing scanner')
 

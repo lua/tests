@@ -1,4 +1,5 @@
--- $Id: errors.lua,v 1.91 2015/10/12 16:39:56 roberto Exp roberto $
+-- $Id: errors.lua,v 1.92 2016/03/07 19:27:08 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 print("testing errors")
 

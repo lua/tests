@@ -1,4 +1,5 @@
--- $Id: goto.lua,v 1.11 2014/12/26 17:20:53 roberto Exp roberto $
+-- $Id: goto.lua,v 1.12 2016/03/07 19:26:18 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 collectgarbage()
 

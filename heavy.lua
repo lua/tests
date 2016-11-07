@@ -1,4 +1,5 @@
--- $Id: heavy.lua,v 1.2 2014/12/26 17:20:53 roberto Exp $
+-- $Id: heavy.lua,v 1.3 2015/09/08 17:18:18 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 print("creating a string too long")
 do

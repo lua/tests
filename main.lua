@@ -1,5 +1,6 @@
 # testing special comment on first line
--- $Id: main.lua,v 1.63 2015/09/08 17:16:34 roberto Exp roberto $
+-- $Id: main.lua,v 1.64 2016/04/13 16:25:59 roberto Exp roberto $
+-- See Copyright Notice in file all.lua
 
 -- most (all?) tests here assume a reasonable "Unix-like" shell
 if _port then return end

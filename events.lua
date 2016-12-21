@@ -1,4 +1,4 @@
--- $Id: events.lua,v 1.43 2016/01/14 16:27:25 roberto Exp roberto $
+-- $Id: events.lua,v 1.44 2016/11/07 13:11:28 roberto Exp roberto $
 -- See Copyright Notice in file all.lua
 
 print('testing metatables')
@@ -21,10 +21,10 @@ assert(B == 30)
 assert(getmetatable{} == nil)
 assert(getmetatable(4) == nil)
 assert(getmetatable(nil) == nil)
-a={}; setmetatable(a, {__metatable = "xuxu",
+a={name = "NAME"}; setmetatable(a, {__metatable = "xuxu",
                     __tostring=function(x) return x.name end})
 assert(getmetatable(a) == "xuxu")
-assert(tostring(a) == nil)
+assert(tostring(a) == "NAME")
 -- cannot change a protected metatable
 assert(pcall(setmetatable, a, {}) == false)
 a.name = "gororoba"
